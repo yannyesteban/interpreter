@@ -1,0 +1,10 @@
+{
+  "devDependencies": {
+    "@types/node": "^18.16.3"
+  },
+  "scripts": {
+    "build": "tsc --build",
+    "clean": "tsc --build --clean",
+    "start": "node dist/server.js"
+  }
+}
