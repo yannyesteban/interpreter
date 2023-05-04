@@ -70,6 +70,9 @@ export enum Token {
 	DEFAULT, // "default"
 	FOR, // "for"
 	EACH, // "each"
+	FALSE, // "false"
+	TRUE, // "true"
+	NULL, // "true"
 }
 
 const keywords = {
@@ -81,6 +84,9 @@ const keywords = {
 	default: Token.DEFAULT,
 	for: Token.FOR,
 	each: Token.EACH,
+	false: Token.FALSE,
+	true: Token.TRUE,
+	null: Token.NULL,
 
 
 };
