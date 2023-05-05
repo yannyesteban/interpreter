@@ -133,10 +133,7 @@ export class AST {
         try {
             
             //if (this.match([Token.CLASS])) return this.classDeclaration();
-            
-            
             //if (this.match([Token.FUNC])) return this._function("function");
-            
             //if (this.match([Token.LET])) return this.varDeclaration();
 
             return this.statement();

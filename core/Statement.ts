@@ -1,3 +1,4 @@
+import * as exp from "constants";
 import * as Expr from "./Expressions.js";
 
 export interface Statement {
@@ -21,6 +22,7 @@ export class Block implements Statement {
 export class Expression implements Statement {
     public expression;
     constructor(expression) {
+        console.log("Expression: ", expression);
         this.expression = expression;
     }
     accept(visitor) {

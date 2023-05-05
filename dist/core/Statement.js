@@ -10,6 +10,7 @@ var Block = /** @class */ (function () {
 export { Block };
 var Expression = /** @class */ (function () {
     function Expression(expression) {
+        console.log("Expression: ", expression);
         this.expression = expression;
     }
     Expression.prototype.accept = function (visitor) {
