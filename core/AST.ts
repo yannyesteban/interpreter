@@ -1,6 +1,7 @@
 import { Token } from "./Token.js";
-import { Lexer } from "./Lexer.js";
+import { Lexer, Item } from "./Lexer.js";
 import * as Expr from "./Expressions.js";
+import * as Stmt from "./Statement.js";
 
 const source = 'if (3>=6) 6+6*2 || 2';
 let lexer = new Lexer(source);
@@ -15,7 +16,7 @@ console.log("bye");
 type exp = any;
 export class AST {
 
-    public tokens: string[];
+    public tokens: Item[];
     public current = 0;
 
     constructor(tokens) {
@@ -30,17 +31,25 @@ export class AST {
             //report(token.line, " at '" + token.lexeme + "'", message);
         }
     }
-    parse() {
+    parse(): Stmt.Statement[] {
+        let statements = [];
+        while (!this.isAtEnd()) {
+            /* Statements and State parse < Statements and State parse-declaration
+                  statements.add(statement());
+            */
+            //> parse-declaration
+            statements.push(this.declaration());
+            //< parse-declaration
+        }
 
-
+        return statements; // [parse-error-handling]
     }
-
     peek() {
         return this.tokens[this.current];
     }
 
     isAtEnd() {
-        return this.peek().typ == Token.EOF;
+        return this.peek().tok == Token.EOF;
     }
 
     advance() {
@@ -53,7 +62,7 @@ export class AST {
 
 
     previous() {
-        return this.tokens.[this.current - 1];
+        return this.tokens[this.current - 1];
     }
 
     consume(type, message) {
@@ -68,7 +77,7 @@ export class AST {
         if (this.isAtEnd()) {
             return false;
         }
-        return this.peek().type == TokenType;
+        return this.peek().tok == TokenType;
     }
 
     match(TokenType) {
@@ -82,11 +91,66 @@ export class AST {
         return false;
     }
 
+    private expressionStatement() {
+        let expr = this.expression();
+        this.consume(Token.SEMICOLON, "Expect ';' after expression.");
+        return new Stmt.Expression(expr);
+    }
+
+    private block() {
+        let statements: Expr.Expression[] = [];
+    
+        while (!this.check(Token.RBRACE) && !this.isAtEnd()) {
+          statements.push(this.declaration());
+        }
+    
+        this.consume(Token.RBRACE, "Expect '}' after block.");
+        return statements;
+      }
+
+    private statement() {
+        
+        //if (this.match([Token.FOR])) return this.forStatement();
+        
+        
+        //if (this.match([Token.IF])) return this.ifStatement();
+        
+        //if (this.match([Token.PRINT])) return printStatement();
+        
+        //if (this.match([Token.RETURN])) return this.returnStatement();
+        
+        
+        //if (this.match([Token.WHILE])) return this.whileStatement();
+        
+        
+        if (this.match(Token.LBRACE)) return new Stmt.Block(this.block());
+        
+
+        return this.expressionStatement();
+    }
+
+    declaration() {
+        try {
+            
+            //if (this.match([Token.CLASS])) return this.classDeclaration();
+            
+            
+            //if (this.match([Token.FUNC])) return this._function("function");
+            
+            //if (this.match([Token.LET])) return this.varDeclaration();
+
+            return this.statement();
+        } catch (/*ParseError*/ error) {
+            //this.synchronize();
+            return null;
+        }
+    }
+
     comparison() {
         let expr: exp = this.term();
 
         while (this.match([Token.GTR, Token.GEQ, Token.LSS, Token.LEQ])) {
-            let operator: Token = this.previous();
+            let operator = this.previous();
             let right: exp = this.term();
             expr = new Expr.Binary(expr, operator, right);
         }
@@ -98,7 +162,7 @@ export class AST {
         let expr = this.comparison();
 
         while (this.match([Token.NEQ, Token.EQL])) {
-            let operator: Token = this.previous();
+            let operator: Item = this.previous();
             let right: exp = this.comparison();
             expr = new Expr.Binary(expr, operator, right);
         }
@@ -151,7 +215,7 @@ export class AST {
         if (this.match([Token.NULL])) return new Expr.Literal(null);
 
         if (this.match([Token.INT, Token.FLOAT, Token.STRING])) {
-            return new Expr.Literal(this.previous().literal);
+            return new Expr.Literal(this.previous().value);
         }
 
         if (this.match([Token.LPAREN])) {

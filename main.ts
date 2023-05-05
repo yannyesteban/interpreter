@@ -1,9 +1,16 @@
 import { Lexer } from "./core/Lexer.js";
+import { AST } from "./core/AST.js";
 
-const source = 'if (3>=6) 6+6*2 || 2';
-let lexer = new Lexer(source);
+const source = '2+3*6;';
+const lexer = new Lexer(source);
 
-console.log(source, "\n", lexer.getTokens());
+const tokens = lexer.getTokens();
+
+console.log(source, "\n", tokens);
 
 
-console.log("bye");
+const ast = new AST(tokens);
+
+const statements = ast.parse();
+console.log("result", statements);
+console.log("bye", JSON.stringify(statements));

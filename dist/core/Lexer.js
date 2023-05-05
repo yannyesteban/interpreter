@@ -426,6 +426,12 @@ var Lexer = /** @class */ (function () {
         while (!this.eof) {
             tokens.push(this.scan());
         }
+        tokens.push({
+            pos: null,
+            value: "EOF",
+            priority: null,
+            tok: Token.EOF
+        });
         return tokens;
     };
     return Lexer;

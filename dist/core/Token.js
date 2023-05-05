@@ -57,6 +57,12 @@ export var Token;
     Token[Token["DEFAULT"] = 53] = "DEFAULT";
     Token[Token["FOR"] = 54] = "FOR";
     Token[Token["EACH"] = 55] = "EACH";
+    Token[Token["FALSE"] = 56] = "FALSE";
+    Token[Token["TRUE"] = 57] = "TRUE";
+    Token[Token["NULL"] = 58] = "NULL";
+    Token[Token["RETURN"] = 59] = "RETURN";
+    Token[Token["CLASS"] = 60] = "CLASS";
+    Token[Token["FUNC"] = 61] = "FUNC";
 })(Token || (Token = {}));
 var keywords = {
     if: Token.IF,
@@ -67,6 +73,13 @@ var keywords = {
     default: Token.DEFAULT,
     for: Token.FOR,
     each: Token.EACH,
+    false: Token.FALSE,
+    true: Token.TRUE,
+    null: Token.NULL,
+    return: Token.RETURN,
+    let: Token.LET,
+    class: Token.CLASS,
+    func: Token.FUNC,
 };
 var LowestPrec = 0, // non-operators
 UnaryPrec = 6, HighestPrec = 7;

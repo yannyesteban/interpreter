@@ -3,6 +3,14 @@ import { isAlphaNumeric, isDecimal, isHex, isLetter} from "./LexerFunctions.js";
 
 var keyword = new Keyword();
 var unicode = { MaxRune: 65536 };
+
+export interface Item{
+    pos: number;
+    value: any;
+    priority: number;
+    tok: string | Token.EOF;
+} 
+
 export class Lexer {
 
     public input: string = "";
@@ -309,7 +317,7 @@ export class Lexer {
 
 
 
-    scan() {
+    scan(): Item {
 
         let ch = null;
         let lit = "*** ERROR ***";
@@ -495,6 +503,13 @@ export class Lexer {
             tokens.push(this.scan())
 
         }
+        tokens.push( {
+            pos: null,
+            value: "EOF",
+            priority: null,
+            tok: Token.EOF
+        });
+        
         return tokens;
     }
 

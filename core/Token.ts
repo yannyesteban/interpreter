@@ -52,9 +52,9 @@ export enum Token {
 	LSS, // <
 	GTR, // >
 	ASSIGN, // =
-	NOT, // !
+	NOT, // (!)
 
-	NEQ, // !=
+	NEQ, // (!=)
 	LEQ, // <=
 	GEQ, // >=
 	LET, // :=
@@ -73,6 +73,11 @@ export enum Token {
 	FALSE, // "false"
 	TRUE, // "true"
 	NULL, // "true"
+	RETURN, // "return"
+
+	CLASS, // "class"
+	FUNC, // "let"
+	
 }
 
 const keywords = {
@@ -87,6 +92,11 @@ const keywords = {
 	false: Token.FALSE,
 	true: Token.TRUE,
 	null: Token.NULL,
+	return: Token.RETURN,
+
+	let: Token.LET,
+	class: Token.CLASS,
+	func: Token.FUNC,
 
 
 };
