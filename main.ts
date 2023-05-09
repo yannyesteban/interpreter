@@ -1,6 +1,9 @@
 import { Lexer } from "./core/Lexer.js";
 import { AST } from "./core/AST.js";
 
+import   "./core/Resolver.js";
+import   "./core/Interpreter.js";
+
 import * as fs from 'fs';
 
 

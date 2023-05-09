@@ -1,5 +1,7 @@
 import { Lexer } from "./core/Lexer.js";
 import { AST } from "./core/AST.js";
+import "./core/Resolver.js";
+import "./core/Interpreter.js";
 import * as fs from 'fs';
 fs.readFile("sevian.sv", function (err, buff) {
     if (err) {

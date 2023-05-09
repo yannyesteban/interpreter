@@ -1,6 +1,19 @@
 import * as exp from "constants";
 import * as Expr from "./Expressions.js";
 
+
+interface Visitor {
+    visitBlockStmt(stmt: Block);
+    //visitClassStmt(Class stmt);
+    visitExpressionStmt(stmt: Expression);
+    visitFunctionStmt(stmt: Function);
+    visitIfStmt(stmt: If);
+    //visitPrintStmt(Print stmt);
+    //visitReturnStmt(Return stmt);
+    //visitVarStmt(Var stmt);
+    //visitWhileStmt(While stmt);
+  }
+
 export interface Statement {
     accept(visitor: any);
 }
@@ -48,4 +61,21 @@ export class If implements Statement {
         return visitor.visitIfStmt(this);
     }
 
-}  
+} 
+
+export class Function implements Statement {
+    public name;
+    public params;
+    public body;
+    
+    constructor(name, params, body) {
+      this.name = name;
+      this.params = params;
+      this.body = body;
+    }
+    accept(visitor) {
+        return visitor.visitFunctionStmt(this);
+    }
+
+    
+  }
