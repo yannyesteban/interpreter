@@ -10,7 +10,7 @@ var Block = /** @class */ (function () {
 export { Block };
 var Expression = /** @class */ (function () {
     function Expression(expression) {
-        console.log("Expression: ", expression);
+        //console.log("Expression: ", expression);
         this.expression = expression;
     }
     Expression.prototype.accept = function (visitor) {
@@ -31,4 +31,16 @@ var If = /** @class */ (function () {
     return If;
 }());
 export { If };
+var Function = /** @class */ (function () {
+    function Function(name, params, body) {
+        this.name = name;
+        this.params = params;
+        this.body = body;
+    }
+    Function.prototype.accept = function (visitor) {
+        return visitor.visitFunctionStmt(this);
+    };
+    return Function;
+}());
+export { Function };
 //# sourceMappingURL=Statement.js.map

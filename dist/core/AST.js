@@ -1,11 +1,6 @@
 import { Token } from "./Token.js";
-import { Lexer } from "./Lexer.js";
 import * as Expr from "./Expressions.js";
 import * as Stmt from "./Statement.js";
-var source = 'if (3>=6) 6+6*2 || 2';
-var lexer = new Lexer(source);
-console.log(source, "\n", lexer.getTokens());
-console.log("bye");
 var AST = /** @class */ (function () {
     function AST(tokens) {
         this.current = 0;

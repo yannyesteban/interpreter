@@ -27,7 +27,7 @@ export class Lexer {
         this.eof = false;
 
         this.next()
-        console.log(input);
+        //console.log(input);
     }
 
     error(offs: number, msg: string) {
@@ -294,7 +294,7 @@ export class Lexer {
         }
         */
         lit = this.input.substring(offs, this.pos)
-        console.log("<>", offs, this.pos, " = ", lit)
+        //console.log("<>", offs, this.pos, " = ", lit)
         //return lit
         return { lit, tok }
     }
@@ -329,12 +329,12 @@ export class Lexer {
 
             ch = this.ch;
             offs = this.pos;
-            console.log(this.ch)
+            //console.log(this.ch)
 
 
             if (isLetter(ch) || ch == "_") {
                 lit = this.scanIdentifier();
-                console.log(".....", lit)
+                //console.log(".....", lit)
                 if (lit.length > 1) {
                     tok = keyword.isKeyword(lit);
                 } else {
@@ -349,7 +349,7 @@ export class Lexer {
 
                 //console.log("this.scanNumber()", this.scanNumber())
                 //{lit, tok} = this.scanNumber()
-                console.log(lit, tok)
+                //console.log(lit, tok)
                 break;
             } else {
 
@@ -464,7 +464,7 @@ export class Lexer {
 
             break;
         }
-        console.log(lit, tok)
+        //console.log(lit, tok)
         return {
             pos: this.pos,
             value: lit,

@@ -1,4 +1,4 @@
-
+import { Keyword, Token } from "./Token.js";
 
 
 export class Interpreter {
@@ -10,8 +10,12 @@ export class Interpreter {
 
     interpret(statements) {
         try {
+            console.log(JSON.stringify(statements));
+
             for (let stmt of statements) {
-                this.execute(stmt);
+                console.log("> ",stmt.expression.operator);
+                let r = this.execute(stmt.expression);
+                console.log(r);
             }
         } catch (error) {
             //Lox.runtimeError(error);
@@ -23,5 +27,13 @@ export class Interpreter {
         stmt.accept(this);
     }
    
+    visitBinaryExpr(expr: any) {
+        const op = expr.tok;
+        console.log("*****", expr.operator)
+        switch(op){
+            case Token.ADD:
+                return expr.left.value + expr.right.value;
+        }
+    }
 
 }

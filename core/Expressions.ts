@@ -11,6 +11,12 @@ export class Binary {
     this.left = left;
     this.operator = operator;
     this.right = right;
+
+    
+  }
+
+  accept(visitor) {
+    return visitor.visitBinaryExpr(this);
   }
 }
 

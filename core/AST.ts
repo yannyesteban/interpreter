@@ -3,13 +3,13 @@ import { Lexer, Item } from "./Lexer.js";
 import * as Expr from "./Expressions.js";
 import * as Stmt from "./Statement.js";
 
-const source = 'if (3>=6) 6+6*2 || 2';
-let lexer = new Lexer(source);
+//const source = 'if (3>=6) 6+6*2 || 2';
+//let lexer = new Lexer(source);
 
-console.log(source, "\n", lexer.getTokens());
+//console.log(source, "\n", lexer.getTokens());
 
 
-console.log("bye");
+//console.log("bye");
 
 
 

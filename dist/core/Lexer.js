@@ -15,7 +15,7 @@ var Lexer = /** @class */ (function () {
         this.ch = " ";
         this.eof = false;
         this.next();
-        console.log(input);
+        //console.log(input);
     }
     Lexer.prototype.error = function (offs, msg) {
     };
@@ -252,7 +252,7 @@ var Lexer = /** @class */ (function () {
         }
         */
         lit = this.input.substring(offs, this.pos);
-        console.log("<>", offs, this.pos, " = ", lit);
+        //console.log("<>", offs, this.pos, " = ", lit)
         //return lit
         return { lit: lit, tok: tok };
     };
@@ -280,10 +280,10 @@ var Lexer = /** @class */ (function () {
             this.skipWhitespace();
             ch = this.ch;
             offs = this.pos;
-            console.log(this.ch);
+            //console.log(this.ch)
             if (isLetter(ch) || ch == "_") {
                 lit = this.scanIdentifier();
-                console.log(".....", lit);
+                //console.log(".....", lit)
                 if (lit.length > 1) {
                     tok = keyword.isKeyword(lit);
                 }
@@ -296,7 +296,7 @@ var Lexer = /** @class */ (function () {
                 (_a = this.scanNumber(), lit = _a.lit, tok = _a.tok);
                 //console.log("this.scanNumber()", this.scanNumber())
                 //{lit, tok} = this.scanNumber()
-                console.log(lit, tok);
+                //console.log(lit, tok)
                 break;
             }
             else {
@@ -395,7 +395,7 @@ var Lexer = /** @class */ (function () {
             }
             break;
         }
-        console.log(lit, tok);
+        //console.log(lit, tok)
         return {
             pos: this.pos,
             value: lit,

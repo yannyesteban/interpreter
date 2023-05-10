@@ -4,6 +4,9 @@ var Binary = /** @class */ (function () {
         this.operator = operator;
         this.right = right;
     }
+    Binary.prototype.accept = function (visitor) {
+        return visitor.visitBinaryExpr(this);
+    };
     return Binary;
 }());
 export { Binary };
