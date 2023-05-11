@@ -2,7 +2,7 @@ import * as exp from "constants";
 import * as Expr from "./Expressions.js";
 
 
-interface Visitor {
+export interface Visitor {
     visitBlockStmt(stmt: Block);
     //visitClassStmt(Class stmt);
     visitExpressionStmt(stmt: Expression);
@@ -15,17 +15,17 @@ interface Visitor {
   }
 
 export interface Statement {
-    accept(visitor: any);
+    accept(visitor: Visitor);
 }
 
 export class Block implements Statement {
     public statements: Statement[];
-    constructor(statements) {
+    constructor(statements: Statement[]) {
         this.statements = statements;
     }
 
 
-    accept(visitor) {
+    accept(visitor:Visitor) {
         return visitor.visitBlockStmt(this);
     }
 
@@ -38,7 +38,7 @@ export class Expression implements Statement {
         //console.log("Expression: ", expression);
         this.expression = expression;
     }
-    accept(visitor) {
+    accept(visitor:Visitor) {
         return visitor.visitExpressionStmt(this);
     }
 
@@ -57,7 +57,7 @@ export class If implements Statement {
         this.elseBranch = elseBranch;
     }
 
-    accept(visitor) {
+    accept(visitor:Visitor) {
         return visitor.visitIfStmt(this);
     }
 
@@ -73,7 +73,7 @@ export class Function implements Statement {
       this.params = params;
       this.body = body;
     }
-    accept(visitor) {
+    accept(visitor:Visitor) {
         return visitor.visitFunctionStmt(this);
     }
 

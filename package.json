@@ -6,7 +6,7 @@
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "start": "node dist/server.js",
+    "start": "node dist/main.js",
     "main": "node dist/main.js"
   },
   "type":"module"

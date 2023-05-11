@@ -78,11 +78,13 @@ var AST = /** @class */ (function () {
     };
     AST.prototype.statement = function () {
         //if (this.match([Token.FOR])) return this.forStatement();
-        //if (this.match([Token.IF])) return this.ifStatement();
+        if (this.match([Token.IF])) {
+            return this.ifStatement();
+        }
         //if (this.match([Token.PRINT])) return printStatement();
         //if (this.match([Token.RETURN])) return this.returnStatement();
         //if (this.match([Token.WHILE])) return this.whileStatement();
-        if (this.match(Token.LBRACE))
+        if (this.match([Token.LBRACE]))
             return new Stmt.Block(this.block());
         return this.expressionStatement();
     };
@@ -160,6 +162,17 @@ var AST = /** @class */ (function () {
             this.consume(Token.RPAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
+    };
+    AST.prototype.ifStatement = function () {
+        this.consume(Token.LPAREN, "Expect '(' after 'if'.");
+        var condition = this.expression();
+        this.consume(Token.RPAREN, "Expect ')' after if condition."); // [parens]
+        var thenBranch = this.statement();
+        var elseBranch = null;
+        if (this.match(Token.ELSE)) {
+            elseBranch = this.statement();
+        }
+        return new Stmt.If(condition, thenBranch, elseBranch);
     };
     return AST;
 }());

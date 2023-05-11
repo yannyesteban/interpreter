@@ -66,6 +66,7 @@ export class AST {
     }
 
     consume(type, message) {
+
         if (this.check(type)) {
             return this.advance();
         }
@@ -113,7 +114,9 @@ export class AST {
         //if (this.match([Token.FOR])) return this.forStatement();
         
         
-        //if (this.match([Token.IF])) return this.ifStatement();
+        if (this.match([Token.IF])) {
+            return this.ifStatement();
+        }
         
         //if (this.match([Token.PRINT])) return printStatement();
         
@@ -123,7 +126,7 @@ export class AST {
         //if (this.match([Token.WHILE])) return this.whileStatement();
         
         
-        if (this.match(Token.LBRACE)) return new Stmt.Block(this.block());
+        if (this.match([Token.LBRACE])) return new Stmt.Block(this.block());
         
 
         return this.expressionStatement();
@@ -221,4 +224,20 @@ export class AST {
             return new Expr.Grouping(expr);
         }
     }
+
+
+    ifStatement(): Expr.Expression {
+        this.consume(Token.LPAREN, "Expect '(' after 'if'.");
+        const condition: Expr.Expression = this.expression();
+        this.consume(Token.RPAREN, "Expect ')' after if condition."); // [parens]
+    
+        const thenBranch: Stmt.Statement = this.statement();
+        let elseBranch: Stmt.Statement = null;
+        
+        if (this.match(Token.ELSE)) {
+          elseBranch = this.statement();
+        }
+    
+        return new Stmt.If(condition, thenBranch, elseBranch);
+      }
 }
