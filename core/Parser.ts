@@ -14,7 +14,7 @@ import * as Stmt from "./Statement.js";
 
 
 type exp = any;
-export class AST {
+export class Parser {
 
     public tokens: Item[];
     public current = 0;
@@ -81,7 +81,7 @@ export class AST {
         return this.peek().tok == TokenType;
     }
 
-    match(TokenType) {
+    match(...TokenType: Token[]) {
         for (let type of TokenType) {
             if (this.check(type)) {
                 this.advance();
@@ -100,47 +100,53 @@ export class AST {
 
     private block() {
         let statements: Expr.Expression[] = [];
-    
+
         while (!this.check(Token.RBRACE) && !this.isAtEnd()) {
-          statements.push(this.declaration());
+            statements.push(this.declaration());
         }
-    
+
         this.consume(Token.RBRACE, "Expect '}' after block.");
         return statements;
-      }
+    }
 
     private statement() {
-        
-        //if (this.match([Token.FOR])) return this.forStatement();
-        
-        
-        if (this.match([Token.IF])) {
+
+        //if (this.match(Token.FOR)) return this.forStatement();
+
+
+        if (this.match(Token.IF)) {
             return this.ifStatement();
         }
-        
-        //if (this.match([Token.PRINT])) return printStatement();
-        
-        //if (this.match([Token.RETURN])) return this.returnStatement();
-        
-        
-        //if (this.match([Token.WHILE])) return this.whileStatement();
-        
-        
-        if (this.match([Token.LBRACE])) return new Stmt.Block(this.block());
-        
+
+        //if (this.match(Token.PRINT)) return printStatement();
+
+        //if (this.match(Token.RETURN)) return this.returnStatement();
+
+
+        //if (this.match(Token.WHILE)) return this.whileStatement();
+
+
+        if (this.match(Token.LBRACE)) return new Stmt.Block(this.block());
+
 
         return this.expressionStatement();
     }
 
     declaration() {
+        console.log("declaration")
         try {
-            
-            //if (this.match([Token.CLASS])) return this.classDeclaration();
-            //if (this.match([Token.FUNC])) return this._function("function");
-            //if (this.match([Token.LET])) return this.varDeclaration();
+
+            //if (this.match(Token.CLASS)) return this.classDeclaration();
+            //if (this.match(Token.FUNC)) return this._function("function");
+            console.log("mi token 46----->", this.peek())
+            if (this.match(Token.LET)) {
+                console.log("mi token 46")
+                return this.varDeclaration();
+            }
 
             return this.statement();
         } catch (/*ParseError*/ error) {
+            console.log(error)
             //this.synchronize();
             return null;
         }
@@ -149,7 +155,7 @@ export class AST {
     comparison() {
         let expr: exp = this.term();
 
-        while (this.match([Token.GTR, Token.GEQ, Token.LSS, Token.LEQ])) {
+        while (this.match(Token.GTR, Token.GEQ, Token.LSS, Token.LEQ)) {
             let operator = this.previous();
             let right: exp = this.term();
             expr = new Expr.Binary(expr, operator, right);
@@ -161,7 +167,7 @@ export class AST {
     equality() {
         let expr = this.comparison();
 
-        while (this.match([Token.NEQ, Token.EQL])) {
+        while (this.match(Token.NEQ, Token.EQL)) {
             let operator: Item = this.previous();
             let right: exp = this.comparison();
             expr = new Expr.Binary(expr, operator, right);
@@ -171,14 +177,69 @@ export class AST {
     }
 
     expression() {
-        return this.equality();
+        //return this.equality();
+        return this.assignment();
     }
 
+    assignment() {
+        /* Statements and State parse-assignment < Control Flow or-in-assignment
+            Expr expr = equality();
+        */
+        //> Control Flow or-in-assignment
+        let expr: Expr.Expression = this.or();
+        //< Control Flow or-in-assignment
+
+        if (this.match(Token.EQL)) {
+            const equals: Item = this.previous();
+            let value: Expr.Expression = this.assignment();
+
+            if (expr instanceof Expr.Variable) {
+                const name: Item = expr.name;
+                return new Expr.Assign(name, value);
+                //> Classes assign-set
+            } else if (expr instanceof Expr.Get) {
+                const get: Expr.Get = expr;
+                return new Expr.Set(get.object, get.name, value);
+                //< Classes assign-set
+            }
+
+            this.error(equals, "Invalid assignment target."); // [no-throw]
+        }
+
+        return expr;
+    }
+    or(): Expr.Expression {
+        let expr: Expr.Expression = this.and();
+
+        while (this.match(Token.OR)) {
+            const operator: Item = this.previous();
+            const right: Expr.Expression = this.and();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+    //< Control Flow or
+    //> Control Flow and
+    and(): Expr.Expression {
+        let expr: Expr.Expression = this.equality();
+
+        while (this.match(Token.AND)) {
+            const operator: Item = this.previous();
+            const right: Expr.Expression = this.equality();
+            expr = new Expr.Logical(expr, operator, right);
+        }
+
+        return expr;
+    }
+    //< Control Flow and
+
+    //> comparison
 
     term() {
         let expr: exp = this.factor();
 
-        while (this.match([Token.SUB, Token.ADD])) {
+        while (this.match(Token.SUB, Token.ADD)) {
             let operator = this.previous();
             let right: exp = this.factor();
             expr = new Expr.Binary(expr, operator, right);
@@ -190,7 +251,7 @@ export class AST {
     factor() {
         let expr: exp = this.unary();
 
-        while (this.match([Token.MUL, Token.DIV])) {
+        while (this.match(Token.MUL, Token.DIV)) {
             let operator = this.previous();
             let right = this.unary();
             expr = new Expr.Binary(expr, operator, right);
@@ -200,7 +261,7 @@ export class AST {
     }
 
     unary() {
-        if (this.match([Token.SUB, Token.NOT])) {
+        if (this.match(Token.SUB, Token.NOT)) {
             let operator = this.previous();
             let right = this.unary();
             return new Expr.Unary(operator, right);
@@ -210,15 +271,36 @@ export class AST {
     }
 
     primary() {
-        if (this.match([Token.FALSE])) return new Expr.Literal(false);
-        if (this.match([Token.TRUE])) return new Expr.Literal(true);
-        if (this.match([Token.NULL])) return new Expr.Literal(null);
+        if (this.match(Token.FALSE)) {
+            return new Expr.Literal(false);
+        }
+        if (this.match(Token.TRUE)) {
+            return new Expr.Literal(true);
+        }
+        if (this.match(Token.NULL)) {
+            return new Expr.Literal(null);
+        }
 
-        if (this.match([Token.INT, Token.FLOAT, Token.STRING])) {
+        if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
+            console.log("number or string.............")
             return new Expr.Literal(this.previous().value);
         }
 
-        if (this.match([Token.LPAREN])) {
+        if (this.match(Token.INCR, Token.DECR)) {
+            console.log("post ASIGn");
+            let id = null;
+            let op = this.previous();
+            if (this.match(Token.IDENT)) {
+                console.log("post ASIGN 2");
+                id = this.previous();
+                return new Expr.PostAssign(id, op)
+            }
+            console.log("post ASIGN 5");
+
+            throw new Error("expected a identifier");
+
+        }
+        if (this.match(Token.LPAREN)) {
             let expr = this.expression();
             this.consume(Token.RPAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
@@ -230,14 +312,26 @@ export class AST {
         this.consume(Token.LPAREN, "Expect '(' after 'if'.");
         const condition: Expr.Expression = this.expression();
         this.consume(Token.RPAREN, "Expect ')' after if condition."); // [parens]
-    
+
         const thenBranch: Stmt.Statement = this.statement();
         let elseBranch: Stmt.Statement = null;
-        
+
         if (this.match(Token.ELSE)) {
-          elseBranch = this.statement();
+            elseBranch = this.statement();
         }
-    
+
         return new Stmt.If(condition, thenBranch, elseBranch);
-      }
+    }
+
+    varDeclaration() {
+        const name = this.consume(Token.IDENT, "Expect variable name.");
+
+        let initializer: Expr.Expression = null;
+        if (this.match(Token.ASSIGN)) {
+            initializer = this.expression();
+        }
+
+        this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
+        return new Stmt.Var(name, initializer);
+    }
 }

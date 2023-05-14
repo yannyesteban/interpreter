@@ -1,5 +1,5 @@
 import { Lexer } from "./core/Lexer.js";
-import { AST } from "./core/AST.js";
+import { Parser } from "./core/Parser.js";
 import * as fs from "fs";
 import * as http from "http";
 //create a server object:
@@ -16,7 +16,7 @@ http.createServer(function (req, res) {
         var lexer = new Lexer(source);
         var tokens = lexer.getTokens();
         console.log(source, "\n", tokens);
-        var ast = new AST(tokens);
+        var ast = new Parser(tokens);
         var statements = ast.parse();
         console.log("result", statements);
         console.log("bye", JSON.stringify(statements));

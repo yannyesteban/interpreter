@@ -1,5 +1,5 @@
 import { Lexer } from "./core/Lexer.js";
-import { AST } from "./core/AST.js";
+import { Parser } from "./core/Parser.js";
 
 import * as fs from "fs";
 
@@ -26,7 +26,7 @@ http.createServer(function (req, res) {
 
     console.log(source, "\n", tokens);
 
-    const ast = new AST(tokens);
+    const ast = new Parser(tokens);
 
     const statements = ast.parse();
     console.log("result", statements);

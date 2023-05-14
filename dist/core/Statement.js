@@ -43,4 +43,15 @@ var Function = /** @class */ (function () {
     return Function;
 }());
 export { Function };
+var Var = /** @class */ (function () {
+    function Var(name, initializer) {
+        this.name = name;
+        this.initializer = initializer;
+    }
+    Var.prototype.accept = function (visitor) {
+        return visitor.visitVarStmt(this);
+    };
+    return Var;
+}());
+export { Var };
 //# sourceMappingURL=Statement.js.map

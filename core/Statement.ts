@@ -1,6 +1,7 @@
-import * as exp from "constants";
-import * as Expr from "./Expressions.js";
 
+import * as Expr from "./Expressions.js";
+import { Item } from "./Lexer.js";
+import { Token } from "./Token.js";
 
 export interface Visitor {
     visitBlockStmt(stmt: Block);
@@ -10,7 +11,7 @@ export interface Visitor {
     visitIfStmt(stmt: If);
     //visitPrintStmt(Print stmt);
     //visitReturnStmt(Return stmt);
-    //visitVarStmt(Var stmt);
+    visitVarStmt(stmt: Var);
     //visitWhileStmt(While stmt);
   }
 
@@ -75,6 +76,20 @@ export class Function implements Statement {
     }
     accept(visitor:Visitor) {
         return visitor.visitFunctionStmt(this);
+    }
+ }
+
+ export class Var implements Statement {
+
+    public  name:Item;
+    public initializer: Expr.Expression;
+    constructor(name: Item, initializer: Expr.Expression) {
+      this.name = name;
+      this.initializer = initializer;
+    }
+
+    accept(visitor: Visitor) {
+      return visitor.visitVarStmt(this);
     }
 
     

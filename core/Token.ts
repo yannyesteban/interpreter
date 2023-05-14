@@ -76,7 +76,8 @@ export enum Token {
 	RETURN, // "return"
 
 	CLASS, // "class"
-	FUNC, // "let"
+	FUNC, // "func"
+	FN, // "fn"
 	
 }
 
@@ -97,6 +98,7 @@ const keywords = {
 	let: Token.LET,
 	class: Token.CLASS,
 	func: Token.FUNC,
+	fn: Token.FN,
 
 
 };

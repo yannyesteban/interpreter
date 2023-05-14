@@ -1,5 +1,5 @@
 import { Lexer } from "./core/Lexer.js";
-import { AST } from "./core/AST.js";
+import { Parser } from "./core/Parser.js";
 
 import   "./core/Resolver.js";
 import   "./core/Interpreter.js";
@@ -25,9 +25,9 @@ fs.readFile("sevian.sv", (err, buff) => {
     //console.log("source: ", source, "\n", tokens);
     console.log("source: ", source, "\n");
 
-    const ast = new AST(tokens);
+    const parser = new Parser(tokens);
 
-    const statements = ast.parse();
+    const statements = parser.parse();
     //console.log("result", statements);
     //console.log("bye", JSON.stringify(statements));
     
