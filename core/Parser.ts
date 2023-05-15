@@ -99,7 +99,7 @@ export class Parser {
     }
 
     private block() {
-        let statements: Expr.Expression[] = [];
+        let statements/*: Expr.Expression[]*/  = [];
 
         while (!this.check(Token.RBRACE) && !this.isAtEnd()) {
             statements.push(this.declaration());
@@ -125,8 +125,14 @@ export class Parser {
 
         //if (this.match(Token.WHILE)) return this.whileStatement();
 
+        if(this.peek().tok == Token.LBRACE){
+            
+            return this.expressionObj();
+        }
 
-        if (this.match(Token.LBRACE)) return new Stmt.Block(this.block());
+        if (this.match(Token.LBRACE)) {
+            return new Stmt.Block(this.block());
+        }
 
 
         return this.expressionStatement();
@@ -147,9 +153,11 @@ export class Parser {
             return this.statement();
         } catch (/*ParseError*/ error) {
             console.log(error)
+            throw error;
             //this.synchronize();
             return null;
         }
+        return null;
     }
 
     comparison() {
@@ -333,5 +341,33 @@ export class Parser {
 
         this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
+    }
+
+    expressionObj(){
+
+        console.log("Peek: ", this.peek())
+        if(this.match(Token.LBRACE)){
+            let x = this.peek();
+            console.log("Peek 2: ", x)
+        }
+
+        throw "error";
+        return new Expr.Object(null);
+    }
+
+    isObjectId(){
+        if(this.peek().tok == Token.IDENT  || this.peek().tok == Token.STRING || this.peek().tok == Token.INT){
+            return {
+                name: this.peek().value,
+                type: this.peek().tok
+            }
+        }
+    }
+
+    nameObjectId(){
+        if(this.peek().tok == Token.LBRACK){
+
+            
+        }
     }
 }

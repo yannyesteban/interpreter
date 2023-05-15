@@ -120,4 +120,35 @@ var Logical = /** @class */ (function () {
     return Logical;
 }());
 export { Logical };
+var Par = /** @class */ (function () {
+    function Par(id, value) {
+        this.id = id;
+        this.value = value;
+    }
+    Par.prototype.accept = function (visitor) {
+        return visitor.visitObjectExpr(this);
+    };
+    return Par;
+}());
+export { Par };
+var Object = /** @class */ (function () {
+    function Object(childs) {
+        this.childs = childs;
+    }
+    Object.prototype.accept = function (visitor) {
+        return visitor.visitObjectExpr(this);
+    };
+    return Object;
+}());
+export { Object };
+var Array = /** @class */ (function () {
+    function Array(childs) {
+        this.childs = childs;
+    }
+    Array.prototype.accept = function (visitor) {
+        return visitor.visitArrayExpr(this);
+    };
+    return Array;
+}());
+export { Array };
 //# sourceMappingURL=Expressions.js.map

@@ -31,9 +31,9 @@ fs.readFile("sevian.sv", (err, buff) => {
     //console.log("result", statements);
     //console.log("bye", JSON.stringify(statements));
     
-    const intp = new Interpreter();
+    //const intp = new Interpreter();
 
-    intp.interpret(statements);
+    //intp.interpret(statements);
 });
 
 

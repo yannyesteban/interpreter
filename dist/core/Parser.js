@@ -73,7 +73,7 @@ var Parser = /** @class */ (function () {
         return new Stmt.Expression(expr);
     };
     Parser.prototype.block = function () {
-        var statements = [];
+        var statements /*: Expr.Expression[]*/ = [];
         while (!this.check(Token.RBRACE) && !this.isAtEnd()) {
             statements.push(this.declaration());
         }
@@ -88,8 +88,12 @@ var Parser = /** @class */ (function () {
         //if (this.match(Token.PRINT)) return printStatement();
         //if (this.match(Token.RETURN)) return this.returnStatement();
         //if (this.match(Token.WHILE)) return this.whileStatement();
-        if (this.match(Token.LBRACE))
+        if (this.peek().tok == Token.LBRACE) {
+            return this.expressionObj();
+        }
+        if (this.match(Token.LBRACE)) {
             return new Stmt.Block(this.block());
+        }
         return this.expressionStatement();
     };
     Parser.prototype.declaration = function () {
@@ -106,9 +110,11 @@ var Parser = /** @class */ (function () {
         }
         catch ( /*ParseError*/error) {
             console.log(error);
+            throw error;
             //this.synchronize();
             return null;
         }
+        return null;
     };
     Parser.prototype.comparison = function () {
         var expr = this.term();
@@ -255,6 +261,27 @@ var Parser = /** @class */ (function () {
         }
         this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
+    };
+    Parser.prototype.expressionObj = function () {
+        console.log("Peek: ", this.peek());
+        if (this.match(Token.LBRACE)) {
+            var x = this.peek();
+            console.log("Peek 2: ", x);
+        }
+        throw "error";
+        return new Expr.Object(null);
+    };
+    Parser.prototype.isObjectId = function () {
+        if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
+            return {
+                name: this.peek().value,
+                type: this.peek().tok
+            };
+        }
+    };
+    Parser.prototype.nameObjectId = function () {
+        if (this.peek().tok == Token.LBRACK) {
+        }
     };
     return Parser;
 }());

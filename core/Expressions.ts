@@ -85,9 +85,9 @@ export class PreAssign {
 }
 
 export class Variable implements Expression {
-  public name:Item;
+  public name: Item;
 
-  constructor(name:Item) {
+  constructor(name: Item) {
     this.name = name;
   }
 
@@ -98,10 +98,10 @@ export class Variable implements Expression {
 
 export class Assign implements Expression {
 
-  public name:Item;
+  public name: Item;
   public value: Expression;
 
-  constructor(name:Item, value: Expression) {
+  constructor(name: Item, value: Expression) {
     this.name = name;
     this.value = value;
   }
@@ -114,7 +114,7 @@ export class Assign implements Expression {
 export class Get implements Expression {
   public name: Item;
   public object: Expression;
-  
+
   constructor(object: Expression, name: Item) {
     this.object = object;
     this.name = name;
@@ -145,10 +145,10 @@ export class Logical implements Expression {
 
   public left: Expression;
   public operator: Item;
-  
+
   public right: Expression;
 
-  constructor(left: Expression, operator:Item, right:Expression) {
+  constructor(left: Expression, operator: Item, right: Expression) {
     this.left = left;
     this.operator = operator;
     this.right = right;
@@ -156,5 +156,44 @@ export class Logical implements Expression {
 
   accept(visitor) {
     return visitor.visitLogicalExpr(this);
+  }
+}
+
+
+export class Par implements Expression {
+  public id: Item;
+  public value: Expression;
+  constructor(id, value) {
+    this.id = id;
+    this.value = value;
+  }
+  accept(visitor: any) {
+    return visitor.visitObjectExpr(this);
+  }
+}
+
+export class Object implements Expression {
+
+  childs:Par[];
+  
+  
+  constructor(childs) {
+    this.childs = childs;
+  }
+  accept(visitor: any) {
+    return visitor.visitObjectExpr(this);
+  }
+}
+
+export class Array implements Expression {
+
+  childs:Expression[];
+  
+  
+  constructor(childs) {
+    this.childs = childs;
+  }
+  accept(visitor: any) {
+    return visitor.visitArrayExpr(this);
   }
 }

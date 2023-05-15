@@ -3,7 +3,6 @@ import { Parser } from "./core/Parser.js";
 import "./core/Resolver.js";
 import "./core/Interpreter.js";
 import * as fs from 'fs';
-import { Interpreter } from "./core/Interpreter.js";
 fs.readFile("sevian.sv", function (err, buff) {
     if (err) {
         console.error(err);
@@ -19,7 +18,7 @@ fs.readFile("sevian.sv", function (err, buff) {
     var statements = parser.parse();
     //console.log("result", statements);
     //console.log("bye", JSON.stringify(statements));
-    var intp = new Interpreter();
-    intp.interpret(statements);
+    //const intp = new Interpreter();
+    //intp.interpret(statements);
 });
 //# sourceMappingURL=main.js.map

@@ -8,7 +8,7 @@ export interface Item{
     pos: number;
     value: any;
     priority: number;
-    tok: string | Token.EOF;
+    tok: string | Token.EOF | number;
 } 
 
 export class Lexer {
