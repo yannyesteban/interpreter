@@ -75,9 +75,10 @@ var Variable = /** @class */ (function () {
 }());
 export { Variable };
 var Assign = /** @class */ (function () {
-    function Assign(name, value) {
+    function Assign(name, value, type) {
         this.name = name;
         this.value = value;
+        this.type = type;
     }
     Assign.prototype.accept = function (visitor) {
         return visitor.visitAssignExpr(this);
@@ -97,10 +98,11 @@ var Get = /** @class */ (function () {
 }());
 export { Get };
 var Set = /** @class */ (function () {
-    function Set(object, name, value) {
+    function Set(object, name, value, type) {
         this.object = object;
         this.name = name;
         this.value = value;
+        this.type = type;
     }
     Set.prototype.accept = function (visitor) {
         return visitor.visitSetExpr(this);

@@ -3,20 +3,13 @@ import { Lexer, Item } from "./Lexer.js";
 import * as Expr from "./Expressions.js";
 import * as Stmt from "./Statement.js";
 
-//const source = 'if (3>=6) 6+6*2 || 2';
-//let lexer = new Lexer(source);
 
-//console.log(source, "\n", lexer.getTokens());
-
-
-//console.log("bye");
-
-function db(...msg){
+function db(...msg) {
     console.log("------------------")
-    msg.forEach(x=>{
+    msg.forEach(x => {
         console.debug("..", x);
     });
-    
+
     console.log("------------------")
 }
 
@@ -25,6 +18,8 @@ export class Parser {
 
     public tokens: Item[];
     public current = 0;
+
+    public brackets = 0;
 
     constructor(tokens) {
         this.tokens = tokens;
@@ -42,12 +37,7 @@ export class Parser {
     parse(): Stmt.Statement[] {
         let statements = [];
         while (!this.isAtEnd()) {
-            /* Statements and State parse < Statements and State parse-declaration
-                  statements.add(statement());
-            */
-            //> parse-declaration
             statements.push(this.declaration());
-            //< parse-declaration
         }
 
         return statements; // [parse-error-handling]
@@ -58,6 +48,14 @@ export class Parser {
 
     isAtEnd() {
         return this.peek().tok == Token.EOF;
+    }
+
+    reset(position) {
+        this.current = position
+    }
+
+    getPosition() {
+        return this.current;
     }
 
     advance() {
@@ -102,18 +100,27 @@ export class Parser {
 
     private expressionStatement() {
         let expr = this.expression();
-        this.consume(Token.SEMICOLON, "Expect ';' after expression.");
+
+        if(this.brackets > 0 && this.peek().tok == Token.RBRACE){
+
+        }else{
+            this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+        }
+        
         return new Stmt.Expression(expr);
     }
 
+
+
     private block() {
-        let statements/*: Expr.Expression[]*/  = [];
+        let statements/*: Expr.Expression[]*/ = [];
 
         while (!this.check(Token.RBRACE) && !this.isAtEnd()) {
             statements.push(this.declaration());
         }
 
         this.consume(Token.RBRACE, "Expect '}' after block.");
+        this.brackets--;
         return statements;
     }
 
@@ -133,28 +140,33 @@ export class Parser {
 
         //if (this.match(Token.WHILE)) return this.whileStatement();
 
-        if(this.peek().tok == Token.LBRACE){
-            
-            return this.expressionObj();
-        }
-
         if (this.match(Token.LBRACE)) {
+            this.brackets++;
+            const position = this.getPosition();
+            try {
+
+                let expr = new Expr.Object(this.objectValue(true));
+                this.consume(Token.SEMICOLON, "Expect ';' after expression.");
+                return new Stmt.Expression(expr);
+
+            } catch (e) {
+                db("UN ERROR PASó")
+            }
+            this.reset(position);
+
             return new Stmt.Block(this.block());
         }
-
 
         return this.expressionStatement();
     }
 
     declaration() {
-        console.log("declaration")
         try {
 
             //if (this.match(Token.CLASS)) return this.classDeclaration();
             //if (this.match(Token.FUNC)) return this._function("function");
-            console.log("mi token 46----->", this.peek())
+
             if (this.match(Token.LET)) {
-                console.log("mi token 46")
                 return this.varDeclaration();
             }
 
@@ -205,17 +217,19 @@ export class Parser {
         let expr: Expr.Expression = this.or();
         //< Control Flow or-in-assignment
 
-        if (this.match(Token.EQL)) {
+       
+
+        if (this.match(Token.ASSIGN, Token.ADD_ASSIGN, Token.SUB_ASSIGN, Token.MUL_ASSIGN, Token.DIV_ASSIGN, Token.MOD_ASSIGN)) {
             const equals: Item = this.previous();
             let value: Expr.Expression = this.assignment();
 
             if (expr instanceof Expr.Variable) {
                 const name: Item = expr.name;
-                return new Expr.Assign(name, value);
+                return new Expr.Assign(name, value, equals);
                 //> Classes assign-set
             } else if (expr instanceof Expr.Get) {
                 const get: Expr.Get = expr;
-                return new Expr.Set(get.object, get.name, value);
+                return new Expr.Set(get.object, get.name, value, equals);
                 //< Classes assign-set
             }
 
@@ -287,6 +301,8 @@ export class Parser {
     }
 
     primary() {
+
+        
         if (this.match(Token.FALSE)) {
             return new Expr.Literal(false);
         }
@@ -297,14 +313,27 @@ export class Parser {
             return new Expr.Literal(null);
         }
 
+
         if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
-            
+
             return new Expr.Literal(this.previous().value);
         }
 
-        if(this.match(Token.LBRACK)){
-            db("array")
+        if (this.match(Token.LBRACE)) {
+            
+            return new Expr.Object(this.objectValue());
+        }
+
+        
+
+        if (this.match(Token.LBRACK)) {
+            
             return new Expr.Array(this.arrayValue());
+        }
+
+
+        if (this.match(Token.IDENT)) {
+            return new Expr.Variable(this.previous());
         }
 
         if (this.match(Token.INCR, Token.DECR)) {
@@ -321,17 +350,26 @@ export class Parser {
             throw new Error("expected a identifier");
 
         }
+        
+
+        if (this.match(Token.IDENT)) {
+            return new Expr.Variable(this.previous());
+        }
+
         if (this.match(Token.LPAREN)) {
+            
             let expr = this.expression();
             this.consume(Token.RPAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
+        
     }
 
 
     ifStatement(): Expr.Expression {
         this.consume(Token.LPAREN, "Expect '(' after 'if'.");
         const condition: Expr.Expression = this.expression();
+        
         this.consume(Token.RPAREN, "Expect ')' after if condition."); // [parens]
 
         const thenBranch: Stmt.Statement = this.statement();
@@ -356,44 +394,47 @@ export class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    arrayValue(){
+    arrayValue() {
         const values = [];
-        if(this.match(Token.RBRACK)){
+        if (this.match(Token.RBRACK)) {
             return values;
         }
 
-        do{
+        do {
             values.push(this.or());
-        }while(this.match(Token.COMMA));
+        } while (this.match(Token.COMMA));
 
         this.consume(Token.RBRACK, "Expect ']'.");
 
         return values;
     }
 
-    expressionObj(){
-        console.log(2)
-        this.consume(Token.LBRACE, "Expect '{'.");
-
+    objectValue(ambiguity?) {
+    
         const pairs = [];
+        if (this.match(Token.RBRACK)) {
+
+            if (ambiguity) {
+                this.error(this.peek(), "error of ambiguity");
+            }
+
+            return pairs;
+        }
+
 
         do {
-            db(3)
+            
             let name = null;
             let value = null;
-            if(this.peek().tok == Token.IDENT  || this.peek().tok == Token.STRING || this.peek().tok == Token.INT){
-                
+            if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
+
                 name = new Expr.Literal(this.peek().value);
                 this.advance()
-            }else if(this.match(Token.LBRACK)){
-                db("name")
+            } else if (this.match(Token.LBRACK)) {
                 name = this.or();
-                db("name", name);
-                //db(this.advance())
                 this.consume(Token.RBRACK, "Expect ']' after property id");
-                db("Finish")
             }
-            
+
             this.consume(Token.COLON, "Expect ':'.");
 
             value = this.or();
@@ -401,29 +442,26 @@ export class Parser {
                 name,
                 value
             })
-        }while(this.match(Token.COMMA));
-        db(5)
-        console.log("pairs", pairs);
+        } while (this.match(Token.COMMA));
         this.consume(Token.RBRACE, "Expect '}'.");
-        throw "error";
-        return new Expr.Object(null);
+        return pairs;
     }
 
-    isObjectId(){
-        if(this.peek().tok == Token.IDENT  || this.peek().tok == Token.STRING || this.peek().tok == Token.INT){
+    isObjectId() {
+        if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
             return {
                 name: this.peek().value,
                 type: this.peek().tok
             }
         }
 
-        
+
     }
 
-    nameObjectId(){
-        if(this.peek().tok == Token.LBRACK){
+    nameObjectId() {
+        if (this.peek().tok == Token.LBRACK) {
 
-            
+
         }
     }
 }

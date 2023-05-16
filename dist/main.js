@@ -13,11 +13,12 @@ fs.readFile("sevian.sv", function (err, buff) {
     var lexer = new Lexer(source);
     var tokens = lexer.getTokens();
     //console.log("source: ", source, "\n", tokens);
+    console.clear();
     console.log("source: ", source, "\n");
     var parser = new Parser(tokens);
     var statements = parser.parse();
-    //console.log("result", statements);
-    //console.log("bye", JSON.stringify(statements));
+    console.log("result", statements);
+    console.log("bye", JSON.stringify(statements));
     //const intp = new Interpreter();
     //intp.interpret(statements);
 });

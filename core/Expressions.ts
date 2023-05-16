@@ -100,16 +100,20 @@ export class Assign implements Expression {
 
   public name: Item;
   public value: Expression;
+  public type: Item;
 
-  constructor(name: Item, value: Expression) {
+  constructor(name: Item, value: Expression, type: Item) {
     this.name = name;
     this.value = value;
+    this.type = type;
   }
 
   accept(visitor) {
     return visitor.visitAssignExpr(this);
   }
 }
+
+
 
 export class Get implements Expression {
   public name: Item;
@@ -130,16 +134,20 @@ export class Set implements Expression {
   public name: Item;
   public object: Expression;
   public value: Expression;
-  constructor(object: Expression, name: Item, value: Expression) {
+  public type: Item;
+
+  constructor(object: Expression, name: Item, value: Expression, type: Item) {
     this.object = object;
     this.name = name;
     this.value = value;
+    this.type = type;
   }
 
   accept(visitor) {
     return visitor.visitSetExpr(this);
   }
 }
+
 
 export class Logical implements Expression {
 

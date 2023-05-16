@@ -23,13 +23,14 @@ fs.readFile("sevian.sv", (err, buff) => {
     const tokens = lexer.getTokens();
 
     //console.log("source: ", source, "\n", tokens);
+    console.clear();
     console.log("source: ", source, "\n");
 
     const parser = new Parser(tokens);
 
     const statements = parser.parse();
-    //console.log("result", statements);
-    //console.log("bye", JSON.stringify(statements));
+    console.log("result", statements);
+    console.log("bye", JSON.stringify(statements));
     
     //const intp = new Interpreter();
 
