@@ -1,12 +1,28 @@
 import { Token } from "./Token.js";
 import * as Expr from "./Expressions.js";
 import * as Stmt from "./Statement.js";
+//const source = 'if (3>=6) 6+6*2 || 2';
+//let lexer = new Lexer(source);
+//console.log(source, "\n", lexer.getTokens());
+//console.log("bye");
+function db() {
+    var msg = [];
+    for (var _i = 0; _i < arguments.length; _i++) {
+        msg[_i] = arguments[_i];
+    }
+    console.log("------------------");
+    msg.forEach(function (x) {
+        console.debug("..", x);
+    });
+    console.log("------------------");
+}
 var Parser = /** @class */ (function () {
     function Parser(tokens) {
         this.current = 0;
         this.tokens = tokens;
     }
     Parser.prototype.error = function (token, message) {
+        db("Error: ", message);
         if (token.type == Token.EOF) {
             //report(token.line, " at end", message);
         }
@@ -109,7 +125,7 @@ var Parser = /** @class */ (function () {
             return this.statement();
         }
         catch ( /*ParseError*/error) {
-            console.log(error);
+            db("Error: ? ", error);
             throw error;
             //this.synchronize();
             return null;
@@ -221,8 +237,11 @@ var Parser = /** @class */ (function () {
             return new Expr.Literal(null);
         }
         if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
-            console.log("number or string.............");
             return new Expr.Literal(this.previous().value);
+        }
+        if (this.match(Token.LBRACK)) {
+            db("array");
+            return new Expr.Array(this.arrayValue());
         }
         if (this.match(Token.INCR, Token.DECR)) {
             console.log("post ASIGn");
@@ -262,12 +281,47 @@ var Parser = /** @class */ (function () {
         this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
         return new Stmt.Var(name, initializer);
     };
-    Parser.prototype.expressionObj = function () {
-        console.log("Peek: ", this.peek());
-        if (this.match(Token.LBRACE)) {
-            var x = this.peek();
-            console.log("Peek 2: ", x);
+    Parser.prototype.arrayValue = function () {
+        var values = [];
+        if (this.match(Token.RBRACK)) {
+            return values;
         }
+        do {
+            values.push(this.or());
+        } while (this.match(Token.COMMA));
+        this.consume(Token.RBRACK, "Expect ']'.");
+        return values;
+    };
+    Parser.prototype.expressionObj = function () {
+        console.log(2);
+        this.consume(Token.LBRACE, "Expect '{'.");
+        var pairs = [];
+        do {
+            db(3);
+            var name_2 = null;
+            var value = null;
+            if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
+                name_2 = new Expr.Literal(this.peek().value);
+                this.advance();
+            }
+            else if (this.match(Token.LBRACK)) {
+                db("name");
+                name_2 = this.or();
+                db("name", name_2);
+                //db(this.advance())
+                this.consume(Token.RBRACK, "Expect ']' after property id");
+                db("Finish");
+            }
+            this.consume(Token.COLON, "Expect ':'.");
+            value = this.or();
+            pairs.push({
+                name: name_2,
+                value: value
+            });
+        } while (this.match(Token.COMMA));
+        db(5);
+        console.log("pairs", pairs);
+        this.consume(Token.RBRACE, "Expect '}'.");
         throw "error";
         return new Expr.Object(null);
     };

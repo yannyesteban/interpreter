@@ -11,7 +11,14 @@ import * as Stmt from "./Statement.js";
 
 //console.log("bye");
 
-
+function db(...msg){
+    console.log("------------------")
+    msg.forEach(x=>{
+        console.debug("..", x);
+    });
+    
+    console.log("------------------")
+}
 
 type exp = any;
 export class Parser {
@@ -25,6 +32,7 @@ export class Parser {
 
 
     error(token, message) {
+        db("Error: ", message);
         if (token.type == Token.EOF) {
             //report(token.line, " at end", message);
         } else {
@@ -152,7 +160,7 @@ export class Parser {
 
             return this.statement();
         } catch (/*ParseError*/ error) {
-            console.log(error)
+            db("Error: ? ", error)
             throw error;
             //this.synchronize();
             return null;
@@ -290,8 +298,13 @@ export class Parser {
         }
 
         if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
-            console.log("number or string.............")
+            
             return new Expr.Literal(this.previous().value);
+        }
+
+        if(this.match(Token.LBRACK)){
+            db("array")
+            return new Expr.Array(this.arrayValue());
         }
 
         if (this.match(Token.INCR, Token.DECR)) {
@@ -343,14 +356,55 @@ export class Parser {
         return new Stmt.Var(name, initializer);
     }
 
-    expressionObj(){
-
-        console.log("Peek: ", this.peek())
-        if(this.match(Token.LBRACE)){
-            let x = this.peek();
-            console.log("Peek 2: ", x)
+    arrayValue(){
+        const values = [];
+        if(this.match(Token.RBRACK)){
+            return values;
         }
 
+        do{
+            values.push(this.or());
+        }while(this.match(Token.COMMA));
+
+        this.consume(Token.RBRACK, "Expect ']'.");
+
+        return values;
+    }
+
+    expressionObj(){
+        console.log(2)
+        this.consume(Token.LBRACE, "Expect '{'.");
+
+        const pairs = [];
+
+        do {
+            db(3)
+            let name = null;
+            let value = null;
+            if(this.peek().tok == Token.IDENT  || this.peek().tok == Token.STRING || this.peek().tok == Token.INT){
+                
+                name = new Expr.Literal(this.peek().value);
+                this.advance()
+            }else if(this.match(Token.LBRACK)){
+                db("name")
+                name = this.or();
+                db("name", name);
+                //db(this.advance())
+                this.consume(Token.RBRACK, "Expect ']' after property id");
+                db("Finish")
+            }
+            
+            this.consume(Token.COLON, "Expect ':'.");
+
+            value = this.or();
+            pairs.push({
+                name,
+                value
+            })
+        }while(this.match(Token.COMMA));
+        db(5)
+        console.log("pairs", pairs);
+        this.consume(Token.RBRACE, "Expect '}'.");
         throw "error";
         return new Expr.Object(null);
     }
@@ -362,6 +416,8 @@ export class Parser {
                 type: this.peek().tok
             }
         }
+
+        
     }
 
     nameObjectId(){
