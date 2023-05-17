@@ -218,8 +218,17 @@ var Parser = /** @class */ (function () {
         return expr;
     };
     Parser.prototype.factor = function () {
+        var expr = this.power();
+        while (this.match(Token.MUL, Token.DIV, Token.MOD)) {
+            var operator = this.previous();
+            var right = this.power();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+        return expr;
+    };
+    Parser.prototype.power = function () {
         var expr = this.unary();
-        while (this.match(Token.MUL, Token.DIV)) {
+        while (this.match(Token.POW)) {
             var operator = this.previous();
             var right = this.unary();
             expr = new Expr.Binary(expr, operator, right);
@@ -253,11 +262,8 @@ var Parser = /** @class */ (function () {
         if (this.match(Token.LBRACK)) {
             return new Expr.Array(this.arrayValue());
         }
-        if (this.match(Token.IDENT)) {
-            return new Expr.Variable(this.previous());
-        }
         if (this.match(Token.INCR, Token.DECR)) {
-            console.log("post ASIGn");
+            console.log("post ASign");
             var id = null;
             var op = this.previous();
             if (this.match(Token.IDENT)) {
@@ -267,6 +273,15 @@ var Parser = /** @class */ (function () {
             }
             console.log("post ASIGN 5");
             throw new Error("expected a identifier");
+        }
+        if (this.match(Token.IDENT)) {
+            var ident = this.previous();
+            if (this.match(Token.INCR, Token.DECR)) {
+                console.log("pre ASIGN 2");
+                var op = this.previous();
+                return new Expr.PostAssign(ident, op);
+            }
+            return new Expr.Variable(this.previous());
         }
         if (this.match(Token.IDENT)) {
             return new Expr.Variable(this.previous());

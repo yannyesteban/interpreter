@@ -279,14 +279,26 @@ export class Parser {
     }
 
     factor() {
+        
+        let expr: exp = this.power();
+
+        while (this.match(Token.MUL, Token.DIV, Token.MOD)) {
+            let operator = this.previous();
+            let right = this.power();
+            expr = new Expr.Binary(expr, operator, right);
+        }
+
+        return expr;
+    }
+
+    power() {
         let expr: exp = this.unary();
 
-        while (this.match(Token.MUL, Token.DIV)) {
+        while (this.match(Token.POW)) {
             let operator = this.previous();
             let right = this.unary();
             expr = new Expr.Binary(expr, operator, right);
         }
-
         return expr;
     }
 
@@ -331,13 +343,8 @@ export class Parser {
             return new Expr.Array(this.arrayValue());
         }
 
-
-        if (this.match(Token.IDENT)) {
-            return new Expr.Variable(this.previous());
-        }
-
         if (this.match(Token.INCR, Token.DECR)) {
-            console.log("post ASIGn");
+            console.log("post ASign");
             let id = null;
             let op = this.previous();
             if (this.match(Token.IDENT)) {
@@ -350,6 +357,18 @@ export class Parser {
             throw new Error("expected a identifier");
 
         }
+
+        if (this.match(Token.IDENT)) {
+            const ident = this.previous();
+            if(this.match(Token.INCR, Token.DECR)){
+                console.log("pre ASIGN 2");
+                const op = this.previous();
+                return new Expr.PostAssign(ident, op);
+            }
+            return new Expr.Variable(this.previous());
+        }
+
+        
         
 
         if (this.match(Token.IDENT)) {
