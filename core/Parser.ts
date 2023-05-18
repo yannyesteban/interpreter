@@ -23,6 +23,7 @@ export class Parser {
 
     constructor(tokens) {
         this.tokens = tokens;
+        db(tokens)
     }
 
 
@@ -126,7 +127,7 @@ export class Parser {
 
     private statement() {
 
-        //if (this.match(Token.FOR)) return this.forStatement();
+        if (this.match(Token.FOR)) return this.forStatement();
 
 
         if (this.match(Token.IF)) {
@@ -138,7 +139,8 @@ export class Parser {
         if (this.match(Token.RETURN)) return this.returnStatement();
 
 
-        //if (this.match(Token.WHILE)) return this.whileStatement();
+        if (this.match(Token.DO)) return this.doStatement();
+        if (this.match(Token.WHILE)) return this.whileStatement();
 
         if (this.match(Token.LBRACE)) {
             this.brackets++;
@@ -205,8 +207,21 @@ export class Parser {
     }
 
     expression() {
-        //return this.equality();
-        return this.assignment();
+
+        let expr = this.assignment();
+
+        if (this.match(Token.QUESTION)) {
+
+
+            let exprThen = this.assignment();
+            this.consume(Token.COLON, "Expect ':' after expression.");
+
+            let exprElse = this.assignment();
+            expr = new Expr.Ternary(expr, exprThen, exprElse);
+        }
+
+        return expr;
+        //return this.assignment();
     }
 
     assignment() {
@@ -309,18 +324,18 @@ export class Parser {
             return new Expr.Unary(operator, right);
         }
 
-        return this.primary();
+        return this.call();
     }
 
     finishCall(callee: Expr.Expression): Expr.Expression {
         const arg: Expr.Expression[] = [];
         if (!this.check(Token.RPAREN)) {
             do {
-                
+
                 if (arg.length >= 64) {
                     this.error(this.peek(), "Can't have more than 255 arguments.");
                 }
-                
+
                 arg.push(this.expression());
             } while (this.match(Token.COMMA));
         }
@@ -329,19 +344,22 @@ export class Parser {
 
         return new Expr.Call(callee, paren, arg);
     }
-    
-    
+
+
     call(): Expr.Expression {
         let expr: Expr.Expression = this.primary();
 
-        while (true) { 
+        while (true) {
             if (this.match(Token.LPAREN)) {
                 expr = this.finishCall(expr);
-                
+
             } else if (this.match(Token.DOT)) {
                 const name: Item = this.consume(Token.IDENT, "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name);
-                
+            } else if (this.match(Token.LBRACK)) {
+                const name: Expr.Expression = this.expression();
+                expr = new Expr.Get2(expr, name);
+                this.consume(Token.RBRACK, "Expect ']' after property name.");
             } else {
                 break;
             }
@@ -522,6 +540,29 @@ export class Parser {
         }
     }
 
+    doStatement(): Expr.Expression {
+
+        const body: Stmt.Statement = this.statement();
+
+        this.consume(Token.WHILE, "Expect 'while' token after statement.")
+
+        this.consume(Token.LPAREN, "Expect '(' after 'if'.");
+        const condition: Expr.Expression = this.expression();
+
+        this.consume(Token.RPAREN, "Expect ')' after if condition.");
+
+        return new Stmt.Do(condition, body);
+    }
+
+    whileStatement(): Stmt.Statement {
+        this.consume(Token.LPAREN, "Expect '(' after 'while'.");
+        let condition: Expr.Expression = this.expression();
+        this.consume(Token.RPAREN, "Expect ')' after condition.");
+        const body: Stmt.Statement = this.statement();
+
+        return new Stmt.While(condition, body);
+    }
+
     returnStatement() {
         //Token keyword: I = previous();
         let value: Expr.Expression = null;
@@ -531,5 +572,55 @@ export class Parser {
 
         this.consume(Token.SEMICOLON, "Expect ';' after return value.");
         return new Stmt.Return(value);
+    }
+
+
+
+    forStatement(): Stmt.Statement {
+        this.consume(Token.LPAREN, "Expect '(' after 'for'.");
+
+
+        let initializer: Stmt.Statement;
+        if (this.match(Token.SEMICOLON)) {
+            initializer = null;
+        } else if (this.match(Token.LET)) {
+            initializer = this.varDeclaration();
+        } else {
+            initializer = this.expressionStatement();
+        }
+
+
+        let condition: Expr.Expression = null;
+        if (!this.check(Token.SEMICOLON)) {
+            condition = this.expression();
+        }
+        this.consume(Token.SEMICOLON, "Expect ';' after loop condition.");
+
+
+        let increment: Expr.Expression = null;
+        if (!this.check(Token.RPAREN)) {
+            increment = this.expression();
+        }
+        this.consume(Token.RPAREN, "Expect ')' after for clauses.");
+
+        let body: Stmt.Statement = this.statement();
+
+        // for-desugar-increment
+        if (increment != null) {
+            body = new Stmt.Block(
+                [
+                    body,
+                    new Stmt.Expression(increment)
+                ]);
+        }
+        
+        if (condition == null) condition = new Expr.Literal(true);
+        body = new Stmt.While(condition, body);
+        
+        if (initializer != null) {
+            body = new Stmt.Block([initializer, body]);
+        }
+        
+        return body;
     }
 }

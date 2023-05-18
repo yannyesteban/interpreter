@@ -110,6 +110,17 @@ var Set = /** @class */ (function () {
     return Set;
 }());
 export { Set };
+var Get2 = /** @class */ (function () {
+    function Get2(object, name) {
+        this.object = object;
+        this.name = name;
+    }
+    Get2.prototype.accept = function (visitor) {
+        return visitor.visitGet2Expr(this);
+    };
+    return Get2;
+}());
+export { Get2 };
 var Logical = /** @class */ (function () {
     function Logical(left, operator, right) {
         this.left = left;
@@ -165,4 +176,16 @@ var Call = /** @class */ (function () {
     return Call;
 }());
 export { Call };
+var Ternary = /** @class */ (function () {
+    function Ternary(cond, exprTrue, exprFalse) {
+        this.cond = cond;
+        this.exprTrue = exprTrue;
+        this.exprFalse = exprFalse;
+    }
+    Ternary.prototype.accept = function (visitor) {
+        return visitor.visitTernaryExpr(this);
+    };
+    return Ternary;
+}());
+export { Ternary };
 //# sourceMappingURL=Expressions.js.map

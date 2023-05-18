@@ -148,6 +148,19 @@ export class Set implements Expression {
   }
 }
 
+export class Get2 implements Expression {
+  public name: Expression;
+  public object: Expression;
+
+  constructor(object: Expression, name: Expression) {
+    this.object = object;
+    this.name = name;
+  }
+
+  accept(visitor) {
+    return visitor.visitGet2Expr(this);
+  }
+}
 
 export class Logical implements Expression {
 
@@ -222,5 +235,23 @@ export class Call implements Expression {
   }
   accept(visitor: any) {
     return visitor.visitCallExpr(this);
+  }
+}
+
+export class Ternary implements Expression {
+
+  public cond: Expression;
+  public exprTrue: Expression;
+  public exprFalse: Expression;
+
+
+  constructor(cond: Expression, exprTrue: Expression, exprFalse: Expression) {
+    this.cond = cond;
+    this.exprTrue = exprTrue;
+    this.exprFalse = exprFalse;
+  }
+
+  accept(visitor) {
+    return visitor.visitTernaryExpr(this);
   }
 }

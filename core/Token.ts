@@ -23,6 +23,9 @@ export enum Token {
 	BIT_SHR,     // >>
 	BIT_AND_NOT, // &^
 
+	QUESTION, // ? 
+	COALESCE, // ?? 
+
 	LPAREN, // (
 	LBRACK, // [
 	LBRACE, // {
@@ -67,6 +70,7 @@ export enum Token {
 	CASE, // "case"
 	WHEN, // "when"
 	WHILE, // "while"
+	DO, // "DO"
 	DEFAULT, // "default"
 	FOR, // "for"
 	EACH, // "each"
@@ -87,6 +91,7 @@ const keywords = {
 	case: Token.CASE,
 	when: Token.WHEN,
 	while: Token.WHILE,
+	do: Token.DO,
 	default: Token.DEFAULT,
 	for: Token.FOR,
 	each: Token.EACH,

@@ -19,51 +19,54 @@ export var Token;
     Token[Token["BIT_SHL"] = 15] = "BIT_SHL";
     Token[Token["BIT_SHR"] = 16] = "BIT_SHR";
     Token[Token["BIT_AND_NOT"] = 17] = "BIT_AND_NOT";
-    Token[Token["LPAREN"] = 18] = "LPAREN";
-    Token[Token["LBRACK"] = 19] = "LBRACK";
-    Token[Token["LBRACE"] = 20] = "LBRACE";
-    Token[Token["COMMA"] = 21] = "COMMA";
-    Token[Token["DOT"] = 22] = "DOT";
-    Token[Token["RPAREN"] = 23] = "RPAREN";
-    Token[Token["RBRACK"] = 24] = "RBRACK";
-    Token[Token["RBRACE"] = 25] = "RBRACE";
-    Token[Token["SEMICOLON"] = 26] = "SEMICOLON";
-    Token[Token["COLON"] = 27] = "COLON";
-    Token[Token["ADD_ASSIGN"] = 28] = "ADD_ASSIGN";
-    Token[Token["SUB_ASSIGN"] = 29] = "SUB_ASSIGN";
-    Token[Token["MUL_ASSIGN"] = 30] = "MUL_ASSIGN";
-    Token[Token["DIV_ASSIGN"] = 31] = "DIV_ASSIGN";
-    Token[Token["MOD_ASSIGN"] = 32] = "MOD_ASSIGN";
-    Token[Token["AND"] = 33] = "AND";
-    Token[Token["OR"] = 34] = "OR";
-    Token[Token["INCR"] = 35] = "INCR";
-    Token[Token["DECR"] = 36] = "DECR";
-    Token[Token["POW"] = 37] = "POW";
-    Token[Token["EQL"] = 38] = "EQL";
-    Token[Token["LSS"] = 39] = "LSS";
-    Token[Token["GTR"] = 40] = "GTR";
-    Token[Token["ASSIGN"] = 41] = "ASSIGN";
-    Token[Token["NOT"] = 42] = "NOT";
-    Token[Token["NEQ"] = 43] = "NEQ";
-    Token[Token["LEQ"] = 44] = "LEQ";
-    Token[Token["GEQ"] = 45] = "GEQ";
-    Token[Token["LET"] = 46] = "LET";
-    Token[Token["SYMBOL"] = 47] = "SYMBOL";
-    Token[Token["IF"] = 48] = "IF";
-    Token[Token["ELSE"] = 49] = "ELSE";
-    Token[Token["CASE"] = 50] = "CASE";
-    Token[Token["WHEN"] = 51] = "WHEN";
-    Token[Token["WHILE"] = 52] = "WHILE";
-    Token[Token["DEFAULT"] = 53] = "DEFAULT";
-    Token[Token["FOR"] = 54] = "FOR";
-    Token[Token["EACH"] = 55] = "EACH";
-    Token[Token["FALSE"] = 56] = "FALSE";
-    Token[Token["TRUE"] = 57] = "TRUE";
-    Token[Token["NULL"] = 58] = "NULL";
-    Token[Token["RETURN"] = 59] = "RETURN";
-    Token[Token["CLASS"] = 60] = "CLASS";
-    Token[Token["FUNC"] = 61] = "FUNC";
-    Token[Token["FN"] = 62] = "FN";
+    Token[Token["QUESTION"] = 18] = "QUESTION";
+    Token[Token["COALESCE"] = 19] = "COALESCE";
+    Token[Token["LPAREN"] = 20] = "LPAREN";
+    Token[Token["LBRACK"] = 21] = "LBRACK";
+    Token[Token["LBRACE"] = 22] = "LBRACE";
+    Token[Token["COMMA"] = 23] = "COMMA";
+    Token[Token["DOT"] = 24] = "DOT";
+    Token[Token["RPAREN"] = 25] = "RPAREN";
+    Token[Token["RBRACK"] = 26] = "RBRACK";
+    Token[Token["RBRACE"] = 27] = "RBRACE";
+    Token[Token["SEMICOLON"] = 28] = "SEMICOLON";
+    Token[Token["COLON"] = 29] = "COLON";
+    Token[Token["ADD_ASSIGN"] = 30] = "ADD_ASSIGN";
+    Token[Token["SUB_ASSIGN"] = 31] = "SUB_ASSIGN";
+    Token[Token["MUL_ASSIGN"] = 32] = "MUL_ASSIGN";
+    Token[Token["DIV_ASSIGN"] = 33] = "DIV_ASSIGN";
+    Token[Token["MOD_ASSIGN"] = 34] = "MOD_ASSIGN";
+    Token[Token["AND"] = 35] = "AND";
+    Token[Token["OR"] = 36] = "OR";
+    Token[Token["INCR"] = 37] = "INCR";
+    Token[Token["DECR"] = 38] = "DECR";
+    Token[Token["POW"] = 39] = "POW";
+    Token[Token["EQL"] = 40] = "EQL";
+    Token[Token["LSS"] = 41] = "LSS";
+    Token[Token["GTR"] = 42] = "GTR";
+    Token[Token["ASSIGN"] = 43] = "ASSIGN";
+    Token[Token["NOT"] = 44] = "NOT";
+    Token[Token["NEQ"] = 45] = "NEQ";
+    Token[Token["LEQ"] = 46] = "LEQ";
+    Token[Token["GEQ"] = 47] = "GEQ";
+    Token[Token["LET"] = 48] = "LET";
+    Token[Token["SYMBOL"] = 49] = "SYMBOL";
+    Token[Token["IF"] = 50] = "IF";
+    Token[Token["ELSE"] = 51] = "ELSE";
+    Token[Token["CASE"] = 52] = "CASE";
+    Token[Token["WHEN"] = 53] = "WHEN";
+    Token[Token["WHILE"] = 54] = "WHILE";
+    Token[Token["DO"] = 55] = "DO";
+    Token[Token["DEFAULT"] = 56] = "DEFAULT";
+    Token[Token["FOR"] = 57] = "FOR";
+    Token[Token["EACH"] = 58] = "EACH";
+    Token[Token["FALSE"] = 59] = "FALSE";
+    Token[Token["TRUE"] = 60] = "TRUE";
+    Token[Token["NULL"] = 61] = "NULL";
+    Token[Token["RETURN"] = 62] = "RETURN";
+    Token[Token["CLASS"] = 63] = "CLASS";
+    Token[Token["FUNC"] = 64] = "FUNC";
+    Token[Token["FN"] = 65] = "FN";
 })(Token || (Token = {}));
 var keywords = {
     if: Token.IF,
@@ -71,6 +74,7 @@ var keywords = {
     case: Token.CASE,
     when: Token.WHEN,
     while: Token.WHILE,
+    do: Token.DO,
     default: Token.DEFAULT,
     for: Token.FOR,
     each: Token.EACH,

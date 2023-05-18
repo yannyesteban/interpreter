@@ -64,4 +64,26 @@ var Return = /** @class */ (function () {
     return Return;
 }());
 export { Return };
+var While = /** @class */ (function () {
+    function While(condition, body) {
+        this.condition = condition;
+        this.body = body;
+    }
+    While.prototype.accept = function (visitor) {
+        return visitor.visitWhileStmt(this);
+    };
+    return While;
+}());
+export { While };
+var Do = /** @class */ (function () {
+    function Do(condition, body) {
+        this.condition = condition;
+        this.body = body;
+    }
+    Do.prototype.accept = function (visitor) {
+        return visitor.visitDoStmt(this);
+    };
+    return Do;
+}());
+export { Do };
 //# sourceMappingURL=Statement.js.map

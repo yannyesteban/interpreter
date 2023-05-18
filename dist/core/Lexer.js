@@ -347,6 +347,15 @@ var Lexer = /** @class */ (function () {
                         tok = Token.SEMICOLON;
                         lit = ";";
                         break;
+                    case "?":
+                        tok = Token.QUESTION;
+                        lit = "?";
+                        if (this.ch == "?") {
+                            this.next();
+                            tok = Token.COALESCE;
+                            lit = "??";
+                        }
+                        break;
                     case "+":
                         tok = this.evalOp(ch, Token.ADD, Token.ADD_ASSIGN, Token.INCR, null);
                         lit = this.input.substring(offs, this.pos);

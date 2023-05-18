@@ -108,3 +108,33 @@ export class Function implements Statement {
       return visitor.visitReturnStmt(this);
     }
 }
+
+export class While implements Statement {
+  
+  public condition: Expr.Expression;
+  public body:Statement;
+
+  constructor(condition: Expr.Expression, body:Statement) {
+    this.condition = condition;
+    this.body = body;
+  }
+
+  accept(visitor) {
+    return visitor.visitWhileStmt(this);
+  }
+}
+
+export class Do implements Statement {
+  
+  public condition: Expr.Expression;
+  public body:Statement;
+
+  constructor(condition: Expr.Expression, body:Statement) {
+    this.condition = condition;
+    this.body = body;
+  }
+
+  accept(visitor) {
+    return visitor.visitDoStmt(this);
+  }
+}

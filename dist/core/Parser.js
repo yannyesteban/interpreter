@@ -17,6 +17,7 @@ var Parser = /** @class */ (function () {
         this.current = 0;
         this.brackets = 0;
         this.tokens = tokens;
+        db(tokens);
     }
     Parser.prototype.error = function (token, message) {
         db("Error: ", message);
@@ -100,14 +101,18 @@ var Parser = /** @class */ (function () {
         return statements;
     };
     Parser.prototype.statement = function () {
-        //if (this.match(Token.FOR)) return this.forStatement();
+        if (this.match(Token.FOR))
+            return this.forStatement();
         if (this.match(Token.IF)) {
             return this.ifStatement();
         }
         //if (this.match(Token.PRINT)) return printStatement();
         if (this.match(Token.RETURN))
             return this.returnStatement();
-        //if (this.match(Token.WHILE)) return this.whileStatement();
+        if (this.match(Token.DO))
+            return this.doStatement();
+        if (this.match(Token.WHILE))
+            return this.whileStatement();
         if (this.match(Token.LBRACE)) {
             this.brackets++;
             var position = this.getPosition();
@@ -160,8 +165,15 @@ var Parser = /** @class */ (function () {
         return expr;
     };
     Parser.prototype.expression = function () {
-        //return this.equality();
-        return this.assignment();
+        var expr = this.assignment();
+        if (this.match(Token.QUESTION)) {
+            var exprThen = this.assignment();
+            this.consume(Token.COLON, "Expect ':' after expression.");
+            var exprElse = this.assignment();
+            expr = new Expr.Ternary(expr, exprThen, exprElse);
+        }
+        return expr;
+        //return this.assignment();
     };
     Parser.prototype.assignment = function () {
         /* Statements and State parse-assignment < Control Flow or-in-assignment
@@ -242,7 +254,7 @@ var Parser = /** @class */ (function () {
             var right = this.unary();
             return new Expr.Unary(operator, right);
         }
-        return this.primary();
+        return this.call();
     };
     Parser.prototype.finishCall = function (callee) {
         var arg = [];
@@ -266,6 +278,11 @@ var Parser = /** @class */ (function () {
             else if (this.match(Token.DOT)) {
                 var name_2 = this.consume(Token.IDENT, "Expect property name after '.'.");
                 expr = new Expr.Get(expr, name_2);
+            }
+            else if (this.match(Token.LBRACK)) {
+                var name_3 = this.expression();
+                expr = new Expr.Get2(expr, name_3);
+                this.consume(Token.RBRACK, "Expect ']' after property name.");
             }
             else {
                 break;
@@ -362,20 +379,20 @@ var Parser = /** @class */ (function () {
             return pairs;
         }
         do {
-            var name_3 = null;
+            var name_4 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
-                name_3 = new Expr.Literal(this.peek().value);
+                name_4 = new Expr.Literal(this.peek().value);
                 this.advance();
             }
             else if (this.match(Token.LBRACK)) {
-                name_3 = this.or();
+                name_4 = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
             this.consume(Token.COLON, "Expect ':'.");
             value = this.or();
             pairs.push({
-                name: name_3,
+                name: name_4,
                 value: value
             });
         } while (this.match(Token.COMMA));
@@ -394,6 +411,21 @@ var Parser = /** @class */ (function () {
         if (this.peek().tok == Token.LBRACK) {
         }
     };
+    Parser.prototype.doStatement = function () {
+        var body = this.statement();
+        this.consume(Token.WHILE, "Expect 'while' token after statement.");
+        this.consume(Token.LPAREN, "Expect '(' after 'if'.");
+        var condition = this.expression();
+        this.consume(Token.RPAREN, "Expect ')' after if condition.");
+        return new Stmt.Do(condition, body);
+    };
+    Parser.prototype.whileStatement = function () {
+        this.consume(Token.LPAREN, "Expect '(' after 'while'.");
+        var condition = this.expression();
+        this.consume(Token.RPAREN, "Expect ')' after condition.");
+        var body = this.statement();
+        return new Stmt.While(condition, body);
+    };
     Parser.prototype.returnStatement = function () {
         //Token keyword: I = previous();
         var value = null;
@@ -402,6 +434,44 @@ var Parser = /** @class */ (function () {
         }
         this.consume(Token.SEMICOLON, "Expect ';' after return value.");
         return new Stmt.Return(value);
+    };
+    Parser.prototype.forStatement = function () {
+        this.consume(Token.LPAREN, "Expect '(' after 'for'.");
+        var initializer;
+        if (this.match(Token.SEMICOLON)) {
+            initializer = null;
+        }
+        else if (this.match(Token.LET)) {
+            initializer = this.varDeclaration();
+        }
+        else {
+            initializer = this.expressionStatement();
+        }
+        var condition = null;
+        if (!this.check(Token.SEMICOLON)) {
+            condition = this.expression();
+        }
+        this.consume(Token.SEMICOLON, "Expect ';' after loop condition.");
+        var increment = null;
+        if (!this.check(Token.RPAREN)) {
+            increment = this.expression();
+        }
+        this.consume(Token.RPAREN, "Expect ')' after for clauses.");
+        var body = this.statement();
+        // for-desugar-increment
+        if (increment != null) {
+            body = new Stmt.Block([
+                body,
+                new Stmt.Expression(increment)
+            ]);
+        }
+        if (condition == null)
+            condition = new Expr.Literal(true);
+        body = new Stmt.While(condition, body);
+        if (initializer != null) {
+            body = new Stmt.Block([initializer, body]);
+        }
+        return body;
     };
     return Parser;
 }());
