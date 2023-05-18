@@ -153,4 +153,16 @@ var Array = /** @class */ (function () {
     return Array;
 }());
 export { Array };
+var Call = /** @class */ (function () {
+    function Call(callee, paren, arg) {
+        this.callee = callee;
+        this.paren = paren;
+        this.arg = arg;
+    }
+    Call.prototype.accept = function (visitor) {
+        return visitor.visitCallExpr(this);
+    };
+    return Call;
+}());
+export { Call };
 //# sourceMappingURL=Expressions.js.map

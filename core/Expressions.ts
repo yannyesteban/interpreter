@@ -210,15 +210,15 @@ export class Call implements Expression {
 
   public callee:Expression ;
   public paren: Item;
-  public arguments: Expression[];
+  public arg: Expression[];
 
   childs:Expression[];
   
   
-  constructor(callee: Expression, paren: Item, arguments: Expression[]) {
+  constructor(callee: Expression, paren: Item, arg: Expression[]) {
     this.callee = callee;
     this.paren = paren;
-    this.arguments = arguments;
+    this.arg = arg;
   }
   accept(visitor: any) {
     return visitor.visitCallExpr(this);

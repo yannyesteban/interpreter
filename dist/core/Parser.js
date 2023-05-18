@@ -244,6 +244,35 @@ var Parser = /** @class */ (function () {
         }
         return this.primary();
     };
+    Parser.prototype.finishCall = function (callee) {
+        var arg = [];
+        if (!this.check(Token.RPAREN)) {
+            do {
+                if (arg.length >= 64) {
+                    this.error(this.peek(), "Can't have more than 255 arguments.");
+                }
+                arg.push(this.expression());
+            } while (this.match(Token.COMMA));
+        }
+        var paren = this.consume(Token.RPAREN, "Expect ')' after arguments.");
+        return new Expr.Call(callee, paren, arg);
+    };
+    Parser.prototype.call = function () {
+        var expr = this.primary();
+        while (true) {
+            if (this.match(Token.LPAREN)) {
+                expr = this.finishCall(expr);
+            }
+            else if (this.match(Token.DOT)) {
+                var name_2 = this.consume(Token.IDENT, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name_2);
+            }
+            else {
+                break;
+            }
+        }
+        return expr;
+    };
     Parser.prototype.primary = function () {
         if (this.match(Token.FALSE)) {
             return new Expr.Literal(false);
@@ -333,20 +362,20 @@ var Parser = /** @class */ (function () {
             return pairs;
         }
         do {
-            var name_2 = null;
+            var name_3 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
-                name_2 = new Expr.Literal(this.peek().value);
+                name_3 = new Expr.Literal(this.peek().value);
                 this.advance();
             }
             else if (this.match(Token.LBRACK)) {
-                name_2 = this.or();
+                name_3 = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
             this.consume(Token.COLON, "Expect ':'.");
             value = this.or();
             pairs.push({
-                name: name_2,
+                name: name_3,
                 value: value
             });
         } while (this.match(Token.COMMA));
