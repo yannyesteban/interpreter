@@ -94,3 +94,17 @@ export class Function implements Statement {
 
     
   }
+
+
+  export class Return implements Statement {
+
+    value: Expression;
+    
+    
+    constructor(value) {
+      this.value = value;
+    }
+    accept(visitor: any) {
+      return visitor.visitReturnStmt(this);
+    }
+}

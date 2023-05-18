@@ -205,3 +205,22 @@ export class Array implements Expression {
     return visitor.visitArrayExpr(this);
   }
 }
+
+export class Call implements Expression {
+
+  public callee:Expression ;
+  public paren: Item;
+  public arguments: Expression[];
+
+  childs:Expression[];
+  
+  
+  constructor(callee: Expression, paren: Item, arguments: Expression[]) {
+    this.callee = callee;
+    this.paren = paren;
+    this.arguments = arguments;
+  }
+  accept(visitor: any) {
+    return visitor.visitCallExpr(this);
+  }
+}

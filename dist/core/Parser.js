@@ -105,7 +105,8 @@ var Parser = /** @class */ (function () {
             return this.ifStatement();
         }
         //if (this.match(Token.PRINT)) return printStatement();
-        //if (this.match(Token.RETURN)) return this.returnStatement();
+        if (this.match(Token.RETURN))
+            return this.returnStatement();
         //if (this.match(Token.WHILE)) return this.whileStatement();
         if (this.match(Token.LBRACE)) {
             this.brackets++;
@@ -363,6 +364,15 @@ var Parser = /** @class */ (function () {
     Parser.prototype.nameObjectId = function () {
         if (this.peek().tok == Token.LBRACK) {
         }
+    };
+    Parser.prototype.returnStatement = function () {
+        //Token keyword: I = previous();
+        var value = null;
+        if (!this.check(Token.SEMICOLON)) {
+            value = this.expression();
+        }
+        this.consume(Token.SEMICOLON, "Expect ';' after return value.");
+        return new Stmt.Return(value);
     };
     return Parser;
 }());

@@ -101,12 +101,12 @@ export class Parser {
     private expressionStatement() {
         let expr = this.expression();
 
-        if(this.brackets > 0 && this.peek().tok == Token.RBRACE){
+        if (this.brackets > 0 && this.peek().tok == Token.RBRACE) {
 
-        }else{
+        } else {
             this.consume(Token.SEMICOLON, "Expect ';' after expression..");
         }
-        
+
         return new Stmt.Expression(expr);
     }
 
@@ -135,7 +135,7 @@ export class Parser {
 
         //if (this.match(Token.PRINT)) return printStatement();
 
-        //if (this.match(Token.RETURN)) return this.returnStatement();
+        if (this.match(Token.RETURN)) return this.returnStatement();
 
 
         //if (this.match(Token.WHILE)) return this.whileStatement();
@@ -217,7 +217,7 @@ export class Parser {
         let expr: Expr.Expression = this.or();
         //< Control Flow or-in-assignment
 
-       
+
 
         if (this.match(Token.ASSIGN, Token.ADD_ASSIGN, Token.SUB_ASSIGN, Token.MUL_ASSIGN, Token.DIV_ASSIGN, Token.MOD_ASSIGN)) {
             const equals: Item = this.previous();
@@ -279,7 +279,7 @@ export class Parser {
     }
 
     factor() {
-        
+
         let expr: exp = this.power();
 
         while (this.match(Token.MUL, Token.DIV, Token.MOD)) {
@@ -312,9 +312,47 @@ export class Parser {
         return this.primary();
     }
 
+    finishCall(callee: Expr.Expression): Expr.Expression {
+        const arg: Expr.Expression[] = [];
+        if (!this.check(Token.RPAREN)) {
+            do {
+                
+                if (arg.length >= 64) {
+                    this.error(this.peek(), "Can't have more than 255 arguments.");
+                }
+                
+                arg.push(this.expression());
+            } while (this.match(Token.COMMA));
+        }
+
+        const paren: Item = this.consume(Token.RPAREN, "Expect ')' after arguments.");
+
+        return new Expr.Call(callee, paren, arg);
+    }
+    
+    
+    call(): Expr.Expression {
+        let expr: Expr.Expression = this.primary();
+
+        while (true) { 
+            if (this.match(Token.LPAREN)) {
+                expr = this.finishCall(expr);
+                
+            } else if (this.match(Token.DOT)) {
+                const name: Item = this.consume(Token.IDENT, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name);
+                
+            } else {
+                break;
+            }
+        }
+
+        return expr;
+    }
+
     primary() {
 
-        
+
         if (this.match(Token.FALSE)) {
             return new Expr.Literal(false);
         }
@@ -332,14 +370,14 @@ export class Parser {
         }
 
         if (this.match(Token.LBRACE)) {
-            
+
             return new Expr.Object(this.objectValue());
         }
 
-        
+
 
         if (this.match(Token.LBRACK)) {
-            
+
             return new Expr.Array(this.arrayValue());
         }
 
@@ -360,7 +398,7 @@ export class Parser {
 
         if (this.match(Token.IDENT)) {
             const ident = this.previous();
-            if(this.match(Token.INCR, Token.DECR)){
+            if (this.match(Token.INCR, Token.DECR)) {
                 console.log("pre ASIGN 2");
                 const op = this.previous();
                 return new Expr.PostAssign(ident, op);
@@ -368,27 +406,27 @@ export class Parser {
             return new Expr.Variable(this.previous());
         }
 
-        
-        
+
+
 
         if (this.match(Token.IDENT)) {
             return new Expr.Variable(this.previous());
         }
 
         if (this.match(Token.LPAREN)) {
-            
+
             let expr = this.expression();
             this.consume(Token.RPAREN, "Expect ')' after expression.");
             return new Expr.Grouping(expr);
         }
-        
+
     }
 
 
     ifStatement(): Expr.Expression {
         this.consume(Token.LPAREN, "Expect '(' after 'if'.");
         const condition: Expr.Expression = this.expression();
-        
+
         this.consume(Token.RPAREN, "Expect ')' after if condition."); // [parens]
 
         const thenBranch: Stmt.Statement = this.statement();
@@ -429,7 +467,7 @@ export class Parser {
     }
 
     objectValue(ambiguity?) {
-    
+
         const pairs = [];
         if (this.match(Token.RBRACK)) {
 
@@ -442,7 +480,7 @@ export class Parser {
 
 
         do {
-            
+
             let name = null;
             let value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
@@ -482,5 +520,16 @@ export class Parser {
 
 
         }
+    }
+
+    returnStatement() {
+        //Token keyword: I = previous();
+        let value: Expr.Expression = null;
+        if (!this.check(Token.SEMICOLON)) {
+            value = this.expression();
+        }
+
+        this.consume(Token.SEMICOLON, "Expect ';' after return value.");
+        return new Stmt.Return(value);
     }
 }

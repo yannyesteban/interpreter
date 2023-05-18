@@ -54,4 +54,14 @@ var Var = /** @class */ (function () {
     return Var;
 }());
 export { Var };
+var Return = /** @class */ (function () {
+    function Return(value) {
+        this.value = value;
+    }
+    Return.prototype.accept = function (visitor) {
+        return visitor.visitReturnStmt(this);
+    };
+    return Return;
+}());
+export { Return };
 //# sourceMappingURL=Statement.js.map
