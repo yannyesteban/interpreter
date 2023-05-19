@@ -1,5 +1,7 @@
 import { Lexer } from "./core/Lexer.js";
 import { Parser } from "./core/Parser.js";
+import "./core/Resolver.js";
+import "./core/Interpreter.js";
 import * as fs from "fs";
 import * as http from "http";
 //create a server object:
@@ -16,11 +18,10 @@ http.createServer(function (req, res) {
         var lexer = new Lexer(source);
         var tokens = lexer.getTokens();
         console.log(source, "\n", tokens);
-        var ast = new Parser(tokens);
-        var statements = ast.parse();
+        var parser = new Parser(tokens);
+        var statements = parser.parse();
         console.log("result", statements);
         console.log("bye", JSON.stringify(statements));
-        res.write(JSON.stringify(statements));
         res.end(); //end the response
     });
 }).listen(8080); //the server object listens on port 8080 

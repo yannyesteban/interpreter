@@ -1,6 +1,13 @@
 import { Lexer } from "./core/Lexer.js";
 import { Parser } from "./core/Parser.js";
 
+import   "./core/Resolver.js";
+import   "./core/Interpreter.js";
+
+
+import { Interpreter } from "./core/Interpreter.js";
+
+
 import * as fs from "fs";
 
 import * as http from "http"
@@ -26,12 +33,11 @@ http.createServer(function (req, res) {
 
     console.log(source, "\n", tokens);
 
-    const ast = new Parser(tokens);
+    const parser = new Parser(tokens);
 
-    const statements = ast.parse();
+    const statements = parser.parse();
     console.log("result", statements);
     console.log("bye", JSON.stringify(statements));
-    res.write(JSON.stringify(statements));
 
     res.end(); //end the response
   });

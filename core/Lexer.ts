@@ -62,7 +62,8 @@ export class Lexer {
 
 
     skipWhitespace() {
-        while (this.ch == ' ' || this.ch == '\t' || this.ch == '\n' || this.ch == '\r') {
+        
+        while (this.ch == ' ' || this.ch == '\t' /*|| this.ch == '\n'*/ || this.ch == '\r') {
             this.next();
         }
     }
@@ -355,6 +356,10 @@ export class Lexer {
 
                 this.next();
                 switch (ch) {
+                    case "\n":
+                        tok = Token.EOL;
+                        lit = "EOL";
+                        break;
                     case "\"":
                     case "'":                        
                         tok = Token.STRING;

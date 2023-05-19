@@ -16,6 +16,8 @@ function db(...msg) {
 type exp = any;
 export class Parser {
 
+    public version = "Interpreter V0.1";
+
     public tokens: Item[];
     public current = 0;
 
@@ -51,6 +53,10 @@ export class Parser {
         return this.peek().tok == Token.EOF;
     }
 
+    isEOL() {
+        return this.peek().tok == Token.EOL;
+    }
+
     reset(position) {
         this.current = position
     }
@@ -60,6 +66,7 @@ export class Parser {
     }
 
     advance() {
+
         if (!this.isAtEnd()) {
             this.current++;
         }
@@ -100,12 +107,20 @@ export class Parser {
     }
 
     private expressionStatement() {
+
+        if (this.match(Token.EOL)) {
+            return null;
+        }
         let expr = this.expression();
 
         if (this.brackets > 0 && this.peek().tok == Token.RBRACE) {
 
         } else {
-            this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+            if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+                console.log("what ", this.peek(), Token.EOF)
+                this.consume(Token.SEMICOLON, "1.0 Expect ';' after expression..");
+            }
+
         }
 
         return new Stmt.Expression(expr);
@@ -148,7 +163,11 @@ export class Parser {
             try {
 
                 let expr = new Expr.Object(this.objectValue(true));
-                this.consume(Token.SEMICOLON, "Expect ';' after expression.");
+                //this.consume(Token.SEMICOLON, "Expect ';' after expression.");
+                if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+                    this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+                }
+
                 return new Stmt.Expression(expr);
 
             } catch (e) {
@@ -465,7 +484,11 @@ export class Parser {
             initializer = this.expression();
         }
 
-        this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
+        //this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
+        if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+            this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+        }
+
         return new Stmt.Var(name, initializer);
     }
 
@@ -570,7 +593,10 @@ export class Parser {
             value = this.expression();
         }
 
-        this.consume(Token.SEMICOLON, "Expect ';' after return value.");
+        if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+            this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+        }
+        //this.consume(Token.SEMICOLON, "Expect ';' after return value.");
         return new Stmt.Return(value);
     }
 
@@ -613,14 +639,14 @@ export class Parser {
                     new Stmt.Expression(increment)
                 ]);
         }
-        
+
         if (condition == null) condition = new Expr.Literal(true);
         body = new Stmt.While(condition, body);
-        
+
         if (initializer != null) {
             body = new Stmt.Block([initializer, body]);
         }
-        
+
         return body;
     }
 }

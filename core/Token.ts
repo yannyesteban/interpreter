@@ -1,6 +1,7 @@
 export enum Token {
 	IDENT = 1, // main
 	EOF,
+	EOL, // \n
 	COMMENT,
 	INT, // 12345
 	FLOAT, // 123.45

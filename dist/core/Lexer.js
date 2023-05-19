@@ -42,7 +42,7 @@ var Lexer = /** @class */ (function () {
         return tokenDefault;
     };
     Lexer.prototype.skipWhitespace = function () {
-        while (this.ch == ' ' || this.ch == '\t' || this.ch == '\n' || this.ch == '\r') {
+        while (this.ch == ' ' || this.ch == '\t' /*|| this.ch == '\n'*/ || this.ch == '\r') {
             this.next();
         }
     };
@@ -302,6 +302,10 @@ var Lexer = /** @class */ (function () {
             else {
                 this.next();
                 switch (ch) {
+                    case "\n":
+                        tok = Token.EOL;
+                        lit = "EOL";
+                        break;
                     case "\"":
                     case "'":
                         tok = Token.STRING;

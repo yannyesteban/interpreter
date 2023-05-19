@@ -14,6 +14,7 @@ function db() {
 }
 var Parser = /** @class */ (function () {
     function Parser(tokens) {
+        this.version = "Interpreter V0.1";
         this.current = 0;
         this.brackets = 0;
         this.tokens = tokens;
@@ -40,6 +41,9 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.isAtEnd = function () {
         return this.peek().tok == Token.EOF;
+    };
+    Parser.prototype.isEOL = function () {
+        return this.peek().tok == Token.EOL;
     };
     Parser.prototype.reset = function (position) {
         this.current = position;
@@ -83,11 +87,17 @@ var Parser = /** @class */ (function () {
         return false;
     };
     Parser.prototype.expressionStatement = function () {
+        if (this.match(Token.EOL)) {
+            return null;
+        }
         var expr = this.expression();
         if (this.brackets > 0 && this.peek().tok == Token.RBRACE) {
         }
         else {
-            this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+            if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+                console.log("what ", this.peek(), Token.EOF);
+                this.consume(Token.SEMICOLON, "1.0 Expect ';' after expression..");
+            }
         }
         return new Stmt.Expression(expr);
     };
@@ -118,7 +128,10 @@ var Parser = /** @class */ (function () {
             var position = this.getPosition();
             try {
                 var expr = new Expr.Object(this.objectValue(true));
-                this.consume(Token.SEMICOLON, "Expect ';' after expression.");
+                //this.consume(Token.SEMICOLON, "Expect ';' after expression.");
+                if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+                    this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+                }
                 return new Stmt.Expression(expr);
             }
             catch (e) {
@@ -356,7 +369,10 @@ var Parser = /** @class */ (function () {
         if (this.match(Token.ASSIGN)) {
             initializer = this.expression();
         }
-        this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
+        //this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
+        if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+            this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+        }
         return new Stmt.Var(name, initializer);
     };
     Parser.prototype.arrayValue = function () {
@@ -432,7 +448,10 @@ var Parser = /** @class */ (function () {
         if (!this.check(Token.SEMICOLON)) {
             value = this.expression();
         }
-        this.consume(Token.SEMICOLON, "Expect ';' after return value.");
+        if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+            this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+        }
+        //this.consume(Token.SEMICOLON, "Expect ';' after return value.");
         return new Stmt.Return(value);
     };
     Parser.prototype.forStatement = function () {
