@@ -195,9 +195,9 @@ export class Par implements Expression {
 
 export class Object implements Expression {
 
-  childs:Par[];
-  
-  
+  childs: Par[];
+
+
   constructor(childs) {
     this.childs = childs;
   }
@@ -208,9 +208,9 @@ export class Object implements Expression {
 
 export class Array implements Expression {
 
-  childs:Expression[];
-  
-  
+  childs: Expression[];
+
+
   constructor(childs) {
     this.childs = childs;
   }
@@ -221,13 +221,13 @@ export class Array implements Expression {
 
 export class Call implements Expression {
 
-  public callee:Expression ;
+  public callee: Expression;
   public paren: Item;
   public arg: Expression[];
 
-  childs:Expression[];
-  
-  
+  childs: Expression[];
+
+
   constructor(callee: Expression, paren: Item, arg: Expression[]) {
     this.callee = callee;
     this.paren = paren;
@@ -254,4 +254,34 @@ export class Ternary implements Expression {
   accept(visitor) {
     return visitor.visitTernaryExpr(this);
   }
+}
+
+export class Super implements Expression {
+  public keyword: Item;
+  public method: Item;
+
+  constructor(keyword: Item, method: Item) {
+    this.keyword = keyword;
+    this.method = method;
+  }
+
+
+  accept(visitor) {
+    return visitor.visitSuperExpr(this);
+  }
+
+}
+
+export class This implements Expression {
+  public keyword: Item;
+  constructor(keyword: Item) {
+    this.keyword = keyword;
+  }
+
+
+  accept(visitor) {
+    return visitor.visitThisExpr(this);
+  }
+
+
 }
