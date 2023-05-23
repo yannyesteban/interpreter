@@ -1,3 +1,14 @@
+/*
+export interface Expression {
+  accept(visitor: any);
+}
+*/
+var Expression = /** @class */ (function () {
+    function Expression() {
+    }
+    return Expression;
+}());
+export { Expression };
 var Binary = /** @class */ (function () {
     function Binary(left, operator, right) {
         this.left = left;
@@ -188,4 +199,25 @@ var Ternary = /** @class */ (function () {
     return Ternary;
 }());
 export { Ternary };
+var Super = /** @class */ (function () {
+    function Super(keyword, method) {
+        this.keyword = keyword;
+        this.method = method;
+    }
+    Super.prototype.accept = function (visitor) {
+        return visitor.visitSuperExpr(this);
+    };
+    return Super;
+}());
+export { Super };
+var This = /** @class */ (function () {
+    function This(keyword) {
+        this.keyword = keyword;
+    }
+    This.prototype.accept = function (visitor) {
+        return visitor.visitThisExpr(this);
+    };
+    return This;
+}());
+export { This };
 //# sourceMappingURL=Expressions.js.map

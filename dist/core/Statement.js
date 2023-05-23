@@ -1,3 +1,9 @@
+var Statement = /** @class */ (function () {
+    function Statement() {
+    }
+    return Statement;
+}());
+export { Statement };
 var Block = /** @class */ (function () {
     function Block(statements) {
         this.statements = statements;
@@ -86,4 +92,26 @@ var Do = /** @class */ (function () {
     return Do;
 }());
 export { Do };
+var Class = /** @class */ (function () {
+    function Class(name, superclass, methods) {
+        this.name = name;
+        this.superclass = superclass;
+        this.methods = methods;
+    }
+    Class.prototype.accept = function (visitor) {
+        return visitor.visitClassStmt(this);
+    };
+    return Class;
+}());
+export { Class };
+var Print = /** @class */ (function () {
+    function Print(expression) {
+        this.expression = expression;
+    }
+    Print.prototype.accept = function (visitor) {
+        return visitor.visitPrintStmt(this);
+    };
+    return Print;
+}());
+export { Print };
 //# sourceMappingURL=Statement.js.map

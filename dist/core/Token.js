@@ -68,6 +68,7 @@ export var Token;
     Token[Token["CLASS"] = 64] = "CLASS";
     Token[Token["FUNC"] = 65] = "FUNC";
     Token[Token["FN"] = 66] = "FN";
+    Token[Token["PRINT"] = 67] = "PRINT";
 })(Token || (Token = {}));
 var keywords = {
     if: Token.IF,
@@ -87,6 +88,7 @@ var keywords = {
     class: Token.CLASS,
     func: Token.FUNC,
     fn: Token.FN,
+    print: Token.PRINT,
 };
 var LowestPrec = 0, // non-operators
 UnaryPrec = 6, HighestPrec = 7;

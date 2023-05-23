@@ -6,6 +6,7 @@ import   "./core/Interpreter.js";
 
 import * as fs from 'fs';
 import { Interpreter } from "./core/Interpreter.js";
+import { Resolver } from "./core/Resolver.js";
 
 
 
@@ -15,7 +16,7 @@ fs.readFile("sevian.sv", (err, buff) => {
         return;
     }
 
-    //console.log("INTERPRETER V0.0");return;
+    //console.log("INTERPRETER V0.1");return;
 
     const source = buff.toString();
     const lexer = new Lexer(source);
@@ -29,10 +30,13 @@ fs.readFile("sevian.sv", (err, buff) => {
     const parser = new Parser(tokens);
 
     const statements = parser.parse();
-    console.log("result", statements);
-    console.log("bye", JSON.stringify(statements));
+    //console.log("result", statements);
+    //console.log("bye", JSON.stringify(statements));
+
+    const intp = new Interpreter();
+    const resolver = new Resolver(intp);
+    resolver.resolve(statements);
     
-    //const intp = new Interpreter();
 
     //intp.interpret(statements);
 });

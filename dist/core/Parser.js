@@ -116,7 +116,8 @@ var Parser = /** @class */ (function () {
         if (this.match(Token.IF)) {
             return this.ifStatement();
         }
-        //if (this.match(Token.PRINT)) return printStatement();
+        if (this.match(Token.PRINT))
+            return this.printStatement();
         if (this.match(Token.RETURN))
             return this.returnStatement();
         if (this.match(Token.DO))
@@ -491,6 +492,11 @@ var Parser = /** @class */ (function () {
             body = new Stmt.Block([initializer, body]);
         }
         return body;
+    };
+    Parser.prototype.printStatement = function () {
+        var value = this.expression();
+        this.consume(Token.SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
     };
     return Parser;
 }());

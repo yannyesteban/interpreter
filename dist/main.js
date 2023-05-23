@@ -3,12 +3,14 @@ import { Parser } from "./core/Parser.js";
 import "./core/Resolver.js";
 import "./core/Interpreter.js";
 import * as fs from 'fs';
+import { Interpreter } from "./core/Interpreter.js";
+import { Resolver } from "./core/Resolver.js";
 fs.readFile("sevian.sv", function (err, buff) {
     if (err) {
         console.error(err);
         return;
     }
-    //console.log("INTERPRETER V0.0");return;
+    //console.log("INTERPRETER V0.1");return;
     var source = buff.toString();
     var lexer = new Lexer(source);
     var tokens = lexer.getTokens();
@@ -17,9 +19,11 @@ fs.readFile("sevian.sv", function (err, buff) {
     console.log("source: ", source, "\n");
     var parser = new Parser(tokens);
     var statements = parser.parse();
-    console.log("result", statements);
-    console.log("bye", JSON.stringify(statements));
-    //const intp = new Interpreter();
+    //console.log("result", statements);
+    //console.log("bye", JSON.stringify(statements));
+    var intp = new Interpreter();
+    var resolver = new Resolver(intp);
+    resolver.resolve(statements);
     //intp.interpret(statements);
 });
 //# sourceMappingURL=main.js.map

@@ -83,6 +83,7 @@ export enum Token {
 	CLASS, // "class"
 	FUNC, // "func"
 	FN, // "fn"
+	PRINT, // "print"
 	
 }
 
@@ -105,6 +106,8 @@ const keywords = {
 	class: Token.CLASS,
 	func: Token.FUNC,
 	fn: Token.FN,
+
+	print: Token.PRINT,
 
 
 };

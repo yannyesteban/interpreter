@@ -15,8 +15,8 @@ export interface Visitor {
   //visitWhileStmt(While stmt);
 }
 
-export interface Statement {
-  accept(visitor: Visitor);
+export abstract class Statement {
+  abstract accept(visitor: Visitor);
 }
 
 export class Block implements Statement {
@@ -155,6 +155,20 @@ export class Class implements Statement {
 
   accept(visitor) {
     return visitor.visitClassStmt(this);
+  }
+
+
+}
+
+
+export class Print implements Statement {
+  public expression: Expr.Expression;
+  constructor(expression: Expr.Expression) {
+    this.expression = expression;
+  }
+
+  accept(visitor) {
+    return visitor.visitPrintStmt(this);
   }
 
 

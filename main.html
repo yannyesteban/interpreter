@@ -21,11 +21,9 @@
         import { Lexer } from "./dist/core/Lexer.js";
         import { Parser } from "./dist/core/Parser.js";
 
-        import "./dist/core/Resolver.js";
-        import "./dist/core/Interpreter.js";
-
-
+        import { Resolver } from "./dist/core/Resolver.js";
         import { Interpreter } from "./dist/core/Interpreter.js";
+        
 
         function run(code) {
             
@@ -43,6 +41,14 @@
 
             const statements = parser.parse();
             console.log(statements);
+
+            const intp = new Interpreter();
+            const resolver = new Resolver(intp);
+            resolver.resolve(statements);
+
+            intp.interpret(statements);
+            console.log("FIN", intp.locals)
+
 
         }
 

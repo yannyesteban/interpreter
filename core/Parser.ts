@@ -149,7 +149,7 @@ export class Parser {
             return this.ifStatement();
         }
 
-        //if (this.match(Token.PRINT)) return printStatement();
+        if (this.match(Token.PRINT)) return this.printStatement();
 
         if (this.match(Token.RETURN)) return this.returnStatement();
 
@@ -649,4 +649,10 @@ export class Parser {
 
         return body;
     }
+
+    printStatement() {
+        const value: Expr.Expression = this.expression();
+        this.consume(Token.SEMICOLON, "Expect ';' after value.");
+        return new Stmt.Print(value);
+      }
 }

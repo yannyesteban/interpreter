@@ -1,8 +1,12 @@
 import { Item } from "./Lexer";
 import { Visitor } from "./Statement";
-
+/*
 export interface Expression {
   accept(visitor: any);
+}
+*/
+export abstract class Expression{
+  abstract accept(visitor: any);
 }
 
 export class Binary {
