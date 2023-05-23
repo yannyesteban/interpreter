@@ -315,7 +315,7 @@ var Parser = /** @class */ (function () {
             return new Expr.Literal(null);
         }
         if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
-            return new Expr.Literal(this.previous().value);
+            return new Expr.Literal(this.previous().value, this.previous().tok);
         }
         if (this.match(Token.LBRACE)) {
             return new Expr.Object(this.objectValue());

@@ -22,9 +22,11 @@ var Binary = /** @class */ (function () {
 }());
 export { Binary };
 var Literal = /** @class */ (function () {
-    function Literal(value) {
+    function Literal(value, type) {
         this.value = null;
+        this.type = 0;
         this.value = value;
+        this.type = type;
     }
     Literal.prototype.accept = function (visitor) {
         return visitor.visitLiteralExpr(this);

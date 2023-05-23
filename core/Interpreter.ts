@@ -161,8 +161,9 @@ export class Interpreter {
     visitBinaryExpr(expr: Expr.Binary) {
         const left = this.evaluate(expr.left);
         const right = this.evaluate(expr.right);
-
-        switch (expr.operator.type) {
+        console.log("typeof left ", typeof left == "number")
+        console.log("left ", left, " right ", right);
+        switch (expr.operator.tok) {
             //> binary-equality
             case Token.NEQ: return !this.isEqual(left, right);
             case Token.EQL: return this.isEqual(left, right);
@@ -237,6 +238,12 @@ export class Interpreter {
     }
 
     visitLiteralExpr(expr: Expr.Literal) {
+
+
+        console.log("visitLiteralExpr", expr)
+        if(expr.type == Token.INT || expr.type == Token.FLOAT){
+            return +expr.value
+        }
         return expr.value;
     }
 
@@ -314,14 +321,14 @@ export class Interpreter {
             return this.globals.get(name);
         }
     }
-
+    
     private checkNumberOperand(operator: Item, operand: Object) {
         if (typeof operand == "number") {
             return;
         }
         throw "" //new RuntimeError(operator, "Operand must be a number.");
     }
-
+    
     private checkNumberOperands(operator: Item, left: Object, right: Object) {
         if (typeof left == "number" && typeof right == "number") {
             return;

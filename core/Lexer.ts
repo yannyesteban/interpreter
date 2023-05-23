@@ -171,7 +171,7 @@ export class Lexer {
                 this.scanEscape(quote)
             }
         }
-
+        //return this.input.substring(offs+1, this.pos-1);
         return this.input.substring(offs, this.pos);
     }
 

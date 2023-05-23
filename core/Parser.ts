@@ -403,7 +403,7 @@ export class Parser {
 
         if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
 
-            return new Expr.Literal(this.previous().value);
+            return new Expr.Literal(this.previous().value, this.previous().tok);
         }
 
         if (this.match(Token.LBRACE)) {

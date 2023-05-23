@@ -140,6 +140,7 @@ var Lexer = /** @class */ (function () {
                 this.scanEscape(quote);
             }
         }
+        //return this.input.substring(offs+1, this.pos-1);
         return this.input.substring(offs, this.pos);
     };
     Lexer.prototype.scanIdentifier = function () {

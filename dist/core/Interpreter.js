@@ -132,7 +132,9 @@ var Interpreter = /** @class */ (function () {
     Interpreter.prototype.visitBinaryExpr = function (expr) {
         var left = this.evaluate(expr.left);
         var right = this.evaluate(expr.right);
-        switch (expr.operator.type) {
+        console.log("typeof left ", typeof left == "number");
+        console.log("left ", left, " right ", right);
+        switch (expr.operator.tok) {
             //> binary-equality
             case Token.NEQ: return !this.isEqual(left, right);
             case Token.EQL: return this.isEqual(left, right);
@@ -196,6 +198,10 @@ var Interpreter = /** @class */ (function () {
         return this.evaluate(expr.expression);
     };
     Interpreter.prototype.visitLiteralExpr = function (expr) {
+        console.log("visitLiteralExpr", expr);
+        if (expr.type == Token.INT || expr.type == Token.FLOAT) {
+            return +expr.value;
+        }
         return expr.value;
     };
     Interpreter.prototype.visitLogicalExpr = function (expr) {

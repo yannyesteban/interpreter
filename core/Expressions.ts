@@ -10,9 +10,9 @@ export abstract class Expression{
 }
 
 export class Binary {
-  public left;
-  public operator;
-  public right;
+  public left:Expression;
+  public operator:Item;
+  public right:Expression;
 
   constructor(left, operator, right) {
     this.left = left;
@@ -27,8 +27,10 @@ export class Binary {
 
 export class Literal {
   public value = null;
-  constructor(value) {
+  public type:number = 0; 
+  constructor(value, type?) {
     this.value = value;
+    this.type = type;
   }
 
   accept(visitor) {
