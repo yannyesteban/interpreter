@@ -3,17 +3,21 @@ import { isAlphaNumeric, isDecimal, isHex, isLetter } from "./LexerFunctions.js"
 var keyword = new Keyword();
 var unicode = { MaxRune: 65536 };
 var Lexer = /** @class */ (function () {
-    function Lexer(input) {
+    function Lexer(input, useString) {
         this.input = "";
         this.pos = null;
         this.rd = null;
         this.eof = false;
         this.ch = "";
+        this.useString = true;
         this.input = input;
         this.pos = 0;
         this.rd = 0;
         this.ch = " ";
         this.eof = false;
+        if (useString !== undefined) {
+            this.useString = useString;
+        }
         this.next();
         //console.log(input);
     }
@@ -309,8 +313,14 @@ var Lexer = /** @class */ (function () {
                         break;
                     case "\"":
                     case "'":
-                        tok = Token.STRING;
-                        lit = this.scanString(ch);
+                        if (this.useString) {
+                            tok = Token.STRING;
+                            lit = this.scanString(ch);
+                        }
+                        else {
+                            tok = Token.SYMBOL;
+                            lit = ch;
+                        }
                         break;
                     case ":":
                         tok = this.evalOp(ch, Token.COLON, Token.LET, null, null);

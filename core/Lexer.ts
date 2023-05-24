@@ -19,12 +19,17 @@ export class Lexer {
     public eof: boolean = false;
     public ch: string = "";
 
-    constructor(input: string) {
+    private useString: boolean = true;
+
+    constructor(input: string, useString?: boolean) {
         this.input = input;
         this.pos = 0;
         this.rd = 0;
         this.ch = " ";
         this.eof = false;
+        if(useString !== undefined){
+            this.useString = useString;
+        }
 
         this.next()
         //console.log(input);
@@ -361,9 +366,15 @@ export class Lexer {
                         lit = "EOL";
                         break;
                     case "\"":
-                    case "'":                        
-                        tok = Token.STRING;
-                        lit = this.scanString(ch);
+                    case "'":    
+                        if(this.useString){
+                            tok = Token.STRING;
+                            lit = this.scanString(ch);
+                        }else{
+                            tok = Token.SYMBOL;
+                            lit = ch;
+                        }                    
+                        
                         break;
                     case ":":
                         tok = this.evalOp(ch, Token.COLON, Token.LET, null, null);

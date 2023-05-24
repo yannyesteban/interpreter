@@ -73,26 +73,28 @@
 
                 "mode": "update",
                 "esteban": "JIMENEZ",
-                "yanny": "NUñEZ",
+                "name": "NUñEZ",
                 "apellido": "NEVER",
                 "age": "47",
+                "city": "Caracas",
+                "country":"Ve"
             };
 
-            outer.setMap("@", data);
+            outer.setMap("@", data, "");
 
-            outer.setMap("&EX_", {
+            outer.setMap("&", {
 
                 "apellido": "lopez",
-            });
+            }, "EX_");
 
 
             console.log("code: ", code, "\n");
 
             const r = outer.run();
 
-
+            document.getElementById("result").value = r;
             console.log(r);
-
+            
 
         }
 

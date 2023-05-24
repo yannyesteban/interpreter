@@ -8,13 +8,15 @@ export class Expresion {
     public valid: boolean;
     public pos: number;
     public length: number;
+    public mods:string[];
 
-    constructor(token:string, name:string, valid:boolean, pos:number, length:number) {
+    constructor(token:string, name:string, valid:boolean, pos:number, length:number, mods:string[]) {
         this.token = token;
         this.name = name;
         this.valid = valid;
         this.pos = pos;
         this.length = length;
+        this.mods = mods;
     }
 }
 
@@ -134,6 +136,7 @@ export class Parser {
         let valid:boolean = true;
         let pos:number = null;
         let length: number = null;
+        let mods: string[] = null;
 
         if (this.match(Token.LBRACE)) {
             pos = this.previous().pos;
@@ -151,15 +154,37 @@ export class Parser {
                     name = this.previous().value;
                 }
 
+                if (this.match(Token.BIT_OR)) {
+                    
+                    mods = this.modifiers();
+                }
+
                 if(this.match(Token.RBRACE)){
                     length = this.previous().pos - pos + 1;
                     console.log("saliendo", this.peek())
-                    return new Expresion(token, name, valid, pos, length);
+                    return new Expresion(token, name, valid, pos, length, mods);
                 }
             }
         }
         //this.advance();
         return  null;
+
+    }
+
+    modifiers(){
+        const mods = [];
+        while(true){
+            let mod = this.consume(Token.IDENT, "error");
+
+            mods.push(mod);
+            if(this.match(Token.BIT_OR)){
+                continue;
+            }
+
+            break;
+        }
+        
+        return mods;
 
     }
 }

@@ -1,11 +1,12 @@
 import { Token } from "../Token.js";
 var Expresion = /** @class */ (function () {
-    function Expresion(token, name, valid, pos, length) {
+    function Expresion(token, name, valid, pos, length, mods) {
         this.token = token;
         this.name = name;
         this.valid = valid;
         this.pos = pos;
         this.length = length;
+        this.mods = mods;
     }
     return Expresion;
 }());
@@ -106,6 +107,7 @@ var Parser = /** @class */ (function () {
         var valid = true;
         var pos = null;
         var length = null;
+        var mods = null;
         if (this.match(Token.LBRACE)) {
             pos = this.previous().pos;
             console.log(this.peek());
@@ -120,15 +122,30 @@ var Parser = /** @class */ (function () {
                     console.log(this.peek());
                     name = this.previous().value;
                 }
+                if (this.match(Token.BIT_OR)) {
+                    mods = this.modifiers();
+                }
                 if (this.match(Token.RBRACE)) {
                     length = this.previous().pos - pos + 1;
                     console.log("saliendo", this.peek());
-                    return new Expresion(token, name, valid, pos, length);
+                    return new Expresion(token, name, valid, pos, length, mods);
                 }
             }
         }
         //this.advance();
         return null;
+    };
+    Parser.prototype.modifiers = function () {
+        var mods = [];
+        while (true) {
+            var mod = this.consume(Token.IDENT, "error");
+            mods.push(mod);
+            if (this.match(Token.BIT_OR)) {
+                continue;
+            }
+            break;
+        }
+        return mods;
     };
     return Parser;
 }());
