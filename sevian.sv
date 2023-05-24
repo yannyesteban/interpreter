@@ -1,1 +1,1 @@
-print 4;
+yanny {@name} r: {@age} nothing

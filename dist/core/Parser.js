@@ -14,7 +14,7 @@ function db() {
 }
 var Parser = /** @class */ (function () {
     function Parser(tokens) {
-        this.version = "Interpreter V0.1";
+        this.version = "Interpreter V0.2";
         this.current = 0;
         this.brackets = 0;
         this.tokens = tokens;
@@ -399,7 +399,7 @@ var Parser = /** @class */ (function () {
             var name_4 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
-                name_4 = new Expr.Literal(this.peek().value);
+                name_4 = new Expr.Literal(this.peek().value, this.peek().tok);
                 this.advance();
             }
             else if (this.match(Token.LBRACK)) {
@@ -409,7 +409,7 @@ var Parser = /** @class */ (function () {
             this.consume(Token.COLON, "Expect ':'.");
             value = this.or();
             pairs.push({
-                name: name_4,
+                id: name_4,
                 value: value
             });
         } while (this.match(Token.COMMA));

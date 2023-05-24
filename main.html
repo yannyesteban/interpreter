@@ -15,7 +15,13 @@
     <div>
         <textarea id="source"></textarea>
     </div>
-    <button id="button">Run</button>
+    <nav>
+        <button id="button">Execute</button>
+        <button id="evaluate">Evaluate</button>
+    </nav>
+    <div>
+        <textarea id="result"></textarea>
+    </div>
     <script type="module">
 
         import { Lexer } from "./dist/core/Lexer.js";
@@ -23,10 +29,12 @@
 
         import { Resolver } from "./dist/core/Resolver.js";
         import { Interpreter } from "./dist/core/Interpreter.js";
-        
+
+        import { Outer } from "./dist/core/outer/Outer.js";
+
 
         function run(code) {
-            
+
             const lexer = new Lexer(code);
 
             const tokens = lexer.getTokens();
@@ -44,10 +52,46 @@
 
             const intp = new Interpreter();
             const resolver = new Resolver(intp);
-            resolver.resolve(statements);
+            //resolver.resolve(statements);
 
             intp.interpret(statements);
             console.log("FIN", intp.locals)
+
+
+        }
+
+        function evaluate(code) {
+
+            //const lexer = new Lexer(code);
+
+            //const tokens = lexer.getTokens();
+
+            const outer = new Outer(code);
+
+
+            const data = {
+
+                "mode": "update",
+                "esteban": "JIMENEZ",
+                "yanny": "NUñEZ",
+                "apellido": "NEVER",
+                "age": "47",
+            };
+
+            outer.setMap("@", data);
+
+            outer.setMap("&EX_", {
+
+                "apellido": "lopez",
+            });
+
+
+            console.log("code: ", code, "\n");
+
+            const r = outer.run();
+
+
+            console.log(r);
 
 
         }
@@ -59,10 +103,13 @@
             .then(r => r.text())
             .then(source => {
                 document.getElementById("source").value = source;
-                document.getElementById("button").addEventListener("click", (event)=>{
+                document.getElementById("button").addEventListener("click", (event) => {
                     run(document.getElementById("source").value);
                 });
-                run(source)
+                document.getElementById("evaluate").addEventListener("click", (event) => {
+                    evaluate(document.getElementById("source").value);
+                });
+                //run(source)
             })
 
 

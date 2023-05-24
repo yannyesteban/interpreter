@@ -1,5 +1,5 @@
 import { Token } from "./Token.js";
-import { Lexer, Item } from "./Lexer.js";
+import { Item } from "./Lexer.js";
 import * as Expr from "./Expressions.js";
 import * as Stmt from "./Statement.js";
 
@@ -16,7 +16,7 @@ function db(...msg) {
 type exp = any;
 export class Parser {
 
-    public version = "Interpreter V0.1";
+    public version = "Interpreter V0.2";
 
     public tokens: Item[];
     public current = 0;
@@ -460,7 +460,7 @@ export class Parser {
     }
 
 
-    ifStatement(): Expr.Expression {
+    ifStatement(): Stmt.Statement {
         this.consume(Token.LPAREN, "Expect '(' after 'if'.");
         const condition: Expr.Expression = this.expression();
 
@@ -526,7 +526,7 @@ export class Parser {
             let value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
 
-                name = new Expr.Literal(this.peek().value);
+                name = new Expr.Literal(this.peek().value, this.peek().tok);
                 this.advance()
             } else if (this.match(Token.LBRACK)) {
                 name = this.or();
@@ -537,7 +537,7 @@ export class Parser {
 
             value = this.or();
             pairs.push({
-                name,
+                id: name,
                 value
             })
         } while (this.match(Token.COMMA));
@@ -563,7 +563,7 @@ export class Parser {
         }
     }
 
-    doStatement(): Expr.Expression {
+    doStatement(): Stmt.Statement {
 
         const body: Stmt.Statement = this.statement();
 

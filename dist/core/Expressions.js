@@ -14,6 +14,7 @@ var Binary = /** @class */ (function () {
         this.left = left;
         this.operator = operator;
         this.right = right;
+        this.clss = this.constructor.name;
     }
     Binary.prototype.accept = function (visitor) {
         return visitor.visitBinaryExpr(this);
@@ -27,6 +28,7 @@ var Literal = /** @class */ (function () {
         this.type = 0;
         this.value = value;
         this.type = type;
+        this.clss = this.constructor.name;
     }
     Literal.prototype.accept = function (visitor) {
         return visitor.visitLiteralExpr(this);
@@ -38,6 +40,7 @@ var Unary = /** @class */ (function () {
     function Unary(operator, right) {
         this.operator = operator;
         this.right = right;
+        this.clss = this.constructor.name;
     }
     Unary.prototype.accept = function (visitor) {
         return visitor.visitUnaryExpr(this);
@@ -48,6 +51,7 @@ export { Unary };
 var Grouping = /** @class */ (function () {
     function Grouping(expression) {
         this.expression = expression;
+        this.clss = this.constructor.name;
     }
     Grouping.prototype.accept = function (visitor) {
         return visitor.visitGroupingExpr(this);
@@ -59,6 +63,7 @@ var PostAssign = /** @class */ (function () {
     function PostAssign(name, operator) {
         this.name = name;
         this.operator = operator;
+        this.clss = this.constructor.name;
     }
     PostAssign.prototype.accept = function (visitor) {
         return visitor.visitPostExpr(this);
@@ -70,6 +75,7 @@ var PreAssign = /** @class */ (function () {
     function PreAssign(name, operator) {
         this.name = name;
         this.operator = operator;
+        this.clss = this.constructor.name;
     }
     PreAssign.prototype.accept = function (visitor) {
         return visitor.visitPreExpr(this);
@@ -80,6 +86,7 @@ export { PreAssign };
 var Variable = /** @class */ (function () {
     function Variable(name) {
         this.name = name;
+        this.clss = this.constructor.name;
     }
     Variable.prototype.accept = function (visitor) {
         return visitor.visitVariableExpr(this);
@@ -92,6 +99,7 @@ var Assign = /** @class */ (function () {
         this.name = name;
         this.value = value;
         this.type = type;
+        this.clss = this.constructor.name;
     }
     Assign.prototype.accept = function (visitor) {
         return visitor.visitAssignExpr(this);
@@ -103,6 +111,7 @@ var Get = /** @class */ (function () {
     function Get(object, name) {
         this.object = object;
         this.name = name;
+        this.clss = this.constructor.name;
     }
     Get.prototype.accept = function (visitor) {
         return visitor.visitGetExpr(this);
@@ -116,6 +125,7 @@ var Set = /** @class */ (function () {
         this.name = name;
         this.value = value;
         this.type = type;
+        this.clss = this.constructor.name;
     }
     Set.prototype.accept = function (visitor) {
         return visitor.visitSetExpr(this);
@@ -127,6 +137,7 @@ var Get2 = /** @class */ (function () {
     function Get2(object, name) {
         this.object = object;
         this.name = name;
+        this.clss = this.constructor.name;
     }
     Get2.prototype.accept = function (visitor) {
         return visitor.visitGet2Expr(this);
@@ -139,6 +150,7 @@ var Logical = /** @class */ (function () {
         this.left = left;
         this.operator = operator;
         this.right = right;
+        this.clss = this.constructor.name;
     }
     Logical.prototype.accept = function (visitor) {
         return visitor.visitLogicalExpr(this);
@@ -150,6 +162,7 @@ var Par = /** @class */ (function () {
     function Par(id, value) {
         this.id = id;
         this.value = value;
+        this.clss = this.constructor.name;
     }
     Par.prototype.accept = function (visitor) {
         return visitor.visitObjectExpr(this);
@@ -160,6 +173,7 @@ export { Par };
 var Object = /** @class */ (function () {
     function Object(childs) {
         this.childs = childs;
+        this.clss = this.constructor.name;
     }
     Object.prototype.accept = function (visitor) {
         return visitor.visitObjectExpr(this);
@@ -170,6 +184,7 @@ export { Object };
 var Array = /** @class */ (function () {
     function Array(childs) {
         this.childs = childs;
+        this.clss = this.constructor.name;
     }
     Array.prototype.accept = function (visitor) {
         return visitor.visitArrayExpr(this);
@@ -182,6 +197,7 @@ var Call = /** @class */ (function () {
         this.callee = callee;
         this.paren = paren;
         this.arg = arg;
+        this.clss = this.constructor.name;
     }
     Call.prototype.accept = function (visitor) {
         return visitor.visitCallExpr(this);
@@ -194,6 +210,7 @@ var Ternary = /** @class */ (function () {
         this.cond = cond;
         this.exprTrue = exprTrue;
         this.exprFalse = exprFalse;
+        this.clss = this.constructor.name;
     }
     Ternary.prototype.accept = function (visitor) {
         return visitor.visitTernaryExpr(this);
@@ -205,6 +222,7 @@ var Super = /** @class */ (function () {
     function Super(keyword, method) {
         this.keyword = keyword;
         this.method = method;
+        this.clss = this.constructor.name;
     }
     Super.prototype.accept = function (visitor) {
         return visitor.visitSuperExpr(this);
@@ -215,6 +233,7 @@ export { Super };
 var This = /** @class */ (function () {
     function This(keyword) {
         this.keyword = keyword;
+        this.clss = this.constructor.name;
     }
     This.prototype.accept = function (visitor) {
         return visitor.visitThisExpr(this);

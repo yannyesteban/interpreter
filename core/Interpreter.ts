@@ -31,7 +31,7 @@ export class Interpreter {
         }
     }
 
-    private evaluate(expr: Stmt.Statement) {
+    private evaluate(expr: Expr.Expression) {
         return expr.accept(this);
     }
 
@@ -39,7 +39,7 @@ export class Interpreter {
         stmt.accept(this);
     }
 
-    resolve(expr: Stmt.Statement, depth: number) {
+    resolve(expr: Expr.Expression, depth: number) {
         this.locals.set(expr, depth);
     }
 
@@ -94,7 +94,8 @@ export class Interpreter {
     }
 
     visitExpressionStmt(stmt: Stmt.Expression) {
-        this.evaluate(stmt.expression);
+        const value = this.evaluate(stmt.expression);
+        console.log("RESULT ", value);
         return null;
     }
 
@@ -105,6 +106,7 @@ export class Interpreter {
     }
 
     visitIfStmt(stmt: Stmt.If) {
+        console.log("Condition ", this.isTruthy(this.evaluate(stmt.condition)))
         if (this.isTruthy(this.evaluate(stmt.condition))) {
             this.execute(stmt.thenBranch);
         } else if (stmt.elseBranch != null) {
@@ -167,8 +169,14 @@ export class Interpreter {
             //> binary-equality
             case Token.NEQ: return !this.isEqual(left, right);
             case Token.EQL: return this.isEqual(left, right);
+            
+            case Token.POW:
+                this.checkNumberOperands(expr.operator, left, right);
+                return left ** right;
+            
             case Token.GTR:
                 this.checkNumberOperands(expr.operator, left, right);
+                console.log("comparing", left > right)
                 return left > right;
             case Token.GEQ:
                 this.checkNumberOperands(expr.operator, left, right);
@@ -313,6 +321,36 @@ export class Interpreter {
         return this.lookUpVariable(expr.name, expr);
     }
 
+    visitObjectExpr(expr: Expr.Object){
+
+        const o = {};
+        //console.error("visitObjectExpr", expr);
+        expr.childs.forEach(ch=>{
+            o[this.evaluate(ch.id)] = this.evaluate(ch.value);
+            //console.log("...", this.evaluate(ch.id));
+            //console.log("name of ", this.evaluate(ch.name))
+            //o[this.evaluate(ch.)]=
+        })
+        //console.error("visitObjectExpr", expr);
+        console.log("json\n", JSON.stringify(o));
+        return o;
+    }
+
+    visitArrayExpr(expr: Expr.Array){
+        const a = [];
+
+        expr.childs.forEach(ch=>{
+            a.push(this.evaluate(ch));
+            //console.log("...", this.evaluate(ch.id));
+            //console.log("name of ", this.evaluate(ch.name))
+            //o[this.evaluate(ch.)]=
+        });
+        console.log("json\n", JSON.stringify(a));
+
+        return a;
+
+    }
+
     lookUpVariable(name: Item, expr: Expr.Expression) {
         const distance: number = this.locals.get(expr);
         if (distance != null) {
@@ -338,8 +376,13 @@ export class Interpreter {
     }
 
     private isTruthy(object: Object) {
-        if (object == null) return false;
-        if (object instanceof Boolean) return object;
+        if (object == null) {
+            return false;
+        }
+        if (typeof object === "boolean") {
+            return object;
+        }
+        
         return true;
     }
 

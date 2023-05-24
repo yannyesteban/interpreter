@@ -38,7 +38,7 @@ fs.readFile("sevian.sv", (err, buff) => {
     resolver.resolve(statements);
     
 
-    //intp.interpret(statements);
+    intp.interpret(statements);
 });
 
 

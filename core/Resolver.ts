@@ -305,6 +305,10 @@ export class Resolver {
         return null;
     }
     
+    visitObjectExpr(expr: Expr.Object){
+        console.error("visitObjectExpr", expr);
+    }
+
     private resolveFunction(_function: Stmt.Function, type) {
         const enclosingFunction = this.currentFunction;
         this.currentFunction = type;

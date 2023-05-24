@@ -17,8 +17,13 @@ body {
   height: 10em;
 }
 
-#button {
-  width: 100%;
+nav {
+  display: flex;
+  flex-direction: row;
+}
+
+#button, #evaluate {
+  flex: 1 1;
   height: 2em;
 }
 

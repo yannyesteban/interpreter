@@ -7,6 +7,7 @@ export { Statement };
 var Block = /** @class */ (function () {
     function Block(statements) {
         this.statements = statements;
+        this.clssStmt = this.constructor.name;
     }
     Block.prototype.accept = function (visitor) {
         return visitor.visitBlockStmt(this);
@@ -18,6 +19,7 @@ var Expression = /** @class */ (function () {
     function Expression(expression) {
         //console.log("Expression: ", expression);
         this.expression = expression;
+        this.clssStmt = this.constructor.name;
     }
     Expression.prototype.accept = function (visitor) {
         return visitor.visitExpressionStmt(this);
@@ -30,6 +32,7 @@ var If = /** @class */ (function () {
         this.condition = condition;
         this.thenBranch = thenBranch;
         this.elseBranch = elseBranch;
+        this.clssStmt = this.constructor.name;
     }
     If.prototype.accept = function (visitor) {
         return visitor.visitIfStmt(this);
@@ -42,6 +45,7 @@ var Function = /** @class */ (function () {
         this.name = name;
         this.params = params;
         this.body = body;
+        this.clssStmt = this.constructor.name;
     }
     Function.prototype.accept = function (visitor) {
         return visitor.visitFunctionStmt(this);
@@ -53,6 +57,7 @@ var Var = /** @class */ (function () {
     function Var(name, initializer) {
         this.name = name;
         this.initializer = initializer;
+        this.clssStmt = this.constructor.name;
     }
     Var.prototype.accept = function (visitor) {
         return visitor.visitVarStmt(this);
@@ -63,6 +68,7 @@ export { Var };
 var Return = /** @class */ (function () {
     function Return(value) {
         this.value = value;
+        this.clssStmt = this.constructor.name;
     }
     Return.prototype.accept = function (visitor) {
         return visitor.visitReturnStmt(this);
@@ -74,6 +80,7 @@ var While = /** @class */ (function () {
     function While(condition, body) {
         this.condition = condition;
         this.body = body;
+        this.clssStmt = this.constructor.name;
     }
     While.prototype.accept = function (visitor) {
         return visitor.visitWhileStmt(this);
@@ -85,6 +92,7 @@ var Do = /** @class */ (function () {
     function Do(condition, body) {
         this.condition = condition;
         this.body = body;
+        this.clssStmt = this.constructor.name;
     }
     Do.prototype.accept = function (visitor) {
         return visitor.visitDoStmt(this);
@@ -97,6 +105,7 @@ var Class = /** @class */ (function () {
         this.name = name;
         this.superclass = superclass;
         this.methods = methods;
+        this.clssStmt = this.constructor.name;
     }
     Class.prototype.accept = function (visitor) {
         return visitor.visitClassStmt(this);
@@ -107,6 +116,7 @@ export { Class };
 var Print = /** @class */ (function () {
     function Print(expression) {
         this.expression = expression;
+        this.clssStmt = this.constructor.name;
     }
     Print.prototype.accept = function (visitor) {
         return visitor.visitPrintStmt(this);

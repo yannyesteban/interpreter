@@ -140,8 +140,8 @@ var Lexer = /** @class */ (function () {
                 this.scanEscape(quote);
             }
         }
-        //return this.input.substring(offs+1, this.pos-1);
-        return this.input.substring(offs, this.pos);
+        return this.input.substring(offs + 1, this.pos - 1);
+        //return this.input.substring(offs, this.pos);
     };
     Lexer.prototype.scanIdentifier = function () {
         var init = this.pos;
@@ -404,6 +404,18 @@ var Lexer = /** @class */ (function () {
                     case ">":
                         tok = this.evalOp(ch, Token.GTR, Token.GEQ, null, null);
                         lit = this.input.substring(offs, this.pos);
+                        break;
+                    case "@":
+                        tok = Token.AT;
+                        lit = "@";
+                        break;
+                    case "$":
+                        tok = Token.DOLAR;
+                        lit = "$";
+                        break;
+                    case "#":
+                        tok = Token.HASHTAG;
+                        lit = "#";
                         break;
                 }
             }

@@ -24,6 +24,10 @@ export enum Token {
 	BIT_SHR,     // >>
 	BIT_AND_NOT, // &^
 
+	AT, //@
+	DOLAR, //$
+	HASHTAG, //#
+
 	QUESTION, // ? 
 	COALESCE, // ?? 
 
@@ -89,7 +93,7 @@ export enum Token {
 
 const keywords = {
 	if: Token.IF,
-	ELSE: Token.ELSE,
+	else: Token.ELSE,
 	case: Token.CASE,
 	when: Token.WHEN,
 	while: Token.WHILE,

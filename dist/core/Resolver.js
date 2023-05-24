@@ -243,6 +243,9 @@ var Resolver = /** @class */ (function () {
         this.resolveLocal(expr, expr.name);
         return null;
     };
+    Resolver.prototype.visitObjectExpr = function (expr) {
+        console.error("visitObjectExpr", expr);
+    };
     Resolver.prototype.resolveFunction = function (_function, type) {
         var enclosingFunction = this.currentFunction;
         this.currentFunction = type;

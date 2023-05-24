@@ -75,7 +75,8 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitExpressionStmt = function (stmt) {
-        this.evaluate(stmt.expression);
+        var value = this.evaluate(stmt.expression);
+        console.log("RESULT ", value);
         return null;
     };
     Interpreter.prototype.visitFunctionStmt = function (stmt) {
@@ -84,6 +85,7 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitIfStmt = function (stmt) {
+        console.log("Condition ", this.isTruthy(this.evaluate(stmt.condition)));
         if (this.isTruthy(this.evaluate(stmt.condition))) {
             this.execute(stmt.thenBranch);
         }
@@ -138,8 +140,12 @@ var Interpreter = /** @class */ (function () {
             //> binary-equality
             case Token.NEQ: return !this.isEqual(left, right);
             case Token.EQL: return this.isEqual(left, right);
+            case Token.POW:
+                this.checkNumberOperands(expr.operator, left, right);
+                return Math.pow(left, right);
             case Token.GTR:
                 this.checkNumberOperands(expr.operator, left, right);
+                console.log("comparing", left > right);
                 return left > right;
             case Token.GEQ:
                 this.checkNumberOperands(expr.operator, left, right);
@@ -257,6 +263,32 @@ var Interpreter = /** @class */ (function () {
     Interpreter.prototype.visitVariableExpr = function (expr) {
         return this.lookUpVariable(expr.name, expr);
     };
+    Interpreter.prototype.visitObjectExpr = function (expr) {
+        var _this = this;
+        var o = {};
+        //console.error("visitObjectExpr", expr);
+        expr.childs.forEach(function (ch) {
+            o[_this.evaluate(ch.id)] = _this.evaluate(ch.value);
+            //console.log("...", this.evaluate(ch.id));
+            //console.log("name of ", this.evaluate(ch.name))
+            //o[this.evaluate(ch.)]=
+        });
+        //console.error("visitObjectExpr", expr);
+        console.log("json\n", JSON.stringify(o));
+        return o;
+    };
+    Interpreter.prototype.visitArrayExpr = function (expr) {
+        var _this = this;
+        var a = [];
+        expr.childs.forEach(function (ch) {
+            a.push(_this.evaluate(ch));
+            //console.log("...", this.evaluate(ch.id));
+            //console.log("name of ", this.evaluate(ch.name))
+            //o[this.evaluate(ch.)]=
+        });
+        console.log("json\n", JSON.stringify(a));
+        return a;
+    };
     Interpreter.prototype.lookUpVariable = function (name, expr) {
         var distance = this.locals.get(expr);
         if (distance != null) {
@@ -279,10 +311,12 @@ var Interpreter = /** @class */ (function () {
         throw ""; //new RuntimeError(operator, "Operands must be numbers.");
     };
     Interpreter.prototype.isTruthy = function (object) {
-        if (object == null)
+        if (object == null) {
             return false;
-        if (object instanceof Boolean)
+        }
+        if (typeof object === "boolean") {
             return object;
+        }
         return true;
     };
     Interpreter.prototype.isEqual = function (a, b) {

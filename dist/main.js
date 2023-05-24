@@ -24,6 +24,6 @@ fs.readFile("sevian.sv", function (err, buff) {
     var intp = new Interpreter();
     var resolver = new Resolver(intp);
     resolver.resolve(statements);
-    //intp.interpret(statements);
+    intp.interpret(statements);
 });
 //# sourceMappingURL=main.js.map
