@@ -5,18 +5,30 @@ import * as exp from "constants";
 export class Expresion {
     public token: string;
     public name: string;
-    public valid: boolean;
+    
     public pos: number;
     public length: number;
-    public mods:string[];
+    public mods: Modifier[];
+    public ready: boolean;
 
-    constructor(token:string, name:string, valid:boolean, pos:number, length:number, mods:string[]) {
+    constructor(token: string, name: string, pos: number, length: number, mods: Modifier[]) {
         this.token = token;
         this.name = name;
-        this.valid = valid;
+    
         this.pos = pos;
         this.length = length;
         this.mods = mods;
+        this.ready = false;
+    }
+}
+
+export class Modifier {
+    public mod: string;
+    public value: string;
+
+    constructor(mod: string, value: string) {
+        this.mod = mod;
+        this.value = value;
     }
 }
 
@@ -41,7 +53,6 @@ export class Parser {
 
     constructor(tokens) {
         this.tokens = tokens;
-
     }
 
     error(token, message) {
@@ -57,13 +68,12 @@ export class Parser {
         let statements = [];
         while (!this.isAtEnd()) {
             const expr = this.expression();
-            if(expr){
+            if (expr) {
                 statements.push(expr);
             }
-            else{
+            else {
                 this.advance();
             }
-            
         }
 
         return statements; // [parse-error-handling]
@@ -131,12 +141,12 @@ export class Parser {
     }
 
     expression() {
-        let token:string = "";
-        let name:string = "";
-        let valid:boolean = true;
-        let pos:number = null;
+        let token: string = "";
+        let name: string = "";
+        let invalid: Item;
+        let pos: number = null;
         let length: number = null;
-        let mods: string[] = null;
+        let mods: Modifier[] = null;
 
         if (this.match(Token.LBRACE)) {
             pos = this.previous().pos;
@@ -144,10 +154,6 @@ export class Parser {
             if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
                 console.log(this.peek())
                 token = this.previous().value;
-                if (this.match(Token.NOT)) {
-                    console.log(this.peek())
-                    valid = false;
-                }
 
                 if (this.match(Token.IDENT)) {
                     console.log(this.peek())
@@ -155,36 +161,47 @@ export class Parser {
                 }
 
                 if (this.match(Token.BIT_OR)) {
-                    
+
                     mods = this.modifiers();
                 }
 
-                if(this.match(Token.RBRACE)){
+                if (this.match(Token.RBRACE)) {
                     length = this.previous().pos - pos + 1;
                     console.log("saliendo", this.peek())
-                    return new Expresion(token, name, valid, pos, length, mods);
+                    return new Expresion(token, name, pos, length, mods);
                 }
             }
         }
         //this.advance();
-        return  null;
+        return null;
 
     }
 
-    modifiers(){
-        const mods = [];
-        while(true){
-            let mod = this.consume(Token.IDENT, "error");
+    modifiers() {
+        const mods: Modifier[] = [];
 
-            mods.push(mod);
-            if(this.match(Token.BIT_OR)){
+        while (true) {
+            let mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
+            let value = null;
+
+            if (this.match(Token.COLON)) {
+                console.log("PEEK ", this.peek());
+                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
+                    throw this.error(this.peek(), "expected a identifier after expression ':'");
+                }
+                value = this.previous().value;
+
+            }
+
+            mods.push(new Modifier(mod, value));
+
+            if (this.match(Token.BIT_OR)) {
                 continue;
             }
 
             break;
         }
-        
-        return mods;
 
+        return mods;
     }
 }

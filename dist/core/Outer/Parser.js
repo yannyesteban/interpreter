@@ -1,16 +1,24 @@
 import { Token } from "../Token.js";
 var Expresion = /** @class */ (function () {
-    function Expresion(token, name, valid, pos, length, mods) {
+    function Expresion(token, name, pos, length, mods) {
         this.token = token;
         this.name = name;
-        this.valid = valid;
         this.pos = pos;
         this.length = length;
         this.mods = mods;
+        this.ready = false;
     }
     return Expresion;
 }());
 export { Expresion };
+var Modifier = /** @class */ (function () {
+    function Modifier(mod, value) {
+        this.mod = mod;
+        this.value = value;
+    }
+    return Modifier;
+}());
+export { Modifier };
 function db() {
     var msg = [];
     for (var _i = 0; _i < arguments.length; _i++) {
@@ -104,7 +112,7 @@ var Parser = /** @class */ (function () {
     Parser.prototype.expression = function () {
         var token = "";
         var name = "";
-        var valid = true;
+        var invalid;
         var pos = null;
         var length = null;
         var mods = null;
@@ -114,10 +122,6 @@ var Parser = /** @class */ (function () {
             if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
                 console.log(this.peek());
                 token = this.previous().value;
-                if (this.match(Token.NOT)) {
-                    console.log(this.peek());
-                    valid = false;
-                }
                 if (this.match(Token.IDENT)) {
                     console.log(this.peek());
                     name = this.previous().value;
@@ -128,7 +132,7 @@ var Parser = /** @class */ (function () {
                 if (this.match(Token.RBRACE)) {
                     length = this.previous().pos - pos + 1;
                     console.log("saliendo", this.peek());
-                    return new Expresion(token, name, valid, pos, length, mods);
+                    return new Expresion(token, name, pos, length, mods);
                 }
             }
         }
@@ -138,8 +142,16 @@ var Parser = /** @class */ (function () {
     Parser.prototype.modifiers = function () {
         var mods = [];
         while (true) {
-            var mod = this.consume(Token.IDENT, "error");
-            mods.push(mod);
+            var mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
+            var value = null;
+            if (this.match(Token.COLON)) {
+                console.log("PEEK ", this.peek());
+                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
+                    throw this.error(this.peek(), "expected a identifier after expression ':'");
+                }
+                value = this.previous().value;
+            }
+            mods.push(new Modifier(mod, value));
             if (this.match(Token.BIT_OR)) {
                 continue;
             }

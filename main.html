@@ -15,6 +15,9 @@
     <div>
         <textarea id="source"></textarea>
     </div>
+    <div>
+        <textarea id="data"></textarea>
+    </div>
     <nav>
         <button id="button">Execute</button>
         <button id="evaluate">Evaluate</button>
@@ -68,7 +71,8 @@
 
             const outer = new Outer(code);
 
-
+            const data = JSON.parse(document.getElementById("data").value);
+            /*
             const data = {
 
                 "mode": "update",
@@ -77,9 +81,10 @@
                 "apellido": "NEVER",
                 "age": "47",
                 "city": "Caracas",
-                "country":"Ve"
+                "country": "Ve",
+                "price": 456.74666
             };
-
+            */
             outer.setMap("@", data, "");
 
             outer.setMap("&", {
@@ -94,12 +99,24 @@
 
             document.getElementById("result").value = r;
             console.log(r);
-            
+
 
         }
 
 
+        const data = {
 
+            "mode": "update",
+            "esteban": "JIMENEZ",
+            "name": "NUñEZ",
+            "apellido": "NEVER",
+            "age": "47",
+            "city": "Caracas",
+            "country": "Ve",
+            "price": 456.74666
+        };
+
+        document.getElementById("data").value = JSON.stringify(data, null, 2);
 
         fetch('sevian.sv')
             .then(r => r.text())
