@@ -15,9 +15,14 @@ var Outer = /** @class */ (function () {
     Outer.prototype.setMap = function (token, data, pre) {
         this.data.push(new Data(token, data, pre));
     };
-    Outer.prototype.getDate = function (str) {
-        var aux = str.split("-");
-        return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
+    Outer.prototype.getDate = function (date) {
+        if (typeof date === "string") {
+            var aux = date.split("-");
+            return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
+        }
+        if (date instanceof Date) {
+            return date;
+        }
     };
     Outer.prototype.evalMods = function (data, mods) {
         var _this = this;
@@ -68,7 +73,10 @@ var Outer = /** @class */ (function () {
                     }
                     break;
                 case "date":
-                    data = _this.getDate(data.toString()).toLocaleDateString((_a = m.value) === null || _a === void 0 ? void 0 : _a.replace("_", "-"));
+                    data = _this.getDate(data).toLocaleDateString((_a = m.value) === null || _a === void 0 ? void 0 : _a.replace("_", "-"));
+                    break;
+                case "time":
+                    data = _this.getDate(data).toLocaleTimeString();
                     break;
                 case "tofixed":
                     data = Number(data).toFixed(Number(m.value || 0));
@@ -97,14 +105,13 @@ var Outer = /** @class */ (function () {
     Outer.prototype.eval = function (expressions) {
         var delta = 0;
         var _loop_1 = function (e) {
-            //expressions.forEach(e => {
-            var value;
+            var value = null;
             if (e.type === ExpressionType.VAR) {
                 this_1.data.forEach(function (d) {
                     if (e.token == d.token) {
                         var data = d.data;
                         for (var i = 0; i < e.path.length; i++) {
-                            if (data[e.path[i]]) {
+                            if (data[e.path[i]] !== undefined) {
                                 value = data[e.path[i]];
                                 data = value;
                             }
@@ -118,7 +125,7 @@ var Outer = /** @class */ (function () {
             else if (e.type === ExpressionType.DATE) {
                 value = new Date();
             }
-            if (!value) {
+            if (value === null) {
                 return "continue";
             }
             value = this_1.evalMods(value, e.mods);

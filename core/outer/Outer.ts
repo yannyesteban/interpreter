@@ -26,12 +26,19 @@ export class Outer {
         this.data.push(new Data(token, data, pre));
     }
 
-    public getDate(str : string) {
-        let aux = str.split("-");
-        return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
+    public getDate(date:string | number | object | Date) {
+        if(typeof date === "string"){
+            let aux = date.split("-");
+            return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
+        }
+
+        if(date instanceof Date){
+            return date;
+        }
+        
     }
 
-    public evalMods(data : string | number | object, mods : Modifier[]) {
+    public evalMods(data : string | number | object | Date, mods : Modifier[]) {
 
         let aux = {};
         mods.forEach(m => {
@@ -75,7 +82,10 @@ export class Outer {
                     }
                     break;
                 case "date":
-                    data = this.getDate(data.toString()).toLocaleDateString(m.value ?. replace("_", "-"));
+                    data = this.getDate(data).toLocaleDateString(m.value ?. replace("_", "-"));
+                    break;
+                case "time":
+                    data = this.getDate(data).toLocaleTimeString();
                     break;
                 case "tofixed":
                     data = Number(data).toFixed(Number(m.value || 0));
@@ -110,32 +120,28 @@ export class Outer {
     public eval(expressions : Expression[]) {
         let delta = 0;
         for(let e of expressions){
-            //expressions.forEach(e => {
-            let value;
+            
+            let value = null;
             if(e.type === ExpressionType.VAR){
                 this.data.forEach(d => {
                     if (e.token == d.token) {
-                        
                         let data = d.data;
                         for (let i = 0; i < e.path.length; i++) {
-                            if (data[e.path[i]]) {
+                            if (data[e.path[i]] !== undefined) {
                                 value = data[e.path[i]];
                                 data = value;
-    
                             } else {
                                 return;
                             }
                         }
-    
-    
                     }
                 });
             }else if(e.type === ExpressionType.DATE){
                 value = new Date();
             }
             
-            if(!value){
-                continue;
+            if(value === null){
+               continue;
             }
 
             value = this.evalMods(value, e.mods);
@@ -148,7 +154,6 @@ export class Outer {
             delta = delta + (value.length - e.length);
         };
 
-
         return this.output;
     }
 
@@ -157,13 +162,10 @@ export class Outer {
         this.output = source;
 
         const lexer = new Lexer(source, false);
-
         const tokens = lexer.getTokens();
-
         const parser = new Parser(tokens);
         const expressions = parser.parse();
 
         return this.eval(expressions);
-
     }
 }
