@@ -1,12 +1,12 @@
-import { Lexer } from "../Lexer.js";
-import { Parser, Expresion, Modifier } from "./Parser.js";
+import {Lexer} from "../Lexer.js";
+import {Parser, Expression, Modifier, ExpressionType} from "./Parser.js";
 
 class Data {
-    public token: string;
-    public data: object;
-    public pre: string;
+    public token : string;
+    public data : object;
+    public pre : string;
 
-    constructor(token: string, data: object, pre: string) {
+    constructor(token : string, data : object, pre : string) {
         this.token = token;
         this.data = data;
         this.pre = pre;
@@ -14,30 +14,31 @@ class Data {
 }
 
 export class Outer {
+    public source : string;
+    public output : string;
+    private data : Data[];
 
-    public source: string;
-    public output: string;
-    private data: Data[];
-    constructor(source) {
-        this.source = source;
-        this.output = source;
+    constructor() {
         this.data = [];
     }
 
-    public setMap(token: string, data: object, pre: string) {
+    public setMap(token : string, data : object, pre : string) {
         this.data.push(new Data(token, data, pre));
     }
 
-    public interprete(source: string) {
-
+    public getDate(str : string) {
+        let aux = str.split("-");
+        return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
     }
 
-    public evalMods(data: string, mods: Modifier[]) {
+    public evalMods(data : string | number | object, mods : Modifier[]) {
 
+        let aux = {};
         mods.forEach(m => {
 
             switch (m.mod.toLowerCase()) {
                 case "trim":
+                    data = data.toString();
                     if (m.value) {
                         if (m.value.toLowerCase() == "left") {
                             data = data.trimStart();
@@ -47,16 +48,12 @@ export class Outer {
                     } else {
                         data = data.trim();
                     }
-
                     break;
                 case "upper":
-                    data = data.toUpperCase();
-                    break;
-                case "upper":
-                    data = data.toUpperCase();
+                    data = data.toString().toUpperCase();
                     break;
                 case "lower":
-                    data = data.toLowerCase();
+                    data = data.toString().toLowerCase();
                     break;
                 case "floor":
                     data = Math.floor(Number(data)).toString();
@@ -67,89 +64,104 @@ export class Outer {
                 case "abs":
                     data = Math.abs(Number(data)).toString();
                     break;
+                case "digits": aux["format"] = true;
+                    aux["locales"] = aux["locales"];
+                    aux["digits"] = m.value || 2;
+                    break;
+                case "format": aux["format"] = true;
+                    aux["locales"] = m.value;
+                    if (aux["digits"] == undefined) {
+                        aux["digits"] = 2;
+                    }
+                    break;
+                case "date":
+                    data = this.getDate(data.toString()).toLocaleDateString(m.value ?. replace("_", "-"));
+                    break;
                 case "tofixed":
                     data = Number(data).toFixed(Number(m.value || 0));
+                    break;
+                case "pretty":
+                    if (typeof data === "object") {
+                        data = JSON.stringify(data, null, 2);
+                    }
                     break;
             }
         });
 
+        if (aux["format"]) {
+            return new Intl.NumberFormat(aux["locales"] ?. replace("_", "-"), {
+                minimumFractionDigits: aux["digits"],
+                maximumFractionDigits: aux["digits"]
+            }).format(Number(data));
+        }
+
+        if (typeof data == "number") {
+            return data.toString();
+        }
+
+        if (typeof data == "object") {
+            return JSON.stringify(data)
+        }
+
         return data;
     }
 
-    private getDataValue(data){
 
-    }
-    public eval(expressions: Expresion[]) {
+    public eval(expressions : Expression[]) {
         let delta = 0;
-        expressions.forEach(e => {
-            this.data.forEach(d => {
-                if (e.token == d.token) {
-                    let data;
-                    let value;
-                    data = d.data;
-                    for(let i=0;i<e.path.length;i++){
-                        if(data[e.path[i]]){
-                            
-                            value = data[e.path[i]];
-                            data = value;
-                            console.log("value ", value)
-                        }else{
-                            return;
-                        }
+        for(let e of expressions){
+            //expressions.forEach(e => {
+            let value;
+            if(e.type === ExpressionType.VAR){
+                this.data.forEach(d => {
+                    if (e.token == d.token) {
                         
-                    }
-                    if (typeof data == "number") {
-                        value = data.toString();
-                    }
-                    if (e.mods) {
-                        value = this.evalMods(value, e.mods);
-                    }
-
-                    /*
-                    if (d.data[e.name]) {
-
-                        data = d.data[e.name];
-
-                        if (typeof data == "number") {
-                            data = data.toString();
+                        let data = d.data;
+                        for (let i = 0; i < e.path.length; i++) {
+                            if (data[e.path[i]]) {
+                                value = data[e.path[i]];
+                                data = value;
+    
+                            } else {
+                                return;
+                            }
                         }
-                        if (e.mods) {
-                            data = this.evalMods(d.data[e.name], e.mods);
-                        }
-
-                    } else {
-                        return;
+    
+    
                     }
-                    */
-                    console.log("2.- value ", value)
-                    e.ready = true;
-                    e.pos += delta;
-                    this.output = this.output.substring(0, e.pos - 1) + value + this.output.substring(e.pos - 1 + e.length);
+                });
+            }else if(e.type === ExpressionType.DATE){
+                value = new Date();
+            }
+            
+            if(!value){
+                continue;
+            }
 
-                    delta = delta + (data.length - e.length);
+            value = this.evalMods(value, e.mods);
 
-                    console.log(" pos : ", delta, e.pos);
-                }
-            });
-        });
+            e.ready = true;
+            e.pos += delta;
 
-        console.log("expressions\n", expressions)
+            this.output = this.output.substring(0, e.pos - 1) + value + this.output.substring(e.pos - 1 + e.length);
+
+            delta = delta + (value.length - e.length);
+        };
+
+
         return this.output;
     }
 
-    public run() {
+    public execute(source) {
 
-        console.log("data\n", this.data)
+        this.output = source;
 
-        console.log("source:\n", this.source);
-        const lexer = new Lexer(this.source, false);
+        const lexer = new Lexer(source, false);
 
         const tokens = lexer.getTokens();
-        console.log(tokens);
 
         const parser = new Parser(tokens);
         const expressions = parser.parse();
-        console.log("...", expressions)
 
         return this.eval(expressions);
 

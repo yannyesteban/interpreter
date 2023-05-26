@@ -6,6 +6,7 @@
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Interpreter v0.1</title>
+    <link rel="icon" type="image/x-icon" href="favicon.ico">
     <link rel="stylesheet" href="sass/main.css">
 </head>
 
@@ -65,26 +66,11 @@
 
         function evaluate(code) {
 
-            //const lexer = new Lexer(code);
-
-            //const tokens = lexer.getTokens();
-
-            const outer = new Outer(code);
+            
+            const outer = new Outer();
 
             const data = JSON.parse(document.getElementById("data").value);
-            /*
-            const data = {
 
-                "mode": "update",
-                "esteban": "JIMENEZ",
-                "name": "NUñEZ",
-                "apellido": "NEVER",
-                "age": "47",
-                "city": "Caracas",
-                "country": "Ve",
-                "price": 456.74666
-            };
-            */
             outer.setMap("@", data, "");
 
             outer.setMap("&", {
@@ -93,12 +79,10 @@
             }, "EX_");
 
 
-            console.log("code: ", code, "\n");
+            const output = outer.execute(code);
 
-            const r = outer.run();
-
-            document.getElementById("result").value = r;
-            console.log(r);
+            document.getElementById("result").value = output;
+            console.log(output);
 
 
         }
@@ -110,13 +94,14 @@
             "esteban": "JIMENEZ",
             "name": "NUñEZ",
             "apellido": "NEVER",
+            "birth": "1975-10-24",
             "age": "47",
             "city": "Caracas",
-            "country": "Ve",
+            "country": "Venezuela",
             "price": 456.74666,
-            "k":{
-                "a":"yanny",
-                "b":["green", "yellow", "red"]
+            "k": {
+                "a": "yanny",
+                "b": ["green", "yellow", "red"]
             }
         };
 

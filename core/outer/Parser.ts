@@ -1,8 +1,14 @@
 import { Token } from "../Token.js";
 import { Item } from "../Lexer.js";
 import * as exp from "constants";
+export enum ExpressionType {
+	VAR = 1, // main
+	DATE,
+	TIME
+	
 
-export class Expresion {
+}
+export class Expression {
     public token: string;
     public name: string;
     
@@ -12,8 +18,9 @@ export class Expresion {
     public ready: boolean;
 
     public path:string[];
+    public type: ExpressionType;
 
-    constructor(token: string, name: string, pos: number, length: number, mods: Modifier[], path) {
+    constructor(token: string, name: string, pos: number, length: number, mods: Modifier[], path, type:ExpressionType) {
         this.token = token;
         this.name = name;
     
@@ -21,7 +28,8 @@ export class Expresion {
         this.length = length;
         this.mods = mods;
         this.ready = false;
-        this.path = path
+        this.path = path;
+        this.type = type;
     }
 }
 
@@ -67,7 +75,7 @@ export class Parser {
         }
     }
 
-    parse(): Expresion[] {
+    parse(): Expression[] {
         let statements = [];
         while (!this.isAtEnd()) {
             const expr = this.expression();
@@ -149,21 +157,26 @@ export class Parser {
         let invalid: Item;
         let pos: number = null;
         let length: number = null;
-        let mods: Modifier[] = null;
+        let mods: Modifier[] = [];
         let path = [];
+        let type:ExpressionType = ExpressionType.VAR; 
 
         if (this.match(Token.LBRACE)) {
             pos = this.previous().pos;
-            console.log(this.peek())
             if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
-                console.log(this.peek())
+                
                 token = this.previous().value;
 
                 do{
                     if (this.match(Token.IDENT, Token.INT)) {
-                        console.log(this.peek())
                         name = this.previous().value;
                         path.push(name);
+
+                        if(name === "_DATE_"){
+                            type = ExpressionType.DATE
+                        }else if(name === "_TIME_"){
+                            type = ExpressionType.TIME;
+                        }
                     }
                 }while(this.match(Token.DOT));
 
@@ -173,12 +186,10 @@ export class Parser {
 
                 if (this.match(Token.RBRACE)) {
                     length = this.previous().pos - pos + 1;
-                    console.log("saliendo", this.peek())
-                    return new Expresion(token, name, pos, length, mods, path);
+                    return new Expression(token, name, pos, length, mods, path, type);
                 }
             }
         }
-        //this.advance();
         return null;
 
     }
@@ -191,12 +202,11 @@ export class Parser {
             let value = null;
 
             if (this.match(Token.COLON)) {
-                console.log("PEEK ", this.peek());
+                
                 if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
                     throw this.error(this.peek(), "expected a identifier after expression ':'");
                 }
                 value = this.previous().value;
-
             }
 
             mods.push(new Modifier(mod, value));

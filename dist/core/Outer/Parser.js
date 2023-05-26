@@ -1,6 +1,12 @@
 import { Token } from "../Token.js";
-var Expresion = /** @class */ (function () {
-    function Expresion(token, name, pos, length, mods, path) {
+export var ExpressionType;
+(function (ExpressionType) {
+    ExpressionType[ExpressionType["VAR"] = 1] = "VAR";
+    ExpressionType[ExpressionType["DATE"] = 2] = "DATE";
+    ExpressionType[ExpressionType["TIME"] = 3] = "TIME";
+})(ExpressionType || (ExpressionType = {}));
+var Expression = /** @class */ (function () {
+    function Expression(token, name, pos, length, mods, path, type) {
         this.token = token;
         this.name = name;
         this.pos = pos;
@@ -8,10 +14,11 @@ var Expresion = /** @class */ (function () {
         this.mods = mods;
         this.ready = false;
         this.path = path;
+        this.type = type;
     }
-    return Expresion;
+    return Expression;
 }());
-export { Expresion };
+export { Expression };
 var Modifier = /** @class */ (function () {
     function Modifier(mod, value) {
         this.mod = mod;
@@ -116,19 +123,23 @@ var Parser = /** @class */ (function () {
         var invalid;
         var pos = null;
         var length = null;
-        var mods = null;
+        var mods = [];
         var path = [];
+        var type = ExpressionType.VAR;
         if (this.match(Token.LBRACE)) {
             pos = this.previous().pos;
-            console.log(this.peek());
             if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
-                console.log(this.peek());
                 token = this.previous().value;
                 do {
                     if (this.match(Token.IDENT, Token.INT)) {
-                        console.log(this.peek());
                         name = this.previous().value;
                         path.push(name);
+                        if (name === "_DATE_") {
+                            type = ExpressionType.DATE;
+                        }
+                        else if (name === "_TIME_") {
+                            type = ExpressionType.TIME;
+                        }
                     }
                 } while (this.match(Token.DOT));
                 if (this.match(Token.BIT_OR)) {
@@ -136,12 +147,10 @@ var Parser = /** @class */ (function () {
                 }
                 if (this.match(Token.RBRACE)) {
                     length = this.previous().pos - pos + 1;
-                    console.log("saliendo", this.peek());
-                    return new Expresion(token, name, pos, length, mods, path);
+                    return new Expression(token, name, pos, length, mods, path, type);
                 }
             }
         }
-        //this.advance();
         return null;
     };
     Parser.prototype.modifiers = function () {
@@ -150,7 +159,6 @@ var Parser = /** @class */ (function () {
             var mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
             var value = null;
             if (this.match(Token.COLON)) {
-                console.log("PEEK ", this.peek());
                 if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
                     throw this.error(this.peek(), "expected a identifier after expression ':'");
                 }

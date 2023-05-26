@@ -1,5 +1,5 @@
 import { Lexer } from "../Lexer.js";
-import { Parser, ExpressionType } from "./Parser.js";
+import { Parser } from "./Parser.js";
 var Data = /** @class */ (function () {
     function Data(token, data, pre) {
         this.token = token;
@@ -9,11 +9,15 @@ var Data = /** @class */ (function () {
     return Data;
 }());
 var Outer = /** @class */ (function () {
-    function Outer() {
+    function Outer(source) {
+        this.source = source;
+        this.output = source;
         this.data = [];
     }
     Outer.prototype.setMap = function (token, data, pre) {
         this.data.push(new Data(token, data, pre));
+    };
+    Outer.prototype.interprete = function (source) {
     };
     Outer.prototype.getDate = function (str) {
         var aux = str.split("-");
@@ -95,55 +99,46 @@ var Outer = /** @class */ (function () {
         return data;
     };
     Outer.prototype.eval = function (expressions) {
+        var _this = this;
         var delta = 0;
-        var _loop_1 = function (e) {
-            //expressions.forEach(e => {
-            var value;
-            if (e.type === ExpressionType.VAR) {
-                this_1.data.forEach(function (d) {
-                    if (e.token == d.token) {
-                        var data = d.data;
-                        for (var i = 0; i < e.path.length; i++) {
-                            if (data[e.path[i]]) {
-                                value = data[e.path[i]];
-                                data = value;
-                            }
-                            else {
-                                return;
-                            }
+        expressions.forEach(function (e) {
+            _this.data.forEach(function (d) {
+                if (e.token == d.token) {
+                    var data = void 0;
+                    var value = void 0;
+                    data = d.data;
+                    for (var i = 0; i < e.path.length; i++) {
+                        if (data[e.path[i]]) {
+                            value = data[e.path[i]];
+                            data = value;
+                        }
+                        else {
+                            return;
                         }
                     }
-                });
-            }
-            else if (e.type === ExpressionType.DATE) {
-                value = new Date();
-            }
-            if (!value) {
-                return "continue";
-            }
-            value = this_1.evalMods(value, e.mods);
-            e.ready = true;
-            e.pos += delta;
-            this_1.output = this_1.output.substring(0, e.pos - 1) + value + this_1.output.substring(e.pos - 1 + e.length);
-            delta = delta + (value.length - e.length);
-        };
-        var this_1 = this;
-        for (var _i = 0, expressions_1 = expressions; _i < expressions_1.length; _i++) {
-            var e = expressions_1[_i];
-            _loop_1(e);
-        }
-        ;
+                    value = _this.evalMods(value, e.mods);
+                    e.ready = true;
+                    e.pos += delta;
+                    _this.output = _this.output.substring(0, e.pos - 1) + value + _this.output.substring(e.pos - 1 + e.length);
+                    delta = delta + (value.length - e.length);
+                }
+            });
+        });
+        console.log("expressions\n", expressions);
         return this.output;
     };
-    Outer.prototype.execute = function (source) {
-        this.output = source;
-        var lexer = new Lexer(source, false);
+    Outer.prototype.run = function () {
+        console.log("data\n", this.data);
+        console.log("source:\n", this.source);
+        var lexer = new Lexer(this.source, false);
         var tokens = lexer.getTokens();
+        console.log(tokens);
         var parser = new Parser(tokens);
         var expressions = parser.parse();
+        console.log("...", expressions);
         return this.eval(expressions);
     };
     return Outer;
 }());
 export { Outer };
-//# sourceMappingURL=Outer.js.map
+//# sourceMappingURL=Outer1.js.map
