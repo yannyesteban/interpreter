@@ -1,1 +1,1 @@
-yanny {@name} r: {@age} nothing
+yanny {@name} r: {@age} nothing {@k.b.1 | upper}

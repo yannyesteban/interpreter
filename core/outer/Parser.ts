@@ -11,7 +11,9 @@ export class Expresion {
     public mods: Modifier[];
     public ready: boolean;
 
-    constructor(token: string, name: string, pos: number, length: number, mods: Modifier[]) {
+    public path:string[];
+
+    constructor(token: string, name: string, pos: number, length: number, mods: Modifier[], path) {
         this.token = token;
         this.name = name;
     
@@ -19,6 +21,7 @@ export class Expresion {
         this.length = length;
         this.mods = mods;
         this.ready = false;
+        this.path = path
     }
 }
 
@@ -147,6 +150,7 @@ export class Parser {
         let pos: number = null;
         let length: number = null;
         let mods: Modifier[] = null;
+        let path = [];
 
         if (this.match(Token.LBRACE)) {
             pos = this.previous().pos;
@@ -155,20 +159,22 @@ export class Parser {
                 console.log(this.peek())
                 token = this.previous().value;
 
-                if (this.match(Token.IDENT)) {
-                    console.log(this.peek())
-                    name = this.previous().value;
-                }
+                do{
+                    if (this.match(Token.IDENT, Token.INT)) {
+                        console.log(this.peek())
+                        name = this.previous().value;
+                        path.push(name);
+                    }
+                }while(this.match(Token.DOT));
 
                 if (this.match(Token.BIT_OR)) {
-
                     mods = this.modifiers();
                 }
 
                 if (this.match(Token.RBRACE)) {
                     length = this.previous().pos - pos + 1;
                     console.log("saliendo", this.peek())
-                    return new Expresion(token, name, pos, length, mods);
+                    return new Expresion(token, name, pos, length, mods, path);
                 }
             }
         }

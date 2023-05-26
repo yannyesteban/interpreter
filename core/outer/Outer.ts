@@ -76,12 +76,36 @@ export class Outer {
         return data;
     }
 
+    private getDataValue(data){
+
+    }
     public eval(expressions: Expresion[]) {
         let delta = 0;
         expressions.forEach(e => {
             this.data.forEach(d => {
                 if (e.token == d.token) {
                     let data;
+                    let value;
+                    data = d.data;
+                    for(let i=0;i<e.path.length;i++){
+                        if(data[e.path[i]]){
+                            
+                            value = data[e.path[i]];
+                            data = value;
+                            console.log("value ", value)
+                        }else{
+                            return;
+                        }
+                        
+                    }
+                    if (typeof data == "number") {
+                        value = data.toString();
+                    }
+                    if (e.mods) {
+                        value = this.evalMods(value, e.mods);
+                    }
+
+                    /*
                     if (d.data[e.name]) {
 
                         data = d.data[e.name];
@@ -96,10 +120,11 @@ export class Outer {
                     } else {
                         return;
                     }
-
+                    */
+                    console.log("2.- value ", value)
                     e.ready = true;
                     e.pos += delta;
-                    this.output = this.output.substring(0, e.pos - 1) + data + this.output.substring(e.pos - 1 + e.length);
+                    this.output = this.output.substring(0, e.pos - 1) + value + this.output.substring(e.pos - 1 + e.length);
 
                     delta = delta + (data.length - e.length);
 

@@ -1,12 +1,13 @@
 import { Token } from "../Token.js";
 var Expresion = /** @class */ (function () {
-    function Expresion(token, name, pos, length, mods) {
+    function Expresion(token, name, pos, length, mods, path) {
         this.token = token;
         this.name = name;
         this.pos = pos;
         this.length = length;
         this.mods = mods;
         this.ready = false;
+        this.path = path;
     }
     return Expresion;
 }());
@@ -116,23 +117,27 @@ var Parser = /** @class */ (function () {
         var pos = null;
         var length = null;
         var mods = null;
+        var path = [];
         if (this.match(Token.LBRACE)) {
             pos = this.previous().pos;
             console.log(this.peek());
             if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
                 console.log(this.peek());
                 token = this.previous().value;
-                if (this.match(Token.IDENT)) {
-                    console.log(this.peek());
-                    name = this.previous().value;
-                }
+                do {
+                    if (this.match(Token.IDENT, Token.INT)) {
+                        console.log(this.peek());
+                        name = this.previous().value;
+                        path.push(name);
+                    }
+                } while (this.match(Token.DOT));
                 if (this.match(Token.BIT_OR)) {
                     mods = this.modifiers();
                 }
                 if (this.match(Token.RBRACE)) {
                     length = this.previous().pos - pos + 1;
                     console.log("saliendo", this.peek());
-                    return new Expresion(token, name, pos, length, mods);
+                    return new Expresion(token, name, pos, length, mods, path);
                 }
             }
         }

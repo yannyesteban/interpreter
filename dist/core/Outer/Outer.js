@@ -60,6 +60,8 @@ var Outer = /** @class */ (function () {
         });
         return data;
     };
+    Outer.prototype.getDataValue = function (data) {
+    };
     Outer.prototype.eval = function (expressions) {
         var _this = this;
         var delta = 0;
@@ -67,21 +69,44 @@ var Outer = /** @class */ (function () {
             _this.data.forEach(function (d) {
                 if (e.token == d.token) {
                     var data = void 0;
+                    var value = void 0;
+                    data = d.data;
+                    for (var i = 0; i < e.path.length; i++) {
+                        if (data[e.path[i]]) {
+                            value = data[e.path[i]];
+                            data = value;
+                            console.log("value ", value);
+                        }
+                        else {
+                            return;
+                        }
+                    }
+                    if (typeof data == "number") {
+                        value = data.toString();
+                    }
+                    if (e.mods) {
+                        value = _this.evalMods(value, e.mods);
+                    }
+                    /*
                     if (d.data[e.name]) {
+
                         data = d.data[e.name];
+
                         if (typeof data == "number") {
                             data = data.toString();
                         }
                         if (e.mods) {
-                            data = _this.evalMods(d.data[e.name], e.mods);
+                            data = this.evalMods(d.data[e.name], e.mods);
                         }
-                    }
-                    else {
+
+                    } else {
                         return;
                     }
+                    */
+                    console.log("2.- value ", value);
                     e.ready = true;
                     e.pos += delta;
-                    _this.output = _this.output.substring(0, e.pos - 1) + data + _this.output.substring(e.pos - 1 + e.length);
+                    _this.output = _this.output.substring(0, e.pos - 1) + value + _this.output.substring(e.pos - 1 + e.length);
                     delta = delta + (data.length - e.length);
                     console.log(" pos : ", delta, e.pos);
                 }
