@@ -12,7 +12,9 @@
 
 <body>
     <h2 id="int-name"></h2>
-
+    <div>
+        <textarea id="template"></textarea>
+    </div>
     <div>
         <textarea id="source"></textarea>
     </div>
@@ -20,8 +22,9 @@
         <textarea id="data"></textarea>
     </div>
     <nav>
+        <button id="sv">load</button>
         <button id="button">Execute</button>
-        <button id="evaluate">Evaluate</button>
+        <button id="evaluate">Template</button>
     </nav>
     <div>
         <textarea id="result"></textarea>
@@ -58,15 +61,17 @@
             const resolver = new Resolver(intp);
             //resolver.resolve(statements);
 
-            intp.interpret(statements);
-            console.log("FIN", intp.locals)
+            const output = intp.interpret(statements);
+            console.log("FIN", intp.locals,output)
+
+            document.getElementById("result").value = output.join(":");
 
 
         }
 
         function evaluate(code) {
 
-            
+
             const outer = new Outer();
 
             const data = JSON.parse(document.getElementById("data").value);
@@ -106,19 +111,26 @@
         };
 
         document.getElementById("data").value = JSON.stringify(data, null, 2);
+        fetch('template.sv')
+            .then(r => r.text())
+            .then(source => {
+                document.getElementById("template").value = source;
 
+            });
         fetch('sevian.sv')
             .then(r => r.text())
             .then(source => {
                 document.getElementById("source").value = source;
-                document.getElementById("button").addEventListener("click", (event) => {
-                    run(document.getElementById("source").value);
-                });
-                document.getElementById("evaluate").addEventListener("click", (event) => {
-                    evaluate(document.getElementById("source").value);
-                });
+
                 //run(source)
-            })
+            });
+
+        document.getElementById("button").addEventListener("click", (event) => {
+            run(document.getElementById("source").value);
+        });
+        document.getElementById("evaluate").addEventListener("click", (event) => {
+            evaluate(document.getElementById("template").value);
+        });
 
 
 

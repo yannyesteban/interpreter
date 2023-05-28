@@ -1,3 +1,11 @@
+var Modifier = /** @class */ (function () {
+    function Modifier(mod, value) {
+        this.mod = mod;
+        this.value = value;
+    }
+    return Modifier;
+}());
+export { Modifier };
 var Statement = /** @class */ (function () {
     function Statement() {
     }
@@ -16,9 +24,10 @@ var Block = /** @class */ (function () {
 }());
 export { Block };
 var Expression = /** @class */ (function () {
-    function Expression(expression) {
+    function Expression(expression, mods) {
         //console.log("Expression: ", expression);
         this.expression = expression;
+        this.mods = mods;
         this.clssStmt = this.constructor.name;
     }
     Expression.prototype.accept = function (visitor) {

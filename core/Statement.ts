@@ -3,6 +3,16 @@ import * as Expr from "./Expressions.js";
 import { Item } from "./Lexer.js";
 import { Token } from "./Token.js";
 
+export class Modifier {
+  public mod: string;
+  public value: string;
+
+  constructor(mod: string, value: string) {
+      this.mod = mod;
+      this.value = value;
+  }
+}
+
 export interface Visitor {
   visitBlockStmt(stmt: Block);
   //visitClassStmt(Class stmt);
@@ -40,12 +50,14 @@ export class Block implements Statement {
 
 export class Expression implements Statement {
   public expression;
+  public mods:Modifier[];
   public clssStmt:string;
 
-  constructor(expression) {
+
+  constructor(expression, mods) {
     //console.log("Expression: ", expression);
     this.expression = expression;
-
+    this.mods = mods;
     this.clssStmt = this.constructor.name;
   }
   accept(visitor: Visitor) {

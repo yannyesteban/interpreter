@@ -16,6 +16,7 @@ export class Interpreter {
     private globals: Environment = new Environment();
     private environment: Environment = this.globals;
     public locals = new Map();
+    public output: string[] = [];
 
     constructor() {
 
@@ -29,6 +30,8 @@ export class Interpreter {
         } catch (error) {
             //Lox.runtimeError(error);
         }
+
+        return this.output;
     }
 
     private evaluate(expr: Expr.Expression) {
@@ -96,6 +99,7 @@ export class Interpreter {
     visitExpressionStmt(stmt: Stmt.Expression) {
         const value = this.evaluate(stmt.expression);
         console.log("RESULT ", value);
+        this.output.push(value);
         return null;
     }
 
@@ -173,7 +177,6 @@ export class Interpreter {
             case Token.POW:
                 this.checkNumberOperands(expr.operator, left, right);
                 return left ** right;
-            
             case Token.GTR:
                 this.checkNumberOperands(expr.operator, left, right);
                 console.log("comparing", left > right)
@@ -405,5 +408,98 @@ export class Interpreter {
         }
 
         return object.toString();
+    }
+
+    public getDate(date:string | number | object | Date) {
+        if(typeof date === "string"){
+            let aux = date.split("-");
+            return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
+        }
+
+        if(date instanceof Date){
+            return date;
+        }
+        
+    }
+
+    public evalMod(mod: string, value){
+        switch (mod.name.toLowerCase()) {
+            case "trim":
+                value = value.toString();
+                if (m.value) {
+                    if (m.value.toLowerCase() == "left") {
+                        data = data.trimStart();
+                    } else if (m.value.toLowerCase() == "right") {
+                        data = data.trimEnd();
+                    }
+                } else {
+                    data = data.trim();
+                }
+                break;
+            case "upper":
+                data = data.toString().toUpperCase();
+                break;
+            case "lower":
+                data = data.toString().toLowerCase();
+                break;
+            case "floor":
+                data = Math.floor(Number(data)).toString();
+                break;
+            case "ceil":
+                data = Math.ceil(Number(data)).toString();
+                break;
+            case "abs":
+                data = Math.abs(Number(data)).toString();
+                break;
+            case "digits": aux["format"] = true;
+                aux["locales"] = aux["locales"];
+                aux["digits"] = m.value || 2;
+                break;
+            case "format": aux["format"] = true;
+                aux["locales"] = m.value;
+                if (aux["digits"] == undefined) {
+                    aux["digits"] = 2;
+                }
+                break;
+            case "date":
+                data = this.getDate(data).toLocaleDateString(m.value ?. replace("_", "-"));
+                break;
+            case "time":
+                data = this.getDate(data).toLocaleTimeString();
+                break;
+            case "tofixed":
+                data = Number(data).toFixed(Number(m.value || 0));
+                break;
+            case "pretty":
+                if (typeof data === "object") {
+                    data = JSON.stringify(data, null, 2);
+                }
+                break;
+        }
+    }
+    public evalMods(data : string | number | object | Date, mods : Stmt.Modifier[]) {
+
+        let aux = {};
+        mods.forEach(m => {
+
+            
+        });
+
+        if (aux["format"]) {
+            return new Intl.NumberFormat(aux["locales"] ?. replace("_", "-"), {
+                minimumFractionDigits: aux["digits"],
+                maximumFractionDigits: aux["digits"]
+            }).format(Number(data));
+        }
+
+        if (typeof data == "number") {
+            return data.toString();
+        }
+
+        if (typeof data == "object") {
+            return JSON.stringify(data)
+        }
+
+        return data;
     }
 }

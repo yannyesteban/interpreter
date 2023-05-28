@@ -73,8 +73,6 @@ export class Parser {
         return this.previous();
     }
 
-
-
     previous() {
         return this.tokens[this.current - 1];
     }
@@ -96,6 +94,7 @@ export class Parser {
     }
 
     match(...TokenType: Token[]) {
+        console.log("...",this.peek().value)
         for (let type of TokenType) {
             if (this.check(type)) {
                 this.advance();
@@ -112,7 +111,19 @@ export class Parser {
             return null;
         }
         let expr = this.expression();
-
+        if(!expr){
+            
+            this.error(this.peek().value, "unknow error!")
+            this.advance()
+        }
+        console.log(expr)
+        let mods: Stmt.Modifier[] = [];
+        
+        if (this.match(Token.BIT_OR)) {
+            
+            mods = this.modifiers();
+        }
+        
         if (this.brackets > 0 && this.peek().tok == Token.RBRACE) {
 
         } else {
@@ -123,10 +134,40 @@ export class Parser {
 
         }
 
-        return new Stmt.Expression(expr);
+        
+
+        return new Stmt.Expression(expr, mods);
     }
 
+    modifiers() {
+        const mods: Stmt.Modifier[] = [];
 
+        while (true) {
+            let mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
+            let value = null;
+
+            if (this.match(Token.COLON)) {
+                
+                value = this.expression();
+                /*
+                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
+                    throw this.error(this.peek(), "expected a identifier after expression ':'");
+                }
+                value = this.previous().value;
+                */
+            }
+
+            mods.push(new Stmt.Modifier(mod, value));
+
+            if (this.match(Token.BIT_OR)) {
+                continue;
+            }
+
+            break;
+        }
+
+        return mods;
+    }
 
     private block() {
         let statements/*: Expr.Expression[]*/ = [];
@@ -142,6 +183,7 @@ export class Parser {
 
     private statement() {
 
+        console.log(this.peek().value)
         if (this.match(Token.FOR)) return this.forStatement();
 
 
@@ -168,7 +210,7 @@ export class Parser {
                     this.consume(Token.SEMICOLON, "Expect ';' after expression..");
                 }
 
-                return new Stmt.Expression(expr);
+                return new Stmt.Expression(expr, []);
 
             } catch (e) {
                 db("UN ERROR PASó")
@@ -177,7 +219,7 @@ export class Parser {
 
             return new Stmt.Block(this.block());
         }
-
+        alert(7)
         return this.expressionStatement();
     }
 
@@ -330,7 +372,7 @@ export class Parser {
 
         while (this.match(Token.POW)) {
             let operator = this.previous();
-            let right = this.unary();
+            let right = this.power();
             expr = new Expr.Binary(expr, operator, right);
         }
         return expr;
@@ -636,7 +678,7 @@ export class Parser {
             body = new Stmt.Block(
                 [
                     body,
-                    new Stmt.Expression(increment)
+                    new Stmt.Expression(increment ,[])
                 ]);
         }
 

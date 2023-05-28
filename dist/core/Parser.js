@@ -77,6 +77,7 @@ var Parser = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             TokenType[_i] = arguments[_i];
         }
+        console.log("...", this.peek().value);
         for (var _a = 0, TokenType_1 = TokenType; _a < TokenType_1.length; _a++) {
             var type = TokenType_1[_a];
             if (this.check(type)) {
@@ -91,6 +92,15 @@ var Parser = /** @class */ (function () {
             return null;
         }
         var expr = this.expression();
+        if (!expr) {
+            this.error(this.peek().value, "unknow error!");
+            this.advance();
+        }
+        console.log(expr);
+        var mods = [];
+        if (this.match(Token.BIT_OR)) {
+            mods = this.modifiers();
+        }
         if (this.brackets > 0 && this.peek().tok == Token.RBRACE) {
         }
         else {
@@ -99,7 +109,29 @@ var Parser = /** @class */ (function () {
                 this.consume(Token.SEMICOLON, "1.0 Expect ';' after expression..");
             }
         }
-        return new Stmt.Expression(expr);
+        return new Stmt.Expression(expr, mods);
+    };
+    Parser.prototype.modifiers = function () {
+        var mods = [];
+        while (true) {
+            var mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
+            var value = null;
+            if (this.match(Token.COLON)) {
+                value = this.expression();
+                /*
+                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
+                    throw this.error(this.peek(), "expected a identifier after expression ':'");
+                }
+                value = this.previous().value;
+                */
+            }
+            mods.push(new Stmt.Modifier(mod, value));
+            if (this.match(Token.BIT_OR)) {
+                continue;
+            }
+            break;
+        }
+        return mods;
     };
     Parser.prototype.block = function () {
         var statements /*: Expr.Expression[]*/ = [];
@@ -111,6 +143,7 @@ var Parser = /** @class */ (function () {
         return statements;
     };
     Parser.prototype.statement = function () {
+        console.log(this.peek().value);
         if (this.match(Token.FOR))
             return this.forStatement();
         if (this.match(Token.IF)) {
@@ -133,7 +166,7 @@ var Parser = /** @class */ (function () {
                 if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
                     this.consume(Token.SEMICOLON, "Expect ';' after expression..");
                 }
-                return new Stmt.Expression(expr);
+                return new Stmt.Expression(expr, []);
             }
             catch (e) {
                 db("UN ERROR PASó");
@@ -141,6 +174,7 @@ var Parser = /** @class */ (function () {
             this.reset(position);
             return new Stmt.Block(this.block());
         }
+        alert(7);
         return this.expressionStatement();
     };
     Parser.prototype.declaration = function () {
@@ -257,7 +291,7 @@ var Parser = /** @class */ (function () {
         var expr = this.unary();
         while (this.match(Token.POW)) {
             var operator = this.previous();
-            var right = this.unary();
+            var right = this.power();
             expr = new Expr.Binary(expr, operator, right);
         }
         return expr;
@@ -482,7 +516,7 @@ var Parser = /** @class */ (function () {
         if (increment != null) {
             body = new Stmt.Block([
                 body,
-                new Stmt.Expression(increment)
+                new Stmt.Expression(increment, [])
             ]);
         }
         if (condition == null)
