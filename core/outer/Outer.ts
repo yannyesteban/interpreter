@@ -157,12 +157,63 @@ export class Outer {
         return this.output;
     }
 
+    public execute2(source) {
+
+        this.output = source;
+
+        let x = source.indexOf("{");
+        let subToken = source.charAt(x + 1);
+        const lexer = new Lexer(source, false);
+        let tokens = [];
+        if(subToken == "@" || subToken == "#" || subToken=="$" || subToken=="&"){
+            tokens = lexer.getTokens();
+        }
+        
+        
+
+
+
+        
+        
+        const parser = new Parser(tokens);
+        const expressions = parser.parse();
+
+        return this.eval(expressions);
+    }
+
     public execute(source) {
 
         this.output = source;
 
         const lexer = new Lexer(source, false);
-        const tokens = lexer.getTokens();
+
+        lexer.isLeftDelim = function (){
+            console.log("PeeK", this.peek());
+            let x = this.input.indexOf("{");
+            if(x>=0){
+                let y = this.input.charAt(x+1);
+                if(y=="@"){
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        lexer.isRightDelim = function (){
+            console.log("PeeK", this.peek());
+            
+            if(this.peek() == "}"){
+                return true;
+                
+            }
+            return false;
+        }
+        const tokens = lexer.getTokens2();
+
+
+        return;
+
+
         const parser = new Parser(tokens);
         const expressions = parser.parse();
 

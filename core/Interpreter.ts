@@ -97,8 +97,14 @@ export class Interpreter {
     }
 
     visitExpressionStmt(stmt: Stmt.Expression) {
-        const value = this.evaluate(stmt.expression);
-        console.log("RESULT ", value);
+        console.log("---> ",stmt)
+        let value = this.evaluate(stmt.expression);
+        console.log("RESULT A", value);
+        if(stmt.mods){
+            value = this.evalMods(value, stmt.mods);
+        }
+        console.log("RESULT B:", value);
+
         this.output.push(value);
         return null;
     }
@@ -422,75 +428,64 @@ export class Interpreter {
         
     }
 
-    public evalMod(mod: string, value){
-        switch (mod.name.toLowerCase()) {
+    public evalMod(data: any, mod: Stmt.Modifier){
+        const name = mod.name;
+        let param = null;
+        if(mod.param){
+            param = this.evaluate(mod.param);
+        }
+        console.log("PARAM ", param)
+        
+        switch (name.toLowerCase()) {
             case "trim":
-                value = value.toString();
-                if (m.value) {
-                    if (m.value.toLowerCase() == "left") {
-                        data = data.trimStart();
-                    } else if (m.value.toLowerCase() == "right") {
-                        data = data.trimEnd();
+                data = data.toString();
+                if (param) {
+                    if (param.toLowerCase() == "left") {
+                        return data.trimStart();
+                    } else if (param.toLowerCase() == "right") {
+                        return data.trimEnd();
                     }
-                } else {
-                    data = data.trim();
                 }
-                break;
+                return data.trim();
+                
             case "upper":
-                data = data.toString().toUpperCase();
-                break;
+                return data.toString().toUpperCase();
             case "lower":
-                data = data.toString().toLowerCase();
-                break;
+                return data.toString().toLowerCase();
             case "floor":
-                data = Math.floor(Number(data)).toString();
-                break;
+                return Math.floor(Number(data)).toString();
             case "ceil":
-                data = Math.ceil(Number(data)).toString();
-                break;
+                return Math.ceil(Number(data)).toString();
             case "abs":
-                data = Math.abs(Number(data)).toString();
-                break;
-            case "digits": aux["format"] = true;
-                aux["locales"] = aux["locales"];
-                aux["digits"] = m.value || 2;
-                break;
-            case "format": aux["format"] = true;
-                aux["locales"] = m.value;
-                if (aux["digits"] == undefined) {
-                    aux["digits"] = 2;
-                }
-                break;
+                return Math.abs(Number(data)).toString();
+            case "format": 
+                const digits = param["digits"] || 2;
+                return new Intl.NumberFormat(param["locales"] || undefined , {
+                    minimumFractionDigits: digits,
+                    maximumFractionDigits: digits
+                }).format(Number(data));
             case "date":
-                data = this.getDate(data).toLocaleDateString(m.value ?. replace("_", "-"));
-                break;
+                return this.getDate(data).toLocaleDateString(param["locales"] || undefined);
             case "time":
-                data = this.getDate(data).toLocaleTimeString();
-                break;
+                return this.getDate(data).toLocaleTimeString();
             case "tofixed":
-                data = Number(data).toFixed(Number(m.value || 0));
-                break;
+                return Number(data).toFixed(Number(param || 0));
             case "pretty":
                 if (typeof data === "object") {
                     data = JSON.stringify(data, null, 2);
                 }
-                break;
+                return data
         }
+        return data;
     }
+
     public evalMods(data : string | number | object | Date, mods : Stmt.Modifier[]) {
 
         let aux = {};
-        mods.forEach(m => {
-
-            
+        mods.forEach(mod => {
+            console.log(mod)
+            data = this.evalMod(data, mod)
         });
-
-        if (aux["format"]) {
-            return new Intl.NumberFormat(aux["locales"] ?. replace("_", "-"), {
-                minimumFractionDigits: aux["digits"],
-                maximumFractionDigits: aux["digits"]
-            }).format(Number(data));
-        }
 
         if (typeof data == "number") {
             return data.toString();

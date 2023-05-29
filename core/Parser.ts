@@ -94,7 +94,7 @@ export class Parser {
     }
 
     match(...TokenType: Token[]) {
-        console.log("...",this.peek().value)
+        console.log("...", this.peek().value)
         for (let type of TokenType) {
             if (this.check(type)) {
                 this.advance();
@@ -111,19 +111,19 @@ export class Parser {
             return null;
         }
         let expr = this.expression();
-        if(!expr){
-            
+        if (!expr) {
+
             this.error(this.peek().value, "unknow error!")
             this.advance()
         }
         console.log(expr)
         let mods: Stmt.Modifier[] = [];
-        
+
         if (this.match(Token.BIT_OR)) {
-            
+
             mods = this.modifiers();
         }
-        
+
         if (this.brackets > 0 && this.peek().tok == Token.RBRACE) {
 
         } else {
@@ -134,7 +134,7 @@ export class Parser {
 
         }
 
-        
+
 
         return new Stmt.Expression(expr, mods);
     }
@@ -143,18 +143,18 @@ export class Parser {
         const mods: Stmt.Modifier[] = [];
 
         while (true) {
+
             let mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
             let value = null;
 
             if (this.match(Token.COLON)) {
-                
-                value = this.expression();
-                /*
-                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
-                    throw this.error(this.peek(), "expected a identifier after expression ':'");
+
+                if (this.match(Token.AT)) {
+                    let id = this.consume(Token.IDENT, "expected a literal value after expression '@'");
+                    value = new Expr.Literal(id.value, Token.STRING);
+                } else {
+                    value = this.expression();
                 }
-                value = this.previous().value;
-                */
             }
 
             mods.push(new Stmt.Modifier(mod, value));
@@ -219,7 +219,7 @@ export class Parser {
 
             return new Stmt.Block(this.block());
         }
-        alert(7)
+
         return this.expressionStatement();
     }
 
@@ -232,6 +232,24 @@ export class Parser {
             if (this.match(Token.LET)) {
                 return this.varDeclaration();
             }
+
+            const position = this.getPosition();
+            if (this.match(Token.IDENT)) {
+                const name = this.previous();
+                
+                if (this.match(Token.LET)) {
+                    const initializer = this.expression();
+                    //this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
+                    if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+                        this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+                    }
+
+                    return new Stmt.Var(name, initializer)
+                }
+
+                this.reset(position);    
+            }
+            
 
             return this.statement();
         } catch (/*ParseError*/ error) {
@@ -678,7 +696,7 @@ export class Parser {
             body = new Stmt.Block(
                 [
                     body,
-                    new Stmt.Expression(increment ,[])
+                    new Stmt.Expression(increment, [])
                 ]);
         }
 
@@ -696,5 +714,5 @@ export class Parser {
         const value: Expr.Expression = this.expression();
         this.consume(Token.SEMICOLON, "Expect ';' after value.");
         return new Stmt.Print(value);
-      }
+    }
 }

@@ -117,13 +117,13 @@ var Parser = /** @class */ (function () {
             var mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
             var value = null;
             if (this.match(Token.COLON)) {
-                value = this.expression();
-                /*
-                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
-                    throw this.error(this.peek(), "expected a identifier after expression ':'");
+                if (this.match(Token.AT)) {
+                    var id = this.consume(Token.IDENT, "expected a literal value after expression '@'");
+                    value = new Expr.Literal(id.value, Token.STRING);
                 }
-                value = this.previous().value;
-                */
+                else {
+                    value = this.expression();
+                }
             }
             mods.push(new Stmt.Modifier(mod, value));
             if (this.match(Token.BIT_OR)) {
@@ -174,7 +174,6 @@ var Parser = /** @class */ (function () {
             this.reset(position);
             return new Stmt.Block(this.block());
         }
-        alert(7);
         return this.expressionStatement();
     };
     Parser.prototype.declaration = function () {
@@ -183,6 +182,19 @@ var Parser = /** @class */ (function () {
             //if (this.match(Token.FUNC)) return this._function("function");
             if (this.match(Token.LET)) {
                 return this.varDeclaration();
+            }
+            var position = this.getPosition();
+            if (this.match(Token.IDENT)) {
+                var name_1 = this.previous();
+                if (this.match(Token.LET)) {
+                    var initializer = this.expression();
+                    //this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
+                    if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
+                        this.consume(Token.SEMICOLON, "Expect ';' after expression..");
+                    }
+                    return new Stmt.Var(name_1, initializer);
+                }
+                this.reset(position);
             }
             return this.statement();
         }
@@ -234,8 +246,8 @@ var Parser = /** @class */ (function () {
             var equals = this.previous();
             var value = this.assignment();
             if (expr instanceof Expr.Variable) {
-                var name_1 = expr.name;
-                return new Expr.Assign(name_1, value, equals);
+                var name_2 = expr.name;
+                return new Expr.Assign(name_2, value, equals);
                 //> Classes assign-set
             }
             else if (expr instanceof Expr.Get) {
@@ -324,12 +336,12 @@ var Parser = /** @class */ (function () {
                 expr = this.finishCall(expr);
             }
             else if (this.match(Token.DOT)) {
-                var name_2 = this.consume(Token.IDENT, "Expect property name after '.'.");
-                expr = new Expr.Get(expr, name_2);
+                var name_3 = this.consume(Token.IDENT, "Expect property name after '.'.");
+                expr = new Expr.Get(expr, name_3);
             }
             else if (this.match(Token.LBRACK)) {
-                var name_3 = this.expression();
-                expr = new Expr.Get2(expr, name_3);
+                var name_4 = this.expression();
+                expr = new Expr.Get2(expr, name_4);
                 this.consume(Token.RBRACK, "Expect ']' after property name.");
             }
             else {
@@ -430,20 +442,20 @@ var Parser = /** @class */ (function () {
             return pairs;
         }
         do {
-            var name_4 = null;
+            var name_5 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
-                name_4 = new Expr.Literal(this.peek().value, this.peek().tok);
+                name_5 = new Expr.Literal(this.peek().value, this.peek().tok);
                 this.advance();
             }
             else if (this.match(Token.LBRACK)) {
-                name_4 = this.or();
+                name_5 = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
             this.consume(Token.COLON, "Expect ':'.");
             value = this.or();
             pairs.push({
-                id: name_4,
+                id: name_5,
                 value: value
             });
         } while (this.match(Token.COMMA));

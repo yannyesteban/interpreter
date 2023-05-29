@@ -10,6 +10,9 @@ var Lexer = /** @class */ (function () {
         this.eof = false;
         this.ch = "";
         this.useString = true;
+        this.inside = false;
+        this.isLeftDelim = function () { return false; };
+        this.isRightDelim = function () { return false; };
         this.input = input;
         this.pos = 0;
         this.rd = 0;
@@ -460,7 +463,33 @@ var Lexer = /** @class */ (function () {
     Lexer.prototype.getTokens = function () {
         var tokens = [];
         while (!this.eof) {
+            console.log("peek: ", this.peek());
             tokens.push(this.scan());
+        }
+        tokens.push({
+            pos: null,
+            value: "EOF",
+            priority: null,
+            tok: Token.EOF
+        });
+        return tokens;
+    };
+    Lexer.prototype.getTokens2 = function () {
+        var tokens = [];
+        if (this.isLeftDelim()) {
+            this.inside = true;
+        }
+        else {
+            return;
+        }
+        while (!this.eof) {
+            if (this.inside) {
+                console.log("peek: ", this.peek());
+                if (this.isRightDelim()) {
+                    break;
+                }
+                tokens.push(this.scan());
+            }
         }
         tokens.push({
             pos: null,

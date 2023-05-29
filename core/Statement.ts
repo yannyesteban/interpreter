@@ -4,12 +4,12 @@ import { Item } from "./Lexer.js";
 import { Token } from "./Token.js";
 
 export class Modifier {
-  public mod: string;
-  public value: string;
+  public name: string;
+  public param: Expr.Expression;
 
-  constructor(mod: string, value: string) {
-      this.mod = mod;
-      this.value = value;
+  constructor(name: string, param: Expr.Expression) {
+      this.name = name;
+      this.param = param;
   }
 }
 

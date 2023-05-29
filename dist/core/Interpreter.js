@@ -77,8 +77,13 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitExpressionStmt = function (stmt) {
+        console.log("---> ", stmt);
         var value = this.evaluate(stmt.expression);
-        console.log("RESULT ", value);
+        console.log("RESULT A", value);
+        if (stmt.mods) {
+            value = this.evalMods(value, stmt.mods);
+        }
+        console.log("RESULT B:", value);
         this.output.push(value);
         return null;
     };
@@ -350,76 +355,62 @@ var Interpreter = /** @class */ (function () {
             return date;
         }
     };
+    Interpreter.prototype.evalMod = function (data, mod) {
+        var name = mod.name;
+        var param = null;
+        if (mod.param) {
+            param = this.evaluate(mod.param);
+        }
+        console.log("PARAM ", param);
+        switch (name.toLowerCase()) {
+            case "trim":
+                data = data.toString();
+                if (param) {
+                    if (param.toLowerCase() == "left") {
+                        return data.trimStart();
+                    }
+                    else if (param.toLowerCase() == "right") {
+                        return data.trimEnd();
+                    }
+                }
+                return data.trim();
+            case "upper":
+                return data.toString().toUpperCase();
+            case "lower":
+                return data.toString().toLowerCase();
+            case "floor":
+                return Math.floor(Number(data)).toString();
+            case "ceil":
+                return Math.ceil(Number(data)).toString();
+            case "abs":
+                return Math.abs(Number(data)).toString();
+            case "format":
+                var digits = param["digits"] || 2;
+                return new Intl.NumberFormat(param["locales"] || undefined, {
+                    minimumFractionDigits: digits,
+                    maximumFractionDigits: digits
+                }).format(Number(data));
+            case "date":
+                return this.getDate(data).toLocaleDateString(param["locales"] || undefined);
+            case "time":
+                return this.getDate(data).toLocaleTimeString();
+            case "tofixed":
+                return Number(data).toFixed(Number(param || 0));
+            case "pretty":
+                if (typeof data === "object") {
+                    data = JSON.stringify(data, null, 2);
+                }
+                return data;
+        }
+        return data;
+    };
     Interpreter.prototype.evalMods = function (data, mods) {
         var _this = this;
-        var _a;
         var aux = {};
-        mods.forEach(function (m) {
-            var _a;
-            switch (m.mod.toLowerCase()) {
-                case "trim":
-                    data = data.toString();
-                    if (m.value) {
-                        if (m.value.toLowerCase() == "left") {
-                            data = data.trimStart();
-                        }
-                        else if (m.value.toLowerCase() == "right") {
-                            data = data.trimEnd();
-                        }
-                    }
-                    else {
-                        data = data.trim();
-                    }
-                    break;
-                case "upper":
-                    data = data.toString().toUpperCase();
-                    break;
-                case "lower":
-                    data = data.toString().toLowerCase();
-                    break;
-                case "floor":
-                    data = Math.floor(Number(data)).toString();
-                    break;
-                case "ceil":
-                    data = Math.ceil(Number(data)).toString();
-                    break;
-                case "abs":
-                    data = Math.abs(Number(data)).toString();
-                    break;
-                case "digits":
-                    aux["format"] = true;
-                    aux["locales"] = aux["locales"];
-                    aux["digits"] = m.value || 2;
-                    break;
-                case "format":
-                    aux["format"] = true;
-                    aux["locales"] = m.value;
-                    if (aux["digits"] == undefined) {
-                        aux["digits"] = 2;
-                    }
-                    break;
-                case "date":
-                    data = _this.getDate(data).toLocaleDateString((_a = m.value) === null || _a === void 0 ? void 0 : _a.replace("_", "-"));
-                    break;
-                case "time":
-                    data = _this.getDate(data).toLocaleTimeString();
-                    break;
-                case "tofixed":
-                    data = Number(data).toFixed(Number(m.value || 0));
-                    break;
-                case "pretty":
-                    if (typeof data === "object") {
-                        data = JSON.stringify(data, null, 2);
-                    }
-                    break;
-            }
+        mods.forEach(function (mod) {
+            console.log(mod);
+            data = _this.evalMod(data, mod);
         });
-        if (aux["format"]) {
-            return new Intl.NumberFormat((_a = aux["locales"]) === null || _a === void 0 ? void 0 : _a.replace("_", "-"), {
-                minimumFractionDigits: aux["digits"],
-                maximumFractionDigits: aux["digits"]
-            }).format(Number(data));
-        }
         if (typeof data == "number") {
             return data.toString();
         }

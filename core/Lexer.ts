@@ -21,6 +21,10 @@ export class Lexer {
 
     private useString: boolean = true;
 
+    private inside: boolean = false;
+    isLeftDelim:Function = ()=>false;
+    isRightDelim:Function = ()=>false;
+
     constructor(input: string, useString?: boolean) {
         this.input = input;
         this.pos = 0;
@@ -536,8 +540,42 @@ export class Lexer {
     getTokens() {
         let tokens = [];
         while (!this.eof) {
-
+            console.log("peek: ", this.peek())
             tokens.push(this.scan())
+
+        }
+        tokens.push( {
+            pos: null,
+            value: "EOF",
+            priority: null,
+            tok: Token.EOF
+        });
+        
+        return tokens;
+    }
+
+    getTokens2() {
+        let tokens = [];
+        
+        if(this.isLeftDelim()){
+            this.inside =  true;
+        }else{
+            return;
+        }
+        
+        while (!this.eof) {
+
+            
+
+            if(this.inside){
+                console.log("peek: ", this.peek())
+
+                if(this.isRightDelim()){
+                    break;
+                }
+                tokens.push(this.scan())
+            }
+            
 
         }
         tokens.push( {

@@ -41,13 +41,13 @@
 
 
         function run(code) {
-
+            console.clear();
             const lexer = new Lexer(code);
 
             const tokens = lexer.getTokens();
 
             //console.log("source: ", source, "\n", tokens);
-            console.clear();
+            
             console.log("code: ", code, "\n");
 
             const parser = new Parser(tokens);

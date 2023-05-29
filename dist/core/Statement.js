@@ -1,7 +1,7 @@
 var Modifier = /** @class */ (function () {
-    function Modifier(mod, value) {
-        this.mod = mod;
-        this.value = value;
+    function Modifier(name, param) {
+        this.name = name;
+        this.param = param;
     }
     return Modifier;
 }());

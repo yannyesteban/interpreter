@@ -142,10 +142,42 @@ var Outer = /** @class */ (function () {
         ;
         return this.output;
     };
+    Outer.prototype.execute2 = function (source) {
+        this.output = source;
+        var x = source.indexOf("{");
+        var subToken = source.charAt(x + 1);
+        var lexer = new Lexer(source, false);
+        var tokens = [];
+        if (subToken == "@" || subToken == "#" || subToken == "$" || subToken == "&") {
+            tokens = lexer.getTokens();
+        }
+        var parser = new Parser(tokens);
+        var expressions = parser.parse();
+        return this.eval(expressions);
+    };
     Outer.prototype.execute = function (source) {
         this.output = source;
         var lexer = new Lexer(source, false);
-        var tokens = lexer.getTokens();
+        lexer.isLeftDelim = function () {
+            console.log("PeeK", this.peek());
+            var x = this.input.indexOf("{");
+            if (x >= 0) {
+                var y = this.input.charAt(x + 1);
+                if (y == "@") {
+                    return true;
+                }
+            }
+            return false;
+        };
+        lexer.isRightDelim = function () {
+            console.log("PeeK", this.peek());
+            if (this.peek() == "}") {
+                return true;
+            }
+            return false;
+        };
+        var tokens = lexer.getTokens2();
+        return;
         var parser = new Parser(tokens);
         var expressions = parser.parse();
         return this.eval(expressions);
