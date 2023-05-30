@@ -10,6 +10,7 @@ var Data = /** @class */ (function () {
 }());
 var Outer = /** @class */ (function () {
     function Outer() {
+        this.indexOf = 0;
         this.data = [];
     }
     Outer.prototype.setMap = function (token, data, pre) {
@@ -159,18 +160,24 @@ var Outer = /** @class */ (function () {
         this.output = source;
         var lexer = new Lexer(source, false);
         lexer.isLeftDelim = function () {
-            console.log("PeeK", this.peek());
-            var x = this.input.indexOf("{");
-            if (x >= 0) {
-                var y = this.input.charAt(x + 1);
-                if (y == "@") {
-                    return true;
+            while (!this.eof) {
+                console.log("PeeK", this.peek());
+                if (this.peek() == "{") {
+                    console.log(" llave Open", this.peek());
+                    this.next();
+                    console.log(" ???", this.peek());
+                    if (this.peek() == "@") {
+                        this.next();
+                        console.log("....", this.peek());
+                        return true;
+                    }
                 }
+                this.next();
             }
             return false;
         };
         lexer.isRightDelim = function () {
-            console.log("PeeK", this.peek());
+            console.log("PeeK22", this.peek());
             if (this.peek() == "}") {
                 return true;
             }

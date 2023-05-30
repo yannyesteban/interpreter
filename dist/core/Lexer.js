@@ -463,7 +463,6 @@ var Lexer = /** @class */ (function () {
     Lexer.prototype.getTokens = function () {
         var tokens = [];
         while (!this.eof) {
-            console.log("peek: ", this.peek());
             tokens.push(this.scan());
         }
         tokens.push({
@@ -478,17 +477,23 @@ var Lexer = /** @class */ (function () {
         var tokens = [];
         if (this.isLeftDelim()) {
             this.inside = true;
+            //this.next();
         }
         else {
             return;
         }
         while (!this.eof) {
             if (this.inside) {
-                console.log("peek: ", this.peek());
+                console.log("peek A: ", this.peek());
+                if (!this.isRightDelim()) {
+                    console.log(".............");
+                    tokens.push(this.scan());
+                    continue;
+                }
                 if (this.isRightDelim()) {
+                    alert(14);
                     break;
                 }
-                tokens.push(this.scan());
             }
         }
         tokens.push({
@@ -497,6 +502,7 @@ var Lexer = /** @class */ (function () {
             priority: null,
             tok: Token.EOF
         });
+        console.log(tokens);
         return tokens;
     };
     return Lexer;

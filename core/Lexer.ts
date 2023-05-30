@@ -540,10 +540,9 @@ export class Lexer {
     getTokens() {
         let tokens = [];
         while (!this.eof) {
-            console.log("peek: ", this.peek())
             tokens.push(this.scan())
-
         }
+
         tokens.push( {
             pos: null,
             value: "EOF",
@@ -559,6 +558,7 @@ export class Lexer {
         
         if(this.isLeftDelim()){
             this.inside =  true;
+            //this.next();
         }else{
             return;
         }
@@ -568,12 +568,19 @@ export class Lexer {
             
 
             if(this.inside){
-                console.log("peek: ", this.peek())
+                console.log("peek A: ", this.peek())
+
+                if(!this.isRightDelim()){
+                    console.log(".............")
+                    tokens.push(this.scan());
+                    continue;
+                }
 
                 if(this.isRightDelim()){
+                    alert(14)
                     break;
                 }
-                tokens.push(this.scan())
+                
             }
             
 
@@ -584,7 +591,7 @@ export class Lexer {
             priority: null,
             tok: Token.EOF
         });
-        
+        console.log(tokens)
         return tokens;
     }
 
