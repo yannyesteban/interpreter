@@ -206,7 +206,12 @@ var Interpreter = /** @class */ (function () {
         if (object instanceof InstanceR) {
             return object.get(expr.name);
         }
-        throw ""; //new RuntimeError(expr.name,           "Only instances have properties.");
+        alert(8);
+        if (typeof object == "object") {
+            console.log(object, expr.name.value);
+            return object[expr.name.value];
+        }
+        throw "Only instances have properties."; //new RuntimeError(expr.name,           "Only instances have properties.");
     };
     Interpreter.prototype.visitGroupingExpr = function (expr) {
         return this.evaluate(expr.expression);

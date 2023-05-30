@@ -77,6 +77,13 @@ export class Parser {
         return this.tokens[this.current - 1];
     }
 
+    nextValid() {
+        while (this.peek().tok === Token.EOL) {
+            this.advance();
+        }
+
+        return;
+    }
     consume(type, message) {
 
         if (this.check(type)) {
@@ -236,7 +243,7 @@ export class Parser {
             const position = this.getPosition();
             if (this.match(Token.IDENT)) {
                 const name = this.previous();
-                
+
                 if (this.match(Token.LET)) {
                     const initializer = this.expression();
                     //this.consume(Token.SEMICOLON, "Expect ';' after variable declaration.");
@@ -247,9 +254,9 @@ export class Parser {
                     return new Stmt.Var(name, initializer)
                 }
 
-                this.reset(position);    
+                this.reset(position);
             }
-            
+
 
             return this.statement();
         } catch (/*ParseError*/ error) {
@@ -569,6 +576,7 @@ export class Parser {
 
     objectValue(ambiguity?) {
 
+        console.log(this.tokens)
         const pairs = [];
         if (this.match(Token.RBRACK)) {
 
@@ -581,20 +589,22 @@ export class Parser {
 
 
         do {
-
+            this.nextValid();
             let name = null;
             let value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
 
                 name = new Expr.Literal(this.peek().value, this.peek().tok);
                 this.advance()
+                
             } else if (this.match(Token.LBRACK)) {
                 name = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
 
+            this.nextValid();
             this.consume(Token.COLON, "Expect ':'.");
-
+            this.nextValid();
             value = this.or();
             pairs.push({
                 id: name,

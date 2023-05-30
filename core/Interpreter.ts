@@ -246,8 +246,13 @@ export class Interpreter {
         if (object instanceof InstanceR) {
             return object.get(expr.name);
         }
+        alert(8)
+        if (typeof object == "object") {
+            console.log(object, expr.name.value)
+            return object[expr.name.value];
+        }
 
-        throw ""//new RuntimeError(expr.name,           "Only instances have properties.");
+        throw "Only instances have properties."//new RuntimeError(expr.name,           "Only instances have properties.");
     }
 
     visitGroupingExpr(expr: Expr.Grouping) {
@@ -287,6 +292,8 @@ export class Interpreter {
         object.set(expr.name, value);
         return value;
     }
+
+    
 
     visitSuperExpr(expr: Expr.Super) {
         const distance: number = this.locals.get(expr);
@@ -331,7 +338,7 @@ export class Interpreter {
     }
 
     visitObjectExpr(expr: Expr.Object){
-
+        
         const o = {};
         //console.error("visitObjectExpr", expr);
         expr.childs.forEach(ch=>{

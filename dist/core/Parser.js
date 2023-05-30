@@ -60,6 +60,12 @@ var Parser = /** @class */ (function () {
     Parser.prototype.previous = function () {
         return this.tokens[this.current - 1];
     };
+    Parser.prototype.nextValid = function () {
+        while (this.peek().tok === Token.EOL) {
+            this.advance();
+        }
+        return;
+    };
     Parser.prototype.consume = function (type, message) {
         if (this.check(type)) {
             return this.advance();
@@ -434,6 +440,7 @@ var Parser = /** @class */ (function () {
         return values;
     };
     Parser.prototype.objectValue = function (ambiguity) {
+        console.log(this.tokens);
         var pairs = [];
         if (this.match(Token.RBRACK)) {
             if (ambiguity) {
@@ -442,6 +449,7 @@ var Parser = /** @class */ (function () {
             return pairs;
         }
         do {
+            this.nextValid();
             var name_5 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
@@ -452,7 +460,9 @@ var Parser = /** @class */ (function () {
                 name_5 = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
+            this.nextValid();
             this.consume(Token.COLON, "Expect ':'.");
+            this.nextValid();
             value = this.or();
             pairs.push({
                 id: name_5,

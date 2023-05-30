@@ -1,1 +1,3 @@
-let name = {a:2}; name.a | upper
+"yanny";
+let name = {a:{name:"yanny",last:"nuñez"}};
+name.a.last | upper;
