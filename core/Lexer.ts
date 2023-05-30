@@ -4,6 +4,21 @@ import { isAlphaNumeric, isDecimal, isHex, isLetter} from "./LexerFunctions.js";
 var keyword = new Keyword();
 var unicode = { MaxRune: 65536 };
 
+
+export class Section{
+    public tokens : Item[] = [];
+    public pos : number = 0;
+    public length : number = 0;
+    public outside: boolean = false;
+
+    constructor(tokens : Item[], pos : number, length : number, outside: boolean){
+        this.tokens = tokens;
+        this.pos = pos;
+        this.length = length;
+        this.outside = outside;
+    }
+
+}
 export interface Item{
     pos: number;
     value: any;
@@ -22,8 +37,8 @@ export class Lexer {
     private useString: boolean = true;
 
     private inside: boolean = false;
-    isLeftDelim:Function = ()=>false;
-    isRightDelim:Function = ()=>false;
+    public isLeftDelim:Function = ()=>false;
+    public isRightDelim:Function = ()=>false;
 
     constructor(input: string, useString?: boolean) {
         this.input = input;
@@ -334,12 +349,22 @@ export class Lexer {
 
         let tok: number = null;
         let offs = 0;
+
+        if(this.isLeftDelim()){
+            this.inside = true
+        }
+
+        if(this.isRightDelim()){
+
+        }
         while (!this.eof) {
             this.skipWhitespace();
 
             ch = this.ch;
             offs = this.pos;
             //console.log(this.ch)
+
+            
 
 
             if (isLetter(ch) || ch == "_") {
@@ -371,14 +396,15 @@ export class Lexer {
                         break;
                     case "\"":
                     case "'":    
-                        if(this.useString){
+                        /*if(this.useString){
                             tok = Token.STRING;
                             lit = this.scanString(ch);
                         }else{
                             tok = Token.SYMBOL;
                             lit = ch;
-                        }                    
-                        
+                        }*/                    
+                        tok = Token.STRING;
+                        lit = this.scanString(ch);
                         break;
                     case ":":
                         tok = this.evalOp(ch, Token.COLON, Token.LET, null, null);
@@ -530,6 +556,20 @@ export class Lexer {
 
     }
 
+    setPosition(pos: number) {
+
+        if (pos < this.input.length) {
+            this.pos = pos;
+            this.ch = this.input[this.pos];
+            this.rd = this.pos + 1;
+        } else {
+            this.pos = this.input.length;
+            this.eof = true;
+            this.ch = "\0";
+        }
+
+    }
+
     peek() {
         if (this.pos < this.input.length) {
             return this.input[this.pos];
@@ -553,61 +593,50 @@ export class Lexer {
         return tokens;
     }
 
-    getTokens2() {
-        let tokens = [];
-        
-        if(this.isLeftDelim()){
-            this.inside =  true;
-            //this.next();
-        }else{
-            return;
-        }
+    getSections(leftDelim: string, rightDelim: string) {
+
+        const sections: Section[] = [];
         
         while (!this.eof) {
-
             
+            let tokens = [];
+            let pos = 0;
+            let endPos = 0;
+            let index = this.input.indexOf(leftDelim, this.pos);
+            
+            if(index >=0){
+                pos = index;
+                this.setPosition(index + leftDelim.length);
 
-            if(this.inside){
-                console.log("peek A: ", this.peek())
+                while (!this.eof) {
+                    this.skipWhitespace();
 
-                if(!this.isRightDelim()){
-                    console.log(".............")
-                    tokens.push(this.scan());
-                    continue;
+                    if(this.peek() == rightDelim[0]){
+                        index = this.input.indexOf(rightDelim, this.pos);
+
+                        if(index>0){
+                            endPos = index + rightDelim.length;
+                            this.setPosition(index + rightDelim.length);
+                            break;
+                        }
+                        
+                    }
+                    tokens.push(this.scan())
                 }
-
-                if(this.isRightDelim()){
-                    alert(14)
-                    break;
-                }
+        
+                tokens.push( {
+                    pos: null,
+                    value: "EOF",
+                    priority: null,
+                    tok: Token.EOF
+                });
                 
+                sections.push(new Section(tokens, pos, endPos-pos, this.input[pos-1] === '"' && this.input[endPos] === '"'));
             }
-            
+            this.next();
 
         }
-        tokens.push( {
-            pos: null,
-            value: "EOF",
-            priority: null,
-            tok: Token.EOF
-        });
-        console.log(tokens)
-        return tokens;
+
+        return sections;
     }
-
 }
-/*
-console.log(Token);
-
-let source = `while if for while  987.368  5e+3 -24 0xaf01 0b2 if yanny, esteban, hello; wait; test 4==5 6=3 2+2 k+=8`;
-
-source = '6+6*2 || 2';
-let lexer = new Lexer(source);
-
-console.log(source, "\n", lexer.getTokens());
-
-`
-if(a>1){"445"}else{"aaa"};a=45;case(a){when(1){ 456}when(2){100}default{3001}}
-
-`
-*/

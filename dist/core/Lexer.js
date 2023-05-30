@@ -2,6 +2,20 @@ import { Keyword, Token } from "./Token.js";
 import { isAlphaNumeric, isDecimal, isHex, isLetter } from "./LexerFunctions.js";
 var keyword = new Keyword();
 var unicode = { MaxRune: 65536 };
+var Section = /** @class */ (function () {
+    function Section(tokens, pos, length, outside) {
+        this.tokens = [];
+        this.pos = 0;
+        this.length = 0;
+        this.outside = false;
+        this.tokens = tokens;
+        this.pos = pos;
+        this.length = length;
+        this.outside = outside;
+    }
+    return Section;
+}());
+export { Section };
 var Lexer = /** @class */ (function () {
     function Lexer(input, useString) {
         this.input = "";
@@ -284,6 +298,11 @@ var Lexer = /** @class */ (function () {
         var lit = "*** ERROR ***";
         var tok = null;
         var offs = 0;
+        if (this.isLeftDelim()) {
+            this.inside = true;
+        }
+        if (this.isRightDelim()) {
+        }
         while (!this.eof) {
             this.skipWhitespace();
             ch = this.ch;
@@ -316,14 +335,15 @@ var Lexer = /** @class */ (function () {
                         break;
                     case "\"":
                     case "'":
-                        if (this.useString) {
+                        /*if(this.useString){
                             tok = Token.STRING;
                             lit = this.scanString(ch);
-                        }
-                        else {
+                        }else{
                             tok = Token.SYMBOL;
                             lit = ch;
-                        }
+                        }*/
+                        tok = Token.STRING;
+                        lit = this.scanString(ch);
                         break;
                     case ":":
                         tok = this.evalOp(ch, Token.COLON, Token.LET, null, null);
@@ -454,6 +474,18 @@ var Lexer = /** @class */ (function () {
             this.ch = "\0";
         }
     };
+    Lexer.prototype.setPosition = function (pos) {
+        if (pos < this.input.length) {
+            this.pos = pos;
+            this.ch = this.input[this.pos];
+            this.rd = this.pos + 1;
+        }
+        else {
+            this.pos = this.input.length;
+            this.eof = true;
+            this.ch = "\0";
+        }
+    };
     Lexer.prototype.peek = function () {
         if (this.pos < this.input.length) {
             return this.input[this.pos];
@@ -473,54 +505,41 @@ var Lexer = /** @class */ (function () {
         });
         return tokens;
     };
-    Lexer.prototype.getTokens2 = function () {
-        var tokens = [];
-        if (this.isLeftDelim()) {
-            this.inside = true;
-            //this.next();
-        }
-        else {
-            return;
-        }
+    Lexer.prototype.getSections = function (leftDelim, rightDelim) {
+        var sections = [];
         while (!this.eof) {
-            if (this.inside) {
-                console.log("peek A: ", this.peek());
-                if (!this.isRightDelim()) {
-                    console.log(".............");
+            var tokens = [];
+            var pos = 0;
+            var endPos = 0;
+            var index = this.input.indexOf(leftDelim, this.pos);
+            if (index >= 0) {
+                pos = index;
+                this.setPosition(index + leftDelim.length);
+                while (!this.eof) {
+                    this.skipWhitespace();
+                    if (this.peek() == rightDelim[0]) {
+                        index = this.input.indexOf(rightDelim, this.pos);
+                        if (index > 0) {
+                            endPos = index + rightDelim.length;
+                            this.setPosition(index + rightDelim.length);
+                            break;
+                        }
+                    }
                     tokens.push(this.scan());
-                    continue;
                 }
-                if (this.isRightDelim()) {
-                    alert(14);
-                    break;
-                }
+                tokens.push({
+                    pos: null,
+                    value: "EOF",
+                    priority: null,
+                    tok: Token.EOF
+                });
+                sections.push(new Section(tokens, pos, endPos - pos, this.input[pos - 1] === '"' && this.input[endPos] === '"'));
             }
+            this.next();
         }
-        tokens.push({
-            pos: null,
-            value: "EOF",
-            priority: null,
-            tok: Token.EOF
-        });
-        console.log(tokens);
-        return tokens;
+        return sections;
     };
     return Lexer;
 }());
 export { Lexer };
-/*
-console.log(Token);
-
-let source = `while if for while  987.368  5e+3 -24 0xaf01 0b2 if yanny, esteban, hello; wait; test 4==5 6=3 2+2 k+=8`;
-
-source = '6+6*2 || 2';
-let lexer = new Lexer(source);
-
-console.log(source, "\n", lexer.getTokens());
-
-`
-if(a>1){"445"}else{"aaa"};a=45;case(a){when(1){ 456}when(2){100}default{3001}}
-
-`
-*/ 
 //# sourceMappingURL=Lexer.js.map

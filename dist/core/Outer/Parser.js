@@ -6,7 +6,7 @@ export var ExpressionType;
     ExpressionType[ExpressionType["TIME"] = 3] = "TIME";
 })(ExpressionType || (ExpressionType = {}));
 var Expression = /** @class */ (function () {
-    function Expression(token, name, pos, length, mods, path, type) {
+    function Expression(token, name, pos, length, mods, path, type, outside) {
         this.token = token;
         this.name = name;
         this.pos = pos;
@@ -15,6 +15,7 @@ var Expression = /** @class */ (function () {
         this.ready = false;
         this.path = path;
         this.type = type;
+        this.outside = outside;
     }
     return Expression;
 }());
@@ -39,11 +40,10 @@ function db() {
     console.log("------------------");
 }
 var Parser = /** @class */ (function () {
-    function Parser(tokens) {
+    function Parser() {
         this.version = "Interpreter V0.2";
         this.current = 0;
         this.brackets = 0;
-        this.tokens = tokens;
     }
     Parser.prototype.error = function (token, message) {
         db("Error: ", message);
@@ -54,18 +54,10 @@ var Parser = /** @class */ (function () {
             //report(token.line, " at '" + token.lexeme + "'", message);
         }
     };
-    Parser.prototype.parse = function () {
-        var statements = [];
-        while (!this.isAtEnd()) {
-            var expr = this.expression();
-            if (expr) {
-                statements.push(expr);
-            }
-            else {
-                this.advance();
-            }
-        }
-        return statements; // [parse-error-handling]
+    Parser.prototype.parse = function (tokens) {
+        this.tokens = tokens;
+        this.reset(0);
+        return this.expression();
     };
     Parser.prototype.peek = function () {
         return this.tokens[this.current];
@@ -126,30 +118,28 @@ var Parser = /** @class */ (function () {
         var mods = [];
         var path = [];
         var type = ExpressionType.VAR;
-        if (this.match(Token.LBRACE)) {
-            pos = this.previous().pos;
-            if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
-                token = this.previous().value;
-                do {
-                    if (this.match(Token.IDENT, Token.INT)) {
-                        name = this.previous().value;
-                        path.push(name);
-                        if (name === "_DATE_") {
-                            type = ExpressionType.DATE;
-                        }
-                        else if (name === "_TIME_") {
-                            type = ExpressionType.TIME;
-                        }
+        var outside = false;
+        if (this.match(Token.COLON)) {
+            outside = true;
+        }
+        if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
+            token = this.previous().value;
+            do {
+                if (this.match(Token.IDENT, Token.INT, Token.STRING)) {
+                    name = this.previous().value;
+                    path.push(name);
+                    if (name === "_DATE_") {
+                        type = ExpressionType.DATE;
                     }
-                } while (this.match(Token.DOT));
-                if (this.match(Token.BIT_OR)) {
-                    mods = this.modifiers();
+                    else if (name === "_TIME_") {
+                        type = ExpressionType.TIME;
+                    }
                 }
-                if (this.match(Token.RBRACE)) {
-                    length = this.previous().pos - pos + 1;
-                    return new Expression(token, name, pos, length, mods, path, type);
-                }
+            } while (this.match(Token.DOT));
+            if (this.match(Token.BIT_OR)) {
+                mods = this.modifiers();
             }
+            return new Expression(token, name, pos, length, mods, path, type, outside);
         }
         return null;
     };
@@ -159,7 +149,7 @@ var Parser = /** @class */ (function () {
             var mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
             var value = null;
             if (this.match(Token.COLON)) {
-                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
+                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT, Token.STRING)) {
                     throw this.error(this.peek(), "expected a identifier after expression ':'");
                 }
                 value = this.previous().value;

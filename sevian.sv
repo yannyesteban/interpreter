@@ -1,1 +1,1 @@
-let name = "yanny"; name | upper
+let name = {a:2}; name.a | upper

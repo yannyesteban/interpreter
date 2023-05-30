@@ -88,6 +88,9 @@ export enum Token {
 	FUNC, // "func"
 	FN, // "fn"
 	PRINT, // "print"
+
+	LEFT_DELIM,
+	RIGHT_DELIM,
 	
 }
 

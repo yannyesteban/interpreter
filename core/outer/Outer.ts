@@ -118,9 +118,9 @@ export class Outer {
         return data;
     }
 
-
     public eval(expressions: Expression[]) {
         let delta = 0;
+        let offset;
         for (let e of expressions) {
 
             let value = null;
@@ -150,37 +150,13 @@ export class Outer {
 
             e.ready = true;
             e.pos += delta;
+            offset = (e.outside && e.pos > 0) ? 1 : 0;
+            this.output = this.output.substring(0, e.pos - offset) + value + this.output.substring(e.pos + e.length + offset);
 
-            this.output = this.output.substring(0, e.pos - 1) + value + this.output.substring(e.pos - 1 + e.length);
-
-            delta = delta + (value.length - e.length);
+            delta = delta + (value.length - e.length) + 2 * offset;
         };
 
         return this.output;
-    }
-
-    public execute2(source) {
-
-        this.output = source;
-
-        let x = source.indexOf("{");
-        let subToken = source.charAt(x + 1);
-        const lexer = new Lexer(source, false);
-        let tokens = [];
-        if (subToken == "@" || subToken == "#" || subToken == "$" || subToken == "&") {
-            tokens = lexer.getTokens();
-        }
-
-
-
-
-
-
-
-        const parser = new Parser(tokens);
-        const expressions = parser.parse();
-
-        return this.eval(expressions);
     }
 
     public execute(source) {
@@ -189,46 +165,25 @@ export class Outer {
 
         const lexer = new Lexer(source, false);
 
-        lexer.isLeftDelim = function () {
-           
-            while (!this.eof) {
-                console.log("PeeK", this.peek());
-                if(this.peek() == "{"){
-                    console.log(" llave Open", this.peek());
-                    this.next();
-                    console.log(" ???", this.peek());
-                    if(this.peek()=="@"){
-                        this.next();
-                        console.log("....", this.peek())
-                        
-                        return true;
-                    }
-                }
-                this.next();
-                
+        const setions = lexer.getSections("{{","}}");
+
+        const parser = new Parser();
+        
+        const expressions = [];
+
+        for (let s of setions){
+            let expr = parser.parse(s.tokens);
+
+            if(expr){
+                expr.length = s.length;
+                expr.pos = s.pos;
+                expr.outside = s.outside && expr.outside;
+                expressions.push(expr);
             }
-            return false;
         }
 
-        lexer.isRightDelim = function () {
-            console.log("PeeK22", this.peek());
-
-            if (this.peek() == "}") {
-                
-                return true;
-
-            }
-            return false;
-        }
-        const tokens = lexer.getTokens2();
-
-
-        return;
-
-
-        const parser = new Parser(tokens);
-        const expressions = parser.parse();
-
+        //console.log(expressions)
+        
         return this.eval(expressions);
     }
 }

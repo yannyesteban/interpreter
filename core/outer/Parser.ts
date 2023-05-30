@@ -2,34 +2,36 @@ import { Token } from "../Token.js";
 import { Item } from "../Lexer.js";
 import * as exp from "constants";
 export enum ExpressionType {
-	VAR = 1, // main
-	DATE,
-	TIME
-	
+    VAR = 1, // main
+    DATE,
+    TIME
+
 
 }
 export class Expression {
     public token: string;
     public name: string;
-    
+
     public pos: number;
     public length: number;
     public mods: Modifier[];
     public ready: boolean;
 
-    public path:string[];
+    public path: string[];
     public type: ExpressionType;
+    public outside: boolean;
 
-    constructor(token: string, name: string, pos: number, length: number, mods: Modifier[], path, type:ExpressionType) {
+    constructor(token: string, name: string, pos: number, length: number, mods: Modifier[], path, type: ExpressionType, outside: boolean) {
         this.token = token;
         this.name = name;
-    
+
         this.pos = pos;
         this.length = length;
         this.mods = mods;
         this.ready = false;
         this.path = path;
         this.type = type;
+        this.outside = outside;
     }
 }
 
@@ -62,8 +64,8 @@ export class Parser {
 
     public brackets = 0;
 
-    constructor(tokens) {
-        this.tokens = tokens;
+    constructor() {
+
     }
 
     error(token, message) {
@@ -75,19 +77,10 @@ export class Parser {
         }
     }
 
-    parse(): Expression[] {
-        let statements = [];
-        while (!this.isAtEnd()) {
-            const expr = this.expression();
-            if (expr) {
-                statements.push(expr);
-            }
-            else {
-                this.advance();
-            }
-        }
-
-        return statements; // [parse-error-handling]
+    parse(tokens: Item[]): Expression {
+        this.tokens = tokens;
+        this.reset(0);
+        return this.expression();
     }
 
     peek() {
@@ -117,8 +110,6 @@ export class Parser {
         }
         return this.previous();
     }
-
-
 
     previous() {
         return this.tokens[this.current - 1];
@@ -159,37 +150,38 @@ export class Parser {
         let length: number = null;
         let mods: Modifier[] = [];
         let path = [];
-        let type:ExpressionType = ExpressionType.VAR; 
+        let type: ExpressionType = ExpressionType.VAR;
+        let outside: boolean = false;
 
-        if (this.match(Token.LBRACE)) {
-            pos = this.previous().pos;
-            if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
-                
-                token = this.previous().value;
-
-                do{
-                    if (this.match(Token.IDENT, Token.INT)) {
-                        name = this.previous().value;
-                        path.push(name);
-
-                        if(name === "_DATE_"){
-                            type = ExpressionType.DATE
-                        }else if(name === "_TIME_"){
-                            type = ExpressionType.TIME;
-                        }
-                    }
-                }while(this.match(Token.DOT));
-
-                if (this.match(Token.BIT_OR)) {
-                    mods = this.modifiers();
-                }
-
-                if (this.match(Token.RBRACE)) {
-                    length = this.previous().pos - pos + 1;
-                    return new Expression(token, name, pos, length, mods, path, type);
-                }
-            }
+        if (this.match(Token.COLON)) {
+            outside = true;
         }
+
+        
+        if (this.match(Token.AT, Token.DOLAR, Token.BIT_AND, Token.HASHTAG)) {
+
+            token = this.previous().value;
+
+            do {
+                if (this.match(Token.IDENT, Token.INT, Token.STRING)) {
+                    name = this.previous().value;
+                    path.push(name);
+
+                    if (name === "_DATE_") {
+                        type = ExpressionType.DATE
+                    } else if (name === "_TIME_") {
+                        type = ExpressionType.TIME;
+                    }
+                }
+            } while (this.match(Token.DOT));
+
+            if (this.match(Token.BIT_OR)) {
+                mods = this.modifiers();
+            }
+
+            return new Expression(token, name, pos, length, mods, path, type, outside);
+        }
+
         return null;
 
     }
@@ -202,8 +194,8 @@ export class Parser {
             let value = null;
 
             if (this.match(Token.COLON)) {
-                
-                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT)) {
+
+                if (!this.match(Token.IDENT, Token.INT, Token.FLOAT, Token.STRING)) {
                     throw this.error(this.peek(), "expected a identifier after expression ':'");
                 }
                 value = this.previous().value;

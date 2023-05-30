@@ -105,6 +105,7 @@ var Outer = /** @class */ (function () {
     };
     Outer.prototype.eval = function (expressions) {
         var delta = 0;
+        var offset;
         var _loop_1 = function (e) {
             var value = null;
             if (e.type === ExpressionType.VAR) {
@@ -132,8 +133,9 @@ var Outer = /** @class */ (function () {
             value = this_1.evalMods(value, e.mods);
             e.ready = true;
             e.pos += delta;
-            this_1.output = this_1.output.substring(0, e.pos - 1) + value + this_1.output.substring(e.pos - 1 + e.length);
-            delta = delta + (value.length - e.length);
+            offset = (e.outside && e.pos > 0) ? 1 : 0;
+            this_1.output = this_1.output.substring(0, e.pos - offset) + value + this_1.output.substring(e.pos + e.length + offset);
+            delta = delta + (value.length - e.length) + 2 * offset;
         };
         var this_1 = this;
         for (var _i = 0, expressions_1 = expressions; _i < expressions_1.length; _i++) {
@@ -143,50 +145,23 @@ var Outer = /** @class */ (function () {
         ;
         return this.output;
     };
-    Outer.prototype.execute2 = function (source) {
-        this.output = source;
-        var x = source.indexOf("{");
-        var subToken = source.charAt(x + 1);
-        var lexer = new Lexer(source, false);
-        var tokens = [];
-        if (subToken == "@" || subToken == "#" || subToken == "$" || subToken == "&") {
-            tokens = lexer.getTokens();
-        }
-        var parser = new Parser(tokens);
-        var expressions = parser.parse();
-        return this.eval(expressions);
-    };
     Outer.prototype.execute = function (source) {
         this.output = source;
         var lexer = new Lexer(source, false);
-        lexer.isLeftDelim = function () {
-            while (!this.eof) {
-                console.log("PeeK", this.peek());
-                if (this.peek() == "{") {
-                    console.log(" llave Open", this.peek());
-                    this.next();
-                    console.log(" ???", this.peek());
-                    if (this.peek() == "@") {
-                        this.next();
-                        console.log("....", this.peek());
-                        return true;
-                    }
-                }
-                this.next();
+        var setions = lexer.getSections("{{", "}}");
+        var parser = new Parser();
+        var expressions = [];
+        for (var _i = 0, setions_1 = setions; _i < setions_1.length; _i++) {
+            var s = setions_1[_i];
+            var expr = parser.parse(s.tokens);
+            if (expr) {
+                expr.length = s.length;
+                expr.pos = s.pos;
+                expr.outside = s.outside && expr.outside;
+                expressions.push(expr);
             }
-            return false;
-        };
-        lexer.isRightDelim = function () {
-            console.log("PeeK22", this.peek());
-            if (this.peek() == "}") {
-                return true;
-            }
-            return false;
-        };
-        var tokens = lexer.getTokens2();
-        return;
-        var parser = new Parser(tokens);
-        var expressions = parser.parse();
+        }
+        //console.log(expressions)
         return this.eval(expressions);
     };
     return Outer;

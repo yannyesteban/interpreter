@@ -72,6 +72,8 @@ export var Token;
     Token[Token["FUNC"] = 68] = "FUNC";
     Token[Token["FN"] = 69] = "FN";
     Token[Token["PRINT"] = 70] = "PRINT";
+    Token[Token["LEFT_DELIM"] = 71] = "LEFT_DELIM";
+    Token[Token["RIGHT_DELIM"] = 72] = "RIGHT_DELIM";
 })(Token || (Token = {}));
 var keywords = {
     if: Token.IF,
