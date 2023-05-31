@@ -589,7 +589,7 @@ export class Parser {
 
 
         do {
-            this.nextValid();
+            //this.nextValid();
             let name = null;
             let value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
@@ -602,14 +602,15 @@ export class Parser {
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
 
-            this.nextValid();
+            //this.nextValid();
             this.consume(Token.COLON, "Expect ':'.");
-            this.nextValid();
+            //this.nextValid();
             value = this.or();
             pairs.push({
                 id: name,
                 value
-            })
+            });
+            //this.nextValid();
         } while (this.match(Token.COMMA));
         this.consume(Token.RBRACE, "Expect '}'.");
         return pairs;

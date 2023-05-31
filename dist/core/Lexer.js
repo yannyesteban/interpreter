@@ -23,22 +23,17 @@ var Lexer = /** @class */ (function () {
         this.rd = null;
         this.eof = false;
         this.ch = "";
-        this.useString = true;
-        this.inside = false;
-        this.isLeftDelim = function () { return false; };
-        this.isRightDelim = function () { return false; };
+        this.markEOL = false;
         this.input = input;
         this.pos = 0;
         this.rd = 0;
         this.ch = " ";
         this.eof = false;
-        if (useString !== undefined) {
-            this.useString = useString;
-        }
         this.next();
         //console.log(input);
     }
     Lexer.prototype.error = function (offs, msg) {
+        throw new Error(msg);
     };
     Lexer.prototype.evalOp = function (ch, tokenDefault, tokenAssign, tokenX2, tokenX3) {
         if (this.ch == "=") {
@@ -63,7 +58,7 @@ var Lexer = /** @class */ (function () {
         return tokenDefault;
     };
     Lexer.prototype.skipWhitespace = function () {
-        while (this.ch == ' ' || this.ch == '\t' /*|| this.ch == '\n'*/ || this.ch == '\r') {
+        while (this.ch == ' ' || this.ch == '\t' || this.ch == '\n' && !this.markEOL || this.ch == '\r') {
             this.next();
         }
     };
@@ -298,28 +293,34 @@ var Lexer = /** @class */ (function () {
         var lit = "*** ERROR ***";
         var tok = null;
         var offs = 0;
-        if (this.isLeftDelim()) {
-            this.inside = true;
-        }
-        if (this.isRightDelim()) {
-        }
+        var markEOL = false;
         while (!this.eof) {
             this.skipWhitespace();
             ch = this.ch;
             offs = this.pos;
             //console.log(this.ch)
+            markEOL = false;
             if (isLetter(ch) || ch == "_") {
                 lit = this.scanIdentifier();
                 //console.log(".....", lit)
                 if (lit.length > 1) {
                     tok = keyword.isKeyword(lit);
+                    switch (tok) {
+                        case Token.IDENT:
+                        case Token.BREAK:
+                        case Token.CONTINUE:
+                        case Token.RETURN:
+                            markEOL = true;
+                    }
                 }
                 else {
+                    markEOL = true;
                     tok = Token.IDENT;
                 }
                 break;
             }
             else if (isDecimal(ch) || ch == '.' && isDecimal(this.peek())) {
+                markEOL = true;
                 (_a = this.scanNumber(), lit = _a.lit, tok = _a.tok);
                 //console.log("this.scanNumber()", this.scanNumber())
                 //{lit, tok} = this.scanNumber()
@@ -329,9 +330,20 @@ var Lexer = /** @class */ (function () {
             else {
                 this.next();
                 switch (ch) {
+                    case "\0":
+                        if (this.markEOL) {
+                            this.markEOL = false;
+                            tok = Token.SEMICOLON;
+                            lit = "EOF";
+                        }
+                        else {
+                            tok = Token.EOF;
+                        }
+                        break;
                     case "\n":
-                        tok = Token.EOL;
-                        lit = "EOL";
+                        markEOL = false;
+                        tok = Token.SEMICOLON;
+                        lit = "\n";
                         break;
                     case "\"":
                     case "'":
@@ -342,6 +354,7 @@ var Lexer = /** @class */ (function () {
                             tok = Token.SYMBOL;
                             lit = ch;
                         }*/
+                        markEOL = true;
                         tok = Token.STRING;
                         lit = this.scanString(ch);
                         break;
@@ -358,6 +371,7 @@ var Lexer = /** @class */ (function () {
                         lit = "(";
                         break;
                     case ")":
+                        markEOL = true;
                         tok = Token.RPAREN;
                         lit = ")";
                         break;
@@ -366,6 +380,7 @@ var Lexer = /** @class */ (function () {
                         lit = "[";
                         break;
                     case "]":
+                        markEOL = true;
                         tok = Token.RBRACK;
                         lit = "]";
                         break;
@@ -374,6 +389,7 @@ var Lexer = /** @class */ (function () {
                         lit = "{";
                         break;
                     case "}":
+                        markEOL = true;
                         tok = Token.RBRACE;
                         lit = "}";
                         break;
@@ -382,6 +398,7 @@ var Lexer = /** @class */ (function () {
                         lit = ",";
                         break;
                     case ";":
+                        markEOL = true;
                         tok = Token.SEMICOLON;
                         lit = ";";
                         break;
@@ -397,10 +414,16 @@ var Lexer = /** @class */ (function () {
                     case "+":
                         tok = this.evalOp(ch, Token.ADD, Token.ADD_ASSIGN, Token.INCR, null);
                         lit = this.input.substring(offs, this.pos);
+                        if (tok === Token.INCR) {
+                            markEOL = true;
+                        }
                         break;
                     case "-":
                         tok = this.evalOp(ch, Token.SUB, Token.SUB_ASSIGN, Token.DECR, null);
                         lit = this.input.substring(offs, this.pos);
+                        if (tok === Token.DECR) {
+                            markEOL = true;
+                        }
                         break;
                     case "*":
                         tok = this.evalOp(ch, Token.MUL, Token.MUL_ASSIGN, Token.POW, null);
@@ -450,11 +473,18 @@ var Lexer = /** @class */ (function () {
                         tok = Token.HASHTAG;
                         lit = "#";
                         break;
+                    default:
+                        markEOL = this.markEOL;
+                        tok = Token.ILLEGAL;
+                        lit = ch;
                 }
             }
             break;
         }
         //console.log(lit, tok)
+        if (true) {
+            this.markEOL = markEOL;
+        }
         return {
             pos: this.pos,
             value: lit,

@@ -1,5 +1,6 @@
 export enum Token {
 	IDENT = 1, // main
+	ILLEGAL,
 	EOF,
 	EOL, // \n
 	COMMENT,
@@ -83,6 +84,8 @@ export enum Token {
 	TRUE, // "true"
 	NULL, // "true"
 	RETURN, // "return"
+	BREAK, // "break"
+	CONTINUE, // "continue"
 
 	CLASS, // "class"
 	FUNC, // "func"
@@ -108,6 +111,8 @@ const keywords = {
 	true: Token.TRUE,
 	null: Token.NULL,
 	return: Token.RETURN,
+	break: Token.BREAK,
+	continue: Token.CONTINUE,
 
 	let: Token.LET,
 	class: Token.CLASS,

@@ -449,7 +449,7 @@ var Parser = /** @class */ (function () {
             return pairs;
         }
         do {
-            this.nextValid();
+            //this.nextValid();
             var name_5 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
@@ -460,14 +460,15 @@ var Parser = /** @class */ (function () {
                 name_5 = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
-            this.nextValid();
+            //this.nextValid();
             this.consume(Token.COLON, "Expect ':'.");
-            this.nextValid();
+            //this.nextValid();
             value = this.or();
             pairs.push({
                 id: name_5,
                 value: value
             });
+            //this.nextValid();
         } while (this.match(Token.COMMA));
         this.consume(Token.RBRACE, "Expect '}'.");
         return pairs;

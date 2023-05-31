@@ -1,17 +1,17 @@
 import { Keyword, Token } from "./Token.js";
-import { isAlphaNumeric, isDecimal, isHex, isLetter} from "./LexerFunctions.js";
+import { isAlphaNumeric, isDecimal, isHex, isLetter } from "./LexerFunctions.js";
 
 var keyword = new Keyword();
 var unicode = { MaxRune: 65536 };
 
 
-export class Section{
-    public tokens : Item[] = [];
-    public pos : number = 0;
-    public length : number = 0;
+export class Section {
+    public tokens: Item[] = [];
+    public pos: number = 0;
+    public length: number = 0;
     public outside: boolean = false;
 
-    constructor(tokens : Item[], pos : number, length : number, outside: boolean){
+    constructor(tokens: Item[], pos: number, length: number, outside: boolean) {
         this.tokens = tokens;
         this.pos = pos;
         this.length = length;
@@ -19,12 +19,12 @@ export class Section{
     }
 
 }
-export interface Item{
+export interface Item {
     pos: number;
     value: any;
     priority: number;
     tok: string | Token.EOF | number;
-} 
+}
 
 export class Lexer {
 
@@ -33,12 +33,10 @@ export class Lexer {
     public rd: number = null;
     public eof: boolean = false;
     public ch: string = "";
+    private markEOL:boolean = false;
+    
 
-    private useString: boolean = true;
-
-    private inside: boolean = false;
-    public isLeftDelim:Function = ()=>false;
-    public isRightDelim:Function = ()=>false;
+    
 
     constructor(input: string, useString?: boolean) {
         this.input = input;
@@ -46,16 +44,14 @@ export class Lexer {
         this.rd = 0;
         this.ch = " ";
         this.eof = false;
-        if(useString !== undefined){
-            this.useString = useString;
-        }
+        
 
         this.next()
         //console.log(input);
     }
 
     error(offs: number, msg: string) {
-
+        throw new Error(msg);
     }
 
     evalOp(ch, tokenDefault, tokenAssign, tokenX2, tokenX3) {
@@ -86,8 +82,8 @@ export class Lexer {
 
 
     skipWhitespace() {
-        
-        while (this.ch == ' ' || this.ch == '\t' /*|| this.ch == '\n'*/ || this.ch == '\r') {
+
+        while (this.ch == ' ' || this.ch == '\t' || this.ch == '\n' && !this.markEOL || this.ch == '\r') {
             this.next();
         }
     }
@@ -107,7 +103,7 @@ export class Lexer {
         const offs = this.pos;
 
         let n: number;
-        let base: number, max:number;
+        let base: number, max: number;
         switch (this.ch) {
             case "a":
             case "b":
@@ -153,7 +149,7 @@ export class Lexer {
                 return false
         }
 
-        let x:number;
+        let x: number;
         while (n > 0) {
             let d = this.digitVal(this.ch);
             if (d >= base) {
@@ -195,7 +191,7 @@ export class Lexer {
                 this.scanEscape(quote)
             }
         }
-        return this.input.substring(offs+1, this.pos-1);
+        return this.input.substring(offs + 1, this.pos - 1);
         //return this.input.substring(offs, this.pos);
     }
 
@@ -349,14 +345,9 @@ export class Lexer {
 
         let tok: number = null;
         let offs = 0;
-
-        if(this.isLeftDelim()){
-            this.inside = true
-        }
-
-        if(this.isRightDelim()){
-
-        }
+        
+        let markEOL = false;
+       
         while (!this.eof) {
             this.skipWhitespace();
 
@@ -364,21 +355,25 @@ export class Lexer {
             offs = this.pos;
             //console.log(this.ch)
 
-            
-
+            markEOL = false;
 
             if (isLetter(ch) || ch == "_") {
                 lit = this.scanIdentifier();
                 //console.log(".....", lit)
                 if (lit.length > 1) {
                     tok = keyword.isKeyword(lit);
+                    switch(tok){
+                        case Token.IDENT: case Token.BREAK: case Token.CONTINUE: case Token.RETURN:
+                            markEOL = true;
+                    }
                 } else {
+                    markEOL = true;
                     tok = Token.IDENT;
                 }
                 break;
 
             } else if (isDecimal(ch) || ch == '.' && isDecimal(this.peek())) {
-
+                markEOL = true;
 
                 ({ lit, tok } = this.scanNumber());
 
@@ -390,19 +385,33 @@ export class Lexer {
 
                 this.next();
                 switch (ch) {
+                    case "\0":
+                        if(this.markEOL){
+                            this.markEOL = false;
+                            tok = Token.SEMICOLON;
+                            lit = "EOF";
+
+                        }else{
+                            tok = Token.EOF;
+                        }
+
+                        break;
+
                     case "\n":
-                        tok = Token.EOL;
-                        lit = "EOL";
+                        markEOL = false;
+                        tok = Token.SEMICOLON;
+                        lit = "\n";
                         break;
                     case "\"":
-                    case "'":    
+                    case "'":
                         /*if(this.useString){
                             tok = Token.STRING;
                             lit = this.scanString(ch);
                         }else{
                             tok = Token.SYMBOL;
                             lit = ch;
-                        }*/                    
+                        }*/
+                        markEOL = true;
                         tok = Token.STRING;
                         lit = this.scanString(ch);
                         break;
@@ -419,6 +428,7 @@ export class Lexer {
                         lit = "(";
                         break;
                     case ")":
+                        markEOL = true;
                         tok = Token.RPAREN;
                         lit = ")";
                         break;
@@ -428,6 +438,7 @@ export class Lexer {
                         break;
 
                     case "]":
+                        markEOL = true;
                         tok = Token.RBRACK;
                         lit = "]";
                         break;
@@ -436,6 +447,7 @@ export class Lexer {
                         lit = "{";
                         break;
                     case "}":
+                        markEOL = true;
                         tok = Token.RBRACE;
                         lit = "}";
                         break;
@@ -444,6 +456,7 @@ export class Lexer {
                         lit = ","
                         break;
                     case ";":
+                        markEOL = true;
                         tok = Token.SEMICOLON;
                         lit = ";"
                         break;
@@ -455,14 +468,20 @@ export class Lexer {
                             tok = Token.COALESCE;
                             lit = "??";
                         }
-                        break;                        
+                        break;
                     case "+":
                         tok = this.evalOp(ch, Token.ADD, Token.ADD_ASSIGN, Token.INCR, null);
                         lit = this.input.substring(offs, this.pos);
+                        if(tok === Token.INCR){
+                            markEOL = true;
+                        }
                         break;
                     case "-":
                         tok = this.evalOp(ch, Token.SUB, Token.SUB_ASSIGN, Token.DECR, null);
                         lit = this.input.substring(offs, this.pos);
+                        if(tok===Token.DECR){
+                            markEOL = true;
+                        }
                         break;
                     case "*":
                         tok = this.evalOp(ch, Token.MUL, Token.MUL_ASSIGN, Token.POW, null);
@@ -522,8 +541,12 @@ export class Lexer {
                         break;
                     case "#":
                         tok = Token.HASHTAG;
-                        lit = "#";    
+                        lit = "#";
                         break;
+                    default:
+                        markEOL = this.markEOL;
+                        tok = Token.ILLEGAL;
+                        lit = ch;
 
                 }
             }
@@ -532,6 +555,10 @@ export class Lexer {
             break;
         }
         //console.log(lit, tok)
+
+        if(true){
+            this.markEOL = markEOL;
+        }
         return {
             pos: this.pos,
             value: lit,
@@ -583,55 +610,55 @@ export class Lexer {
             tokens.push(this.scan())
         }
 
-        tokens.push( {
+        tokens.push({
             pos: null,
             value: "EOF",
             priority: null,
             tok: Token.EOF
         });
-        
+
         return tokens;
     }
 
     getSections(leftDelim: string, rightDelim: string) {
 
         const sections: Section[] = [];
-        
+
         while (!this.eof) {
-            
+
             let tokens = [];
             let pos = 0;
             let endPos = 0;
             let index = this.input.indexOf(leftDelim, this.pos);
-            
-            if(index >=0){
+
+            if (index >= 0) {
                 pos = index;
                 this.setPosition(index + leftDelim.length);
 
                 while (!this.eof) {
                     this.skipWhitespace();
 
-                    if(this.peek() == rightDelim[0]){
+                    if (this.peek() == rightDelim[0]) {
                         index = this.input.indexOf(rightDelim, this.pos);
 
-                        if(index>0){
+                        if (index > 0) {
                             endPos = index + rightDelim.length;
                             this.setPosition(index + rightDelim.length);
                             break;
                         }
-                        
+
                     }
                     tokens.push(this.scan())
                 }
-        
-                tokens.push( {
+
+                tokens.push({
                     pos: null,
                     value: "EOF",
                     priority: null,
                     tok: Token.EOF
                 });
-                
-                sections.push(new Section(tokens, pos, endPos-pos, this.input[pos-1] === '"' && this.input[endPos] === '"'));
+
+                sections.push(new Section(tokens, pos, endPos - pos, this.input[pos - 1] === '"' && this.input[endPos] === '"'));
             }
             this.next();
 
