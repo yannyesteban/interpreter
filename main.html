@@ -43,6 +43,7 @@
 
         function run(code) {
             console.clear();
+            
             const lexer = new Lexer(code);
 
             const tokens = lexer.getTokens();
@@ -51,23 +52,23 @@
             
             console.log("code: ", code, "\n");
 
-            console.log( tokens);return;
+            //console.log( tokens);return;
 
             const parser = new Parser(tokens);
 
             document.getElementById("int-name").innerHTML = parser.version;
 
             const statements = parser.parse();
-            console.log(statements);
+            console.log(statements)
 
             const intp = new Interpreter();
             const resolver = new Resolver(intp);
             //resolver.resolve(statements);
 
             const output = intp.interpret(statements);
-            console.log("FIN", intp.locals,output)
+            console.log(intp.locals,output)
 
-            document.getElementById("result").value = output.join(":");
+            document.getElementById("result").value = output.join("");
 
 
         }

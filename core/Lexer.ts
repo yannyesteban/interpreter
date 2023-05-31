@@ -179,7 +179,7 @@ export class Lexer {
 
         while (true) {
             let ch = this.ch
-            if (ch == "\n" || ch < "\0") {
+            if (/*ch == "\n" ||*/ ch < "\0") {
                 this.error(offs, "string literal not terminated")
                 break
             }
@@ -447,7 +447,7 @@ export class Lexer {
                         lit = "{";
                         break;
                     case "}":
-                        markEOL = true;
+                        //markEOL = true;
                         tok = Token.RBRACE;
                         lit = "}";
                         break;
@@ -456,7 +456,6 @@ export class Lexer {
                         lit = ","
                         break;
                     case ";":
-                        markEOL = true;
                         tok = Token.SEMICOLON;
                         lit = ";"
                         break;

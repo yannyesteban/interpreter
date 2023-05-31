@@ -191,6 +191,27 @@ export class Get2 implements Expression {
   }
 }
 
+export class Set2 implements Expression {
+
+  public name: Expression;
+  public object: Expression;
+  public value: Expression;
+  public type: Item;
+  public clss: string;
+
+  constructor(object: Expression, name: Expression, value: Expression, type: Item) {
+    this.object = object;
+    this.name = name;
+    this.value = value;
+    this.type = type;
+    this.clss = this.constructor.name;
+  }
+
+  accept(visitor) {
+    return visitor.visitSet2Expr(this);
+  }
+}
+
 export class Logical implements Expression {
 
   public left: Expression;

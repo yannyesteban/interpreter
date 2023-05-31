@@ -97,7 +97,7 @@ export class Interpreter {
     }
 
     visitExpressionStmt(stmt: Stmt.Expression) {
-        console.log("---> ",stmt)
+        console.log("---> ",stmt.expression)
         let value = this.evaluate(stmt.expression);
         console.log("RESULT A", value);
         if(stmt.mods){
@@ -105,13 +105,17 @@ export class Interpreter {
         }
         console.log("RESULT B:", value);
 
-        this.output.push(value);
+        if(stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2"){
+            this.output.push(value);
+        }
+        
         return null;
     }
 
     visitFunctionStmt(stmt: Stmt.Function) {
+        console.log("visitFunctionStmt")
         const _function: FunctionR = new FunctionR(stmt, this.environment, false);
-        this.environment.define(stmt.name.lexeme, _function);
+        this.environment.define(stmt.name.value, _function);
         return null;
     }
 
@@ -141,12 +145,14 @@ export class Interpreter {
     }
 
     visitVarStmt(stmt: Stmt.Var) {
+        console.log("visitVarStmt A", stmt.initializer)
         let value: Object = null;
         if (stmt.initializer != null) {
             value = this.evaluate(stmt.initializer);
         }
 
         this.environment.define(stmt.name.value, value);
+        console.log("visitVarStmt B")
         return null;
     }
 
@@ -158,6 +164,7 @@ export class Interpreter {
     }
 
     visitAssignExpr(expr: Expr.Assign) {
+        console.log("ASSIGN ---- ")
         const value: Object = this.evaluate(expr.value);
 
         const distance: number = this.locals.get(expr);
@@ -222,7 +229,12 @@ export class Interpreter {
     }
 
     public visitCallExpr(expr: Expr.Call) {
+        console.log("visitCallExpr");
+        console.log(expr)
+
         const callee: Object = this.evaluate(expr.callee);
+
+        console.log("callee ", callee)
 
         const _arguments: Object[] = [];
         for (const _argument of expr.arg) {
@@ -230,14 +242,15 @@ export class Interpreter {
         }
 
         if (!(callee instanceof CallableR)) {
-            throw "" //new RuntimeError(expr.paren, "Can only call functions and classes.");
+            console.log(1,"an only call functions and classes.")
+            throw "an only call functions and classes." //new RuntimeError(expr.paren, "Can only call functions and classes.");
         }
 
         const _function: CallableR = callee;
         if (_arguments.length != _function.arity()) {
-            throw ""//new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
+            throw "error arity"//new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
         }
-
+        console.log("good")
         return _function.call(this, _arguments);
     }
 
@@ -246,10 +259,26 @@ export class Interpreter {
         if (object instanceof InstanceR) {
             return object.get(expr.name);
         }
-        alert(8)
+        
         if (typeof object == "object") {
             console.log(object, expr.name.value)
             return object[expr.name.value];
+        }
+
+        throw "Only instances have properties."//new RuntimeError(expr.name,           "Only instances have properties.");
+    }
+
+    visitGet2Expr(expr: Expr.Get2) {
+        const object: Object = this.evaluate(expr.object) as InstanceR;
+        if (object instanceof InstanceR) {
+            let index = this.evaluate(expr.name);
+            return object.get(index);
+        }
+        
+        if (typeof object == "object") {
+            
+            let index = this.evaluate(expr.name);
+            return object[index];
         }
 
         throw "Only instances have properties."//new RuntimeError(expr.name,           "Only instances have properties.");
@@ -282,14 +311,40 @@ export class Interpreter {
     }
 
     visitSetExpr(expr: Expr.Set) {
+
+        console.log(" SET ----")
         const object: Object = this.evaluate(expr.object);
 
-        if (!(object instanceof InstanceR)) { // [order]
+        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
             throw "" //new RuntimeError(expr.name,                "Only instances have fields.");
         }
-
         const value: Object = this.evaluate(expr.value);
-        object.set(expr.name, value);
+        if ((object instanceof InstanceR) ) { // [order]
+            object.set(expr.name, value);    
+        }
+
+        object[expr.name.value] = value;
+        
+        return value;
+    }
+
+    visitSet2Expr(expr: Expr.Set2) {
+
+        console.log(" SET ----")
+        const object: Object = this.evaluate(expr.object);
+
+        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
+            throw "" //new RuntimeError(expr.name,                "Only instances have fields.");
+        }
+        let index = this.evaluate(expr.name);
+        const value: Object = this.evaluate(expr.value);
+        if ((object instanceof InstanceR) ) { // [order]
+            object.set(index, value);    
+        }
+
+        
+        object[index] = value;
+        
         return value;
     }
 

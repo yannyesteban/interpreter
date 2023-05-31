@@ -144,7 +144,7 @@ var Lexer = /** @class */ (function () {
         var offs = this.pos - 1;
         while (true) {
             var ch = this.ch;
-            if (ch == "\n" || ch < "\0") {
+            if ( /*ch == "\n" ||*/ch < "\0") {
                 this.error(offs, "string literal not terminated");
                 break;
             }
@@ -389,7 +389,7 @@ var Lexer = /** @class */ (function () {
                         lit = "{";
                         break;
                     case "}":
-                        markEOL = true;
+                        //markEOL = true;
                         tok = Token.RBRACE;
                         lit = "}";
                         break;
@@ -398,7 +398,6 @@ var Lexer = /** @class */ (function () {
                         lit = ",";
                         break;
                     case ";":
-                        markEOL = true;
                         tok = Token.SEMICOLON;
                         lit = ";";
                         break;

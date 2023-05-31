@@ -77,19 +77,22 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitExpressionStmt = function (stmt) {
-        console.log("---> ", stmt);
+        console.log("---> ", stmt.expression);
         var value = this.evaluate(stmt.expression);
         console.log("RESULT A", value);
         if (stmt.mods) {
             value = this.evalMods(value, stmt.mods);
         }
         console.log("RESULT B:", value);
-        this.output.push(value);
+        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2") {
+            this.output.push(value);
+        }
         return null;
     };
     Interpreter.prototype.visitFunctionStmt = function (stmt) {
+        console.log("visitFunctionStmt");
         var _function = new FunctionR(stmt, this.environment, false);
-        this.environment.define(stmt.name.lexeme, _function);
+        this.environment.define(stmt.name.value, _function);
         return null;
     };
     Interpreter.prototype.visitIfStmt = function (stmt) {
@@ -115,11 +118,13 @@ var Interpreter = /** @class */ (function () {
         throw new ReturnR(value);
     };
     Interpreter.prototype.visitVarStmt = function (stmt) {
+        console.log("visitVarStmt A", stmt.initializer);
         var value = null;
         if (stmt.initializer != null) {
             value = this.evaluate(stmt.initializer);
         }
         this.environment.define(stmt.name.value, value);
+        console.log("visitVarStmt B");
         return null;
     };
     Interpreter.prototype.visitWhileStmt = function (stmt) {
@@ -129,6 +134,7 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitAssignExpr = function (expr) {
+        console.log("ASSIGN ---- ");
         var value = this.evaluate(expr.value);
         var distance = this.locals.get(expr);
         if (distance != null) {
@@ -186,19 +192,24 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitCallExpr = function (expr) {
+        console.log("visitCallExpr");
+        console.log(expr);
         var callee = this.evaluate(expr.callee);
+        console.log("callee ", callee);
         var _arguments = [];
         for (var _i = 0, _a = expr.arg; _i < _a.length; _i++) {
             var _argument = _a[_i];
             _arguments.push(this.evaluate(_argument));
         }
         if (!(callee instanceof CallableR)) {
-            throw ""; //new RuntimeError(expr.paren, "Can only call functions and classes.");
+            console.log(1, "an only call functions and classes.");
+            throw "an only call functions and classes."; //new RuntimeError(expr.paren, "Can only call functions and classes.");
         }
         var _function = callee;
         if (_arguments.length != _function.arity()) {
-            throw ""; //new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
+            throw "error arity"; //new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
         }
+        console.log("good");
         return _function.call(this, _arguments);
     };
     Interpreter.prototype.visitGetExpr = function (expr) {
@@ -206,10 +217,21 @@ var Interpreter = /** @class */ (function () {
         if (object instanceof InstanceR) {
             return object.get(expr.name);
         }
-        alert(8);
         if (typeof object == "object") {
             console.log(object, expr.name.value);
             return object[expr.name.value];
+        }
+        throw "Only instances have properties."; //new RuntimeError(expr.name,           "Only instances have properties.");
+    };
+    Interpreter.prototype.visitGet2Expr = function (expr) {
+        var object = this.evaluate(expr.object);
+        if (object instanceof InstanceR) {
+            var index = this.evaluate(expr.name);
+            return object.get(index);
+        }
+        if (typeof object == "object") {
+            var index = this.evaluate(expr.name);
+            return object[index];
         }
         throw "Only instances have properties."; //new RuntimeError(expr.name,           "Only instances have properties.");
     };
@@ -236,12 +258,30 @@ var Interpreter = /** @class */ (function () {
         return this.evaluate(expr.right);
     };
     Interpreter.prototype.visitSetExpr = function (expr) {
+        console.log(" SET ----");
         var object = this.evaluate(expr.object);
-        if (!(object instanceof InstanceR)) { // [order]
+        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
             throw ""; //new RuntimeError(expr.name,                "Only instances have fields.");
         }
         var value = this.evaluate(expr.value);
-        object.set(expr.name, value);
+        if ((object instanceof InstanceR)) { // [order]
+            object.set(expr.name, value);
+        }
+        object[expr.name.value] = value;
+        return value;
+    };
+    Interpreter.prototype.visitSet2Expr = function (expr) {
+        console.log(" SET ----");
+        var object = this.evaluate(expr.object);
+        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
+            throw ""; //new RuntimeError(expr.name,                "Only instances have fields.");
+        }
+        var index = this.evaluate(expr.name);
+        var value = this.evaluate(expr.value);
+        if ((object instanceof InstanceR)) { // [order]
+            object.set(index, value);
+        }
+        object[index] = value;
         return value;
     };
     Interpreter.prototype.visitSuperExpr = function (expr) {

@@ -145,6 +145,20 @@ var Get2 = /** @class */ (function () {
     return Get2;
 }());
 export { Get2 };
+var Set2 = /** @class */ (function () {
+    function Set2(object, name, value, type) {
+        this.object = object;
+        this.name = name;
+        this.value = value;
+        this.type = type;
+        this.clss = this.constructor.name;
+    }
+    Set2.prototype.accept = function (visitor) {
+        return visitor.visitSet2Expr(this);
+    };
+    return Set2;
+}());
+export { Set2 };
 var Logical = /** @class */ (function () {
     function Logical(left, operator, right) {
         this.left = left;

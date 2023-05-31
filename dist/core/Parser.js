@@ -21,7 +21,7 @@ var Parser = /** @class */ (function () {
         db(tokens);
     }
     Parser.prototype.error = function (token, message) {
-        db("Error: ", message);
+        db("Error: ", token, message);
         if (token.type == Token.EOF) {
             //report(token.line, " at end", message);
         }
@@ -83,7 +83,6 @@ var Parser = /** @class */ (function () {
         for (var _i = 0; _i < arguments.length; _i++) {
             TokenType[_i] = arguments[_i];
         }
-        console.log("...", this.peek().value);
         for (var _a = 0, TokenType_1 = TokenType; _a < TokenType_1.length; _a++) {
             var type = TokenType_1[_a];
             if (this.check(type)) {
@@ -99,10 +98,9 @@ var Parser = /** @class */ (function () {
         }
         var expr = this.expression();
         if (!expr) {
-            this.error(this.peek().value, "unknow error!");
+            this.error(this.peek(), "unknow error!");
             this.advance();
         }
-        console.log(expr);
         var mods = [];
         if (this.match(Token.BIT_OR)) {
             mods = this.modifiers();
@@ -111,7 +109,6 @@ var Parser = /** @class */ (function () {
         }
         else {
             if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
-                console.log("what ", this.peek(), Token.EOF);
                 this.consume(Token.SEMICOLON, "1.0 Expect ';' after expression..");
             }
         }
@@ -149,7 +146,6 @@ var Parser = /** @class */ (function () {
         return statements;
     };
     Parser.prototype.statement = function () {
-        console.log(this.peek().value);
         if (this.match(Token.FOR))
             return this.forStatement();
         if (this.match(Token.IF)) {
@@ -185,7 +181,8 @@ var Parser = /** @class */ (function () {
     Parser.prototype.declaration = function () {
         try {
             //if (this.match(Token.CLASS)) return this.classDeclaration();
-            //if (this.match(Token.FUNC)) return this._function("function");
+            if (this.match(Token.FUNC))
+                return this._function("function");
             if (this.match(Token.LET)) {
                 return this.varDeclaration();
             }
@@ -259,6 +256,11 @@ var Parser = /** @class */ (function () {
             else if (expr instanceof Expr.Get) {
                 var get = expr;
                 return new Expr.Set(get.object, get.name, value, equals);
+                //< Classes assign-set
+            }
+            else if (expr instanceof Expr.Get2) {
+                var get = expr;
+                return new Expr.Set2(get.object, get.name, value, equals);
                 //< Classes assign-set
             }
             this.error(equals, "Invalid assignment target."); // [no-throw]
@@ -376,21 +378,17 @@ var Parser = /** @class */ (function () {
             return new Expr.Array(this.arrayValue());
         }
         if (this.match(Token.INCR, Token.DECR)) {
-            console.log("post ASign");
             var id = null;
             var op = this.previous();
             if (this.match(Token.IDENT)) {
-                console.log("post ASIGN 2");
                 id = this.previous();
                 return new Expr.PostAssign(id, op);
             }
-            console.log("post ASIGN 5");
             throw new Error("expected a identifier");
         }
         if (this.match(Token.IDENT)) {
             var ident = this.previous();
             if (this.match(Token.INCR, Token.DECR)) {
-                console.log("pre ASIGN 2");
                 var op = this.previous();
                 return new Expr.PostAssign(ident, op);
             }
@@ -416,6 +414,23 @@ var Parser = /** @class */ (function () {
         }
         return new Stmt.If(condition, thenBranch, elseBranch);
     };
+    Parser.prototype._function = function (kind) {
+        var name = this.consume(Token.IDENT, "Expect " + kind + " name.");
+        this.consume(Token.LPAREN, "Expect '(' after " + kind + " name.");
+        var parameters = [];
+        if (!this.check(Token.RPAREN)) {
+            do {
+                if (parameters.length >= 255) {
+                    this.error(this.peek(), "Can't have more than 255 parameters.");
+                }
+                parameters.push(this.consume(Token.IDENT, "Expect parameter name."));
+            } while (this.match(Token.COMMA));
+        }
+        this.consume(Token.RPAREN, "Expect ')' after parameters.");
+        this.consume(Token.LBRACE, "Expect '{' before " + kind + " body.");
+        var body = this.block();
+        return new Stmt.Function(name, parameters, body);
+    };
     Parser.prototype.varDeclaration = function () {
         var name = this.consume(Token.IDENT, "Expect variable name.");
         var initializer = null;
@@ -440,16 +455,14 @@ var Parser = /** @class */ (function () {
         return values;
     };
     Parser.prototype.objectValue = function (ambiguity) {
-        console.log(this.tokens);
         var pairs = [];
-        if (this.match(Token.RBRACK)) {
+        if (this.match(Token.RBRACE)) {
             if (ambiguity) {
                 this.error(this.peek(), "error of ambiguity");
             }
             return pairs;
         }
         do {
-            //this.nextValid();
             var name_5 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
@@ -460,16 +473,14 @@ var Parser = /** @class */ (function () {
                 name_5 = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
-            //this.nextValid();
             this.consume(Token.COLON, "Expect ':'.");
-            //this.nextValid();
             value = this.or();
             pairs.push({
                 id: name_5,
                 value: value
             });
-            //this.nextValid();
         } while (this.match(Token.COMMA));
+        this.match(Token.SEMICOLON);
         this.consume(Token.RBRACE, "Expect '}'.");
         return pairs;
     };

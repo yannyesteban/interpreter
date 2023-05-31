@@ -30,7 +30,7 @@ export class Parser {
 
 
     error(token, message) {
-        db("Error: ", message);
+        db("Error: ", token, message);
         if (token.type == Token.EOF) {
             //report(token.line, " at end", message);
         } else {
@@ -101,7 +101,6 @@ export class Parser {
     }
 
     match(...TokenType: Token[]) {
-        console.log("...", this.peek().value)
         for (let type of TokenType) {
             if (this.check(type)) {
                 this.advance();
@@ -119,11 +118,11 @@ export class Parser {
         }
         let expr = this.expression();
         if (!expr) {
-
-            this.error(this.peek().value, "unknow error!")
+            
+            this.error(this.peek(), "unknow error!")
             this.advance()
         }
-        console.log(expr)
+
         let mods: Stmt.Modifier[] = [];
 
         if (this.match(Token.BIT_OR)) {
@@ -135,7 +134,7 @@ export class Parser {
 
         } else {
             if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
-                console.log("what ", this.peek(), Token.EOF)
+
                 this.consume(Token.SEMICOLON, "1.0 Expect ';' after expression..");
             }
 
@@ -190,7 +189,7 @@ export class Parser {
 
     private statement() {
 
-        console.log(this.peek().value)
+
         if (this.match(Token.FOR)) return this.forStatement();
 
 
@@ -234,7 +233,7 @@ export class Parser {
         try {
 
             //if (this.match(Token.CLASS)) return this.classDeclaration();
-            //if (this.match(Token.FUNC)) return this._function("function");
+            if (this.match(Token.FUNC)) return this._function("function");
 
             if (this.match(Token.LET)) {
                 return this.varDeclaration();
@@ -331,6 +330,10 @@ export class Parser {
             } else if (expr instanceof Expr.Get) {
                 const get: Expr.Get = expr;
                 return new Expr.Set(get.object, get.name, value, equals);
+                //< Classes assign-set
+            } else if (expr instanceof Expr.Get2) {
+                const get: Expr.Get2 = expr;
+                return new Expr.Set2(get.object, get.name, value, equals);
                 //< Classes assign-set
             }
 
@@ -486,15 +489,15 @@ export class Parser {
         }
 
         if (this.match(Token.INCR, Token.DECR)) {
-            console.log("post ASign");
+
             let id = null;
             let op = this.previous();
             if (this.match(Token.IDENT)) {
-                console.log("post ASIGN 2");
+
                 id = this.previous();
                 return new Expr.PostAssign(id, op)
             }
-            console.log("post ASIGN 5");
+
 
             throw new Error("expected a identifier");
 
@@ -503,7 +506,6 @@ export class Parser {
         if (this.match(Token.IDENT)) {
             const ident = this.previous();
             if (this.match(Token.INCR, Token.DECR)) {
-                console.log("pre ASIGN 2");
                 const op = this.previous();
                 return new Expr.PostAssign(ident, op);
             }
@@ -543,6 +545,29 @@ export class Parser {
         return new Stmt.If(condition, thenBranch, elseBranch);
     }
 
+    _function(kind: string) {
+        let name: Item = this.consume(Token.IDENT, "Expect " + kind + " name.");
+
+        this.consume(Token.LPAREN, "Expect '(' after " + kind + " name.");
+        const parameters: Item[] = [];
+        if (!this.check(Token.RPAREN)) {
+            do {
+                if (parameters.length >= 255) {
+                    this.error(this.peek(), "Can't have more than 255 parameters.");
+                }
+
+                parameters.push(
+                    this.consume(Token.IDENT, "Expect parameter name."));
+            } while (this.match(Token.COMMA));
+        }
+        this.consume(Token.RPAREN, "Expect ')' after parameters.");
+
+        this.consume(Token.LBRACE, "Expect '{' before " + kind + " body.");
+        const body: Stmt.Statement[] = this.block();
+        return new Stmt.Function(name, parameters, body);
+
+    }
+
     varDeclaration() {
         const name = this.consume(Token.IDENT, "Expect variable name.");
 
@@ -575,43 +600,43 @@ export class Parser {
     }
 
     objectValue(ambiguity?) {
+        const pairs: any = [];
 
-        console.log(this.tokens)
-        const pairs = [];
-        if (this.match(Token.RBRACK)) {
-
+        if (this.match(Token.RBRACE)) {
             if (ambiguity) {
                 this.error(this.peek(), "error of ambiguity");
             }
 
             return pairs;
+
         }
 
-
         do {
-            //this.nextValid();
+
             let name = null;
             let value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
 
                 name = new Expr.Literal(this.peek().value, this.peek().tok);
                 this.advance()
-                
+
             } else if (this.match(Token.LBRACK)) {
                 name = this.or();
                 this.consume(Token.RBRACK, "Expect ']' after property id");
             }
 
-            //this.nextValid();
             this.consume(Token.COLON, "Expect ':'.");
-            //this.nextValid();
+
             value = this.or();
             pairs.push({
                 id: name,
                 value
             });
-            //this.nextValid();
+
         } while (this.match(Token.COMMA));
+
+        this.match(Token.SEMICOLON);
+
         this.consume(Token.RBRACE, "Expect '}'.");
         return pairs;
     }
