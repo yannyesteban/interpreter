@@ -10,6 +10,7 @@ export class Section {
     public pos: number = 0;
     public length: number = 0;
     public outside: boolean = false;
+    public output: any;
 
     constructor(tokens: Item[], pos: number, length: number, outside: boolean) {
         this.tokens = tokens;

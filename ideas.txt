@@ -3,3 +3,6 @@ se podria generar url aleatorias para guardar el estado actual de la aplicacion
 http://sevian.com/state=545h44hj45try 
 
 un formulario de edicion mas un formulario 2 de request etc.
+
+
+2.- crear un evento que se pueda suscribir onvisible, que se aplique a un scroll

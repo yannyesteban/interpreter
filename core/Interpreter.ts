@@ -43,6 +43,7 @@ export class Interpreter {
     }
 
     resolve(expr: Expr.Expression, depth: number) {
+        console.log("Resolve", expr, depth)
         this.locals.set(expr, depth);
     }
 
@@ -52,7 +53,9 @@ export class Interpreter {
             this.environment = environment;
 
             for (const statement of statements) {
+                console.log("executeBlock", statement)
                 this.execute(statement);
+
             }
         } finally {
             this.environment = previous;
@@ -82,10 +85,10 @@ export class Interpreter {
 
         let methods = new Map();
         for (const method of stmt.methods) {
-            const func: FunctionR = new FunctionR(method, this.environment, method.name.lexeme.equals("init"));
-            methods[method.name.lexeme] = func;
+            const func: FunctionR = new FunctionR(method, this.environment, method.name.value == "init");
+            methods[method.name.value] = func;
         }
-        
+
         const klass: ClassR = new ClassR(stmt.name.value, superclass as ClassR, methods);
 
         if (superclass != null) {
@@ -97,18 +100,19 @@ export class Interpreter {
     }
 
     visitExpressionStmt(stmt: Stmt.Expression) {
-        console.log("---> ",stmt.expression)
+        console.log("---> ", stmt.expression)
         let value = this.evaluate(stmt.expression);
         console.log("RESULT A", value);
-        if(stmt.mods){
+        if (stmt.mods) {
             value = this.evalMods(value, stmt.mods);
         }
         console.log("RESULT B:", value);
 
-        if(stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2"){
+        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2"
+            && stmt.expression.clss !== "PostAssign") {
             this.output.push(value);
         }
-        
+
         return null;
     }
 
@@ -129,11 +133,11 @@ export class Interpreter {
         return null;
     }
 
-    visitPrintStmt( stmt: Stmt.Print) {
+    visitPrintStmt(stmt: Stmt.Print) {
         const value: object = this.evaluate(stmt.expression);
         console.log("Printing", this.stringify(value));
         return null;
-      }
+    }
 
     visitReturnStmt(stmt: Stmt.Return) {
         let value: Object = null;
@@ -176,6 +180,48 @@ export class Interpreter {
 
         return value;
     }
+    visitPostExpr(expr: Expr.PostAssign) {
+        console.log("visitPostExpr ---- ")
+
+
+        let old = this.lookUpVariable(expr.name, expr);
+        let value = old;
+        if(expr.operator.tok == Token.INCR){
+            value++; 
+        }else{
+            value--;
+        } 
+        
+        const distance: number = this.locals.get(expr);
+        if (distance != null) {
+            this.environment.assignAt(distance, expr.name, value);
+        } else {
+            this.globals.assign(expr.name, value);
+        }
+
+        return old;
+    }
+    visitPreExpr(expr: Expr.PostAssign) {
+        console.log("visitPreExpr ---- ")
+
+
+        let old = this.lookUpVariable(expr.name, expr);
+        let value = old;
+        if(expr.operator.tok == Token.INCR){
+            value++; 
+        }else{
+            value--;
+        } 
+        console.log("New Value ", value)
+        const distance: number = this.locals.get(expr);
+        if (distance != null) {
+            this.environment.assignAt(distance, expr.name, value);
+        } else {
+            this.globals.assign(expr.name, value);
+        }
+
+        return value;
+    }
 
     visitBinaryExpr(expr: Expr.Binary) {
         const left = this.evaluate(expr.left);
@@ -186,7 +232,7 @@ export class Interpreter {
             //> binary-equality
             case Token.NEQ: return !this.isEqual(left, right);
             case Token.EQL: return this.isEqual(left, right);
-            
+
             case Token.POW:
                 this.checkNumberOperands(expr.operator, left, right);
                 return left ** right;
@@ -209,7 +255,7 @@ export class Interpreter {
             case Token.ADD:
                 if (typeof left === 'number' && typeof right === 'number') {
                     return left + right;
-                } 
+                }
 
                 if (typeof left === 'string' && typeof right === 'string') {
                     return left + right;
@@ -234,7 +280,7 @@ export class Interpreter {
 
         const callee: Object = this.evaluate(expr.callee);
 
-        console.log("callee ", callee)
+        console.log("callee ", callee.constructor)
 
         const _arguments: Object[] = [];
         for (const _argument of expr.arg) {
@@ -242,13 +288,14 @@ export class Interpreter {
         }
 
         if (!(callee instanceof CallableR)) {
-            console.log(1,"an only call functions and classes.")
+            console.log(1, "an only call functions and classes.")
             throw "an only call functions and classes." //new RuntimeError(expr.paren, "Can only call functions and classes.");
         }
 
         const _function: CallableR = callee;
         if (_arguments.length != _function.arity()) {
-            throw "error arity"//new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
+            alert(8)
+            throw "Expected " + _function.arity() + " arguments but got " + _arguments.length + "."//new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
         }
         console.log("good")
         return _function.call(this, _arguments);
@@ -259,7 +306,7 @@ export class Interpreter {
         if (object instanceof InstanceR) {
             return object.get(expr.name);
         }
-        
+
         if (typeof object == "object") {
             console.log(object, expr.name.value)
             return object[expr.name.value];
@@ -274,9 +321,9 @@ export class Interpreter {
             let index = this.evaluate(expr.name);
             return object.get(index);
         }
-        
+
         if (typeof object == "object") {
-            
+
             let index = this.evaluate(expr.name);
             return object[index];
         }
@@ -292,7 +339,7 @@ export class Interpreter {
 
 
         console.log("visitLiteralExpr", expr)
-        if(expr.type == Token.INT || expr.type == Token.FLOAT){
+        if (expr.type == Token.INT || expr.type == Token.FLOAT) {
             return +expr.value
         }
         return expr.value;
@@ -319,12 +366,12 @@ export class Interpreter {
             throw "" //new RuntimeError(expr.name,                "Only instances have fields.");
         }
         const value: Object = this.evaluate(expr.value);
-        if ((object instanceof InstanceR) ) { // [order]
-            object.set(expr.name, value);    
+        if ((object instanceof InstanceR)) { // [order]
+            object.set(expr.name, value);
         }
 
         object[expr.name.value] = value;
-        
+
         return value;
     }
 
@@ -338,17 +385,17 @@ export class Interpreter {
         }
         let index = this.evaluate(expr.name);
         const value: Object = this.evaluate(expr.value);
-        if ((object instanceof InstanceR) ) { // [order]
-            object.set(index, value);    
+        if ((object instanceof InstanceR)) { // [order]
+            object.set(index, value);
         }
 
-        
+
         object[index] = value;
-        
+
         return value;
     }
 
-    
+
 
     visitSuperExpr(expr: Expr.Super) {
         const distance: number = this.locals.get(expr);
@@ -392,11 +439,11 @@ export class Interpreter {
         return this.lookUpVariable(expr.name, expr);
     }
 
-    visitObjectExpr(expr: Expr.Object){
-        
+    visitObjectExpr(expr: Expr.Object) {
+
         const o = {};
         //console.error("visitObjectExpr", expr);
-        expr.childs.forEach(ch=>{
+        expr.childs.forEach(ch => {
             o[this.evaluate(ch.id)] = this.evaluate(ch.value);
             //console.log("...", this.evaluate(ch.id));
             //console.log("name of ", this.evaluate(ch.name))
@@ -407,10 +454,10 @@ export class Interpreter {
         return o;
     }
 
-    visitArrayExpr(expr: Expr.Array){
+    visitArrayExpr(expr: Expr.Array) {
         const a = [];
 
-        expr.childs.forEach(ch=>{
+        expr.childs.forEach(ch => {
             a.push(this.evaluate(ch));
             //console.log("...", this.evaluate(ch.id));
             //console.log("name of ", this.evaluate(ch.name))
@@ -430,14 +477,14 @@ export class Interpreter {
             return this.globals.get(name);
         }
     }
-    
+
     private checkNumberOperand(operator: Item, operand: Object) {
         if (typeof operand == "number") {
             return;
         }
         throw "" //new RuntimeError(operator, "Operand must be a number.");
     }
-    
+
     private checkNumberOperands(operator: Item, left: Object, right: Object) {
         if (typeof left == "number" && typeof right == "number") {
             return;
@@ -453,7 +500,7 @@ export class Interpreter {
         if (typeof object === "boolean") {
             return object;
         }
-        
+
         return true;
     }
 
@@ -478,26 +525,26 @@ export class Interpreter {
         return object.toString();
     }
 
-    public getDate(date:string | number | object | Date) {
-        if(typeof date === "string"){
+    public getDate(date: string | number | object | Date) {
+        if (typeof date === "string") {
             let aux = date.split("-");
             return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
         }
 
-        if(date instanceof Date){
+        if (date instanceof Date) {
             return date;
         }
-        
+
     }
 
-    public evalMod(data: any, mod: Stmt.Modifier){
+    public evalMod(data: any, mod: Stmt.Modifier) {
         const name = mod.name;
         let param = null;
-        if(mod.param){
+        if (mod.param) {
             param = this.evaluate(mod.param);
         }
         console.log("PARAM ", param)
-        
+
         switch (name.toLowerCase()) {
             case "trim":
                 data = data.toString();
@@ -509,7 +556,7 @@ export class Interpreter {
                     }
                 }
                 return data.trim();
-                
+
             case "upper":
                 return data.toString().toUpperCase();
             case "lower":
@@ -520,9 +567,9 @@ export class Interpreter {
                 return Math.ceil(Number(data)).toString();
             case "abs":
                 return Math.abs(Number(data)).toString();
-            case "format": 
+            case "format":
                 const digits = param["digits"] || 2;
-                return new Intl.NumberFormat(param["locales"] || undefined , {
+                return new Intl.NumberFormat(param["locales"] || undefined, {
                     minimumFractionDigits: digits,
                     maximumFractionDigits: digits
                 }).format(Number(data));
@@ -541,7 +588,7 @@ export class Interpreter {
         return data;
     }
 
-    public evalMods(data : string | number | object | Date, mods : Stmt.Modifier[]) {
+    public evalMods(data: string | number | object | Date, mods: Stmt.Modifier[]) {
 
         let aux = {};
         mods.forEach(mod => {

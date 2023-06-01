@@ -13,8 +13,9 @@ var Statement = /** @class */ (function () {
 }());
 export { Statement };
 var Block = /** @class */ (function () {
-    function Block(statements) {
+    function Block(statements, pos) {
         this.statements = statements;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Block.prototype.accept = function (visitor) {
@@ -24,10 +25,11 @@ var Block = /** @class */ (function () {
 }());
 export { Block };
 var Expression = /** @class */ (function () {
-    function Expression(expression, mods) {
+    function Expression(expression, mods, pos) {
         //console.log("Expression: ", expression);
         this.expression = expression;
         this.mods = mods;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Expression.prototype.accept = function (visitor) {
@@ -37,10 +39,11 @@ var Expression = /** @class */ (function () {
 }());
 export { Expression };
 var If = /** @class */ (function () {
-    function If(condition, thenBranch, elseBranch) {
+    function If(condition, thenBranch, elseBranch, pos) {
         this.condition = condition;
         this.thenBranch = thenBranch;
         this.elseBranch = elseBranch;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     If.prototype.accept = function (visitor) {
@@ -50,10 +53,11 @@ var If = /** @class */ (function () {
 }());
 export { If };
 var Function = /** @class */ (function () {
-    function Function(name, params, body) {
+    function Function(name, params, body, pos) {
         this.name = name;
         this.params = params;
         this.body = body;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Function.prototype.accept = function (visitor) {
@@ -63,9 +67,10 @@ var Function = /** @class */ (function () {
 }());
 export { Function };
 var Var = /** @class */ (function () {
-    function Var(name, initializer) {
+    function Var(name, initializer, pos) {
         this.name = name;
         this.initializer = initializer;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Var.prototype.accept = function (visitor) {
@@ -75,8 +80,9 @@ var Var = /** @class */ (function () {
 }());
 export { Var };
 var Return = /** @class */ (function () {
-    function Return(value) {
+    function Return(value, pos) {
         this.value = value;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Return.prototype.accept = function (visitor) {
@@ -86,9 +92,10 @@ var Return = /** @class */ (function () {
 }());
 export { Return };
 var While = /** @class */ (function () {
-    function While(condition, body) {
+    function While(condition, body, pos) {
         this.condition = condition;
         this.body = body;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     While.prototype.accept = function (visitor) {
@@ -98,9 +105,10 @@ var While = /** @class */ (function () {
 }());
 export { While };
 var Do = /** @class */ (function () {
-    function Do(condition, body) {
+    function Do(condition, body, pos) {
         this.condition = condition;
         this.body = body;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Do.prototype.accept = function (visitor) {
@@ -110,10 +118,11 @@ var Do = /** @class */ (function () {
 }());
 export { Do };
 var Class = /** @class */ (function () {
-    function Class(name, superclass, methods) {
+    function Class(name, superclass, methods, pos) {
         this.name = name;
         this.superclass = superclass;
         this.methods = methods;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Class.prototype.accept = function (visitor) {
@@ -123,8 +132,9 @@ var Class = /** @class */ (function () {
 }());
 export { Class };
 var Print = /** @class */ (function () {
-    function Print(expression) {
+    function Print(expression, pos) {
         this.expression = expression;
+        this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
     Print.prototype.accept = function (visitor) {

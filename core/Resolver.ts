@@ -138,7 +138,7 @@ export class Resolver {
 
             let declaration: FunctionType = FunctionType.METHOD;
 
-            if (method.name.lexeme.equals("init")) {
+            if (method.name.value =="init") {
                 declaration = FunctionType.INITIALIZER;
             }
 

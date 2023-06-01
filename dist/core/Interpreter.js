@@ -31,6 +31,7 @@ var Interpreter = /** @class */ (function () {
         stmt.accept(this);
     };
     Interpreter.prototype.resolve = function (expr, depth) {
+        console.log("Resolve", expr, depth);
         this.locals.set(expr, depth);
     };
     Interpreter.prototype.executeBlock = function (statements, environment) {
@@ -39,6 +40,7 @@ var Interpreter = /** @class */ (function () {
             this.environment = environment;
             for (var _i = 0, statements_2 = statements; _i < statements_2.length; _i++) {
                 var statement = statements_2[_i];
+                console.log("executeBlock", statement);
                 this.execute(statement);
             }
         }
@@ -66,8 +68,8 @@ var Interpreter = /** @class */ (function () {
         var methods = new Map();
         for (var _i = 0, _a = stmt.methods; _i < _a.length; _i++) {
             var method = _a[_i];
-            var func = new FunctionR(method, this.environment, method.name.lexeme.equals("init"));
-            methods[method.name.lexeme] = func;
+            var func = new FunctionR(method, this.environment, method.name.value == "init");
+            methods[method.name.value] = func;
         }
         var klass = new ClassR(stmt.name.value, superclass, methods);
         if (superclass != null) {
@@ -84,7 +86,8 @@ var Interpreter = /** @class */ (function () {
             value = this.evalMods(value, stmt.mods);
         }
         console.log("RESULT B:", value);
-        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2") {
+        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2"
+            && stmt.expression.clss !== "PostAssign") {
             this.output.push(value);
         }
         return null;
@@ -145,6 +148,45 @@ var Interpreter = /** @class */ (function () {
         }
         return value;
     };
+    Interpreter.prototype.visitPostExpr = function (expr) {
+        console.log("visitPostExpr ---- ");
+        var old = this.lookUpVariable(expr.name, expr);
+        var value = old;
+        if (expr.operator.tok == Token.INCR) {
+            value++;
+        }
+        else {
+            value--;
+        }
+        var distance = this.locals.get(expr);
+        if (distance != null) {
+            this.environment.assignAt(distance, expr.name, value);
+        }
+        else {
+            this.globals.assign(expr.name, value);
+        }
+        return old;
+    };
+    Interpreter.prototype.visitPreExpr = function (expr) {
+        console.log("visitPreExpr ---- ");
+        var old = this.lookUpVariable(expr.name, expr);
+        var value = old;
+        if (expr.operator.tok == Token.INCR) {
+            value++;
+        }
+        else {
+            value--;
+        }
+        console.log("New Value ", value);
+        var distance = this.locals.get(expr);
+        if (distance != null) {
+            this.environment.assignAt(distance, expr.name, value);
+        }
+        else {
+            this.globals.assign(expr.name, value);
+        }
+        return value;
+    };
     Interpreter.prototype.visitBinaryExpr = function (expr) {
         var left = this.evaluate(expr.left);
         var right = this.evaluate(expr.right);
@@ -195,7 +237,7 @@ var Interpreter = /** @class */ (function () {
         console.log("visitCallExpr");
         console.log(expr);
         var callee = this.evaluate(expr.callee);
-        console.log("callee ", callee);
+        console.log("callee ", callee.constructor);
         var _arguments = [];
         for (var _i = 0, _a = expr.arg; _i < _a.length; _i++) {
             var _argument = _a[_i];
@@ -207,7 +249,8 @@ var Interpreter = /** @class */ (function () {
         }
         var _function = callee;
         if (_arguments.length != _function.arity()) {
-            throw "error arity"; //new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
+            alert(8);
+            throw "Expected " + _function.arity() + " arguments but got " + _arguments.length + "."; //new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
         }
         console.log("good");
         return _function.call(this, _arguments);

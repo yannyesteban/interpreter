@@ -107,7 +107,7 @@ var Resolver = /** @class */ (function () {
         for (var _i = 0, _a = stmt.methods; _i < _a.length; _i++) {
             var method = _a[_i];
             var declaration = FunctionType.METHOD;
-            if (method.name.lexeme.equals("init")) {
+            if (method.name.value == "init") {
                 declaration = FunctionType.INITIALIZER;
             }
             this.resolveFunction(method, declaration); // [local]

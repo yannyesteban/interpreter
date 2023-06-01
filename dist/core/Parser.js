@@ -112,7 +112,7 @@ var Parser = /** @class */ (function () {
                 this.consume(Token.SEMICOLON, "1.0 Expect ';' after expression..");
             }
         }
-        return new Stmt.Expression(expr, mods);
+        return new Stmt.Expression(expr, mods, this.peek().pos);
     };
     Parser.prototype.modifiers = function () {
         var mods = [];
@@ -163,18 +163,18 @@ var Parser = /** @class */ (function () {
             this.brackets++;
             var position = this.getPosition();
             try {
-                var expr = new Expr.Object(this.objectValue(true));
+                var expr = new Expr.Object(this.objectValue(true), this.peek().pos);
                 //this.consume(Token.SEMICOLON, "Expect ';' after expression.");
                 if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
                     this.consume(Token.SEMICOLON, "Expect ';' after expression..");
                 }
-                return new Stmt.Expression(expr, []);
+                return new Stmt.Expression(expr, [], this.peek().pos);
             }
             catch (e) {
                 db("UN ERROR PASó");
             }
             this.reset(position);
-            return new Stmt.Block(this.block());
+            return new Stmt.Block(this.block(), this.peek().pos);
         }
         return this.expressionStatement();
     };
@@ -195,7 +195,7 @@ var Parser = /** @class */ (function () {
                     if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
                         this.consume(Token.SEMICOLON, "Expect ';' after expression..");
                     }
-                    return new Stmt.Var(name_1, initializer);
+                    return new Stmt.Var(name_1, initializer, this.peek().pos);
                 }
                 this.reset(position);
             }
@@ -214,7 +214,7 @@ var Parser = /** @class */ (function () {
         while (this.match(Token.GTR, Token.GEQ, Token.LSS, Token.LEQ)) {
             var operator = this.previous();
             var right = this.term();
-            expr = new Expr.Binary(expr, operator, right);
+            expr = new Expr.Binary(expr, operator, right, this.peek().pos);
         }
         return expr;
     };
@@ -223,7 +223,7 @@ var Parser = /** @class */ (function () {
         while (this.match(Token.NEQ, Token.EQL)) {
             var operator = this.previous();
             var right = this.comparison();
-            expr = new Expr.Binary(expr, operator, right);
+            expr = new Expr.Binary(expr, operator, right, this.peek().pos);
         }
         return expr;
     };
@@ -233,7 +233,7 @@ var Parser = /** @class */ (function () {
             var exprThen = this.assignment();
             this.consume(Token.COLON, "Expect ':' after expression.");
             var exprElse = this.assignment();
-            expr = new Expr.Ternary(expr, exprThen, exprElse);
+            expr = new Expr.Ternary(expr, exprThen, exprElse, this.peek().pos);
         }
         return expr;
         //return this.assignment();
@@ -250,17 +250,17 @@ var Parser = /** @class */ (function () {
             var value = this.assignment();
             if (expr instanceof Expr.Variable) {
                 var name_2 = expr.name;
-                return new Expr.Assign(name_2, value, equals);
+                return new Expr.Assign(name_2, value, equals, this.peek().pos);
                 //> Classes assign-set
             }
             else if (expr instanceof Expr.Get) {
                 var get = expr;
-                return new Expr.Set(get.object, get.name, value, equals);
+                return new Expr.Set(get.object, get.name, value, equals, this.peek().pos);
                 //< Classes assign-set
             }
             else if (expr instanceof Expr.Get2) {
                 var get = expr;
-                return new Expr.Set2(get.object, get.name, value, equals);
+                return new Expr.Set2(get.object, get.name, value, equals, this.peek().pos);
                 //< Classes assign-set
             }
             this.error(equals, "Invalid assignment target."); // [no-throw]
@@ -272,7 +272,7 @@ var Parser = /** @class */ (function () {
         while (this.match(Token.OR)) {
             var operator = this.previous();
             var right = this.and();
-            expr = new Expr.Logical(expr, operator, right);
+            expr = new Expr.Logical(expr, operator, right, this.peek().pos);
         }
         return expr;
     };
@@ -283,7 +283,7 @@ var Parser = /** @class */ (function () {
         while (this.match(Token.AND)) {
             var operator = this.previous();
             var right = this.equality();
-            expr = new Expr.Logical(expr, operator, right);
+            expr = new Expr.Logical(expr, operator, right, this.peek().pos);
         }
         return expr;
     };
@@ -294,7 +294,7 @@ var Parser = /** @class */ (function () {
         while (this.match(Token.SUB, Token.ADD)) {
             var operator = this.previous();
             var right = this.factor();
-            expr = new Expr.Binary(expr, operator, right);
+            expr = new Expr.Binary(expr, operator, right, this.peek().pos);
         }
         return expr;
     };
@@ -303,7 +303,7 @@ var Parser = /** @class */ (function () {
         while (this.match(Token.MUL, Token.DIV, Token.MOD)) {
             var operator = this.previous();
             var right = this.power();
-            expr = new Expr.Binary(expr, operator, right);
+            expr = new Expr.Binary(expr, operator, right, this.peek().pos);
         }
         return expr;
     };
@@ -312,7 +312,7 @@ var Parser = /** @class */ (function () {
         while (this.match(Token.POW)) {
             var operator = this.previous();
             var right = this.power();
-            expr = new Expr.Binary(expr, operator, right);
+            expr = new Expr.Binary(expr, operator, right, this.peek().pos);
         }
         return expr;
     };
@@ -320,7 +320,7 @@ var Parser = /** @class */ (function () {
         if (this.match(Token.SUB, Token.NOT)) {
             var operator = this.previous();
             var right = this.unary();
-            return new Expr.Unary(operator, right);
+            return new Expr.Unary(operator, right, this.peek().pos);
         }
         return this.call();
     };
@@ -335,7 +335,7 @@ var Parser = /** @class */ (function () {
             } while (this.match(Token.COMMA));
         }
         var paren = this.consume(Token.RPAREN, "Expect ')' after arguments.");
-        return new Expr.Call(callee, paren, arg);
+        return new Expr.Call(callee, paren, arg, this.peek().pos);
     };
     Parser.prototype.call = function () {
         var expr = this.primary();
@@ -345,11 +345,11 @@ var Parser = /** @class */ (function () {
             }
             else if (this.match(Token.DOT)) {
                 var name_3 = this.consume(Token.IDENT, "Expect property name after '.'.");
-                expr = new Expr.Get(expr, name_3);
+                expr = new Expr.Get(expr, name_3, this.peek().pos);
             }
             else if (this.match(Token.LBRACK)) {
                 var name_4 = this.expression();
-                expr = new Expr.Get2(expr, name_4);
+                expr = new Expr.Get2(expr, name_4, this.peek().pos);
                 this.consume(Token.RBRACK, "Expect ']' after property name.");
             }
             else {
@@ -360,29 +360,29 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.primary = function () {
         if (this.match(Token.FALSE)) {
-            return new Expr.Literal(false);
+            return new Expr.Literal(false, this.peek().pos);
         }
         if (this.match(Token.TRUE)) {
-            return new Expr.Literal(true);
+            return new Expr.Literal(true, this.peek().pos);
         }
         if (this.match(Token.NULL)) {
-            return new Expr.Literal(null);
+            return new Expr.Literal(null, this.peek().pos);
         }
         if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
-            return new Expr.Literal(this.previous().value, this.previous().tok);
+            return new Expr.Literal(this.previous().value, this.peek().pos, this.previous().tok);
         }
         if (this.match(Token.LBRACE)) {
-            return new Expr.Object(this.objectValue());
+            return new Expr.Object(this.objectValue(), this.peek().pos);
         }
         if (this.match(Token.LBRACK)) {
-            return new Expr.Array(this.arrayValue());
+            return new Expr.Array(this.arrayValue(), this.peek().pos);
         }
         if (this.match(Token.INCR, Token.DECR)) {
             var id = null;
             var op = this.previous();
             if (this.match(Token.IDENT)) {
                 id = this.previous();
-                return new Expr.PostAssign(id, op);
+                return new Expr.PreAssign(id, op, this.peek().pos);
             }
             throw new Error("expected a identifier");
         }
@@ -390,17 +390,17 @@ var Parser = /** @class */ (function () {
             var ident = this.previous();
             if (this.match(Token.INCR, Token.DECR)) {
                 var op = this.previous();
-                return new Expr.PostAssign(ident, op);
+                return new Expr.PostAssign(ident, op, this.peek().pos);
             }
-            return new Expr.Variable(this.previous());
+            return new Expr.Variable(this.previous(), this.peek().pos);
         }
         if (this.match(Token.IDENT)) {
-            return new Expr.Variable(this.previous());
+            return new Expr.Variable(this.previous(), this.peek().pos);
         }
         if (this.match(Token.LPAREN)) {
             var expr = this.expression();
             this.consume(Token.RPAREN, "Expect ')' after expression.");
-            return new Expr.Grouping(expr);
+            return new Expr.Grouping(expr, this.peek().pos);
         }
     };
     Parser.prototype.ifStatement = function () {
@@ -412,7 +412,7 @@ var Parser = /** @class */ (function () {
         if (this.match(Token.ELSE)) {
             elseBranch = this.statement();
         }
-        return new Stmt.If(condition, thenBranch, elseBranch);
+        return new Stmt.If(condition, thenBranch, elseBranch, this.peek().pos);
     };
     Parser.prototype._function = function (kind) {
         var name = this.consume(Token.IDENT, "Expect " + kind + " name.");
@@ -429,7 +429,7 @@ var Parser = /** @class */ (function () {
         this.consume(Token.RPAREN, "Expect ')' after parameters.");
         this.consume(Token.LBRACE, "Expect '{' before " + kind + " body.");
         var body = this.block();
-        return new Stmt.Function(name, parameters, body);
+        return new Stmt.Function(name, parameters, body, this.peek().pos);
     };
     Parser.prototype.varDeclaration = function () {
         var name = this.consume(Token.IDENT, "Expect variable name.");
@@ -441,7 +441,7 @@ var Parser = /** @class */ (function () {
         if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
             this.consume(Token.SEMICOLON, "Expect ';' after expression..");
         }
-        return new Stmt.Var(name, initializer);
+        return new Stmt.Var(name, initializer, this.peek().pos);
     };
     Parser.prototype.arrayValue = function () {
         var values = [];
@@ -466,7 +466,7 @@ var Parser = /** @class */ (function () {
             var name_5 = null;
             var value = null;
             if (this.peek().tok == Token.IDENT || this.peek().tok == Token.STRING || this.peek().tok == Token.INT) {
-                name_5 = new Expr.Literal(this.peek().value, this.peek().tok);
+                name_5 = new Expr.Literal(this.peek().value, this.peek().pos, this.peek().tok);
                 this.advance();
             }
             else if (this.match(Token.LBRACK)) {
@@ -502,14 +502,14 @@ var Parser = /** @class */ (function () {
         this.consume(Token.LPAREN, "Expect '(' after 'if'.");
         var condition = this.expression();
         this.consume(Token.RPAREN, "Expect ')' after if condition.");
-        return new Stmt.Do(condition, body);
+        return new Stmt.Do(condition, body, this.peek().pos);
     };
     Parser.prototype.whileStatement = function () {
         this.consume(Token.LPAREN, "Expect '(' after 'while'.");
         var condition = this.expression();
         this.consume(Token.RPAREN, "Expect ')' after condition.");
         var body = this.statement();
-        return new Stmt.While(condition, body);
+        return new Stmt.While(condition, body, this.peek().pos);
     };
     Parser.prototype.returnStatement = function () {
         //Token keyword: I = previous();
@@ -521,7 +521,7 @@ var Parser = /** @class */ (function () {
             this.consume(Token.SEMICOLON, "Expect ';' after expression..");
         }
         //this.consume(Token.SEMICOLON, "Expect ';' after return value.");
-        return new Stmt.Return(value);
+        return new Stmt.Return(value, this.peek().pos);
     };
     Parser.prototype.forStatement = function () {
         this.consume(Token.LPAREN, "Expect '(' after 'for'.");
@@ -550,21 +550,21 @@ var Parser = /** @class */ (function () {
         if (increment != null) {
             body = new Stmt.Block([
                 body,
-                new Stmt.Expression(increment, [])
-            ]);
+                new Stmt.Expression(increment, [], this.peek().pos)
+            ], this.peek().pos);
         }
         if (condition == null)
-            condition = new Expr.Literal(true);
-        body = new Stmt.While(condition, body);
+            condition = new Expr.Literal(true, this.peek().pos);
+        body = new Stmt.While(condition, body, this.peek().pos);
         if (initializer != null) {
-            body = new Stmt.Block([initializer, body]);
+            body = new Stmt.Block([initializer, body], this.peek().pos);
         }
         return body;
     };
     Parser.prototype.printStatement = function () {
         var value = this.expression();
         this.consume(Token.SEMICOLON, "Expect ';' after value.");
-        return new Stmt.Print(value);
+        return new Stmt.Print(value, this.peek().pos);
     };
     return Parser;
 }());

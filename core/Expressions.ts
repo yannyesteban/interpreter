@@ -8,6 +8,7 @@ export interface Expression {
 export abstract class Expression {
   abstract accept(visitor: any);
   abstract clss: string;
+  abstract pos: number;
 }
 
 export class Binary implements Expression {
@@ -15,11 +16,13 @@ export class Binary implements Expression {
   public operator: Item;
   public right: Expression;
   public clss: string;
+  public pos: number;
 
-  constructor(left, operator, right) {
+  constructor(left, operator, right, pos: number) {
     this.left = left;
     this.operator = operator;
     this.right = right;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -32,9 +35,12 @@ export class Literal implements Expression {
   public value = null;
   public type: number = 0;
   public clss: string;
-  constructor(value, type?) {
+  public pos: number;
+
+  constructor(value, pos: number, type?) {
     this.value = value;
     this.type = type;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -47,9 +53,12 @@ export class Unary implements Expression {
   public operator;
   public right;
   public clss: string;
-  constructor(operator, right) {
+  public pos: number;
+
+  constructor(operator, right, pos: number) {
     this.operator = operator;
     this.right = right;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -61,8 +70,11 @@ export class Unary implements Expression {
 export class Grouping implements Expression {
   public expression;
   public clss: string;
-  constructor(expression) {
+  public pos: number;
+
+  constructor(expression, pos: number) {
     this.expression = expression;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -73,12 +85,14 @@ export class Grouping implements Expression {
 
 export class PostAssign implements Expression {
   public name;
-  public operator;
+  public operator: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(name, operator) {
+  constructor(name, operator: Item, pos: number) {
     this.name = name;
     this.operator = operator;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -89,12 +103,14 @@ export class PostAssign implements Expression {
 
 export class PreAssign implements Expression {
   public name;
-  public operator;
+  public operator: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(name, operator) {
+  constructor(name, operator: Item, pos: number) {
     this.name = name;
     this.operator = operator;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -106,9 +122,11 @@ export class PreAssign implements Expression {
 export class Variable implements Expression {
   public name: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(name: Item) {
+  constructor(name: Item, pos: number) {
     this.name = name;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -123,11 +141,13 @@ export class Assign implements Expression {
   public value: Expression;
   public type: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(name: Item, value: Expression, type: Item) {
+  constructor(name: Item, value: Expression, type: Item, pos: number) {
     this.name = name;
     this.value = value;
     this.type = type;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -142,10 +162,12 @@ export class Get implements Expression {
   public name: Item;
   public object: Expression;
   public clss: string;
+  public pos: number;
 
-  constructor(object: Expression, name: Item) {
+  constructor(object: Expression, name: Item, pos: number) {
     this.object = object;
     this.name = name;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -161,13 +183,16 @@ export class Set implements Expression {
   public value: Expression;
   public type: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(object: Expression, name: Item, value: Expression, type: Item) {
+  constructor(object: Expression, name: Item, value: Expression, type: Item, pos: number) {
     this.object = object;
     this.name = name;
     this.value = value;
     this.type = type;
+    this.pos = pos;
     this.clss = this.constructor.name;
+
   }
 
   accept(visitor) {
@@ -179,10 +204,12 @@ export class Get2 implements Expression {
   public name: Expression;
   public object: Expression;
   public clss: string;
+  public pos: number;
 
-  constructor(object: Expression, name: Expression) {
+  constructor(object: Expression, name: Expression, pos: number) {
     this.object = object;
     this.name = name;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -198,12 +225,14 @@ export class Set2 implements Expression {
   public value: Expression;
   public type: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(object: Expression, name: Expression, value: Expression, type: Item) {
+  constructor(object: Expression, name: Expression, value: Expression, type: Item, pos: number) {
     this.object = object;
     this.name = name;
     this.value = value;
     this.type = type;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -219,11 +248,13 @@ export class Logical implements Expression {
 
   public right: Expression;
   public clss: string;
+  public pos: number;
 
-  constructor(left: Expression, operator: Item, right: Expression) {
+  constructor(left: Expression, operator: Item, right: Expression, pos: number) {
     this.left = left;
     this.operator = operator;
     this.right = right;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -237,10 +268,12 @@ export class Par implements Expression {
   public id: Expression;
   public value: Expression;
   public clss: string;
+  public pos: number;
 
-  constructor(id, value) {
+  constructor(id, value, pos: number) {
     this.id = id;
     this.value = value;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
   accept(visitor: any) {
@@ -252,9 +285,11 @@ export class Object implements Expression {
 
   public childs: Par[];
   public clss: string;
+  public pos: number;
 
-  constructor(childs) {
+  constructor(childs, pos: number) {
     this.childs = childs;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
   accept(visitor: any) {
@@ -266,9 +301,11 @@ export class Array implements Expression {
 
   public childs: Expression[];
   public clss: string;
+  public pos: number;
 
-  constructor(childs) {
+  constructor(childs, pos: number) {
     this.childs = childs;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
   accept(visitor: any) {
@@ -284,12 +321,14 @@ export class Call implements Expression {
 
   childs: Expression[];
   public clss: string;
+  public pos: number;
 
 
-  constructor(callee: Expression, paren: Item, arg: Expression[]) {
+  constructor(callee: Expression, paren: Item, arg: Expression[], pos: number) {
     this.callee = callee;
     this.paren = paren;
     this.arg = arg;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
   accept(visitor: any) {
@@ -303,12 +342,14 @@ export class Ternary implements Expression {
   public exprTrue: Expression;
   public exprFalse: Expression;
   public clss: string;
+  public pos: number;
 
 
-  constructor(cond: Expression, exprTrue: Expression, exprFalse: Expression) {
+  constructor(cond: Expression, exprTrue: Expression, exprFalse: Expression, pos: number) {
     this.cond = cond;
     this.exprTrue = exprTrue;
     this.exprFalse = exprFalse;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -321,10 +362,12 @@ export class Super implements Expression {
   public keyword: Item;
   public method: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(keyword: Item, method: Item) {
+  constructor(keyword: Item, method: Item, pos: number) {
     this.keyword = keyword;
     this.method = method;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 
@@ -338,9 +381,11 @@ export class Super implements Expression {
 export class This implements Expression {
   public keyword: Item;
   public clss: string;
+  public pos: number;
 
-  constructor(keyword: Item) {
+  constructor(keyword: Item, pos: number) {
     this.keyword = keyword;
+    this.pos = pos;
     this.clss = this.constructor.name;
   }
 

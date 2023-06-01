@@ -39,10 +39,14 @@
         import { Interpreter } from "./dist/core/Interpreter.js";
 
         import { Outer } from "./dist/core/outer/Outer.js";
-
+        import { Logic } from "./dist/core/Logic.js";
 
         function run(code) {
             console.clear();
+
+            const logic = new Logic();
+            document.getElementById("result").value = logic.execute(code);
+            /*return;
             
             const lexer = new Lexer(code);
 
@@ -69,7 +73,7 @@
             console.log(intp.locals,output)
 
             document.getElementById("result").value = output.join("");
-
+            */
 
         }
 

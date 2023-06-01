@@ -7,13 +7,14 @@ import { ReturnR } from "./ReturnR.js";
 import * as Stmt from "./Statement.js";
 
 
-export class FunctionR implements CallableR {
+export class FunctionR extends CallableR {
     
     private declaration: Stmt.Function;
     private closure: Environment;
     private isInitializer: boolean;
 
     constructor(declaration: Stmt.Function, closure: Environment, isInitializer: boolean) {
+        super()
         this.isInitializer = isInitializer;
         this.closure = closure;
         this.declaration = declaration;
@@ -30,14 +31,15 @@ export class FunctionR implements CallableR {
     }
 
     arity() {
-        return this.declaration.params.size();
+        console.log("calculate arity ", this.declaration.params, this.declaration.params.length)
+        return this.declaration.params.length;
     }
 
     call(interpreter: Interpreter, _arguments: Object[]) {
 
         const environment: Environment = new Environment(this.closure);
-        for (let i = 0; i < this.declaration.params.size(); i++) {
-            environment.define(this.declaration.params.get(i).lexeme, _arguments[i]);
+        for (let i = 0; i < this.declaration.params.length; i++) {
+            environment.define(this.declaration.params[i].value, _arguments[i]);
         }
 
         try {

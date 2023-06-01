@@ -22,7 +22,7 @@ export class Environment {
         if (this.enclosing != null) {
             return this.enclosing.get(name);
         }
-
+        console.log("Undefined variable '" + name.value + "'.")
         throw ""//new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
     }
 

@@ -8,8 +8,8 @@ export class Modifier {
   public param: Expr.Expression;
 
   constructor(name: string, param: Expr.Expression) {
-      this.name = name;
-      this.param = param;
+    this.name = name;
+    this.param = param;
   }
 }
 
@@ -27,16 +27,18 @@ export interface Visitor {
 
 export abstract class Statement {
   abstract accept(visitor: Visitor);
-  abstract clssStmt:string;
+  abstract pos: number;
+  abstract clssStmt: string;
 }
 
 export class Block implements Statement {
   public statements: Statement[];
-  public clssStmt:string;
+  public pos: number;
+  public clssStmt: string;
 
-  constructor(statements: Statement[]) {
+  constructor(statements: Statement[], pos: number) {
     this.statements = statements;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
 
@@ -50,14 +52,16 @@ export class Block implements Statement {
 
 export class Expression implements Statement {
   public expression;
-  public mods:Modifier[];
-  public clssStmt:string;
+  public mods: Modifier[];
+  public pos: number;
+  public clssStmt: string;
 
 
-  constructor(expression, mods) {
+  constructor(expression, mods, pos: number) {
     //console.log("Expression: ", expression);
     this.expression = expression;
     this.mods = mods;
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
   accept(visitor: Visitor) {
@@ -72,14 +76,14 @@ export class If implements Statement {
   public condition;
   public thenBranch;
   public elseBranch;
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(condition: Expr.Expression, thenBranch: Statement, elseBranch: Statement) {
+  constructor(condition: Expr.Expression, thenBranch: Statement, elseBranch: Statement, pos: number) {
     this.condition = condition;
     this.thenBranch = thenBranch;
     this.elseBranch = elseBranch;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
 
@@ -90,17 +94,17 @@ export class If implements Statement {
 }
 
 export class Function implements Statement {
-  public name;
-  public params;
-  public body;
+  public name: Item;
+  public params: Item[];
+  public body: Statement[];
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(name, params, body) {
+  constructor(name: Item, params: Item[], body: Statement[], pos: number) {
     this.name = name;
     this.params = params;
     this.body = body;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
   accept(visitor: Visitor) {
@@ -112,13 +116,13 @@ export class Var implements Statement {
 
   public name: Item;
   public initializer: Expr.Expression;
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(name: Item, initializer: Expr.Expression) {
+  constructor(name: Item, initializer: Expr.Expression, pos: number) {
     this.name = name;
     this.initializer = initializer;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
 
@@ -133,12 +137,12 @@ export class Var implements Statement {
 export class Return implements Statement {
 
   public value: Expr.Expression;
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(value) {
+  constructor(value, pos: number) {
     this.value = value;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
   accept(visitor: any) {
@@ -150,13 +154,13 @@ export class While implements Statement {
 
   public condition: Expr.Expression;
   public body: Statement;
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(condition: Expr.Expression, body: Statement) {
+  constructor(condition: Expr.Expression, body: Statement, pos: number) {
     this.condition = condition;
     this.body = body;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
 
@@ -169,13 +173,13 @@ export class Do implements Statement {
 
   public condition: Expr.Expression;
   public body: Statement;
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(condition: Expr.Expression, body: Statement) {
+  constructor(condition: Expr.Expression, body: Statement, pos: number) {
     this.condition = condition;
     this.body = body;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
 
@@ -190,14 +194,14 @@ export class Class implements Statement {
   public name: Item;
   public superclass: Expr.Variable;
   public methods: Function[];
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(name: Item, superclass: Expr.Variable, methods: Function[]) {
+  constructor(name: Item, superclass: Expr.Variable, methods: Function[], pos: number) {
     this.name = name;
     this.superclass = superclass;
     this.methods = methods;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
 
@@ -212,12 +216,12 @@ export class Class implements Statement {
 
 export class Print implements Statement {
   public expression: Expr.Expression;
+  public pos: number;
+  public clssStmt: string;
 
-  public clssStmt:string;
-
-  constructor(expression: Expr.Expression) {
+  constructor(expression: Expr.Expression, pos: number) {
     this.expression = expression;
-
+    this.pos = pos;
     this.clssStmt = this.constructor.name;
   }
 

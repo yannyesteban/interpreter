@@ -10,10 +10,11 @@ var Expression = /** @class */ (function () {
 }());
 export { Expression };
 var Binary = /** @class */ (function () {
-    function Binary(left, operator, right) {
+    function Binary(left, operator, right, pos) {
         this.left = left;
         this.operator = operator;
         this.right = right;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Binary.prototype.accept = function (visitor) {
@@ -23,11 +24,12 @@ var Binary = /** @class */ (function () {
 }());
 export { Binary };
 var Literal = /** @class */ (function () {
-    function Literal(value, type) {
+    function Literal(value, pos, type) {
         this.value = null;
         this.type = 0;
         this.value = value;
         this.type = type;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Literal.prototype.accept = function (visitor) {
@@ -37,9 +39,10 @@ var Literal = /** @class */ (function () {
 }());
 export { Literal };
 var Unary = /** @class */ (function () {
-    function Unary(operator, right) {
+    function Unary(operator, right, pos) {
         this.operator = operator;
         this.right = right;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Unary.prototype.accept = function (visitor) {
@@ -49,8 +52,9 @@ var Unary = /** @class */ (function () {
 }());
 export { Unary };
 var Grouping = /** @class */ (function () {
-    function Grouping(expression) {
+    function Grouping(expression, pos) {
         this.expression = expression;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Grouping.prototype.accept = function (visitor) {
@@ -60,9 +64,10 @@ var Grouping = /** @class */ (function () {
 }());
 export { Grouping };
 var PostAssign = /** @class */ (function () {
-    function PostAssign(name, operator) {
+    function PostAssign(name, operator, pos) {
         this.name = name;
         this.operator = operator;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     PostAssign.prototype.accept = function (visitor) {
@@ -72,9 +77,10 @@ var PostAssign = /** @class */ (function () {
 }());
 export { PostAssign };
 var PreAssign = /** @class */ (function () {
-    function PreAssign(name, operator) {
+    function PreAssign(name, operator, pos) {
         this.name = name;
         this.operator = operator;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     PreAssign.prototype.accept = function (visitor) {
@@ -84,8 +90,9 @@ var PreAssign = /** @class */ (function () {
 }());
 export { PreAssign };
 var Variable = /** @class */ (function () {
-    function Variable(name) {
+    function Variable(name, pos) {
         this.name = name;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Variable.prototype.accept = function (visitor) {
@@ -95,10 +102,11 @@ var Variable = /** @class */ (function () {
 }());
 export { Variable };
 var Assign = /** @class */ (function () {
-    function Assign(name, value, type) {
+    function Assign(name, value, type, pos) {
         this.name = name;
         this.value = value;
         this.type = type;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Assign.prototype.accept = function (visitor) {
@@ -108,9 +116,10 @@ var Assign = /** @class */ (function () {
 }());
 export { Assign };
 var Get = /** @class */ (function () {
-    function Get(object, name) {
+    function Get(object, name, pos) {
         this.object = object;
         this.name = name;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Get.prototype.accept = function (visitor) {
@@ -120,11 +129,12 @@ var Get = /** @class */ (function () {
 }());
 export { Get };
 var Set = /** @class */ (function () {
-    function Set(object, name, value, type) {
+    function Set(object, name, value, type, pos) {
         this.object = object;
         this.name = name;
         this.value = value;
         this.type = type;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Set.prototype.accept = function (visitor) {
@@ -134,9 +144,10 @@ var Set = /** @class */ (function () {
 }());
 export { Set };
 var Get2 = /** @class */ (function () {
-    function Get2(object, name) {
+    function Get2(object, name, pos) {
         this.object = object;
         this.name = name;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Get2.prototype.accept = function (visitor) {
@@ -146,11 +157,12 @@ var Get2 = /** @class */ (function () {
 }());
 export { Get2 };
 var Set2 = /** @class */ (function () {
-    function Set2(object, name, value, type) {
+    function Set2(object, name, value, type, pos) {
         this.object = object;
         this.name = name;
         this.value = value;
         this.type = type;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Set2.prototype.accept = function (visitor) {
@@ -160,10 +172,11 @@ var Set2 = /** @class */ (function () {
 }());
 export { Set2 };
 var Logical = /** @class */ (function () {
-    function Logical(left, operator, right) {
+    function Logical(left, operator, right, pos) {
         this.left = left;
         this.operator = operator;
         this.right = right;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Logical.prototype.accept = function (visitor) {
@@ -173,9 +186,10 @@ var Logical = /** @class */ (function () {
 }());
 export { Logical };
 var Par = /** @class */ (function () {
-    function Par(id, value) {
+    function Par(id, value, pos) {
         this.id = id;
         this.value = value;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Par.prototype.accept = function (visitor) {
@@ -185,8 +199,9 @@ var Par = /** @class */ (function () {
 }());
 export { Par };
 var Object = /** @class */ (function () {
-    function Object(childs) {
+    function Object(childs, pos) {
         this.childs = childs;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Object.prototype.accept = function (visitor) {
@@ -196,8 +211,9 @@ var Object = /** @class */ (function () {
 }());
 export { Object };
 var Array = /** @class */ (function () {
-    function Array(childs) {
+    function Array(childs, pos) {
         this.childs = childs;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Array.prototype.accept = function (visitor) {
@@ -207,10 +223,11 @@ var Array = /** @class */ (function () {
 }());
 export { Array };
 var Call = /** @class */ (function () {
-    function Call(callee, paren, arg) {
+    function Call(callee, paren, arg, pos) {
         this.callee = callee;
         this.paren = paren;
         this.arg = arg;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Call.prototype.accept = function (visitor) {
@@ -220,10 +237,11 @@ var Call = /** @class */ (function () {
 }());
 export { Call };
 var Ternary = /** @class */ (function () {
-    function Ternary(cond, exprTrue, exprFalse) {
+    function Ternary(cond, exprTrue, exprFalse, pos) {
         this.cond = cond;
         this.exprTrue = exprTrue;
         this.exprFalse = exprFalse;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Ternary.prototype.accept = function (visitor) {
@@ -233,9 +251,10 @@ var Ternary = /** @class */ (function () {
 }());
 export { Ternary };
 var Super = /** @class */ (function () {
-    function Super(keyword, method) {
+    function Super(keyword, method, pos) {
         this.keyword = keyword;
         this.method = method;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     Super.prototype.accept = function (visitor) {
@@ -245,8 +264,9 @@ var Super = /** @class */ (function () {
 }());
 export { Super };
 var This = /** @class */ (function () {
-    function This(keyword) {
+    function This(keyword, pos) {
         this.keyword = keyword;
+        this.pos = pos;
         this.clss = this.constructor.name;
     }
     This.prototype.accept = function (visitor) {
