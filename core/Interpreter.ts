@@ -469,6 +469,16 @@ export class Interpreter {
 
     }
 
+    visitTernaryExpr(expr: Expr.Ternary){
+        console.log("visitTernaryExpr", expr);
+
+        if (this.isTruthy(this.evaluate(expr.condition))) {
+            return this.evaluate(expr.exprTrue);
+        } 
+        return this.evaluate(expr.exprFalse);
+        
+    }
+
     lookUpVariable(name: Item, expr: Expr.Expression) {
         const distance: number = this.locals.get(expr);
         if (distance != null) {

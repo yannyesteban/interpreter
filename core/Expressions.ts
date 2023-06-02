@@ -338,15 +338,15 @@ export class Call implements Expression {
 
 export class Ternary implements Expression {
 
-  public cond: Expression;
+  public condition: Expression;
   public exprTrue: Expression;
   public exprFalse: Expression;
   public clss: string;
   public pos: number;
 
 
-  constructor(cond: Expression, exprTrue: Expression, exprFalse: Expression, pos: number) {
-    this.cond = cond;
+  constructor(condition: Expression, exprTrue: Expression, exprFalse: Expression, pos: number) {
+    this.condition = condition;
     this.exprTrue = exprTrue;
     this.exprFalse = exprFalse;
     this.pos = pos;

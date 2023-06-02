@@ -13,8 +13,9 @@ var Logic = /** @class */ (function () {
         var statements = parser.parse();
         var interpreter = new Interpreter();
         var resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
         var output = interpreter.interpret(statements);
-        return output;
+        return output.join("");
     };
     Logic.prototype.scan = function (source) {
         this.output = source;
@@ -30,7 +31,7 @@ var Logic = /** @class */ (function () {
             var statements = parser.parse();
             var interpreter = new Interpreter();
             var resolver = new Resolver(interpreter);
-            //resolver.resolve(statements);
+            resolver.resolve(statements);
             var output = interpreter.interpret(statements);
             s.output = output;
             s.pos += delta;

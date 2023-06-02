@@ -34,25 +34,25 @@ class Stack {
     }
     public pop() {
         return this.list.pop();
-         
+
 
     }
-    
+
     public length() {
         return this.list.length;
     }
 
 
     public get(index) {
-        return  this.list[index];
+        return this.list[index];
     }
 
-    public put(key, value){
-        this.list[this.list.length - 1][key] = value;   
+    public put(key, value) {
+        this.list[this.list.length - 1][key] = value;
     }
 
-    public is(key){
-        return key in this.list[this.list.length - 1];   
+    public is(key) {
+        return key in this.list[this.list.length - 1];
     }
 
 }
@@ -70,9 +70,9 @@ export class Resolver {
     private currentClass: ClassType = ClassType.NONE;
 
     resolve(s: Stmt.Statement[] | Stmt.Statement | Expr.Expression | Stmt.Expression | any) {
-        
+
         console.log("Statement ", s);
-      
+
         if (Array.isArray(s)) {
             console.log("Array ", s);
 
@@ -88,15 +88,15 @@ export class Resolver {
             console.log("Statement 2", s)
             s.accept(this);
 
-        }else  if (s instanceof Stmt.Expression){
+        } else if (s instanceof Stmt.Expression) {
             console.log("Statement NOOOOO", s)
             s.accept(this);
 
-        }else{
+        } else {
             console.log("Statement ELSE", s)
             s.accept(this);
         }
-        
+
         //throw "error X"
 
     }
@@ -117,7 +117,7 @@ export class Resolver {
 
         if (stmt.superclass != null &&
             stmt.name.value.equals(stmt.superclass.name.value)) {
-            throw "A class can't inherit from itself.";    
+            throw "A class can't inherit from itself.";
             //Lox.error(stmt.superclass.name,           "A class can't inherit from itself.");
         }
 
@@ -138,7 +138,7 @@ export class Resolver {
 
             let declaration: FunctionType = FunctionType.METHOD;
 
-            if (method.name.value =="init") {
+            if (method.name.value == "init") {
                 declaration = FunctionType.INITIALIZER;
             }
 
@@ -173,13 +173,13 @@ export class Resolver {
         if (stmt.elseBranch != null) this.resolve(stmt.elseBranch);
         return null;
     }
-    
+
     visitPrintStmt(stmt: Stmt.Print) {
         console.log("visitPrintStmt");
         this.resolve(stmt.expression);
         return null;
     }
-    
+
 
     visitReturnStmt(stmt: Stmt.Return) {
         if (this.currentFunction == FunctionType.NONE) {
@@ -304,11 +304,33 @@ export class Resolver {
         this.resolveLocal(expr, expr.name);
         return null;
     }
-    
-    visitObjectExpr(expr: Expr.Object){
+
+    visitObjectExpr(expr: Expr.Object) {
         console.error("visitObjectExpr", expr);
     }
 
+    visitPreExpr(expr: Expr.PreAssign) {
+        console.error("visitPreExpr", expr);
+    }
+
+    visitPostExpr(expr: Expr.PostAssign) {
+        console.error("visitPostExpr", expr);
+    }
+
+    visitArrayExpr(expr: Expr.Array) {
+        console.error("visitArrayExpr", expr);
+    }
+
+    visitTernaryExpr(expr: Expr.Ternary){
+        console.error("visitTernaryExpr", expr);
+    }
+
+    visitGet2Expr(expr: Expr.Get2) {
+        console.error("visitGet2Expr", expr);
+    }
+    visitSet2Expr(expr: Expr.Set2) {
+        console.error("visitSet2Expr", expr);
+    }
     private resolveFunction(_function: Stmt.Function, type) {
         const enclosingFunction = this.currentFunction;
         this.currentFunction = type;
@@ -332,7 +354,9 @@ export class Resolver {
     }
 
     private declare(name: Item) {
-        if (this.scopes.isEmpty()) return;
+        if (this.scopes.isEmpty()) {
+            return;
+        }
 
         //let scope = this.scopes.peek();
         if (this.scopes.peek() && name.value in this.scopes.peek()) {

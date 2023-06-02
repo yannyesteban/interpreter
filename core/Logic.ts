@@ -20,9 +20,10 @@ export class Logic {
         const statements = parser.parse();
         const interpreter = new Interpreter();
         const resolver = new Resolver(interpreter);
+        resolver.resolve(statements);
         const output = interpreter.interpret(statements);
-
-        return output;
+        
+        return output.join("");
 
     }
 
@@ -45,7 +46,7 @@ export class Logic {
             const statements = parser.parse();
             const interpreter = new Interpreter();
             const resolver = new Resolver(interpreter);
-            //resolver.resolve(statements);
+            resolver.resolve(statements);
 
             const output = interpreter.interpret(statements);
 

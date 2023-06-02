@@ -294,7 +294,7 @@ export class Parser {
     expression() {
 
         let expr = this.assignment();
-
+        let pos = this.peek().pos;
         if (this.match(Token.QUESTION)) {
 
 
@@ -302,7 +302,7 @@ export class Parser {
             this.consume(Token.COLON, "Expect ':' after expression.");
 
             let exprElse = this.assignment();
-            expr = new Expr.Ternary(expr, exprThen, exprElse, this.peek().pos);
+            expr = new Expr.Ternary(expr, exprThen, exprElse, pos);
         }
 
         return expr;

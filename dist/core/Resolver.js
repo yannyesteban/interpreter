@@ -246,6 +246,24 @@ var Resolver = /** @class */ (function () {
     Resolver.prototype.visitObjectExpr = function (expr) {
         console.error("visitObjectExpr", expr);
     };
+    Resolver.prototype.visitPreExpr = function (expr) {
+        console.error("visitPreExpr", expr);
+    };
+    Resolver.prototype.visitPostExpr = function (expr) {
+        console.error("visitPostExpr", expr);
+    };
+    Resolver.prototype.visitArrayExpr = function (expr) {
+        console.error("visitArrayExpr", expr);
+    };
+    Resolver.prototype.visitTernaryExpr = function (expr) {
+        console.error("visitTernaryExpr", expr);
+    };
+    Resolver.prototype.visitGet2Expr = function (expr) {
+        console.error("visitGet2Expr", expr);
+    };
+    Resolver.prototype.visitSet2Expr = function (expr) {
+        console.error("visitSet2Expr", expr);
+    };
     Resolver.prototype.resolveFunction = function (_function, type) {
         var enclosingFunction = this.currentFunction;
         this.currentFunction = type;
@@ -266,8 +284,9 @@ var Resolver = /** @class */ (function () {
         this.scopes.pop();
     };
     Resolver.prototype.declare = function (name) {
-        if (this.scopes.isEmpty())
+        if (this.scopes.isEmpty()) {
             return;
+        }
         //let scope = this.scopes.peek();
         if (this.scopes.peek() && name.value in this.scopes.peek()) {
             throw "Already a variable with this name in this scope.";

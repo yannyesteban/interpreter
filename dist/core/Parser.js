@@ -229,11 +229,12 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.expression = function () {
         var expr = this.assignment();
+        var pos = this.peek().pos;
         if (this.match(Token.QUESTION)) {
             var exprThen = this.assignment();
             this.consume(Token.COLON, "Expect ':' after expression.");
             var exprElse = this.assignment();
-            expr = new Expr.Ternary(expr, exprThen, exprElse, this.peek().pos);
+            expr = new Expr.Ternary(expr, exprThen, exprElse, pos);
         }
         return expr;
         //return this.assignment();

@@ -237,8 +237,8 @@ var Call = /** @class */ (function () {
 }());
 export { Call };
 var Ternary = /** @class */ (function () {
-    function Ternary(cond, exprTrue, exprFalse, pos) {
-        this.cond = cond;
+    function Ternary(condition, exprTrue, exprFalse, pos) {
+        this.condition = condition;
         this.exprTrue = exprTrue;
         this.exprFalse = exprFalse;
         this.pos = pos;

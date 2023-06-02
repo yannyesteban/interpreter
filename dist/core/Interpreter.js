@@ -385,6 +385,13 @@ var Interpreter = /** @class */ (function () {
         console.log("json\n", JSON.stringify(a));
         return a;
     };
+    Interpreter.prototype.visitTernaryExpr = function (expr) {
+        console.log("visitTernaryExpr", expr);
+        if (this.isTruthy(this.evaluate(expr.condition))) {
+            return this.evaluate(expr.exprTrue);
+        }
+        return this.evaluate(expr.exprFalse);
+    };
     Interpreter.prototype.lookUpVariable = function (name, expr) {
         var distance = this.locals.get(expr);
         if (distance != null) {
