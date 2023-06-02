@@ -24,7 +24,8 @@
     <nav>
         <button id="sv">load</button>
         <button id="clear">Clear</button>
-        <button id="button">Execute</button>
+        <button id="execute">Execute</button>
+        <button id="scan">Scan</button>
         <button id="evaluate">Template</button>
     </nav>
     <div>
@@ -32,49 +33,18 @@
     </div>
     <script type="module">
 
-        import { Lexer } from "./dist/core/Lexer.js";
-        import { Parser } from "./dist/core/Parser.js";
-
-        import { Resolver } from "./dist/core/Resolver.js";
-        import { Interpreter } from "./dist/core/Interpreter.js";
-
         import { Outer } from "./dist/core/outer/Outer.js";
         import { Logic } from "./dist/core/Logic.js";
 
-        function run(code) {
+        function scan(code) {
             console.clear();
-
+            const logic = new Logic();
+            document.getElementById("result").value = logic.scan(code);
+        }
+        function execute(code) {
+            console.clear();
             const logic = new Logic();
             document.getElementById("result").value = logic.execute(code);
-            /*return;
-            
-            const lexer = new Lexer(code);
-
-            const tokens = lexer.getTokens();
-
-            //console.log("source: ", source, "\n", tokens);
-            
-            console.log("code: ", code, "\n");
-
-            //console.log( tokens);return;
-
-            const parser = new Parser(tokens);
-
-            document.getElementById("int-name").innerHTML = parser.version;
-
-            const statements = parser.parse();
-            console.log(statements)
-
-            const intp = new Interpreter();
-            const resolver = new Resolver(intp);
-            //resolver.resolve(statements);
-
-            const output = intp.interpret(statements);
-            console.log(intp.locals,output)
-
-            document.getElementById("result").value = output.join("");
-            */
-
         }
 
         function evaluate(code) {
@@ -133,8 +103,11 @@
                 //run(source)
             });
 
-        document.getElementById("button").addEventListener("click", (event) => {
-            run(document.getElementById("source").value);
+        document.getElementById("execute").addEventListener("click", (event) => {
+            execute(document.getElementById("source").value);
+        });
+        document.getElementById("scan").addEventListener("click", (event) => {
+            scan(document.getElementById("source").value);
         });
         document.getElementById("evaluate").addEventListener("click", (event) => {
             evaluate(document.getElementById("template").value);
