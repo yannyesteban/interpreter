@@ -8,7 +8,7 @@ function db() {
     }
     console.log("------------------");
     msg.forEach(function (x) {
-        console.debug("..", x);
+        console.trace("..", x);
     });
     console.log("------------------");
 }
@@ -32,7 +32,9 @@ var Parser = /** @class */ (function () {
     Parser.prototype.parse = function () {
         var statements = [];
         while (!this.isAtEnd()) {
-            statements.push(this.declaration());
+            var s = void 0;
+            statements.push(s = this.declaration());
+            console.log(s);
         }
         return statements; // [parse-error-handling]
     };
@@ -357,6 +359,11 @@ var Parser = /** @class */ (function () {
                 break;
             }
         }
+        if (this.match(Token.INCR, Token.DECR)) {
+            var op = this.previous();
+            //return new Expr.PostAssign(ident, op, this.peek().pos);
+            expr = new Expr.PostAssign(expr, op, this.peek().pos);
+        }
         return expr;
     };
     Parser.prototype.primary = function () {
@@ -372,9 +379,6 @@ var Parser = /** @class */ (function () {
         if (this.match(Token.INT, Token.FLOAT, Token.STRING)) {
             return new Expr.Literal(this.previous().value, this.peek().pos, this.previous().tok);
         }
-        if (this.match(Token.LBRACE)) {
-            return new Expr.Object(this.objectValue(), this.peek().pos);
-        }
         if (this.match(Token.LBRACK)) {
             return new Expr.Array(this.arrayValue(), this.peek().pos);
         }
@@ -387,22 +391,30 @@ var Parser = /** @class */ (function () {
             }
             throw new Error("expected a identifier");
         }
+        /*
         if (this.match(Token.IDENT)) {
-            var ident = this.previous();
+            const ident = this.previous();
             if (this.match(Token.INCR, Token.DECR)) {
-                var op = this.previous();
-                return new Expr.PostAssign(ident, op, this.peek().pos);
+                const op = this.previous();
+                //return new Expr.PostAssign(ident, op, this.peek().pos);
+                return new Expr.PostAssign(new Expr.Variable(ident, this.peek().pos), op, this.peek().pos);
             }
             return new Expr.Variable(this.previous(), this.peek().pos);
         }
+        */
+        var expr = null;
         if (this.match(Token.IDENT)) {
-            return new Expr.Variable(this.previous(), this.peek().pos);
+            expr = new Expr.Variable(this.previous(), this.peek().pos);
         }
-        if (this.match(Token.LPAREN)) {
-            var expr = this.expression();
+        else if (this.match(Token.LBRACE)) {
+            expr = new Expr.Object(this.objectValue(), this.peek().pos);
+        }
+        else if (this.match(Token.LPAREN)) {
+            var expr1 = this.expression();
             this.consume(Token.RPAREN, "Expect ')' after expression.");
-            return new Expr.Grouping(expr, this.peek().pos);
+            expr = new Expr.Grouping(expr1, this.peek().pos);
         }
+        return expr;
     };
     Parser.prototype.ifStatement = function () {
         this.consume(Token.LPAREN, "Expect '(' after 'if'.");

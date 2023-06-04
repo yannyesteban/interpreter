@@ -7,7 +7,7 @@ import * as Stmt from "./Statement.js";
 function db(...msg) {
     console.log("------------------")
     msg.forEach(x => {
-        console.debug("..", x);
+        console.trace("..", x);
     });
 
     console.log("------------------")
@@ -40,7 +40,9 @@ export class Parser {
     parse(): Stmt.Statement[] {
         let statements = [];
         while (!this.isAtEnd()) {
-            statements.push(this.declaration());
+            let s;
+            statements.push(s=this.declaration());
+            console.log(s)
         }
 
         return statements; // [parse-error-handling]
@@ -454,6 +456,11 @@ export class Parser {
             }
         }
 
+        if (this.match(Token.INCR, Token.DECR)) {
+            const op = this.previous();
+            //return new Expr.PostAssign(ident, op, this.peek().pos);
+            expr = new Expr.PostAssign(expr, op, this.peek().pos);
+        }
         return expr;
     }
 
@@ -476,10 +483,7 @@ export class Parser {
             return new Expr.Literal(this.previous().value, this.peek().pos, this.previous().tok);
         }
 
-        if (this.match(Token.LBRACE)) {
-
-            return new Expr.Object(this.objectValue(), this.peek().pos);
-        }
+        
 
 
 
@@ -487,6 +491,8 @@ export class Parser {
 
             return new Expr.Array(this.arrayValue(), this.peek().pos);
         }
+
+        
 
         if (this.match(Token.INCR, Token.DECR)) {
 
@@ -502,29 +508,42 @@ export class Parser {
             throw new Error("expected a identifier");
 
         }
-
+        /*
         if (this.match(Token.IDENT)) {
             const ident = this.previous();
             if (this.match(Token.INCR, Token.DECR)) {
                 const op = this.previous();
-                return new Expr.PostAssign(ident, op, this.peek().pos);
+                //return new Expr.PostAssign(ident, op, this.peek().pos);
+                return new Expr.PostAssign(new Expr.Variable(ident, this.peek().pos), op, this.peek().pos);
             }
             return new Expr.Variable(this.previous(), this.peek().pos);
         }
+        */
 
 
-
-
+        var expr = null;
         if (this.match(Token.IDENT)) {
-            return new Expr.Variable(this.previous(), this.peek().pos);
+            expr = new Expr.Variable(this.previous(), this.peek().pos);
+        }
+        
+
+        else if (this.match(Token.LBRACE)) {
+
+            expr = new Expr.Object(this.objectValue(), this.peek().pos);
         }
 
-        if (this.match(Token.LPAREN)) {
+        else if (this.match(Token.LPAREN)) {
 
-            let expr = this.expression();
+            let expr1 = this.expression();
             this.consume(Token.RPAREN, "Expect ')' after expression.");
-            return new Expr.Grouping(expr, this.peek().pos);
+            expr =  new Expr.Grouping(expr1, this.peek().pos);
         }
+
+        
+
+        
+
+        return expr;
 
     }
 

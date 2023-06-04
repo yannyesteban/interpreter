@@ -49,6 +49,7 @@ var Interpreter = /** @class */ (function () {
         }
     };
     Interpreter.prototype.visitBlockStmt = function (stmt) {
+        console.log("visitBlockStmt");
         this.executeBlock(stmt.statements, new Environment(this.environment));
         return null;
     };
@@ -79,6 +80,7 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitExpressionStmt = function (stmt) {
+        console.log("visitExpressionStmt");
         console.log("---> ", stmt.expression);
         var value = this.evaluate(stmt.expression);
         console.log("RESULT A", value);
@@ -137,6 +139,7 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitAssignExpr = function (expr) {
+        console.log("visitAssignExpr");
         console.log("ASSIGN ---- ");
         var value = this.evaluate(expr.value);
         var distance = this.locals.get(expr);
@@ -149,8 +152,11 @@ var Interpreter = /** @class */ (function () {
         return value;
     };
     Interpreter.prototype.visitPostExpr = function (expr) {
-        console.log("visitPostExpr ---- ");
-        var old = this.lookUpVariable(expr.name, expr);
+        var old = this.evaluate(expr.name);
+        console.log("visitPostExpr", expr);
+        console.log("visitPostExpr ---- ", old);
+        console.log("NO");
+        //let old = this.lookUpVariable(expr.name, expr);
         var value = old;
         if (expr.operator.tok == Token.INCR) {
             value++;
@@ -158,12 +164,12 @@ var Interpreter = /** @class */ (function () {
         else {
             value--;
         }
-        var distance = this.locals.get(expr);
+        var distance = this.locals.get(expr.name);
         if (distance != null) {
-            this.environment.assignAt(distance, expr.name, value);
+            this.environment.assignAt(distance, expr.name.name, value);
         }
         else {
-            this.globals.assign(expr.name, value);
+            this.globals.assign(expr.name.name, value);
         }
         return old;
     };
@@ -188,6 +194,7 @@ var Interpreter = /** @class */ (function () {
         return value;
     };
     Interpreter.prototype.visitBinaryExpr = function (expr) {
+        console.log("visitBinaryExpr");
         var left = this.evaluate(expr.left);
         var right = this.evaluate(expr.right);
         console.log("typeof left ", typeof left == "number");
@@ -256,7 +263,9 @@ var Interpreter = /** @class */ (function () {
         return _function.call(this, _arguments);
     };
     Interpreter.prototype.visitGetExpr = function (expr) {
+        console.log("visitGetExpr");
         var object = this.evaluate(expr.object);
+        console.log("OBJETc", object);
         if (object instanceof InstanceR) {
             return object.get(expr.name);
         }
@@ -279,6 +288,7 @@ var Interpreter = /** @class */ (function () {
         throw "Only instances have properties."; //new RuntimeError(expr.name,           "Only instances have properties.");
     };
     Interpreter.prototype.visitGroupingExpr = function (expr) {
+        console.log("visitGroupingExpr");
         return this.evaluate(expr.expression);
     };
     Interpreter.prototype.visitLiteralExpr = function (expr) {
@@ -289,6 +299,7 @@ var Interpreter = /** @class */ (function () {
         return expr.value;
     };
     Interpreter.prototype.visitLogicalExpr = function (expr) {
+        console.log("visitLogicalExpr");
         var left = this.evaluate(expr.left);
         if (expr.operator.tok == Token.OR) {
             if (this.isTruthy(left))
@@ -301,6 +312,7 @@ var Interpreter = /** @class */ (function () {
         return this.evaluate(expr.right);
     };
     Interpreter.prototype.visitSetExpr = function (expr) {
+        console.log("visitSetExpr");
         console.log(" SET ----");
         var object = this.evaluate(expr.object);
         if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
@@ -341,6 +353,7 @@ var Interpreter = /** @class */ (function () {
         return this.lookUpVariable(expr.keyword, expr);
     };
     Interpreter.prototype.visitUnaryExpr = function (expr) {
+        console.log("visitUnaryExpr");
         var right = this.evaluate(expr.right);
         switch (expr.operator.type) {
             //> unary-bang
@@ -357,10 +370,12 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitVariableExpr = function (expr) {
+        console.log("visitVariableExpr");
         return this.lookUpVariable(expr.name, expr);
     };
     Interpreter.prototype.visitObjectExpr = function (expr) {
         var _this = this;
+        console.log("visitObjectExpr");
         var o = {};
         //console.error("visitObjectExpr", expr);
         expr.childs.forEach(function (ch) {

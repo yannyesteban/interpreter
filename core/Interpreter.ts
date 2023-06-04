@@ -63,6 +63,7 @@ export class Interpreter {
     }
 
     visitBlockStmt(stmt: Stmt.Block) {
+        console.log("visitBlockStmt")
         this.executeBlock(stmt.statements, new Environment(this.environment));
         return null;
     }
@@ -100,6 +101,7 @@ export class Interpreter {
     }
 
     visitExpressionStmt(stmt: Stmt.Expression) {
+        console.log("visitExpressionStmt")
         console.log("---> ", stmt.expression)
         let value = this.evaluate(stmt.expression);
         console.log("RESULT A", value);
@@ -168,6 +170,7 @@ export class Interpreter {
     }
 
     visitAssignExpr(expr: Expr.Assign) {
+        console.log("visitAssignExpr")
         console.log("ASSIGN ---- ")
         const value: Object = this.evaluate(expr.value);
 
@@ -181,10 +184,13 @@ export class Interpreter {
         return value;
     }
     visitPostExpr(expr: Expr.PostAssign) {
-        console.log("visitPostExpr ---- ")
 
+        let old = this.evaluate(expr.name);
+        console.log("visitPostExpr", expr)
+        console.log("visitPostExpr ---- ", old)
 
-        let old = this.lookUpVariable(expr.name, expr);
+        console.log("NO")
+        //let old = this.lookUpVariable(expr.name, expr);
         let value = old;
         if(expr.operator.tok == Token.INCR){
             value++; 
@@ -192,16 +198,16 @@ export class Interpreter {
             value--;
         } 
         
-        const distance: number = this.locals.get(expr);
+        const distance: number = this.locals.get(expr.name);
         if (distance != null) {
-            this.environment.assignAt(distance, expr.name, value);
+            this.environment.assignAt(distance, expr.name.name, value);
         } else {
-            this.globals.assign(expr.name, value);
+            this.globals.assign(expr.name.name, value);
         }
 
         return old;
     }
-    visitPreExpr(expr: Expr.PostAssign) {
+    visitPreExpr(expr: Expr.PreAssign) {
         console.log("visitPreExpr ---- ")
 
 
@@ -224,6 +230,7 @@ export class Interpreter {
     }
 
     visitBinaryExpr(expr: Expr.Binary) {
+        console.log("visitBinaryExpr")
         const left = this.evaluate(expr.left);
         const right = this.evaluate(expr.right);
         console.log("typeof left ", typeof left == "number")
@@ -302,7 +309,9 @@ export class Interpreter {
     }
 
     visitGetExpr(expr: Expr.Get) {
+        console.log("visitGetExpr")
         const object: Object = this.evaluate(expr.object) as InstanceR;
+        console.log("OBJETc", object )
         if (object instanceof InstanceR) {
             return object.get(expr.name);
         }
@@ -332,6 +341,7 @@ export class Interpreter {
     }
 
     visitGroupingExpr(expr: Expr.Grouping) {
+        console.log("visitGroupingExpr")
         return this.evaluate(expr.expression);
     }
 
@@ -346,6 +356,7 @@ export class Interpreter {
     }
 
     visitLogicalExpr(expr: Expr.Logical) {
+        console.log("visitLogicalExpr")
         const left: Object = this.evaluate(expr.left);
 
         if (expr.operator.tok == Token.OR) {
@@ -358,7 +369,7 @@ export class Interpreter {
     }
 
     visitSetExpr(expr: Expr.Set) {
-
+        console.log("visitSetExpr")
         console.log(" SET ----")
         const object: Object = this.evaluate(expr.object);
 
@@ -417,6 +428,7 @@ export class Interpreter {
     }
 
     visitUnaryExpr(expr: Expr.Unary) {
+        console.log("visitUnaryExpr")
         const right: Object = this.evaluate(expr.right);
 
         switch (expr.operator.type) {
@@ -436,11 +448,12 @@ export class Interpreter {
     }
 
     visitVariableExpr(expr: Expr.Variable) {
+        console.log("visitVariableExpr")
         return this.lookUpVariable(expr.name, expr);
     }
 
     visitObjectExpr(expr: Expr.Object) {
-
+        console.log("visitObjectExpr")
         const o = {};
         //console.error("visitObjectExpr", expr);
         expr.childs.forEach(ch => {

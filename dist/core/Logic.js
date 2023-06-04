@@ -11,9 +11,10 @@ var Logic = /** @class */ (function () {
         var tokens = lexer.getTokens();
         var parser = new Parser(tokens);
         var statements = parser.parse();
+        console.log(statements);
         var interpreter = new Interpreter();
         var resolver = new Resolver(interpreter);
-        resolver.resolve(statements);
+        //resolver.resolve(statements);
         var output = interpreter.interpret(statements);
         return output.join("");
     };

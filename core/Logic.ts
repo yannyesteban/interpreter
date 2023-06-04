@@ -18,9 +18,10 @@ export class Logic {
         const tokens = lexer.getTokens();
         const parser = new Parser(tokens);
         const statements = parser.parse();
+        console.log(statements)
         const interpreter = new Interpreter();
         const resolver = new Resolver(interpreter);
-        resolver.resolve(statements);
+        //resolver.resolve(statements);
         const output = interpreter.interpret(statements);
         
         return output.join("");
