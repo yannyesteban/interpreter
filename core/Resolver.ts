@@ -324,13 +324,7 @@ export class Resolver {
     visitTernaryExpr(expr: Expr.Ternary){
         console.error("visitTernaryExpr", expr);
     }
-
-    visitGet2Expr(expr: Expr.Get2) {
-        console.error("visitGet2Expr", expr);
-    }
-    visitSet2Expr(expr: Expr.Set2) {
-        console.error("visitSet2Expr", expr);
-    }
+    
     private resolveFunction(_function: Stmt.Function, type) {
         const enclosingFunction = this.currentFunction;
         this.currentFunction = type;

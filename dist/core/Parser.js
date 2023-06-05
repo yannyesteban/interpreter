@@ -260,12 +260,11 @@ var Parser = /** @class */ (function () {
                 var get = expr;
                 return new Expr.Set(get.object, get.name, value, equals, this.peek().pos);
                 //< Classes assign-set
-            }
-            else if (expr instanceof Expr.Get2) {
-                var get = expr;
+            } /*else if (expr instanceof Expr.Get2) {
+                const get: Expr.Get2 = expr;
                 return new Expr.Set2(get.object, get.name, value, equals, this.peek().pos);
                 //< Classes assign-set
-            }
+            }*/
             this.error(equals, "Invalid assignment target."); // [no-throw]
         }
         return expr;
@@ -325,6 +324,12 @@ var Parser = /** @class */ (function () {
             var right = this.unary();
             return new Expr.Unary(operator, right, this.peek().pos);
         }
+        if (this.match(Token.INCR, Token.DECR)) {
+            var op = this.previous();
+            var id = this.call();
+            return new Expr.PreAssign(id, op, this.peek().pos);
+            //throw new Error("expected a identifier");
+        }
         return this.call();
     };
     Parser.prototype.finishCall = function (callee) {
@@ -348,11 +353,11 @@ var Parser = /** @class */ (function () {
             }
             else if (this.match(Token.DOT)) {
                 var name_3 = this.consume(Token.IDENT, "Expect property name after '.'.");
-                expr = new Expr.Get(expr, name_3, this.peek().pos);
+                expr = new Expr.Get(expr, new Expr.Literal(name_3.value), this.peek().pos);
             }
             else if (this.match(Token.LBRACK)) {
                 var name_4 = this.expression();
-                expr = new Expr.Get2(expr, name_4, this.peek().pos);
+                expr = new Expr.Get(expr, name_4, this.peek().pos);
                 this.consume(Token.RBRACK, "Expect ']' after property name.");
             }
             else {
@@ -381,15 +386,6 @@ var Parser = /** @class */ (function () {
         }
         if (this.match(Token.LBRACK)) {
             return new Expr.Array(this.arrayValue(), this.peek().pos);
-        }
-        if (this.match(Token.INCR, Token.DECR)) {
-            var id = null;
-            var op = this.previous();
-            if (this.match(Token.IDENT)) {
-                id = this.previous();
-                return new Expr.PreAssign(id, op, this.peek().pos);
-            }
-            throw new Error("expected a identifier");
         }
         /*
         if (this.match(Token.IDENT)) {

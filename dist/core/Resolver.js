@@ -258,12 +258,6 @@ var Resolver = /** @class */ (function () {
     Resolver.prototype.visitTernaryExpr = function (expr) {
         console.error("visitTernaryExpr", expr);
     };
-    Resolver.prototype.visitGet2Expr = function (expr) {
-        console.error("visitGet2Expr", expr);
-    };
-    Resolver.prototype.visitSet2Expr = function (expr) {
-        console.error("visitSet2Expr", expr);
-    };
     Resolver.prototype.resolveFunction = function (_function, type) {
         var enclosingFunction = this.currentFunction;
         this.currentFunction = type;

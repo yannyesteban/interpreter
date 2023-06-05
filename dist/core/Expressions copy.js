@@ -143,6 +143,34 @@ var Set = /** @class */ (function () {
     return Set;
 }());
 export { Set };
+var Get2 = /** @class */ (function () {
+    function Get2(object, name, pos) {
+        this.object = object;
+        this.name = name;
+        this.pos = pos;
+        this.clss = this.constructor.name;
+    }
+    Get2.prototype.accept = function (visitor) {
+        return visitor.visitGet2Expr(this);
+    };
+    return Get2;
+}());
+export { Get2 };
+var Set2 = /** @class */ (function () {
+    function Set2(object, name, value, type, pos) {
+        this.object = object;
+        this.name = name;
+        this.value = value;
+        this.type = type;
+        this.pos = pos;
+        this.clss = this.constructor.name;
+    }
+    Set2.prototype.accept = function (visitor) {
+        return visitor.visitSet2Expr(this);
+    };
+    return Set2;
+}());
+export { Set2 };
 var Logical = /** @class */ (function () {
     function Logical(left, operator, right, pos) {
         this.left = left;
@@ -247,4 +275,4 @@ var This = /** @class */ (function () {
     return This;
 }());
 export { This };
-//# sourceMappingURL=Expressions.js.map
+//# sourceMappingURL=Expressions%20copy.js.map

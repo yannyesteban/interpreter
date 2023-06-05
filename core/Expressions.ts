@@ -37,7 +37,7 @@ export class Literal implements Expression {
   public clss: string;
   public pos: number;
 
-  constructor(value, pos: number, type?) {
+  constructor(value, pos?: number, type?) {
     this.value = value;
     this.type = type;
     this.pos = pos;
@@ -159,48 +159,6 @@ export class Assign implements Expression {
 
 
 export class Get implements Expression {
-  public name: Item;
-  public object: Expression;
-  public clss: string;
-  public pos: number;
-
-  constructor(object: Expression, name: Item, pos: number) {
-    this.object = object;
-    this.name = name;
-    this.pos = pos;
-    this.clss = this.constructor.name;
-  }
-
-  accept(visitor) {
-    return visitor.visitGetExpr(this);
-  }
-}
-
-export class Set implements Expression {
-
-  public name: Item;
-  public object: Expression;
-  public value: Expression;
-  public type: Item;
-  public clss: string;
-  public pos: number;
-
-  constructor(object: Expression, name: Item, value: Expression, type: Item, pos: number) {
-    this.object = object;
-    this.name = name;
-    this.value = value;
-    this.type = type;
-    this.pos = pos;
-    this.clss = this.constructor.name;
-
-  }
-
-  accept(visitor) {
-    return visitor.visitSetExpr(this);
-  }
-}
-
-export class Get2 implements Expression {
   public name: Expression;
   public object: Expression;
   public clss: string;
@@ -214,11 +172,11 @@ export class Get2 implements Expression {
   }
 
   accept(visitor) {
-    return visitor.visitGet2Expr(this);
+    return visitor.visitGetExpr(this);
   }
 }
 
-export class Set2 implements Expression {
+export class Set implements Expression {
 
   public name: Expression;
   public object: Expression;
@@ -234,12 +192,17 @@ export class Set2 implements Expression {
     this.type = type;
     this.pos = pos;
     this.clss = this.constructor.name;
+
   }
 
   accept(visitor) {
-    return visitor.visitSet2Expr(this);
+    return visitor.visitSetExpr(this);
   }
 }
+
+
+
+
 
 export class Logical implements Expression {
 

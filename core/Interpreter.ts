@@ -23,18 +23,19 @@ export class Interpreter {
     }
 
     interpret(statements: Stmt.Statement[]) {
-        try {
+        //try {
             for (const statement of statements) {
                 this.execute(statement);
             }
-        } catch (error) {
+        //} catch (error) {
             //Lox.runtimeError(error);
-        }
+        //}
 
         return this.output;
     }
 
     private evaluate(expr: Expr.Expression) {
+        console.log(expr)
         return expr.accept(this);
     }
 
@@ -110,8 +111,8 @@ export class Interpreter {
         }
         console.log("RESULT B:", value);
 
-        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2"
-            && stmt.expression.clss !== "PostAssign") {
+        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" 
+            && stmt.expression.clss !== "PostAssign" && stmt.expression.clss !== "PreAssign") {
             this.output.push(value);
         }
 
@@ -186,24 +187,36 @@ export class Interpreter {
     visitPostExpr(expr: Expr.PostAssign) {
 
         let old = this.evaluate(expr.name);
-        console.log("visitPostExpr", expr)
+        console.log("visitPostExpr name", expr.name.constructor.name)
         console.log("visitPostExpr ---- ", old)
 
-        console.log("NO")
+
+       
         //let old = this.lookUpVariable(expr.name, expr);
         let value = old;
+
         if(expr.operator.tok == Token.INCR){
             value++; 
         }else{
+          
             value--;
         } 
-        
-        const distance: number = this.locals.get(expr.name);
-        if (distance != null) {
-            this.environment.assignAt(distance, expr.name.name, value);
-        } else {
-            this.globals.assign(expr.name.name, value);
+
+
+        console.log("NO", old, value);
+
+        if(expr.name.constructor.name == "Variable"){
+            const distance: number = this.locals.get(expr.name);
+            if (distance != null) {
+                this.environment.assignAt(distance, expr.name.name, value);
+            } else {
+                this.globals.assign(expr.name.name, value);
+            }
+        }else{
+            console.log(expr.name)
+            this.evaluate(new Expr.Set(expr.name.object , expr.name.name, new Expr.Literal(value, null), null, null))
         }
+        
 
         return old;
     }
@@ -211,7 +224,7 @@ export class Interpreter {
         console.log("visitPreExpr ---- ")
 
 
-        let old = this.lookUpVariable(expr.name, expr);
+        let old = this.evaluate(expr.name);
         let value = old;
         if(expr.operator.tok == Token.INCR){
             value++; 
@@ -219,11 +232,17 @@ export class Interpreter {
             value--;
         } 
         console.log("New Value ", value)
-        const distance: number = this.locals.get(expr);
-        if (distance != null) {
-            this.environment.assignAt(distance, expr.name, value);
-        } else {
-            this.globals.assign(expr.name, value);
+        
+        if(expr.name.constructor.name == "Variable"){
+            const distance: number = this.locals.get(expr.name);
+            if (distance != null) {
+                this.environment.assignAt(distance, expr.name.name, value);
+            } else {
+                this.globals.assign(expr.name.name, value);
+            }
+        }else{
+            console.log(expr.name)
+            this.evaluate(new Expr.Set(expr.name.object , expr.name.name, new Expr.Literal(value, null), null, null))
         }
 
         return value;
@@ -311,34 +330,21 @@ export class Interpreter {
     visitGetExpr(expr: Expr.Get) {
         console.log("visitGetExpr")
         const object: Object = this.evaluate(expr.object) as InstanceR;
+        const name = this.evaluate(expr.name);
         console.log("OBJETc", object )
         if (object instanceof InstanceR) {
-            return object.get(expr.name);
+            return object.get(name);
         }
 
         if (typeof object == "object") {
-            console.log(object, expr.name.value)
-            return object[expr.name.value];
+            console.log(object, name)
+            return object[name];
         }
 
         throw "Only instances have properties."//new RuntimeError(expr.name,           "Only instances have properties.");
     }
 
-    visitGet2Expr(expr: Expr.Get2) {
-        const object: Object = this.evaluate(expr.object) as InstanceR;
-        if (object instanceof InstanceR) {
-            let index = this.evaluate(expr.name);
-            return object.get(index);
-        }
-
-        if (typeof object == "object") {
-
-            let index = this.evaluate(expr.name);
-            return object[index];
-        }
-
-        throw "Only instances have properties."//new RuntimeError(expr.name,           "Only instances have properties.");
-    }
+    
 
     visitGroupingExpr(expr: Expr.Grouping) {
         console.log("visitGroupingExpr")
@@ -372,39 +378,24 @@ export class Interpreter {
         console.log("visitSetExpr")
         console.log(" SET ----")
         const object: Object = this.evaluate(expr.object);
+        const name = this.evaluate(expr.name);
 
-        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
-            throw "" //new RuntimeError(expr.name,                "Only instances have fields.");
+        if (!(object instanceof InstanceR) && typeof object !== "object") { 
+            console.log("error", object)
+            throw "Only instances have fields." //new RuntimeError(expr.name,                "Only instances have fields.");
         }
         const value: Object = this.evaluate(expr.value);
         if ((object instanceof InstanceR)) { // [order]
-            object.set(expr.name, value);
+            object.set(name, value);
         }
 
-        object[expr.name.value] = value;
+        console.log(object)
+        object[name] = value;
 
         return value;
     }
 
-    visitSet2Expr(expr: Expr.Set2) {
-
-        console.log(" SET ----")
-        const object: Object = this.evaluate(expr.object);
-
-        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
-            throw "" //new RuntimeError(expr.name,                "Only instances have fields.");
-        }
-        let index = this.evaluate(expr.name);
-        const value: Object = this.evaluate(expr.value);
-        if ((object instanceof InstanceR)) { // [order]
-            object.set(index, value);
-        }
-
-
-        object[index] = value;
-
-        return value;
-    }
+    
 
 
 

@@ -1,4 +1,5 @@
 import { Token } from "./Token.js";
+import * as Expr from "./Expressions.js";
 import { Environment } from "./Environment.js";
 import { FunctionR } from "./FunctionR.js";
 import { CallableR } from "./CallableR.js";
@@ -13,18 +14,18 @@ var Interpreter = /** @class */ (function () {
         this.output = [];
     }
     Interpreter.prototype.interpret = function (statements) {
-        try {
-            for (var _i = 0, statements_1 = statements; _i < statements_1.length; _i++) {
-                var statement = statements_1[_i];
-                this.execute(statement);
-            }
+        //try {
+        for (var _i = 0, statements_1 = statements; _i < statements_1.length; _i++) {
+            var statement = statements_1[_i];
+            this.execute(statement);
         }
-        catch (error) {
-            //Lox.runtimeError(error);
-        }
+        //} catch (error) {
+        //Lox.runtimeError(error);
+        //}
         return this.output;
     };
     Interpreter.prototype.evaluate = function (expr) {
+        console.log(expr);
         return expr.accept(this);
     };
     Interpreter.prototype.execute = function (stmt) {
@@ -88,8 +89,8 @@ var Interpreter = /** @class */ (function () {
             value = this.evalMods(value, stmt.mods);
         }
         console.log("RESULT B:", value);
-        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set" && stmt.expression.clss !== "Set2"
-            && stmt.expression.clss !== "PostAssign") {
+        if (stmt.expression.clss !== "Assign" && stmt.expression.clss !== "Set"
+            && stmt.expression.clss !== "PostAssign" && stmt.expression.clss !== "PreAssign") {
             this.output.push(value);
         }
         return null;
@@ -153,9 +154,8 @@ var Interpreter = /** @class */ (function () {
     };
     Interpreter.prototype.visitPostExpr = function (expr) {
         var old = this.evaluate(expr.name);
-        console.log("visitPostExpr", expr);
+        console.log("visitPostExpr name", expr.name.constructor.name);
         console.log("visitPostExpr ---- ", old);
-        console.log("NO");
         //let old = this.lookUpVariable(expr.name, expr);
         var value = old;
         if (expr.operator.tok == Token.INCR) {
@@ -164,18 +164,25 @@ var Interpreter = /** @class */ (function () {
         else {
             value--;
         }
-        var distance = this.locals.get(expr.name);
-        if (distance != null) {
-            this.environment.assignAt(distance, expr.name.name, value);
+        console.log("NO", old, value);
+        if (expr.name.constructor.name == "Variable") {
+            var distance = this.locals.get(expr.name);
+            if (distance != null) {
+                this.environment.assignAt(distance, expr.name.name, value);
+            }
+            else {
+                this.globals.assign(expr.name.name, value);
+            }
         }
         else {
-            this.globals.assign(expr.name.name, value);
+            console.log(expr.name);
+            this.evaluate(new Expr.Set(expr.name.object, expr.name.name, new Expr.Literal(value, null), null, null));
         }
         return old;
     };
     Interpreter.prototype.visitPreExpr = function (expr) {
         console.log("visitPreExpr ---- ");
-        var old = this.lookUpVariable(expr.name, expr);
+        var old = this.evaluate(expr.name);
         var value = old;
         if (expr.operator.tok == Token.INCR) {
             value++;
@@ -184,12 +191,18 @@ var Interpreter = /** @class */ (function () {
             value--;
         }
         console.log("New Value ", value);
-        var distance = this.locals.get(expr);
-        if (distance != null) {
-            this.environment.assignAt(distance, expr.name, value);
+        if (expr.name.constructor.name == "Variable") {
+            var distance = this.locals.get(expr.name);
+            if (distance != null) {
+                this.environment.assignAt(distance, expr.name.name, value);
+            }
+            else {
+                this.globals.assign(expr.name.name, value);
+            }
         }
         else {
-            this.globals.assign(expr.name, value);
+            console.log(expr.name);
+            this.evaluate(new Expr.Set(expr.name.object, expr.name.name, new Expr.Literal(value, null), null, null));
         }
         return value;
     };
@@ -265,25 +278,14 @@ var Interpreter = /** @class */ (function () {
     Interpreter.prototype.visitGetExpr = function (expr) {
         console.log("visitGetExpr");
         var object = this.evaluate(expr.object);
+        var name = this.evaluate(expr.name);
         console.log("OBJETc", object);
         if (object instanceof InstanceR) {
-            return object.get(expr.name);
+            return object.get(name);
         }
         if (typeof object == "object") {
-            console.log(object, expr.name.value);
-            return object[expr.name.value];
-        }
-        throw "Only instances have properties."; //new RuntimeError(expr.name,           "Only instances have properties.");
-    };
-    Interpreter.prototype.visitGet2Expr = function (expr) {
-        var object = this.evaluate(expr.object);
-        if (object instanceof InstanceR) {
-            var index = this.evaluate(expr.name);
-            return object.get(index);
-        }
-        if (typeof object == "object") {
-            var index = this.evaluate(expr.name);
-            return object[index];
+            console.log(object, name);
+            return object[name];
         }
         throw "Only instances have properties."; //new RuntimeError(expr.name,           "Only instances have properties.");
     };
@@ -315,28 +317,17 @@ var Interpreter = /** @class */ (function () {
         console.log("visitSetExpr");
         console.log(" SET ----");
         var object = this.evaluate(expr.object);
-        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
-            throw ""; //new RuntimeError(expr.name,                "Only instances have fields.");
+        var name = this.evaluate(expr.name);
+        if (!(object instanceof InstanceR) && typeof object !== "object") {
+            console.log("error", object);
+            throw "Only instances have fields."; //new RuntimeError(expr.name,                "Only instances have fields.");
         }
         var value = this.evaluate(expr.value);
         if ((object instanceof InstanceR)) { // [order]
-            object.set(expr.name, value);
+            object.set(name, value);
         }
-        object[expr.name.value] = value;
-        return value;
-    };
-    Interpreter.prototype.visitSet2Expr = function (expr) {
-        console.log(" SET ----");
-        var object = this.evaluate(expr.object);
-        if (!(object instanceof InstanceR) && typeof object !== "object") { // [order]
-            throw ""; //new RuntimeError(expr.name,                "Only instances have fields.");
-        }
-        var index = this.evaluate(expr.name);
-        var value = this.evaluate(expr.value);
-        if ((object instanceof InstanceR)) { // [order]
-            object.set(index, value);
-        }
-        object[index] = value;
+        console.log(object);
+        object[name] = value;
         return value;
     };
     Interpreter.prototype.visitSuperExpr = function (expr) {
