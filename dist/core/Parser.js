@@ -148,19 +148,24 @@ var Parser = /** @class */ (function () {
         return statements;
     };
     Parser.prototype.statement = function () {
-        if (this.match(Token.FOR))
+        if (this.match(Token.FOR)) {
             return this.forStatement();
+        }
         if (this.match(Token.IF)) {
             return this.ifStatement();
         }
-        if (this.match(Token.PRINT))
+        if (this.match(Token.PRINT)) {
             return this.printStatement();
-        if (this.match(Token.RETURN))
+        }
+        if (this.match(Token.RETURN)) {
             return this.returnStatement();
-        if (this.match(Token.DO))
+        }
+        if (this.match(Token.DO)) {
             return this.doStatement();
-        if (this.match(Token.WHILE))
+        }
+        if (this.match(Token.WHILE)) {
             return this.whileStatement();
+        }
         if (this.match(Token.LBRACE)) {
             this.brackets++;
             var position = this.getPosition();
@@ -183,8 +188,9 @@ var Parser = /** @class */ (function () {
     Parser.prototype.declaration = function () {
         try {
             //if (this.match(Token.CLASS)) return this.classDeclaration();
-            if (this.match(Token.FUNC))
+            if (this.match(Token.FUNC)) {
                 return this._function("function");
+            }
             if (this.match(Token.LET)) {
                 return this.varDeclaration();
             }
@@ -333,6 +339,7 @@ var Parser = /** @class */ (function () {
         return this.call();
     };
     Parser.prototype.finishCall = function (callee) {
+        var pos = this.peek().pos;
         var arg = [];
         if (!this.check(Token.RPAREN)) {
             do {
@@ -343,7 +350,7 @@ var Parser = /** @class */ (function () {
             } while (this.match(Token.COMMA));
         }
         var paren = this.consume(Token.RPAREN, "Expect ')' after arguments.");
-        return new Expr.Call(callee, paren, arg, this.peek().pos);
+        return new Expr.Call(callee, paren, arg, pos);
     };
     Parser.prototype.call = function () {
         var expr = this.primary();
@@ -438,6 +445,7 @@ var Parser = /** @class */ (function () {
         this.consume(Token.RPAREN, "Expect ')' after parameters.");
         this.consume(Token.LBRACE, "Expect '{' before " + kind + " body.");
         var body = this.block();
+        console.log("This.peek ", this.peek());
         return new Stmt.Function(name, parameters, body, this.peek().pos);
     };
     Parser.prototype.varDeclaration = function () {

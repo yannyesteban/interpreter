@@ -11,6 +11,18 @@ import { ClassR } from "./ClassR.js";
 import { ReturnR } from "./ReturnR.js";
 
 
+class math implements CallableR{
+    arity(): number {
+        return 0;
+    }
+    call(interpreter: Interpreter, _arguments: Object[]): Object {
+        alert(8)
+        console.log(20888)
+        return "888";
+    }
+    
+}
+
 export class Interpreter {
 
     private globals: Environment = new Environment();
@@ -19,7 +31,7 @@ export class Interpreter {
     public output: string[] = [];
 
     constructor() {
-
+        this.globals.define("math", new math());
     }
 
     interpret(statements: Stmt.Statement[]) {
@@ -306,7 +318,7 @@ export class Interpreter {
 
         const callee: Object = this.evaluate(expr.callee);
 
-        console.log("callee ", callee.constructor)
+        console.log("callee ", callee)
 
         const _arguments: Object[] = [];
         for (const _argument of expr.arg) {

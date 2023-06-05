@@ -6,12 +6,26 @@ import { CallableR } from "./CallableR.js";
 import { InstanceR } from "./InstanceR.js";
 import { ClassR } from "./ClassR.js";
 import { ReturnR } from "./ReturnR.js";
+var math = /** @class */ (function () {
+    function math() {
+    }
+    math.prototype.arity = function () {
+        return 0;
+    };
+    math.prototype.call = function (interpreter, _arguments) {
+        alert(8);
+        console.log(20888);
+        return "888";
+    };
+    return math;
+}());
 var Interpreter = /** @class */ (function () {
     function Interpreter() {
         this.globals = new Environment();
         this.environment = this.globals;
         this.locals = new Map();
         this.output = [];
+        this.globals.define("math", new math());
     }
     Interpreter.prototype.interpret = function (statements) {
         //try {
@@ -257,7 +271,7 @@ var Interpreter = /** @class */ (function () {
         console.log("visitCallExpr");
         console.log(expr);
         var callee = this.evaluate(expr.callee);
-        console.log("callee ", callee.constructor);
+        console.log("callee ", callee);
         var _arguments = [];
         for (var _i = 0, _a = expr.arg; _i < _a.length; _i++) {
             var _argument = _a[_i];

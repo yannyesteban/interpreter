@@ -41,7 +41,7 @@ export class Parser {
         let statements = [];
         while (!this.isAtEnd()) {
             let s;
-            statements.push(s=this.declaration());
+            statements.push(s = this.declaration());
             console.log(s)
         }
 
@@ -120,7 +120,7 @@ export class Parser {
         }
         let expr = this.expression();
         if (!expr) {
-            
+
             this.error(this.peek(), "unknow error!")
             this.advance()
         }
@@ -144,7 +144,7 @@ export class Parser {
 
 
 
-        return new Stmt.Expression(expr, mods,this.peek().pos);
+        return new Stmt.Expression(expr, mods, this.peek().pos);
     }
 
     modifiers() {
@@ -192,27 +192,36 @@ export class Parser {
     private statement() {
 
 
-        if (this.match(Token.FOR)) return this.forStatement();
+        if (this.match(Token.FOR)) {
+            return this.forStatement();
+        }
 
 
         if (this.match(Token.IF)) {
             return this.ifStatement();
         }
 
-        if (this.match(Token.PRINT)) return this.printStatement();
+        if (this.match(Token.PRINT)) {
+            return this.printStatement();
+        }
 
-        if (this.match(Token.RETURN)) return this.returnStatement();
+        if (this.match(Token.RETURN)) {
+            return this.returnStatement();
+        }
 
 
-        if (this.match(Token.DO)) return this.doStatement();
-        if (this.match(Token.WHILE)) return this.whileStatement();
-
+        if (this.match(Token.DO)) {
+            return this.doStatement();
+        }
+        if (this.match(Token.WHILE)) {
+            return this.whileStatement();
+        }
         if (this.match(Token.LBRACE)) {
             this.brackets++;
             const position = this.getPosition();
             try {
 
-                let expr = new Expr.Object(this.objectValue(true),this.peek().pos);
+                let expr = new Expr.Object(this.objectValue(true), this.peek().pos);
                 //this.consume(Token.SEMICOLON, "Expect ';' after expression.");
                 if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
                     this.consume(Token.SEMICOLON, "Expect ';' after expression..");
@@ -235,7 +244,9 @@ export class Parser {
         try {
 
             //if (this.match(Token.CLASS)) return this.classDeclaration();
-            if (this.match(Token.FUNC)) return this._function("function");
+            if (this.match(Token.FUNC)) {
+                return this._function("function");
+            }
 
             if (this.match(Token.LET)) {
                 return this.varDeclaration();
@@ -410,7 +421,7 @@ export class Parser {
 
     unary() {
 
-        
+
 
         if (this.match(Token.SUB, Token.NOT)) {
             let operator = this.previous();
@@ -421,13 +432,13 @@ export class Parser {
 
         if (this.match(Token.INCR, Token.DECR)) {
 
-            
-            let op = this.previous();
-            
 
-                let id = this.call();
-                return new Expr.PreAssign(id, op, this.peek().pos)
-            
+            let op = this.previous();
+
+
+            let id = this.call();
+            return new Expr.PreAssign(id, op, this.peek().pos)
+
 
 
             //throw new Error("expected a identifier");
@@ -438,6 +449,7 @@ export class Parser {
     }
 
     finishCall(callee: Expr.Expression): Expr.Expression {
+        let pos = this.peek().pos;
         const arg: Expr.Expression[] = [];
         if (!this.check(Token.RPAREN)) {
             do {
@@ -452,7 +464,7 @@ export class Parser {
 
         const paren: Item = this.consume(Token.RPAREN, "Expect ')' after arguments.");
 
-        return new Expr.Call(callee, paren, arg, this.peek().pos);
+        return new Expr.Call(callee, paren, arg, pos);
     }
 
 
@@ -502,7 +514,7 @@ export class Parser {
             return new Expr.Literal(this.previous().value, this.peek().pos, this.previous().tok);
         }
 
-        
+
 
 
 
@@ -511,9 +523,9 @@ export class Parser {
             return new Expr.Array(this.arrayValue(), this.peek().pos);
         }
 
-        
 
-        
+
+
         /*
         if (this.match(Token.IDENT)) {
             const ident = this.previous();
@@ -531,7 +543,7 @@ export class Parser {
         if (this.match(Token.IDENT)) {
             expr = new Expr.Variable(this.previous(), this.peek().pos);
         }
-        
+
 
         else if (this.match(Token.LBRACE)) {
 
@@ -542,12 +554,12 @@ export class Parser {
 
             let expr1 = this.expression();
             this.consume(Token.RPAREN, "Expect ')' after expression.");
-            expr =  new Expr.Grouping(expr1, this.peek().pos);
+            expr = new Expr.Grouping(expr1, this.peek().pos);
         }
 
-        
 
-        
+
+
 
         return expr;
 
@@ -589,6 +601,7 @@ export class Parser {
 
         this.consume(Token.LBRACE, "Expect '{' before " + kind + " body.");
         const body: Stmt.Statement[] = this.block();
+        console.log("This.peek ", this.peek())
         return new Stmt.Function(name, parameters, body, this.peek().pos);
 
     }
