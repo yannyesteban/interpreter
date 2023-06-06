@@ -6,26 +6,15 @@ import { CallableR } from "./CallableR.js";
 import { InstanceR } from "./InstanceR.js";
 import { ClassR } from "./ClassR.js";
 import { ReturnR } from "./ReturnR.js";
-var math = /** @class */ (function () {
-    function math() {
-    }
-    math.prototype.arity = function () {
-        return 0;
-    };
-    math.prototype.call = function (interpreter, _arguments) {
-        alert(8);
-        console.log(20888);
-        return "888";
-    };
-    return math;
-}());
+import { Native } from "./Native.js";
+import { NavMath } from "./NavMath.js";
 var Interpreter = /** @class */ (function () {
     function Interpreter() {
         this.globals = new Environment();
         this.environment = this.globals;
         this.locals = new Map();
         this.output = [];
-        this.globals.define("math", new math());
+        this.globals.define("math", new NavMath());
     }
     Interpreter.prototype.interpret = function (statements) {
         //try {
@@ -50,6 +39,7 @@ var Interpreter = /** @class */ (function () {
         this.locals.set(expr, depth);
     };
     Interpreter.prototype.executeBlock = function (statements, environment) {
+        console.log(this.environment);
         var previous = this.environment;
         try {
             this.environment = environment;
@@ -69,11 +59,12 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitClassStmt = function (stmt) {
+        console.log("visitClassStmt", stmt);
         var superclass = null;
         if (stmt.superclass != null) {
             superclass = this.evaluate(stmt.superclass);
             if (!(superclass instanceof ClassR)) {
-                throw ""; //new RuntimeError(stmt.superclass.name, "Superclass must be a class.");
+                throw "Superclass must be a class"; //new RuntimeError(stmt.superclass.name, "Superclass must be a class.");
             }
         }
         this.environment.define(stmt.name.value, null);
@@ -85,7 +76,7 @@ var Interpreter = /** @class */ (function () {
         for (var _i = 0, _a = stmt.methods; _i < _a.length; _i++) {
             var method = _a[_i];
             var func = new FunctionR(method, this.environment, method.name.value == "init");
-            methods[method.name.value] = func;
+            methods.set(method.name.value, func);
         }
         var klass = new ClassR(stmt.name.value, superclass, methods);
         if (superclass != null) {
@@ -98,6 +89,9 @@ var Interpreter = /** @class */ (function () {
         console.log("visitExpressionStmt");
         console.log("---> ", stmt.expression);
         var value = this.evaluate(stmt.expression);
+        if (typeof value === "function") {
+            value = "<native function>";
+        }
         console.log("RESULT A", value);
         if (stmt.mods) {
             value = this.evalMods(value, stmt.mods);
@@ -110,7 +104,7 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitFunctionStmt = function (stmt) {
-        console.log("visitFunctionStmt");
+        console.log("visitFunctionStmt", this.environment);
         var _function = new FunctionR(stmt, this.environment, false);
         this.environment.define(stmt.name.value, _function);
         return null;
@@ -268,8 +262,7 @@ var Interpreter = /** @class */ (function () {
         return null;
     };
     Interpreter.prototype.visitCallExpr = function (expr) {
-        console.log("visitCallExpr");
-        console.log(expr);
+        console.log("visitCallExpr", expr, expr.callee["name"].value);
         var callee = this.evaluate(expr.callee);
         console.log("callee ", callee);
         var _arguments = [];
@@ -277,13 +270,15 @@ var Interpreter = /** @class */ (function () {
             var _argument = _a[_i];
             _arguments.push(this.evaluate(_argument));
         }
+        if (typeof callee === "function") {
+            return callee(_arguments);
+        }
         if (!(callee instanceof CallableR)) {
             console.log(1, "an only call functions and classes.");
             throw "an only call functions and classes."; //new RuntimeError(expr.paren, "Can only call functions and classes.");
         }
         var _function = callee;
         if (_arguments.length != _function.arity()) {
-            alert(8);
             throw "Expected " + _function.arity() + " arguments but got " + _arguments.length + "."; //new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
         }
         console.log("good");
@@ -294,6 +289,13 @@ var Interpreter = /** @class */ (function () {
         var object = this.evaluate(expr.object);
         var name = this.evaluate(expr.name);
         console.log("OBJETc", object);
+        if (object instanceof Native) {
+            var value = object.get(name);
+            if (value !== undefined) {
+                return value;
+            }
+            throw "neither property nor method found";
+        }
         if (object instanceof InstanceR) {
             return object.get(name);
         }

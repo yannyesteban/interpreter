@@ -11,17 +11,17 @@ export class InstanceR {
         this.klass = klass;
     }
 
-    get(name: Item) {
-        if (this.fields.has(name.value)) {
-            return this.fields.get(name.value);
+    get(name: string) {
+        if (this.fields.has(name)) {
+            return this.fields.get(name);
         }
 
-        const method: FunctionR = this.klass.findMethod(name.value);
+        const method: FunctionR = this.klass.findMethod(name);
         if (method != null) {
             return method.bind(this);
         }
         
-        throw ""//new RuntimeError(name, "Undefined property '" + name.value + "'.");
+        throw "Undefined property '" + name + "'."//new RuntimeError(name, "Undefined property '" + name.value + "'.");
     }
 
     set(name: Item, value: Object) {

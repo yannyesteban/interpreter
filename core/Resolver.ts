@@ -110,6 +110,7 @@ export class Resolver {
 
     public visitClassStmt(stmt: Stmt.Class) {
 
+        console.log(" visitClassStmt x")
         let enclosingClass = this.currentClass;
         this.currentClass = ClassType.CLASS;
         this.declare(stmt.name);

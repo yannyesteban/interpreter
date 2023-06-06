@@ -243,7 +243,9 @@ export class Parser {
     declaration() {
         try {
 
-            //if (this.match(Token.CLASS)) return this.classDeclaration();
+            if (this.match(Token.CLASS)) {
+                return this.classDeclaration();
+            }
             if (this.match(Token.FUNC)) {
                 return this._function("function");
             }
@@ -279,6 +281,36 @@ export class Parser {
         }
         return null;
     }
+
+
+    classDeclaration() {
+        const name:Item = this.consume(Token.IDENT, "Expect class name.");
+    //> Inheritance parse-superclass
+    
+        let superclass: Expr.Variable = null;
+        if (this.match(Token.LSS)) {
+          this.consume(Token.IDENT, "Expect superclass name.");
+          superclass = new Expr.Variable(this.previous(), this.peek().pos);
+        }
+    
+    //< Inheritance parse-superclass
+        this.consume(Token.LBRACE, "Expect '{' before class body.");
+    
+        const methods:Stmt.Function[] = [];
+        while (!this.check(Token.RBRACE) && !this.isAtEnd()) {
+          methods.push(this._function("method"));
+        }
+    
+        this.consume(Token.RBRACE, "Expect '}' after class body.");
+    
+    /* Classes parse-class-declaration < Inheritance construct-class-ast
+        return new Stmt.Class(name, methods);
+    */
+    //> Inheritance construct-class-ast
+        return new Stmt.Class(name, superclass, methods, this.peek().pos);
+    //< Inheritance construct-class-ast
+      }
+
 
     comparison() {
         let expr: exp = this.term();

@@ -6,13 +6,14 @@ import { Interpreter } from "./Interpreter.js";
 
 
 
-export class ClassR implements CallableR {
+export class ClassR extends CallableR {
     
     public name: string;
     public superclass: ClassR;
     private methods: Map<string, FunctionR>;
 
     constructor(name: string, superclass: ClassR, methods: Map<string, FunctionR>) {
+        super();
         this.superclass = superclass;
         this.name = name;
         this.methods = methods;

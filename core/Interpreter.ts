@@ -9,19 +9,10 @@ import { CallableR } from "./CallableR.js";
 import { InstanceR } from "./InstanceR.js";
 import { ClassR } from "./ClassR.js";
 import { ReturnR } from "./ReturnR.js";
+import { Native } from "./Native.js";
+import { NavMath } from "./NavMath.js";
 
 
-class math implements CallableR{
-    arity(): number {
-        return 0;
-    }
-    call(interpreter: Interpreter, _arguments: Object[]): Object {
-        alert(8)
-        console.log(20888)
-        return "888";
-    }
-    
-}
 
 export class Interpreter {
 
@@ -31,7 +22,7 @@ export class Interpreter {
     public output: string[] = [];
 
     constructor() {
-        this.globals.define("math", new math());
+        this.globals.define("math", new NavMath());
     }
 
     interpret(statements: Stmt.Statement[]) {
@@ -61,6 +52,7 @@ export class Interpreter {
     }
 
     executeBlock(statements: Stmt.Statement[], environment: Environment) {
+        console.log(this.environment)
         const previous: Environment = this.environment;
         try {
             this.environment = environment;
@@ -82,11 +74,12 @@ export class Interpreter {
     }
 
     visitClassStmt(stmt: Stmt.Class) {
+        console.log("visitClassStmt", stmt)
         let superclass: Object = null;
         if (stmt.superclass != null) {
             superclass = this.evaluate(stmt.superclass);
             if (!(superclass instanceof ClassR)) {
-                throw ""//new RuntimeError(stmt.superclass.name, "Superclass must be a class.");
+                throw "Superclass must be a class"//new RuntimeError(stmt.superclass.name, "Superclass must be a class.");
             }
         }
 
@@ -98,9 +91,10 @@ export class Interpreter {
         }
 
         let methods = new Map();
+        
         for (const method of stmt.methods) {
             const func: FunctionR = new FunctionR(method, this.environment, method.name.value == "init");
-            methods[method.name.value] = func;
+            methods.set(method.name.value, func);
         }
 
         const klass: ClassR = new ClassR(stmt.name.value, superclass as ClassR, methods);
@@ -117,6 +111,10 @@ export class Interpreter {
         console.log("visitExpressionStmt")
         console.log("---> ", stmt.expression)
         let value = this.evaluate(stmt.expression);
+
+        if(typeof value === "function"){
+            value = "<native function>";
+        }
         console.log("RESULT A", value);
         if (stmt.mods) {
             value = this.evalMods(value, stmt.mods);
@@ -132,7 +130,7 @@ export class Interpreter {
     }
 
     visitFunctionStmt(stmt: Stmt.Function) {
-        console.log("visitFunctionStmt")
+        console.log("visitFunctionStmt", this.environment)
         const _function: FunctionR = new FunctionR(stmt, this.environment, false);
         this.environment.define(stmt.name.value, _function);
         return null;
@@ -313,8 +311,8 @@ export class Interpreter {
     }
 
     public visitCallExpr(expr: Expr.Call) {
-        console.log("visitCallExpr");
-        console.log(expr)
+        console.log("visitCallExpr", expr, expr.callee["name"].value);
+        
 
         const callee: Object = this.evaluate(expr.callee);
 
@@ -325,6 +323,13 @@ export class Interpreter {
             _arguments.push(this.evaluate(_argument));
         }
 
+
+        if(typeof callee === "function" ){
+            return callee(_arguments);
+        }
+
+        
+
         if (!(callee instanceof CallableR)) {
             console.log(1, "an only call functions and classes.")
             throw "an only call functions and classes." //new RuntimeError(expr.paren, "Can only call functions and classes.");
@@ -332,7 +337,7 @@ export class Interpreter {
 
         const _function: CallableR = callee;
         if (_arguments.length != _function.arity()) {
-            alert(8)
+            
             throw "Expected " + _function.arity() + " arguments but got " + _arguments.length + "."//new RuntimeError(expr.paren, "Expected " + _function.arity() + " arguments but got " + _arguments.length + ".");
         }
         console.log("good")
@@ -344,7 +349,18 @@ export class Interpreter {
         const object: Object = this.evaluate(expr.object) as InstanceR;
         const name = this.evaluate(expr.name);
         console.log("OBJETc", object )
+
+        if(object instanceof Native){
+            let value = object.get(name);
+            if(value !== undefined){
+                return value;
+
+            }
+            throw "neither property nor method found"
+        }
+
         if (object instanceof InstanceR) {
+            
             return object.get(name);
         }
 

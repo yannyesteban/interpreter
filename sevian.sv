@@ -1,2 +1,1 @@
-func a(){return 1};
-a()
+math.cos(45)

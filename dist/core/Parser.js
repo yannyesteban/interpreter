@@ -187,7 +187,9 @@ var Parser = /** @class */ (function () {
     };
     Parser.prototype.declaration = function () {
         try {
-            //if (this.match(Token.CLASS)) return this.classDeclaration();
+            if (this.match(Token.CLASS)) {
+                return this.classDeclaration();
+            }
             if (this.match(Token.FUNC)) {
                 return this._function("function");
             }
@@ -216,6 +218,28 @@ var Parser = /** @class */ (function () {
             return null;
         }
         return null;
+    };
+    Parser.prototype.classDeclaration = function () {
+        var name = this.consume(Token.IDENT, "Expect class name.");
+        //> Inheritance parse-superclass
+        var superclass = null;
+        if (this.match(Token.LSS)) {
+            this.consume(Token.IDENT, "Expect superclass name.");
+            superclass = new Expr.Variable(this.previous(), this.peek().pos);
+        }
+        //< Inheritance parse-superclass
+        this.consume(Token.LBRACE, "Expect '{' before class body.");
+        var methods = [];
+        while (!this.check(Token.RBRACE) && !this.isAtEnd()) {
+            methods.push(this._function("method"));
+        }
+        this.consume(Token.RBRACE, "Expect '}' after class body.");
+        /* Classes parse-class-declaration < Inheritance construct-class-ast
+            return new Stmt.Class(name, methods);
+        */
+        //> Inheritance construct-class-ast
+        return new Stmt.Class(name, superclass, methods, this.peek().pos);
+        //< Inheritance construct-class-ast
     };
     Parser.prototype.comparison = function () {
         var expr = this.term();

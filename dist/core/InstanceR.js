@@ -4,14 +4,14 @@ var InstanceR = /** @class */ (function () {
         this.klass = klass;
     }
     InstanceR.prototype.get = function (name) {
-        if (this.fields.has(name.value)) {
-            return this.fields.get(name.value);
+        if (this.fields.has(name)) {
+            return this.fields.get(name);
         }
-        var method = this.klass.findMethod(name.value);
+        var method = this.klass.findMethod(name);
         if (method != null) {
             return method.bind(this);
         }
-        throw ""; //new RuntimeError(name, "Undefined property '" + name.value + "'.");
+        throw "Undefined property '" + name + "'."; //new RuntimeError(name, "Undefined property '" + name.value + "'.");
     };
     InstanceR.prototype.set = function (name, value) {
         this.fields.set(name.value, value);

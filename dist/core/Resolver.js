@@ -85,6 +85,7 @@ var Resolver = /** @class */ (function () {
         return null;
     };
     Resolver.prototype.visitClassStmt = function (stmt) {
+        console.log(" visitClassStmt x");
         var enclosingClass = this.currentClass;
         this.currentClass = ClassType.CLASS;
         this.declare(stmt.name);
