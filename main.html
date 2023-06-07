@@ -1,123 +1,128 @@
 <!DOCTYPE html>
 <html lang="en">
-
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>Interpreter v0.1</title>
-    <link rel="icon" type="image/x-icon" href="favicon.ico">
-    <link rel="stylesheet" href="sass/main.css">
-</head>
+    <link rel="icon" type="image/x-icon" href="favicon.ico" />
+    <link rel="stylesheet" href="sass/main.css" />
+  </head>
 
-<body>
+  <body>
     <h2 id="int-name"></h2>
     <div>
-        <textarea id="template"></textarea>
+      <textarea id="template"></textarea>
     </div>
     <div>
-        <textarea id="source"></textarea>
+      <textarea id="source"></textarea>
     </div>
     <div>
-        <textarea id="data"></textarea>
+      <textarea id="data"></textarea>
     </div>
     <nav>
-        <button id="sv">load</button>
-        <button id="clear">Clear</button>
-        <button id="execute">Execute</button>
-        <button id="scan">Scan</button>
-        <button id="evaluate">Template</button>
+      <button id="sv">load</button>
+      <button id="clear">Clear</button>
+      <button id="execute">Execute</button>
+      <button id="scan">Scan</button>
+      <button id="evaluate">Template</button>
     </nav>
     <div>
-        <textarea id="result"></textarea>
+      <textarea id="result"></textarea>
     </div>
     <script type="module">
+      import { Outer } from "./dist/core/outer/Outer.js";
+      import { Logic } from "./dist/core/Logic.js";
+      //import WebSocket from "ws";
 
-        import { Outer } from "./dist/core/outer/Outer.js";
-        import { Logic } from "./dist/core/Logic.js";
+      function scan(code) {
+        console.clear();
+        const logic = new Logic();
+        document.getElementById("result").value = logic.scan(code);
+      }
+      function execute(code) {
+        console.clear();
+        const logic = new Logic();
+        document.getElementById("result").value = logic.execute(code);
+      }
 
-        function scan(code) {
-            console.clear();
-            const logic = new Logic();
-            document.getElementById("result").value = logic.scan(code);
-        }
-        function execute(code) {
-            console.clear();
-            const logic = new Logic();
-            document.getElementById("result").value = logic.execute(code);
-        }
+      function evaluate(code) {
+        const outer = new Outer();
 
-        function evaluate(code) {
+        const data = JSON.parse(document.getElementById("data").value);
 
+        outer.setMap("@", data, "");
 
-            const outer = new Outer();
+        outer.setMap(
+          "&",
+          {
+            apellido: "lopez",
+          },
+          "EX_"
+        );
 
-            const data = JSON.parse(document.getElementById("data").value);
+        const output = outer.execute(code);
 
-            outer.setMap("@", data, "");
+        document.getElementById("result").value = output;
+        console.log(output);
+      }
 
-            outer.setMap("&", {
+      const data = {
+        mode: "update",
+        esteban: "JIMENEZ",
+        name: "NUñEZ",
+        apellido: "NEVER",
+        birth: "1975-10-24",
+        age: "47",
+        city: "Caracas",
+        country: "Venezuela",
+        price: 456.74666,
+        k: {
+          a: "yanny",
+          b: ["green", "yellow", "red"],
+        },
+      };
 
-                "apellido": "lopez",
-            }, "EX_");
-
-
-            const output = outer.execute(code);
-
-            document.getElementById("result").value = output;
-            console.log(output);
-
-
-        }
-
-
-        const data = {
-
-            "mode": "update",
-            "esteban": "JIMENEZ",
-            "name": "NUñEZ",
-            "apellido": "NEVER",
-            "birth": "1975-10-24",
-            "age": "47",
-            "city": "Caracas",
-            "country": "Venezuela",
-            "price": 456.74666,
-            "k": {
-                "a": "yanny",
-                "b": ["green", "yellow", "red"]
-            }
-        };
-
-        document.getElementById("data").value = JSON.stringify(data, null, 2);
-        fetch('template.sv')
-            .then(r => r.text())
-            .then(source => {
-                document.getElementById("template").value = source;
-
-            });
-        fetch('sevian.sv')
-            .then(r => r.text())
-            .then(source => {
-                document.getElementById("source").value = source;
-
-                //run(source)
-            });
-
-        document.getElementById("execute").addEventListener("click", (event) => {
-            execute(document.getElementById("source").value);
+      document.getElementById("data").value = JSON.stringify(data, null, 2);
+      fetch("template.sv")
+        .then((r) => r.text())
+        .then((source) => {
+          document.getElementById("template").value = source;
         });
-        document.getElementById("scan").addEventListener("click", (event) => {
-            scan(document.getElementById("source").value);
-        });
-        document.getElementById("evaluate").addEventListener("click", (event) => {
-            evaluate(document.getElementById("template").value);
-        });
-        document.getElementById("clear").addEventListener("click", (event) => {
-            document.getElementById("source").value = "";
+      fetch("sevian.sv")
+        .then((r) => r.text())
+        .then((source) => {
+          document.getElementById("source").value = source;
+
+          //run(source)
         });
 
+      document.getElementById("execute").addEventListener("click", (event) => {
+        execute(document.getElementById("source").value);
+      });
+      document.getElementById("scan").addEventListener("click", (event) => {
+        scan(document.getElementById("source").value);
+      });
+      document.getElementById("evaluate").addEventListener("click", (event) => {
+        evaluate(document.getElementById("template").value);
+      });
+      document.getElementById("clear").addEventListener("click", (event) => {
+        document.getElementById("source").value = "";
+      });
 
+      const socket = new WebSocket("ws://localhost:8080");
+
+// Connection opened
+socket.addEventListener("open", (event) => {
+  socket.send("Hello Server!");
+});
+
+// Listen for messages
+socket.addEventListener("message", (event) => {
+  console.log("Message from server ", event.data);
+});
+
+      
     </script>
-</body>
-
+  </body>
 </html>

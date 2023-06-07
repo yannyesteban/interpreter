@@ -8,7 +8,11 @@
     "clean": "tsc --build --clean",
     "start": "node dist/main.js",
     "main": "node dist/main.js",
-    "ss": "node dist/server.js"
+    "ss": "node dist/server.js",
+    "w": "node dist/websocket.js"
   },
-  "type":"module"
+  "type": "module",
+  "dependencies": {
+    "ws": "^8.13.0"
+  }
 }
