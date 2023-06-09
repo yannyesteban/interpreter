@@ -78,7 +78,7 @@ export var Token;
     Token[Token["LEFT_DELIM"] = 74] = "LEFT_DELIM";
     Token[Token["RIGHT_DELIM"] = 75] = "RIGHT_DELIM";
 })(Token || (Token = {}));
-var keywords = {
+const keywords = {
     if: Token.IF,
     else: Token.ELSE,
     case: Token.CASE,
@@ -100,16 +100,15 @@ var keywords = {
     fn: Token.FN,
     print: Token.PRINT,
 };
-var LowestPrec = 0, // non-operators
+const LowestPrec = 0, // non-operators
 UnaryPrec = 6, HighestPrec = 7;
-var Keyword = /** @class */ (function () {
-    function Keyword() {
-    }
-    Keyword.prototype.isKeyword = function (key) {
+export class Keyword {
+    constructor() { }
+    isKeyword(key) {
         var _a;
         return (_a = keywords[key]) !== null && _a !== void 0 ? _a : Token.IDENT;
-    };
-    Keyword.prototype.precedence = function (op) {
+    }
+    precedence(op) {
         switch (op) {
             case Token.OR:
                 return 1;
@@ -133,9 +132,7 @@ var Keyword = /** @class */ (function () {
                 return 5;
         }
         return LowestPrec;
-    };
-    return Keyword;
-}());
-export { Keyword };
+    }
+}
 //console.log(keywords["f"]);
 //# sourceMappingURL=Token.js.map

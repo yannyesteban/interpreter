@@ -1,7 +1,3 @@
-var Native = /** @class */ (function () {
-    function Native() {
-    }
-    return Native;
-}());
-export { Native };
+export class Native {
+}
 //# sourceMappingURL=Native.js.map

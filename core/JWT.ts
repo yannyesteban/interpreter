@@ -4,6 +4,7 @@ const header = {
     alg: "HS256",
     typ: "JWT",
 };
+
 const payload = {
     "iss": "a_random_server_name",
     "exp": 1500,
@@ -18,9 +19,7 @@ export class JWT {
 
     constructor(opt){
         for(let key in opt){
-            
             this[key] = opt[key];
-
         }
     }
 

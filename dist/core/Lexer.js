@@ -2,8 +2,8 @@ import { Keyword, Token } from "./Token.js";
 import { isAlphaNumeric, isDecimal, isHex, isLetter } from "./LexerFunctions.js";
 var keyword = new Keyword();
 var unicode = { MaxRune: 65536 };
-var Section = /** @class */ (function () {
-    function Section(tokens, pos, length, outside) {
+export class Section {
+    constructor(tokens, pos, length, outside) {
         this.tokens = [];
         this.pos = 0;
         this.length = 0;
@@ -13,11 +13,9 @@ var Section = /** @class */ (function () {
         this.length = length;
         this.outside = outside;
     }
-    return Section;
-}());
-export { Section };
-var Lexer = /** @class */ (function () {
-    function Lexer(input, useString) {
+}
+export class Lexer {
+    constructor(input, useString) {
         this.input = "";
         this.pos = null;
         this.rd = null;
@@ -32,10 +30,10 @@ var Lexer = /** @class */ (function () {
         this.next();
         //console.log(input);
     }
-    Lexer.prototype.error = function (offs, msg) {
+    error(offs, msg) {
         throw new Error(msg);
-    };
-    Lexer.prototype.evalOp = function (ch, tokenDefault, tokenAssign, tokenX2, tokenX3) {
+    }
+    evalOp(ch, tokenDefault, tokenAssign, tokenX2, tokenX3) {
         if (this.ch == "=") {
             this.next();
             return tokenAssign;
@@ -49,20 +47,20 @@ var Lexer = /** @class */ (function () {
             return tokenX2;
         }
         return tokenDefault;
-    };
-    Lexer.prototype.doubleOp = function (ch, tokenDefault, tokenX2) {
+    }
+    doubleOp(ch, tokenDefault, tokenX2) {
         if (tokenX2 && this.ch == ch) {
             this.next();
             return tokenX2;
         }
         return tokenDefault;
-    };
-    Lexer.prototype.skipWhitespace = function () {
+    }
+    skipWhitespace() {
         while (this.ch == ' ' || this.ch == '\t' || this.ch == '\n' && !this.markEOL || this.ch == '\r') {
             this.next();
         }
-    };
-    Lexer.prototype.digitVal = function (ch) {
+    }
+    digitVal(ch) {
         if ("0" <= ch && ch <= "9") {
             return (ch.charCodeAt(0) - "0".charCodeAt(0));
         }
@@ -70,12 +68,11 @@ var Lexer = /** @class */ (function () {
             return (ch.charCodeAt(0) - "a".charCodeAt(0) + 10);
         }
         return 16;
-    };
-    Lexer.prototype.scanEscape = function (quote) {
-        var _a, _b, _c, _d;
-        var offs = this.pos;
-        var n;
-        var base, max;
+    }
+    scanEscape(quote) {
+        const offs = this.pos;
+        let n;
+        let base, max;
         switch (this.ch) {
             case "a":
             case "b":
@@ -96,33 +93,33 @@ var Lexer = /** @class */ (function () {
             case "5":
             case "6":
             case "7":
-                _a = [3, 8, 255], n = _a[0], base = _a[1], max = _a[2];
+                [n, base, max] = [3, 8, 255];
                 break;
             case 'x':
                 this.next();
-                _b = [2, 16, 255], n = _b[0], base = _b[1], max = _b[2];
+                [n, base, max] = [2, 16, 255];
                 break;
             case 'u':
                 this.next();
-                _c = [4, 16, unicode.MaxRune], n = _c[0], base = _c[1], max = _c[2];
+                [n, base, max] = [4, 16, unicode.MaxRune];
                 break;
             case 'U':
                 this.next();
-                _d = [8, 16, unicode.MaxRune], n = _d[0], base = _d[1], max = _d[2];
+                [n, base, max] = [8, 16, unicode.MaxRune];
                 break;
             default:
-                var msg = "unknown escape sequence";
+                let msg = "unknown escape sequence";
                 if (this.ch < "\0") {
                     msg = "escape sequence not terminated";
                 }
                 this.error(offs, msg);
                 return false;
         }
-        var x;
+        let x;
         while (n > 0) {
-            var d = this.digitVal(this.ch);
+            let d = this.digitVal(this.ch);
             if (d >= base) {
-                var msg = "illegal character %#U in escape sequence" + this.ch;
+                let msg = "illegal character %#U in escape sequence" + this.ch;
                 if (this.ch < "\n") {
                     msg = "escape sequence not terminated";
                 }
@@ -138,12 +135,12 @@ var Lexer = /** @class */ (function () {
             return false;
         }
         return true;
-    };
-    Lexer.prototype.scanString = function (quote) {
+    }
+    scanString(quote) {
         // '"' opening already consumed
-        var offs = this.pos - 1;
+        const offs = this.pos - 1;
         while (true) {
-            var ch = this.ch;
+            let ch = this.ch;
             if ( /*ch == "\n" ||*/ch < "\0") {
                 this.error(offs, "string literal not terminated");
                 break;
@@ -158,13 +155,13 @@ var Lexer = /** @class */ (function () {
         }
         return this.input.substring(offs + 1, this.pos - 1);
         //return this.input.substring(offs, this.pos);
-    };
-    Lexer.prototype.scanIdentifier = function () {
-        var init = this.pos;
-        var end = init;
-        var lit = "";
+    }
+    scanIdentifier() {
+        let init = this.pos;
+        let end = init;
+        let lit = "";
         while (!this.eof) {
-            var ch = this.ch;
+            let ch = this.ch;
             if (isAlphaNumeric(ch)) {
                 end++;
                 lit += this.ch;
@@ -174,16 +171,15 @@ var Lexer = /** @class */ (function () {
             break;
         }
         return lit;
-    };
-    Lexer.prototype.scanNumber = function () {
-        var _a, _b, _c, _d;
-        var offs = this.pos;
-        var tok = Token.INT;
-        var base = 10; // number base
-        var prefix = "0"; // one of 0 (decimal), '0' (0-octal), 'x', 'o', or 'b'
+    }
+    scanNumber() {
+        let offs = this.pos;
+        let tok = Token.INT;
+        let base = 10; // number base
+        let prefix = "0"; // one of 0 (decimal), '0' (0-octal), 'x', 'o', or 'b'
         //digsep = 0       // bit 0: digit present, bit 1: '_' present
         //invalid = -1     // index of invalid digit in literal, or < 0
-        var lit = "c";
+        let lit = "c";
         // integer part
         if (this.ch != '.') {
             tok = Token.INT;
@@ -192,18 +188,18 @@ var Lexer = /** @class */ (function () {
                 switch (this.ch.toLowerCase()) {
                     case 'x':
                         this.next();
-                        _a = [16, 'x'], base = _a[0], prefix = _a[1];
+                        [base, prefix] = [16, 'x'];
                         break;
                     case 'o':
                         this.next();
-                        (_b = [8, 'o'], base = _b[0], prefix = _b[1]);
+                        ([base, prefix] = [8, 'o']);
                         break;
                     case 'b':
                         this.next();
-                        _c = [2, 'b'], base = _c[0], prefix = _c[1];
+                        [base, prefix] = [2, 'b'];
                         break;
                     default:
-                        _d = [8, '0'], base = _d[0], prefix = _d[1];
+                        [base, prefix] = [8, '0'];
                     //digsep = 1 // leading 0
                 }
             }
@@ -225,7 +221,7 @@ var Lexer = /** @class */ (function () {
         }
         */
         // exponent
-        var e = this.ch.toLowerCase();
+        const e = this.ch.toLowerCase();
         if (e == 'e' || e == 'p') {
             /*
             switch {
@@ -240,7 +236,7 @@ var Lexer = /** @class */ (function () {
             if (this.ch == '+' || this.ch == '-') {
                 this.next();
             }
-            var ds = this.digits(10);
+            let ds = this.digits(10);
             /*digsep |= ds
             if ds&1 == 0 {
                 s.error(s.offset, "exponent has no digits")
@@ -271,9 +267,9 @@ var Lexer = /** @class */ (function () {
         lit = this.input.substring(offs, this.pos);
         //console.log("<>", offs, this.pos, " = ", lit)
         //return lit
-        return { lit: lit, tok: tok };
-    };
-    Lexer.prototype.digits = function (base) {
+        return { lit, tok };
+    }
+    digits(base) {
         if (base <= 10) {
             //max := rune('0' + base)
             while (isDecimal(this.ch)) {
@@ -286,14 +282,13 @@ var Lexer = /** @class */ (function () {
             }
         }
         return;
-    };
-    Lexer.prototype.scan = function () {
-        var _a;
-        var ch = null;
-        var lit = "*** ERROR ***";
-        var tok = null;
-        var offs = 0;
-        var markEOL = false;
+    }
+    scan() {
+        let ch = null;
+        let lit = "*** ERROR ***";
+        let tok = null;
+        let offs = 0;
+        let markEOL = false;
         while (!this.eof) {
             this.skipWhitespace();
             ch = this.ch;
@@ -321,7 +316,7 @@ var Lexer = /** @class */ (function () {
             }
             else if (isDecimal(ch) || ch == '.' && isDecimal(this.peek())) {
                 markEOL = true;
-                (_a = this.scanNumber(), lit = _a.lit, tok = _a.tok);
+                ({ lit, tok } = this.scanNumber());
                 //console.log("this.scanNumber()", this.scanNumber())
                 //{lit, tok} = this.scanNumber()
                 //console.log(lit, tok)
@@ -488,10 +483,10 @@ var Lexer = /** @class */ (function () {
             pos: this.pos,
             value: lit,
             priority: keyword.precedence(tok),
-            tok: tok
+            tok
         };
-    };
-    Lexer.prototype.next = function () {
+    }
+    next() {
         if (this.rd < this.input.length) {
             this.pos = this.rd;
             this.ch = this.input[this.pos];
@@ -502,8 +497,8 @@ var Lexer = /** @class */ (function () {
             this.eof = true;
             this.ch = "\0";
         }
-    };
-    Lexer.prototype.setPosition = function (pos) {
+    }
+    setPosition(pos) {
         if (pos < this.input.length) {
             this.pos = pos;
             this.ch = this.input[this.pos];
@@ -514,15 +509,15 @@ var Lexer = /** @class */ (function () {
             this.eof = true;
             this.ch = "\0";
         }
-    };
-    Lexer.prototype.peek = function () {
+    }
+    peek() {
         if (this.pos < this.input.length) {
             return this.input[this.pos];
         }
         return null;
-    };
-    Lexer.prototype.getTokens = function () {
-        var tokens = [];
+    }
+    getTokens() {
+        let tokens = [];
         while (!this.eof) {
             tokens.push(this.scan());
         }
@@ -533,14 +528,14 @@ var Lexer = /** @class */ (function () {
             tok: Token.EOF
         });
         return tokens;
-    };
-    Lexer.prototype.getSections = function (leftDelim, rightDelim) {
-        var sections = [];
+    }
+    getSections(leftDelim, rightDelim) {
+        const sections = [];
         while (!this.eof) {
-            var tokens = [];
-            var pos = 0;
-            var endPos = 0;
-            var index = this.input.indexOf(leftDelim, this.pos);
+            let tokens = [];
+            let pos = 0;
+            let endPos = 0;
+            let index = this.input.indexOf(leftDelim, this.pos);
             if (index >= 0) {
                 pos = index;
                 this.setPosition(index + leftDelim.length);
@@ -567,8 +562,6 @@ var Lexer = /** @class */ (function () {
             this.next();
         }
         return sections;
-    };
-    return Lexer;
-}());
-export { Lexer };
+    }
+}
 //# sourceMappingURL=Lexer.js.map

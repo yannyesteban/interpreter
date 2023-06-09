@@ -5,8 +5,8 @@ export var ExpressionType;
     ExpressionType[ExpressionType["DATE"] = 2] = "DATE";
     ExpressionType[ExpressionType["TIME"] = 3] = "TIME";
 })(ExpressionType || (ExpressionType = {}));
-var Expression = /** @class */ (function () {
-    function Expression(token, name, pos, length, mods, path, type, outside) {
+export class Expression {
+    constructor(token, name, pos, length, mods, path, type, outside) {
         this.token = token;
         this.name = name;
         this.pos = pos;
@@ -17,35 +17,27 @@ var Expression = /** @class */ (function () {
         this.type = type;
         this.outside = outside;
     }
-    return Expression;
-}());
-export { Expression };
-var Modifier = /** @class */ (function () {
-    function Modifier(mod, value) {
+}
+export class Modifier {
+    constructor(mod, value) {
         this.mod = mod;
         this.value = value;
     }
-    return Modifier;
-}());
-export { Modifier };
-function db() {
-    var msg = [];
-    for (var _i = 0; _i < arguments.length; _i++) {
-        msg[_i] = arguments[_i];
-    }
+}
+function db(...msg) {
     console.log(".*.*.*.*.*.*.*.*.*");
-    msg.forEach(function (x) {
+    msg.forEach(x => {
         console.debug("..", x);
     });
     console.log("------------------");
 }
-var Parser = /** @class */ (function () {
-    function Parser() {
+export class Parser {
+    constructor() {
         this.version = "Interpreter V0.2";
         this.current = 0;
         this.brackets = 0;
     }
-    Parser.prototype.error = function (token, message) {
+    error(token, message) {
         db("Error: ", message);
         if (token.type == Token.EOF) {
             //report(token.line, " at end", message);
@@ -53,72 +45,67 @@ var Parser = /** @class */ (function () {
         else {
             //report(token.line, " at '" + token.lexeme + "'", message);
         }
-    };
-    Parser.prototype.parse = function (tokens) {
+    }
+    parse(tokens) {
         this.tokens = tokens;
         this.reset(0);
         return this.expression();
-    };
-    Parser.prototype.peek = function () {
+    }
+    peek() {
         return this.tokens[this.current];
-    };
-    Parser.prototype.isAtEnd = function () {
+    }
+    isAtEnd() {
         return this.peek().tok == Token.EOF;
-    };
-    Parser.prototype.isEOL = function () {
+    }
+    isEOL() {
         return this.peek().tok == Token.EOL;
-    };
-    Parser.prototype.reset = function (position) {
+    }
+    reset(position) {
         this.current = position;
-    };
-    Parser.prototype.getPosition = function () {
+    }
+    getPosition() {
         return this.current;
-    };
-    Parser.prototype.advance = function () {
+    }
+    advance() {
         if (!this.isAtEnd()) {
             this.current++;
         }
         return this.previous();
-    };
-    Parser.prototype.previous = function () {
+    }
+    previous() {
         return this.tokens[this.current - 1];
-    };
-    Parser.prototype.consume = function (type, message) {
+    }
+    consume(type, message) {
         if (this.check(type)) {
             return this.advance();
         }
         throw this.error(this.peek(), message);
-    };
-    Parser.prototype.check = function (TokenType) {
+    }
+    check(TokenType) {
         if (this.isAtEnd()) {
             return false;
         }
         return this.peek().tok == TokenType;
-    };
-    Parser.prototype.match = function () {
-        var TokenType = [];
-        for (var _i = 0; _i < arguments.length; _i++) {
-            TokenType[_i] = arguments[_i];
-        }
-        for (var _a = 0, TokenType_1 = TokenType; _a < TokenType_1.length; _a++) {
-            var type = TokenType_1[_a];
+    }
+    match(...TokenType) {
+        for (let type of TokenType) {
             if (this.check(type)) {
                 this.advance();
                 return true;
             }
         }
         return false;
-    };
-    Parser.prototype.expression = function () {
-        var token = "";
-        var name = "";
-        var invalid;
-        var pos = null;
-        var length = null;
-        var mods = [];
-        var path = [];
-        var type = ExpressionType.VAR;
-        var outside = false;
+    }
+    expression() {
+        let token = "";
+        let name = "";
+        let invalid;
+        let pos = null;
+        let length = null;
+        let mods = [];
+        let path = [];
+        let type = ExpressionType.VAR;
+        let outside = false;
         if (this.match(Token.COLON)) {
             outside = true;
         }
@@ -142,12 +129,12 @@ var Parser = /** @class */ (function () {
             return new Expression(token, name, pos, length, mods, path, type, outside);
         }
         return null;
-    };
-    Parser.prototype.modifiers = function () {
-        var mods = [];
+    }
+    modifiers() {
+        const mods = [];
         while (true) {
-            var mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
-            var value = null;
+            let mod = this.consume(Token.IDENT, "expected a identifier after expression '|'").value;
+            let value = null;
             if (this.match(Token.COLON)) {
                 if (!this.match(Token.IDENT, Token.INT, Token.FLOAT, Token.STRING)) {
                     throw this.error(this.peek(), "expected a identifier after expression ':'");
@@ -161,8 +148,6 @@ var Parser = /** @class */ (function () {
             break;
         }
         return mods;
-    };
-    return Parser;
-}());
-export { Parser };
+    }
+}
 //# sourceMappingURL=Parser.js.map

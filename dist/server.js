@@ -8,18 +8,18 @@ import * as http from "http";
 http.createServer(function (req, res) {
     console.log("prueba");
     res.write('Hello World!'); //write a response to the client
-    fs.readFile("sevian.sv", function (err, buff) {
+    fs.readFile("sevian.sv", (err, buff) => {
         if (err) {
             console.error(err);
             return;
         }
         console.log();
-        var source = buff.toString();
-        var lexer = new Lexer(source);
-        var tokens = lexer.getTokens();
+        const source = buff.toString();
+        const lexer = new Lexer(source);
+        const tokens = lexer.getTokens();
         console.log(source, "\n", tokens);
-        var parser = new Parser(tokens);
-        var statements = parser.parse();
+        const parser = new Parser(tokens);
+        const statements = parser.parse();
         console.log("result", statements);
         console.log("bye", JSON.stringify(statements));
         res.end(); //end the response

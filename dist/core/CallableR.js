@@ -1,7 +1,3 @@
-var CallableR = /** @class */ (function () {
-    function CallableR() {
-    }
-    return CallableR;
-}());
-export { CallableR };
+export class CallableR {
+}
 //# sourceMappingURL=CallableR.js.map

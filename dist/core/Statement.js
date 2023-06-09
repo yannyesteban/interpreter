@@ -1,146 +1,120 @@
-var Modifier = /** @class */ (function () {
-    function Modifier(name, param) {
+export class Modifier {
+    constructor(name, param) {
         this.name = name;
         this.param = param;
     }
-    return Modifier;
-}());
-export { Modifier };
-var Statement = /** @class */ (function () {
-    function Statement() {
-    }
-    return Statement;
-}());
-export { Statement };
-var Block = /** @class */ (function () {
-    function Block(statements, pos) {
+}
+export class Statement {
+}
+export class Block {
+    constructor(statements, pos) {
         this.statements = statements;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Block.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitBlockStmt(this);
-    };
-    return Block;
-}());
-export { Block };
-var Expression = /** @class */ (function () {
-    function Expression(expression, mods, pos) {
+    }
+}
+export class Expression {
+    constructor(expression, mods, pos) {
         //console.log("Expression: ", expression);
         this.expression = expression;
         this.mods = mods;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Expression.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitExpressionStmt(this);
-    };
-    return Expression;
-}());
-export { Expression };
-var If = /** @class */ (function () {
-    function If(condition, thenBranch, elseBranch, pos) {
+    }
+}
+export class If {
+    constructor(condition, thenBranch, elseBranch, pos) {
         this.condition = condition;
         this.thenBranch = thenBranch;
         this.elseBranch = elseBranch;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    If.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitIfStmt(this);
-    };
-    return If;
-}());
-export { If };
-var Function = /** @class */ (function () {
-    function Function(name, params, body, pos) {
+    }
+}
+export class Function {
+    constructor(name, params, body, pos) {
         this.name = name;
         this.params = params;
         this.body = body;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Function.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitFunctionStmt(this);
-    };
-    return Function;
-}());
-export { Function };
-var Var = /** @class */ (function () {
-    function Var(name, initializer, pos) {
+    }
+}
+export class Var {
+    constructor(name, initializer, pos) {
         this.name = name;
         this.initializer = initializer;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Var.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitVarStmt(this);
-    };
-    return Var;
-}());
-export { Var };
-var Return = /** @class */ (function () {
-    function Return(value, pos) {
+    }
+}
+export class Return {
+    constructor(value, pos) {
         this.value = value;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Return.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitReturnStmt(this);
-    };
-    return Return;
-}());
-export { Return };
-var While = /** @class */ (function () {
-    function While(condition, body, pos) {
+    }
+}
+export class While {
+    constructor(condition, body, pos) {
         this.condition = condition;
         this.body = body;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    While.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitWhileStmt(this);
-    };
-    return While;
-}());
-export { While };
-var Do = /** @class */ (function () {
-    function Do(condition, body, pos) {
+    }
+}
+export class Do {
+    constructor(condition, body, pos) {
         this.condition = condition;
         this.body = body;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Do.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitDoStmt(this);
-    };
-    return Do;
-}());
-export { Do };
-var Class = /** @class */ (function () {
-    function Class(name, superclass, methods, pos) {
+    }
+}
+export class Class {
+    constructor(name, superclass, methods, pos) {
         this.name = name;
         this.superclass = superclass;
         this.methods = methods;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Class.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitClassStmt(this);
-    };
-    return Class;
-}());
-export { Class };
-var Print = /** @class */ (function () {
-    function Print(expression, pos) {
+    }
+}
+export class Print {
+    constructor(expression, pos) {
         this.expression = expression;
         this.pos = pos;
         this.clssStmt = this.constructor.name;
     }
-    Print.prototype.accept = function (visitor) {
+    accept(visitor) {
         return visitor.visitPrintStmt(this);
-    };
-    return Print;
-}());
-export { Print };
+    }
+}
 //# sourceMappingURL=Statement.js.map

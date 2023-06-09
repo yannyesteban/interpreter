@@ -1,25 +1,23 @@
-var InstanceR = /** @class */ (function () {
-    function InstanceR(klass) {
+export class InstanceR {
+    constructor(klass) {
         this.fields = new Map();
         this.klass = klass;
     }
-    InstanceR.prototype.get = function (name) {
+    get(name) {
         if (this.fields.has(name)) {
             return this.fields.get(name);
         }
-        var method = this.klass.findMethod(name);
+        const method = this.klass.findMethod(name);
         if (method != null) {
             return method.bind(this);
         }
         throw "Undefined property '" + name + "'."; //new RuntimeError(name, "Undefined property '" + name.value + "'.");
-    };
-    InstanceR.prototype.set = function (name, value) {
+    }
+    set(name, value) {
         this.fields.set(name.value, value);
-    };
-    InstanceR.prototype.toString = function () {
+    }
+    toString() {
         return this.klass.name + " instance";
-    };
-    return InstanceR;
-}());
-export { InstanceR };
+    }
+}
 //# sourceMappingURL=InstanceR.js.map

@@ -2,38 +2,37 @@ import { Lexer } from "./Lexer.js";
 import { Parser } from "./Parser.js";
 import { Resolver } from "./Resolver.js";
 import { Interpreter } from "./Interpreter.js";
-var Logic = /** @class */ (function () {
-    function Logic() {
+export class Logic {
+    constructor() {
         this.output = "";
     }
-    Logic.prototype.execute = function (source) {
-        var lexer = new Lexer(source);
-        var tokens = lexer.getTokens();
-        var parser = new Parser(tokens);
-        var statements = parser.parse();
+    execute(source) {
+        const lexer = new Lexer(source);
+        const tokens = lexer.getTokens();
+        const parser = new Parser(tokens);
+        const statements = parser.parse();
         console.log(statements);
-        var interpreter = new Interpreter();
-        var resolver = new Resolver(interpreter);
+        const interpreter = new Interpreter();
+        const resolver = new Resolver(interpreter);
         //resolver.resolve(statements);
-        var output = interpreter.interpret(statements);
+        const output = interpreter.interpret(statements);
         return output.join("");
-    };
-    Logic.prototype.scan = function (source) {
+    }
+    scan(source) {
         this.output = source;
-        var lexer = new Lexer(source);
-        var setions = lexer.getSections("{:", ":}");
-        var expressions = [];
-        var delta = 0;
-        var offset;
-        for (var _i = 0, setions_1 = setions; _i < setions_1.length; _i++) {
-            var s = setions_1[_i];
+        const lexer = new Lexer(source);
+        const setions = lexer.getSections("{:", ":}");
+        const expressions = [];
+        let delta = 0;
+        let offset;
+        for (let s of setions) {
             console.log(s);
-            var parser = new Parser(s.tokens);
-            var statements = parser.parse();
-            var interpreter = new Interpreter();
-            var resolver = new Resolver(interpreter);
+            const parser = new Parser(s.tokens);
+            const statements = parser.parse();
+            const interpreter = new Interpreter();
+            const resolver = new Resolver(interpreter);
             resolver.resolve(statements);
-            var output = interpreter.interpret(statements);
+            const output = interpreter.interpret(statements);
             s.output = output;
             s.pos += delta;
             offset = (s.outside && s.pos > 0) ? 1 : 0;
@@ -41,8 +40,6 @@ var Logic = /** @class */ (function () {
             delta = delta + (output.length - s.length) + 2 * offset;
         }
         return this.output;
-    };
-    return Logic;
-}());
-export { Logic };
+    }
+}
 //# sourceMappingURL=Logic.js.map

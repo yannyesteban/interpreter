@@ -1,5 +1,5 @@
-var Environment = /** @class */ (function () {
-    function Environment(enclosing) {
+export class Environment {
+    constructor(enclosing) {
         this.values = {};
         if (enclosing !== undefined) {
             this.enclosing = enclosing;
@@ -8,7 +8,7 @@ var Environment = /** @class */ (function () {
             this.enclosing = null;
         }
     }
-    Environment.prototype.get = function (name) {
+    get(name) {
         if (name.value in this.values) {
             return this.values[name.value];
         }
@@ -17,8 +17,8 @@ var Environment = /** @class */ (function () {
         }
         console.log("Undefined variable '" + name.value + "'.");
         throw ""; //new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
-    };
-    Environment.prototype.assign = function (name, value) {
+    }
+    assign(name, value) {
         if (name.value in this.values) {
             this.values[name.value] = value;
             return;
@@ -28,31 +28,29 @@ var Environment = /** @class */ (function () {
             return;
         }
         throw ""; //new RuntimeError(name, "Undefined variable '" + name.lexeme + "'.");
-    };
-    Environment.prototype.define = function (name, value) {
+    }
+    define(name, value) {
         this.values[name] = value;
-    };
-    Environment.prototype.ancestor = function (distance) {
-        var environment = this;
-        for (var i = 0; i < distance; i++) {
+    }
+    ancestor(distance) {
+        let environment = this;
+        for (let i = 0; i < distance; i++) {
             environment = environment.enclosing; // [coupled]
         }
         return environment;
-    };
-    Environment.prototype.getAt = function (distance, name) {
+    }
+    getAt(distance, name) {
         return this.ancestor(distance).values[name];
-    };
-    Environment.prototype.assignAt = function (distance, name, value) {
+    }
+    assignAt(distance, name, value) {
         this.ancestor(distance).values[name.value] = value;
-    };
-    Environment.prototype.toString = function () {
-        var result = this.values.toString();
+    }
+    toString() {
+        let result = this.values.toString();
         if (this.enclosing != null) {
             result += " -> " + this.enclosing.toString();
         }
         return result;
-    };
-    return Environment;
-}());
-export { Environment };
+    }
+}
 //# sourceMappingURL=Environment.js.map

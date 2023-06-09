@@ -1,0 +1,12 @@
+{
+    "type":"element",
+    "element":"app",
+    "name":"json/apps/webcar-app.json",
+    "name1":"{@APP_PATH}/webcar-app.json",
+    "method":"init",
+    "id":"MyAppId",
+    "eparams":{
+        "cedula":12474737
+    }
+
+}

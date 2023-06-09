@@ -1,35 +1,33 @@
 import { Lexer } from "../Lexer.js";
 import { Parser, ExpressionType } from "./Parser.js";
-var Data = /** @class */ (function () {
-    function Data(token, data, pre) {
+class Data {
+    constructor(token, data, pre) {
         this.token = token;
         this.data = data;
         this.pre = pre;
     }
-    return Data;
-}());
-var Outer = /** @class */ (function () {
-    function Outer() {
+}
+export class Outer {
+    constructor() {
         this.indexOf = 0;
         this.data = [];
     }
-    Outer.prototype.setMap = function (token, data, pre) {
+    setMap(token, data, pre) {
         this.data.push(new Data(token, data, pre));
-    };
-    Outer.prototype.getDate = function (date) {
+    }
+    getDate(date) {
         if (typeof date === "string") {
-            var aux = date.split("-");
+            let aux = date.split("-");
             return new Date(Number(aux[0]), Number(aux[1]) - 1, Number(aux[2]));
         }
         if (date instanceof Date) {
             return date;
         }
-    };
-    Outer.prototype.evalMods = function (data, mods) {
-        var _this = this;
+    }
+    evalMods(data, mods) {
         var _a;
-        var aux = {};
-        mods.forEach(function (m) {
+        let aux = {};
+        mods.forEach(m => {
             var _a;
             switch (m.mod.toLowerCase()) {
                 case "trim":
@@ -74,10 +72,10 @@ var Outer = /** @class */ (function () {
                     }
                     break;
                 case "date":
-                    data = _this.getDate(data).toLocaleDateString((_a = m.value) === null || _a === void 0 ? void 0 : _a.replace("_", "-"));
+                    data = this.getDate(data).toLocaleDateString((_a = m.value) === null || _a === void 0 ? void 0 : _a.replace("_", "-"));
                     break;
                 case "time":
-                    data = _this.getDate(data).toLocaleTimeString();
+                    data = this.getDate(data).toLocaleTimeString();
                     break;
                 case "tofixed":
                     data = Number(data).toFixed(Number(m.value || 0));
@@ -102,17 +100,17 @@ var Outer = /** @class */ (function () {
             return JSON.stringify(data);
         }
         return data;
-    };
-    Outer.prototype.eval = function (expressions) {
-        var delta = 0;
-        var offset;
-        var _loop_1 = function (e) {
-            var value = null;
+    }
+    eval(expressions) {
+        let delta = 0;
+        let offset;
+        for (let e of expressions) {
+            let value = null;
             if (e.type === ExpressionType.VAR) {
-                this_1.data.forEach(function (d) {
+                this.data.forEach(d => {
                     if (e.token == d.token) {
-                        var data = d.data;
-                        for (var i = 0; i < e.path.length; i++) {
+                        let data = d.data;
+                        for (let i = 0; i < e.path.length; i++) {
                             if (data[e.path[i]] !== undefined) {
                                 value = data[e.path[i]];
                                 data = value;
@@ -128,32 +126,26 @@ var Outer = /** @class */ (function () {
                 value = new Date();
             }
             if (value === null) {
-                return "continue";
+                continue;
             }
-            value = this_1.evalMods(value, e.mods);
+            value = this.evalMods(value, e.mods);
             e.ready = true;
             e.pos += delta;
             offset = (e.outside && e.pos > 0) ? 1 : 0;
-            this_1.output = this_1.output.substring(0, e.pos - offset) + value + this_1.output.substring(e.pos + e.length + offset);
+            this.output = this.output.substring(0, e.pos - offset) + value + this.output.substring(e.pos + e.length + offset);
             delta = delta + (value.length - e.length) + 2 * offset;
-        };
-        var this_1 = this;
-        for (var _i = 0, expressions_1 = expressions; _i < expressions_1.length; _i++) {
-            var e = expressions_1[_i];
-            _loop_1(e);
         }
         ;
         return this.output;
-    };
-    Outer.prototype.execute = function (source) {
+    }
+    execute(source) {
         this.output = source;
-        var lexer = new Lexer(source, false);
-        var setions = lexer.getSections("{{", "}}");
-        var parser = new Parser();
-        var expressions = [];
-        for (var _i = 0, setions_1 = setions; _i < setions_1.length; _i++) {
-            var s = setions_1[_i];
-            var expr = parser.parse(s.tokens);
+        const lexer = new Lexer(source, false);
+        const setions = lexer.getSections("{{", "}}");
+        const parser = new Parser();
+        const expressions = [];
+        for (let s of setions) {
+            let expr = parser.parse(s.tokens);
             if (expr) {
                 expr.length = s.length;
                 expr.pos = s.pos;
@@ -163,8 +155,6 @@ var Outer = /** @class */ (function () {
         }
         //console.log(expressions)
         return this.eval(expressions);
-    };
-    return Outer;
-}());
-export { Outer };
+    }
+}
 //# sourceMappingURL=Outer.js.map

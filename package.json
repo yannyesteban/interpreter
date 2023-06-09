@@ -9,8 +9,10 @@
     "start": "node dist/main.js",
     "main": "node dist/main.js",
     "ss": "node dist/server.js",
-    "w": "node dist/websocket.js",
-    "test": "node dist/nodetest.js"
+    "ws": "node dist/websocket.js",
+    "test": "node dist/nodetest.js",
+    "w": "node dist/whendy/node/main.js"
+
   },
   "type": "module",
   "dependencies": {

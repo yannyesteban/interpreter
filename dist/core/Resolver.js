@@ -13,49 +13,47 @@ export var ClassType;
     ClassType[ClassType["CLASS"] = 1] = "CLASS";
     ClassType[ClassType["SUBCLASS"] = 2] = "SUBCLASS";
 })(ClassType || (ClassType = {}));
-var Stack = /** @class */ (function () {
-    function Stack() {
+class Stack {
+    constructor() {
         this.list = [];
     }
-    Stack.prototype.peek = function () {
+    peek() {
         return this.list[this.list.length - 1];
-    };
-    Stack.prototype.isEmpty = function () {
+    }
+    isEmpty() {
         return this.list.length === 0;
-    };
-    Stack.prototype.push = function (value) {
+    }
+    push(value) {
         this.list.push(value);
-    };
-    Stack.prototype.pop = function () {
+    }
+    pop() {
         return this.list.pop();
-    };
-    Stack.prototype.length = function () {
+    }
+    length() {
         return this.list.length;
-    };
-    Stack.prototype.get = function (index) {
+    }
+    get(index) {
         return this.list[index];
-    };
-    Stack.prototype.put = function (key, value) {
+    }
+    put(key, value) {
         this.list[this.list.length - 1][key] = value;
-    };
-    Stack.prototype.is = function (key) {
+    }
+    is(key) {
         return key in this.list[this.list.length - 1];
-    };
-    return Stack;
-}());
-var Resolver = /** @class */ (function () {
-    function Resolver(interpreter) {
+    }
+}
+export class Resolver {
+    constructor(interpreter) {
         this.scopes = new Stack();
         this.currentFunction = FunctionType.NONE;
         this.currentClass = ClassType.NONE;
         this.interpreter = interpreter;
     }
-    Resolver.prototype.resolve = function (s) {
+    resolve(s) {
         console.log("Statement ", s);
         if (Array.isArray(s)) {
             console.log("Array ", s);
-            for (var _i = 0, s_1 = s; _i < s_1.length; _i++) {
-                var statement = s_1[_i];
+            for (const statement of s) {
                 console.log(statement);
                 this.resolve(statement);
             }
@@ -77,16 +75,16 @@ var Resolver = /** @class */ (function () {
             s.accept(this);
         }
         //throw "error X"
-    };
-    Resolver.prototype.visitBlockStmt = function (stmt) {
+    }
+    visitBlockStmt(stmt) {
         this.beginScope();
         this.resolve(stmt.statements);
         this.endScope();
         return null;
-    };
-    Resolver.prototype.visitClassStmt = function (stmt) {
+    }
+    visitClassStmt(stmt) {
         console.log(" visitClassStmt x");
-        var enclosingClass = this.currentClass;
+        let enclosingClass = this.currentClass;
         this.currentClass = ClassType.CLASS;
         this.declare(stmt.name);
         this.define(stmt.name);
@@ -105,9 +103,8 @@ var Resolver = /** @class */ (function () {
         }
         this.beginScope();
         this.scopes.put("this", true);
-        for (var _i = 0, _a = stmt.methods; _i < _a.length; _i++) {
-            var method = _a[_i];
-            var declaration = FunctionType.METHOD;
+        for (const method of stmt.methods) {
+            let declaration = FunctionType.METHOD;
             if (method.name.value == "init") {
                 declaration = FunctionType.INITIALIZER;
             }
@@ -118,31 +115,31 @@ var Resolver = /** @class */ (function () {
             this.endScope();
         this.currentClass = enclosingClass;
         return null;
-    };
-    Resolver.prototype.visitExpressionStmt = function (stmt) {
+    }
+    visitExpressionStmt(stmt) {
         console.log("visitExpressionStmt", stmt);
         this.resolve(stmt.expression);
         return null;
-    };
-    Resolver.prototype.visitFunctionStmt = function (stmt) {
+    }
+    visitFunctionStmt(stmt) {
         this.declare(stmt.name);
         this.define(stmt.name);
         this.resolveFunction(stmt, FunctionType.FUNCTION);
         return null;
-    };
-    Resolver.prototype.visitIfStmt = function (stmt) {
+    }
+    visitIfStmt(stmt) {
         this.resolve(stmt.condition);
         this.resolve(stmt.thenBranch);
         if (stmt.elseBranch != null)
             this.resolve(stmt.elseBranch);
         return null;
-    };
-    Resolver.prototype.visitPrintStmt = function (stmt) {
+    }
+    visitPrintStmt(stmt) {
         console.log("visitPrintStmt");
         this.resolve(stmt.expression);
         return null;
-    };
-    Resolver.prototype.visitReturnStmt = function (stmt) {
+    }
+    visitReturnStmt(stmt) {
         if (this.currentFunction == FunctionType.NONE) {
             throw "Can't return from top-level code.";
             //Lox.error(stmt.keyword, "Can't return from top-level code.");
@@ -155,8 +152,8 @@ var Resolver = /** @class */ (function () {
             this.resolve(stmt.value);
         }
         return null;
-    };
-    Resolver.prototype.visitVarStmt = function (stmt) {
+    }
+    visitVarStmt(stmt) {
         console.log("visitVarStmt", stmt);
         this.declare(stmt.name);
         if (stmt.initializer != null) {
@@ -164,52 +161,51 @@ var Resolver = /** @class */ (function () {
         }
         this.define(stmt.name);
         return null;
-    };
-    Resolver.prototype.visitWhileStmt = function (stmt) {
+    }
+    visitWhileStmt(stmt) {
         this.resolve(stmt.condition);
         this.resolve(stmt.body);
         return null;
-    };
-    Resolver.prototype.visitAssignExpr = function (expr) {
+    }
+    visitAssignExpr(expr) {
         this.resolve(expr.value);
         this.resolveLocal(expr, expr.name);
         return null;
-    };
-    Resolver.prototype.visitBinaryExpr = function (expr) {
+    }
+    visitBinaryExpr(expr) {
         this.resolve(expr.left);
         this.resolve(expr.right);
         return null;
-    };
-    Resolver.prototype.visitCallExpr = function (expr) {
+    }
+    visitCallExpr(expr) {
         this.resolve(expr.callee);
-        for (var _i = 0, _a = expr.arg; _i < _a.length; _i++) {
-            var arg = _a[_i];
+        for (let arg of expr.arg) {
             this.resolve(arg);
         }
         return null;
-    };
-    Resolver.prototype.visitGetExpr = function (expr) {
+    }
+    visitGetExpr(expr) {
         this.resolve(expr.object);
         return null;
-    };
-    Resolver.prototype.visitGroupingExpr = function (expr) {
+    }
+    visitGroupingExpr(expr) {
         this.resolve(expr.expression);
         return null;
-    };
-    Resolver.prototype.visitLiteralExpr = function (expr) {
+    }
+    visitLiteralExpr(expr) {
         return null;
-    };
-    Resolver.prototype.visitLogicalExpr = function (expr) {
+    }
+    visitLogicalExpr(expr) {
         this.resolve(expr.left);
         this.resolve(expr.right);
         return null;
-    };
-    Resolver.prototype.visitSetExpr = function (expr) {
+    }
+    visitSetExpr(expr) {
         this.resolve(expr.value);
         this.resolve(expr.object);
         return null;
-    };
-    Resolver.prototype.visitSuperExpr = function (expr) {
+    }
+    visitSuperExpr(expr) {
         if (this.currentClass == ClassType.NONE) {
             throw "Can't use 'super' outside of a class.";
             //Lox.error(expr.keyword,       "Can't use 'super' outside of a class.");
@@ -220,8 +216,8 @@ var Resolver = /** @class */ (function () {
         }
         this.resolveLocal(expr, expr.keyword);
         return null;
-    };
-    Resolver.prototype.visitThisExpr = function (expr) {
+    }
+    visitThisExpr(expr) {
         if (this.currentClass == ClassType.NONE) {
             throw "Can't use 'this' outside of a class.";
             //Lox.error(expr.keyword,           "Can't use 'this' outside of a class.");
@@ -229,13 +225,13 @@ var Resolver = /** @class */ (function () {
         }
         this.resolveLocal(expr, expr.keyword);
         return null;
-    };
-    Resolver.prototype.visitUnaryExpr = function (expr) {
+    }
+    visitUnaryExpr(expr) {
         console.log("visitUnaryExpr", expr);
         this.resolve(expr.right);
         return null;
-    };
-    Resolver.prototype.visitVariableExpr = function (expr) {
+    }
+    visitVariableExpr(expr) {
         console.log("visitVariableExpr", expr.name.value, expr);
         if (!this.scopes.isEmpty() && this.scopes.peek()[expr.name.value] == false) {
             throw "Can't read local variable in its own initializer.";
@@ -243,42 +239,41 @@ var Resolver = /** @class */ (function () {
         }
         this.resolveLocal(expr, expr.name);
         return null;
-    };
-    Resolver.prototype.visitObjectExpr = function (expr) {
+    }
+    visitObjectExpr(expr) {
         console.error("visitObjectExpr", expr);
-    };
-    Resolver.prototype.visitPreExpr = function (expr) {
+    }
+    visitPreExpr(expr) {
         console.error("visitPreExpr", expr);
-    };
-    Resolver.prototype.visitPostExpr = function (expr) {
+    }
+    visitPostExpr(expr) {
         console.error("visitPostExpr", expr);
-    };
-    Resolver.prototype.visitArrayExpr = function (expr) {
+    }
+    visitArrayExpr(expr) {
         console.error("visitArrayExpr", expr);
-    };
-    Resolver.prototype.visitTernaryExpr = function (expr) {
+    }
+    visitTernaryExpr(expr) {
         console.error("visitTernaryExpr", expr);
-    };
-    Resolver.prototype.resolveFunction = function (_function, type) {
-        var enclosingFunction = this.currentFunction;
+    }
+    resolveFunction(_function, type) {
+        const enclosingFunction = this.currentFunction;
         this.currentFunction = type;
         this.beginScope();
-        for (var _i = 0, _a = _function.params; _i < _a.length; _i++) {
-            var param = _a[_i];
+        for (let param of _function.params) {
             this.declare(param);
             this.define(param);
         }
         this.resolve(_function.body);
         this.endScope();
         this.currentFunction = enclosingFunction;
-    };
-    Resolver.prototype.beginScope = function () {
+    }
+    beginScope() {
         this.scopes.push({});
-    };
-    Resolver.prototype.endScope = function () {
+    }
+    endScope() {
         this.scopes.pop();
-    };
-    Resolver.prototype.declare = function (name) {
+    }
+    declare(name) {
         if (this.scopes.isEmpty()) {
             return;
         }
@@ -288,22 +283,20 @@ var Resolver = /** @class */ (function () {
             //Lox.error(name, "Already a variable with this name in this scope.");
         }
         this.scopes.put(name.value, false);
-    };
-    Resolver.prototype.define = function (name) {
+    }
+    define(name) {
         if (this.scopes.isEmpty()) {
             return;
         }
         this.scopes.put(name.value, true);
-    };
-    Resolver.prototype.resolveLocal = function (expr, name) {
-        for (var i = this.scopes.length() - 1; i >= 0; i--) {
+    }
+    resolveLocal(expr, name) {
+        for (let i = this.scopes.length() - 1; i >= 0; i--) {
             if (name.value in this.scopes.get(i)) {
                 this.interpreter.resolve(expr, this.scopes.length() - 1 - i);
                 return;
             }
         }
-    };
-    return Resolver;
-}());
-export { Resolver };
+    }
+}
 //# sourceMappingURL=Resolver.js.map
