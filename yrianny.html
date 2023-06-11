@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+    <link rel="stylesheet" href="css/main.css">
+    <style>
+        .cuadrado {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            
+            left: 0px;
+            right: 0px;
+            border: 1px solid black;
+        }
+
+        .cuadrado2 {
+            position: absolute;
+            width: 60px;
+            height: 60px;
+            
+            left: 120px;
+            right: 0px;
+            border: 1px solid black;
+        }
+    </style>
+</head>
+
+<body>
+
+    <div id="c" class="cuadrado">hola</div>
+    <div id="c2" class="cuadrado2">hola</div>
+    <br><br><br><br>
+    <div id="text" class="do">hola</div>
+    <div id="text2" class="do">hola</div>
+    <script>
+
+        let interval = 100
+        let c = document.getElementById("c");
+        let c2 = document.getElementById("c2");
+
+
+        c.style.left = "50px";
+
+
+        c.style.backgroundColor = rojo(255);
+
+        let x = -Math.PI/2
+        setInterval((event) => {
+
+            let y = Math.floor(Math.sin(x) * 255);
+            title(x.toFixed(2) + ", " + y)
+            c.style.backgroundColor = rojo(y);
+            c.style.top = (-y+255)+"px";
+            x += Math.PI / 100
+
+
+        }, interval);
+        
+        setInterval((event) => {
+
+            let y = Math.floor((Math.cos(x)+Math.sin(2*x)) * 255);
+            title2(x.toFixed(2) + ", " + y)
+            c2.style.backgroundColor = rojo(y);
+            c2.style.top = (-y+255)+"px";
+
+            //x += Math.PI / 100
+
+
+        }, interval);
+
+        function componentToHex(c) {
+            var hex = c.toString(16);
+            return hex.length == 1 ? "0" + hex : hex;
+        }
+
+        function rgbToHex(r, g, b) {
+            return "#" + componentToHex(r) + componentToHex(g) + componentToHex(b);
+        }
+
+        function rojo(value) {
+            if (value > 0) {
+                return rgbToHex(value, 0, 0)
+            } else {
+                return rgbToHex(0, 0, Math.abs(value))
+            }
+
+        }
+
+        function title(t) {
+            document.getElementById("text").innerHTML = t
+        }
+
+        function title2(t) {
+            document.getElementById("text2").innerHTML = t
+        }
+
+    </script>
+
+</body>
+
+</html>
