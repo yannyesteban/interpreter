@@ -1,9 +1,10 @@
 import * as http from "http";
+import { Session, Machine } from "./session.js";
 export class Whendy extends http.Server {
     constructor(opt) {
-        console.log("YANNY");
         super((req, res) => {
-            console.log("y");
+            console.log(req.headers);
+            Session.start(req, res);
             let data = null;
             let ct = req.headers["content-type"] || "";
             if (req.method.toUpperCase() == "POST") {
@@ -49,9 +50,15 @@ export class Whendy extends http.Server {
             res.end(); //end the response
         });
         this.port = 8080;
+        for (const x in opt) {
+            this[x] = opt[x];
+        }
+        Session.register("memory", Machine);
+        this.session = Session.create(this.session);
     }
     //https://developer.mozilla.org/en-US/docs/Learn/Server-side/Node_server_without_framework
     start() {
+        console.log(this.port);
         this.listen(this.port);
     }
 }
