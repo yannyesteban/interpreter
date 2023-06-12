@@ -1,4 +1,5 @@
 import { randomBytes, randomUUID } from "node:crypto";
+import { CookieHandler, CookieVar } from "./CookieHandler.js";
 export class Machine {
     constructor(config) {
         console.log(randomUUID());
@@ -23,10 +24,22 @@ class Session {
         return randomBytes(32).toString("base64url");
     }
     static start(req, res) {
+        const cooker = new CookieHandler(req, res);
+        let sessionCookie;
+        if (cooker.get(this.sessionId())) {
+            sessionCookie = cooker.get(this.cookieName);
+        }
+        else {
+            sessionCookie = new CookieVar(this.cookieName, this.sessionId());
+        }
         console.log(req.headers["cookie"]);
-        res.setHeader('Content-Type', 'text/html');
-        res.setHeader('Set-Cookie', [`aaa${this.cookieName}=${this.sessionId()};Domain=localhost;SameSite=Lax; HttpOnly; Expires=Wed, 21 Oct 2023 07:28:00 GMT`]);
-        res.setHeader('Cookie-Setup', ['Alfa=Beta', 'Beta=Romeo']);
+        cooker.setCookie(sessionCookie);
+        cooker.setCookie((new CookieVar("VAR 1", "ONE")).get());
+        cooker.setCookie((new CookieVar("VAR 2", "TWO")).get());
+        //res.setHeader('Content-Type', 'text/html');
+        //res.setHeader('Set-Cookie', [sessionCookie.get(), "test=cuarentena", (new CookieVar("SO", "Debian")).get()]);
+        //res.setHeader('Set-Cookie', [`${this.cookieName}=${this.sessionId()}; HttpOnly; Expires=Wed, 21 Oct 2023 07:28:00 GMT`, "test=cuarentena"]);
+        //res.setHeader('Cookie-Setup',        ['Alfa=Beta', 'Beta=Romeo']);
     }
 }
 Session.machines = {};

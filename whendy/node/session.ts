@@ -1,6 +1,7 @@
 import { Class } from "../../core/Statement";
 import { randomBytes, randomUUID } from "node:crypto";
-import { ServerResponse } from "node:http"
+import { IncomingMessage, ServerResponse } from "node:http"
+import { CookieHandler, CookieVar } from "./CookieHandler.js";
 
 interface Window {
 
@@ -46,13 +47,29 @@ export class Session {
 
     }
 
-    static start(req, res: ServerResponse) {
-        console.log(req.headers["cookie"])
-        res.setHeader('Content-Type', 'text/html');
-        res.setHeader('Set-Cookie', [`aaa${this.cookieName}=${this.sessionId()};Domain=localhost;SameSite=Lax; HttpOnly; Expires=Wed, 21 Oct 2023 07:28:00 GMT`]);
+    static start(req:  IncomingMessage, res: ServerResponse) {
 
-        
-        res.setHeader('Cookie-Setup',        ['Alfa=Beta', 'Beta=Romeo']);
-        
+        const cooker = new CookieHandler(req, res);
+
+        let sessionCookie;
+        if (cooker.get(this.sessionId())) {
+            sessionCookie = cooker.get(this.cookieName);
+        } else {
+            sessionCookie = new CookieVar(this.cookieName, this.sessionId())
+        }
+        console.log(req.headers["cookie"])
+
+        cooker.setCookie(sessionCookie);
+        cooker.setCookie((new CookieVar("VAR 1", "ONE")).get());
+        cooker.setCookie((new CookieVar("VAR 2", "TWO")).get());
+
+        //res.setHeader('Content-Type', 'text/html');
+
+        //res.setHeader('Set-Cookie', [sessionCookie.get(), "test=cuarentena", (new CookieVar("SO", "Debian")).get()]);
+        //res.setHeader('Set-Cookie', [`${this.cookieName}=${this.sessionId()}; HttpOnly; Expires=Wed, 21 Oct 2023 07:28:00 GMT`, "test=cuarentena"]);
+
+
+        //res.setHeader('Cookie-Setup',        ['Alfa=Beta', 'Beta=Romeo']);
+
     }
 }
