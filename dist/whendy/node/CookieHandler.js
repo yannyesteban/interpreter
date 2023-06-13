@@ -9,7 +9,7 @@ export function cookieParse(str) {
     for (let l of lines) {
         let aux = l.split("=");
         key = aux[0].trim();
-        value = aux[1].trim() || key;
+        value = decodeURIComponent(aux[1]).trim() || key;
         cookies[key] = new CookieVar(key, value);
     }
     return cookies;
