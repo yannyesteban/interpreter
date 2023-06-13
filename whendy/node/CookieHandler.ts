@@ -8,7 +8,7 @@ export function cookieParse(str: string) {
     let key = null;
     let value = null;
 
-    const cookies = [];
+    const cookies:CookieVar[] = [];
     for (let l of lines) {
         let aux = l.split("=");
         key = aux[0].trim();

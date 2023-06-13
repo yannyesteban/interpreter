@@ -1,6 +1,7 @@
 import * as http from "http"
 import { Session, Machine } from "./session.js"
 import { cookieParse, CookieVar } from "./CookieHandler.js";
+import { Store } from "./store.js";
 
 
 export class Whendy extends http.Server {
@@ -18,56 +19,19 @@ export class Whendy extends http.Server {
 
 
 
-        super((req, res) => {
+        super(async (req, res) => {
             this.request = req;
             this.response = res;
             console.clear();
             
             console.log(req.method.toUpperCase(), "\n\n", req.headers?.cookie)
+            const store = new Store();
+            await store.start(req, res);
             Session.start(req, res);
 
 
-            let data = null;
-            let ct = req.headers["content-type"] || "";
-            if (req.method.toUpperCase() == "POST") {
-
-
-                console.log("POST")
-                //res.write(req.headers["content-type"])
-                //Content-Type
-                //          application/x-www-form-urlencoded
-                const chunks = [];
-                const postData = null;
-                req.on("data", (chunk) => {
-                    chunks.push(chunk);
-                });
-                req.on("end", () => {
-                    console.log("all parts/chunks have arrived");
-                    const postData = Buffer.concat(chunks).toString();
-                    console.log("Data: ", postData, "\n\n");
-                    if (ct == "application/json") {
-                        data = JSON.parse(postData);
-                    } else
-                        if (ct == "application/x-www-form-urlencoded") {
-                            const parsedData = new URLSearchParams(postData);
-                            data = {};
-                            console.log(parsedData)
-
-                            for (const [key, value] of parsedData) {
-                                data[key] = value;
-                            }
-                            console.log("DataObj: ", data);
-
-                        }
-
-
-                });
-            } else if (req.method.toUpperCase() == "GET") {
-                let [, param] = req.url.split("?");
-                const parsedData = new URLSearchParams(param);
-                console.log("GET", parsedData)
-
-            }
+            console.log("REQ:",store.vreq)
+            
 
             res.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500");
             res.setHeader("Access-Control-Allow-Credentials", "true");
