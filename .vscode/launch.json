@@ -19,6 +19,15 @@
         "program": "${workspaceFolder}/main.ts",
         "preLaunchTask": "tsc: build - tsconfig.json",
         "outFiles": ["${workspaceFolder}/dist/**/*.js"]
+      },
+    
+      {
+        "type": "node",
+        "request": "launch",
+        "name": "Wendy Program",
+        "program": "${workspaceFolder}/whendy/node/main.ts",
+        "preLaunchTask": "tsc: build - tsconfig.json",
+        "outFiles": ["${workspaceFolder}/dist/**/*.js"]
       }
     ]
   }

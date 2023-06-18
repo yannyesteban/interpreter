@@ -1,14 +1,18 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 
 export function cookieParse(str: string) {
+    const cookies: { [key: string]: CookieVar } = {};
     if (!str) {
-        return;
+        return cookies;
     }
+
+    
+
     let lines = str.split(";");
     let key = null;
     let value = null;
 
-    const cookies:CookieVar[] = [];
+
     for (let l of lines) {
         let aux = l.split("=");
         key = aux[0].trim();
@@ -19,7 +23,18 @@ export function cookieParse(str: string) {
     }
     return cookies;
 }
-
+/*
+domain 	String 	Domain name for the cookie. Defaults to the domain name of the app.
+encode 	Function 	A synchronous function used for cookie value encoding. Defaults to encodeURIComponent.
+expires 	Date 	Expiry date of the cookie in GMT. If not specified or set to 0, creates a session cookie.
+httpOnly 	Boolean 	Flags the cookie to be accessible only by the web server.
+maxAge 	Number 	Convenient option for setting the expiry time relative to the current time in milliseconds.
+path 	String 	Path for the cookie. Defaults to “/”.
+priority 	String 	Value of the “Priority” Set-Cookie attribute.
+secure 	Boolean 	Marks the cookie to be used with HTTPS only.
+signed 	Boolean 	Indicates if the cookie should be signed.
+sameSite 	Boolean or String 	Value of the “SameSite” Set-Cookie attribute. More information at https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1.
+*/
 export class CookieVar {
     public name;
     public value;
