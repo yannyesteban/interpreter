@@ -13,27 +13,38 @@ import { Store } from "./store.js";
 import { Memory } from "./memory.js";
 export class Whendy extends http.Server {
     constructor(opt) {
+        //console.log("TEST ", opt);
         super();
         this.port = 8080;
         this.cookies = [];
+        this.header = {};
+        this.output = [];
+        for (const [key, value] of Object.entries(opt)) {
+            this[key] = value;
+        }
         register("memory", Memory);
         let manager = new Manager({
             cookieName: "whsessionid", machineType: "memory", maxLifeTime: 36000
         });
         this.on('request', (req, res) => __awaiter(this, void 0, void 0, function* () {
+            if (req.method.toLocaleUpperCase() == "OPTIONS") {
+                res.writeHead(204, this.header);
+                res.end();
+                return;
+            }
+            console.log("Method:", req.method);
             const session = manager.start(req, res);
             const store = new Store(session);
             yield store.start(req, res);
+            console.log("Method11:", req.method);
+            this.store = store;
             //res.appendHeader('Set-Cookie', ["k2002=cuarentena2"]);
-            console.log("ä", store.getReq("agua"));
-            res.setHeader("Access-Control-Allow-Origin", "http://127.0.0.1:5500");
-            res.setHeader("Access-Control-Allow-Credentials", "true");
-            //res.setHeader("Access-Control-Allow-Headers", "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Application-Mode, authorization, sid,  Application-Id")
-            res.setHeader("Access-Control-Allow-Headers", "*");
-            res.setHeader("Access-Control-Allow-Methods", "GET, POST, OPTIONS, PUT, DELETE");
-            res.setHeader("Allow", "GET, POST, OPTIONS, PUT, DELETE");
-            res.writeHead(200, { 'Content-Type': 'text/plain' });
-            res.write('Hello, World!');
+            console.log("ok", store.getReq("agua"));
+            for (const [key, value] of Object.entries(this.header)) {
+                //res.setHeader(key, value);
+            }
+            res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
+            res.write(this.render());
             res.end();
         }));
     }
@@ -41,6 +52,34 @@ export class Whendy extends http.Server {
     start() {
         console.log(this.port);
         this.listen(this.port);
+    }
+    render() {
+        let request = this.store.getReq("__app_request");
+        if (request) {
+            if (typeof request === "string") {
+                request = JSON.parse(request);
+            }
+            this.evalRequest(request);
+        }
+        return `{"name":"Yanny", "lastname":"Nuñez"}`;
+    }
+    evalRequest(requests) {
+        requests.forEach(request => {
+            this.evalCommand(request);
+        });
+    }
+    evalCommand(command) {
+        //$command = Tool::toJson($command);
+        switch (command.Type) {
+            case "init":
+                this.setElement(command);
+            case "element":
+                this.setElement(command);
+            case "update":
+            default:
+        }
+    }
+    setElement(opt) {
     }
 }
 //# sourceMappingURL=whendy.js.map

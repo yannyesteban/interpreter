@@ -1,0 +1,15 @@
+{
+    "MAIN_PATH": "../",
+    "MODULE_PATH": "",
+    "JSON_PATH": "json/",
+    "CONFIG_PATH": "../config/",
+    "TEMPLATES_PATH": "templates/",
+    "IMAGES_PATH": "images/",
+    "PATH_IMAGES": "images/",
+    "SEVIAN_PATH": "../php/",
+    "SIGEFOR_PATH": "",
+    "PATH"  : "../../",
+    "BUILD" :  "../../build/",
+    "APP_NAME":"application",
+    "APP_PATH":"json/apps/"
+}

@@ -1,0 +1,67 @@
+{
+    "id": "gtcomm",
+    "name": "home",
+    "templateFile": "{@TEMPLATES_PATH}webcar-login.html",
+    "elements": [
+        {
+            "setPanel": "wh-banner",
+            "element": "fragment",
+            "name": "{@JSON_PATH}fragments/webcar-banner.json",
+            "method": "load",
+            "eparams": {}
+        },
+        {
+            "setPanel": "wh-logo",
+            "element": "fragment",
+            "name": "{@JSON_PATH}fragments/webcar-logo.json",
+            "method": "load",
+            "eparams": {}
+        },
+        {
+            "setPanel":"wh-body",
+            "element":"form",
+            "name":"{@JSON_PATH}/forms/login.json",
+            "method":"request",
+            "eparams":{"a":"x"}
+        }
+    ],
+    "className": [
+        "home"
+    ],
+    "acceptedRoles": [
+        "** public **"
+    ],
+    "cssSheets": [
+        "css/reset.css",
+        "css/main.css"
+    ],
+    "jsModules1":[
+        "../js/GTMap.js"
+    ],
+    "modules": [
+        {
+            "src": "./WHHtml.js",
+            "name": "WHHtml",
+            "alias": "WHHtml",
+            "component": "wh-html"
+        },
+        {
+            "src": "./WHForm.js",
+            "name": "WHForm",
+            "alias": "WHForm",
+            "component": "wh-form"
+        },
+        {
+            "src": "./Map.js",
+            "name": "WHMap",
+            "alias": "WHMap",
+            "component": "wh-map"
+        },
+        {
+            "src": "./GTMap.js",
+            "name": "GTMap",
+            "alias": "GTMap",
+            "component": "gt-map"
+        }
+    ]
+}

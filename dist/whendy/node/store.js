@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { cookieParse } from "./CookieHandler.js";
 //import { Session, Machine } from "./manager.js"
+export var test = 5;
 export class Store {
     constructor(session) {
         this.vreq = {};
@@ -52,6 +53,9 @@ export class Store {
                     //let [, param] = req.url.split("?");
                     //this.queryParams(new URLSearchParams(param));
                     this.vreq = Object.assign(Object.assign({}, this.vreq), this.qpar);
+                    resolve(true);
+                }
+                else {
                     resolve(true);
                 }
             });

@@ -1,10 +1,9 @@
 import { Tool } from "./tool.js";
+import { Whendy } from "./whendy.js";
 
-import * as WH from "./whendy.js";
+const config = Tool.loadJsonFile("whendy/configuration/server.json");
+const constants = Tool.loadJsonFile("whendy/configuration/constants.json");
 
-const config = (Tool.loadJsonFile("whendy/node/server.json"));
+const whendy = new Whendy({ ...config, constants });
 
-
-const wh = new WH.Whendy(config);
-
-wh.start();
+whendy.start();

@@ -3,6 +3,11 @@ import * as queryString from "node:querystring";
 import { cookieParse } from "./CookieHandler.js";
 import { ISession } from "./manager.js";
 //import { Session, Machine } from "./manager.js"
+
+export var test = 5;
+
+
+
 export class Store {
 
 
@@ -68,7 +73,9 @@ export class Store {
                 //this.queryParams(new URLSearchParams(param));
                 this.vreq = {...this.vreq, ...this.qpar}
                 resolve(true);
-            } 
+            } else{
+                resolve(true);
+            }
         })
     }
 
