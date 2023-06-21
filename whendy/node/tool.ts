@@ -1,37 +1,54 @@
 import * as fs from 'fs';
 
 export enum LoadMode {
-	TEXT = 1, // main
-	JSON,
-	ARRAY
+    TEXT = 1, // main
+    JSON,
+    ARRAY
 }
 
-export class Tool{
+export function loadJsonFile(name: string) {
+    return loadFile(name, LoadMode.JSON);
+}
 
+export function loadFile(name: string, mode?: LoadMode) {
 
-    static loadJsonFile(name: string){
+    let source = fs.readFileSync(name, "utf8");
+
+    if (!source) {
+        console.error(source);
+        return "error";
+    }
+
+    switch (mode) {
+        case LoadMode.JSON:
+            return JSON.parse(source);
+        default:
+            return source;
+    }
+}
+
+export class Tool {
+
+    static loadJsonFile(name: string) {
         return this.loadFile(name, LoadMode.JSON);
     }
 
-    static loadFile(name: string, mode?: LoadMode){
-        
-        let source = fs.readFileSync(name , "utf8");
-            if (!source) {
-                console.error(source);
-                return "error";
-            }
-            
-            switch(mode){
-                case LoadMode.JSON:
-                    return JSON.parse(source);
-                default:
-                    return source;
+    static loadFile(name: string, mode?: LoadMode) {
 
-            }
-        
+        let source = fs.readFileSync(name, "utf8");
+        if (!source) {
+            console.error(source);
+            return "error";
+        }
+
+        switch (mode) {
+            case LoadMode.JSON:
+                return JSON.parse(source);
+            default:
+                return source;
+
+        }
     }
-
-
 }
 /*
 function parseCookies(str) {

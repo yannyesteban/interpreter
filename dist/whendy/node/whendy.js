@@ -11,18 +11,21 @@ import * as http from "http";
 import { register, Manager } from "./manager.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
+import { AppElement } from "./element.js";
+import * as classManager from "./classManager.js";
 export class Whendy extends http.Server {
     constructor(opt) {
-        //console.log("TEST ", opt);
         super();
         this.port = 8080;
         this.cookies = [];
         this.header = {};
+        this.classElement = [];
         this.output = [];
         for (const [key, value] of Object.entries(opt)) {
             this[key] = value;
         }
         register("memory", Memory);
+        classManager.register(this.classElement);
         let manager = new Manager({
             cookieName: "whsessionid", machineType: "memory", maxLifeTime: 36000
         });
@@ -32,36 +35,42 @@ export class Whendy extends http.Server {
                 res.end();
                 return;
             }
-            console.log("Method:", req.method);
             const session = manager.start(req, res);
+            session.loadSession(this.constants);
             const store = new Store(session);
             yield store.start(req, res);
-            console.log("Method11:", req.method);
             this.store = store;
-            //res.appendHeader('Set-Cookie', ["k2002=cuarentena2"]);
-            console.log("ok", store.getReq("agua"));
-            for (const [key, value] of Object.entries(this.header)) {
-                //res.setHeader(key, value);
-            }
+            /*for (const [key, value] of Object.entries(this.header)) {
+               res.setHeader(key, value);
+            }*/
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
-            res.write(this.render());
+            res.write(yield this.render());
             res.end();
         }));
     }
     //https://developer.mozilla.org/en-US/docs/Learn/Server-side/Node_server_without_framework
     start() {
-        console.log(this.port);
         this.listen(this.port);
     }
     render() {
-        let request = this.store.getReq("__app_request");
-        if (request) {
-            if (typeof request === "string") {
-                request = JSON.parse(request);
+        return __awaiter(this, void 0, void 0, function* () {
+            this.output = [];
+            if ((this.store.getHeader("Application-Mode") || "") === "start") {
+                console.log("START");
+                yield this.setElement(this.setApp);
             }
-            this.evalRequest(request);
-        }
-        return `[{"name":"Yanny", "lastname":"Nuñez"}]`;
+            let request = this.store.getReq("__app_request");
+            if (request) {
+                if (typeof request === "string") {
+                    request = JSON.parse(request);
+                }
+                this.evalRequest(request);
+            }
+            return JSON.stringify(this.output);
+        });
+    }
+    addResponse(response) {
+        this.output = [...this.output, ...response];
     }
     evalRequest(requests) {
         requests.forEach(request => {
@@ -69,7 +78,6 @@ export class Whendy extends http.Server {
         });
     }
     evalCommand(command) {
-        //$command = Tool::toJson($command);
         switch (command.Type) {
             case "init":
                 this.setElement(command);
@@ -79,7 +87,34 @@ export class Whendy extends http.Server {
             default:
         }
     }
-    setElement(opt) {
+    setElement(info) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this.store.setExp("ID_", info.id);
+            this.store.setExp("ELEMENT_", info.element);
+            //this.store.LoadExp(info.eparams)
+            const cls = yield classManager.getClass(info.element);
+            const ele = new cls();
+            ele.setStore(this.store);
+            ele.init(info);
+            ele.evalMethod(info.method);
+            this.addResponse(ele.getResponse());
+            //this.doUserAdmin(typ)
+            yield this.doElementAdmin(ele);
+        });
+    }
+    doElementAdmin(ele) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if (ele instanceof AppElement) {
+                const elements = ele.getElements();
+                if (!Array.isArray(elements)) {
+                    return false;
+                }
+                for (const element of elements) {
+                    yield this.setElement(element);
+                }
+                ;
+            }
+        });
     }
 }
 //# sourceMappingURL=whendy.js.map

@@ -1,33 +1,38 @@
-import {Store} from "./store.js";
+import { Store } from "./store.js";
 
 export class InfoElement {
-  appendTo?:string;
-  element?:string;
-  source?:string;
-  name?:string;
-  method?:string;
-  eparams?:object[];
+  id?: string;
+  type?: string;
+  appendTo?: string;
+  setPanel?: string;
+  element?: string;
+  source?: string;
+  name?: string;
+  method?: string;
+  eparams?: object[];
 
-  constructor(info){
+  constructor(info) {
 
-    for(const [key, value] of Object.entries(info)){
-        this[key] = value;
+    for (const [key, value] of Object.entries(info)) {
+      this[key] = value;
     }
   }
 }
 
+export interface IElementAdmin {
+  getElements(): InfoElement[];
+}
 
-export abstract class Element{
+export abstract class Element {
 
-    abstract setStore(store:Store):void;
-    abstract init(store:InfoElement):void;
-    abstract evalMethod(method: string):void;
-    abstract getResponse():object[];
+  abstract setStore(store: Store): void;
+  abstract init(store: InfoElement): void;
+  abstract evalMethod(method: string): void;
+  abstract getResponse(): object[];
 
 }
 
 
-export abstract class AppElement extends Element{
-
-    
+export abstract class AppElement extends Element implements IElementAdmin {
+  abstract getElements(): InfoElement[];
 }

@@ -1,45 +1,50 @@
-import {IMachine, ISession} from './manager';
+import { IMachine, ISession } from './manager';
 
-class Session implements ISession{
+class Session implements ISession {
 
     id = null;
     data = null;
-    constructor(id){
+
+    constructor(id) {
+
         this.id;
         this.data = {}
-
     }
 
-    set(key, value){
+    set(key, value) {
         this.data[key] = value;
     }
 
-    get(key){
+    get(key) {
         return this.data[key];
     }
 
-    getSessionId(){
+    getSessionId() {
         return this.id;
     }
 
-    delete(key){
+    delete(key) {
 
         delete this.data[key];
     }
+
+    loadSession(data: { [key: string]: any; }) {
+        for (const [key, value] of Object.entries(data)) {
+            this.data[key] = value;
+        }
+    }
 }
 
-export class Memory implements IMachine{
+export class Memory implements IMachine {
 
-    sessions:{[key:string]: ISession}  = {};
+    sessions: { [key: string]: ISession } = {};
 
-
-    init(sessionId){
-        if(this.sessions[sessionId] === undefined){
+    init(sessionId) {
+        if (this.sessions[sessionId] === undefined) {
             this.sessions[sessionId] = new Session(sessionId);
         }
-        
-        return this.sessions[sessionId];
 
+        return this.sessions[sessionId];
     }
 
     read(sessionId: string): ISession {

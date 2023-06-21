@@ -42,9 +42,9 @@
     "setApp": {
         "type": "element",
         "element": "app",
-        "name": "json/apps/webcar-app.json",
+        "source": "whendy/json/app/home.json",
         "name1": "{@APP_PATH}/webcar-app.json",
-        "method": "init",
+        "method": "load",
         "id": "MyAppId",
         "eparams": {
             "cedula": 12474737

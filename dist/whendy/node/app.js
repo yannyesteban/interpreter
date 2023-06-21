@@ -1,13 +1,57 @@
-import { Element } from "./element.js";
-export class App extends Element {
-    setStore(store) {
+import { AppElement } from "./element.js";
+import { loadFile, loadJsonFile } from "./tool.js";
+export class App extends AppElement {
+    constructor() {
+        super(...arguments);
+        this.element = "wh-app";
+        this.response = [];
+        this.elements = [];
+        this.store = null;
     }
-    init(store) {
+    setStore(store) {
+        this.store = store;
+    }
+    init(info) {
+        const config = loadJsonFile(info.source);
+        if (config) {
+            for (const [key, value] of Object.entries(config)) {
+                this[key] = value;
+            }
+        }
     }
     evalMethod(method) {
+        switch (method) {
+            case "load":
+                this.load();
+                break;
+        }
     }
     getResponse() {
-        return [];
+        return this.response;
+    }
+    addResponse(response) {
+        this.response.push(response);
+    }
+    load() {
+        let template = loadFile(this.templateFile);
+        const data = {
+            "mode": "update",
+            "element": "wh-app",
+            "id": this.id,
+            "props": {
+                "cssSheets": this.cssSheets,
+                "name": this.name,
+                "element": "wh-app",
+                "className": this.className,
+                "modules": this.modules,
+                "jsModules": this.jsModules,
+                "innerHTML": template,
+            }
+        };
+        this.addResponse(data);
+    }
+    getElements() {
+        return this.elements;
     }
 }
 //# sourceMappingURL=app.js.map

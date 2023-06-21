@@ -38,7 +38,7 @@ export class App extends HTMLElement {
     }
     connectedCallback() {
         console.log("Custom square element added to page.");
-        this.innerHTML = "hola";
+        this.innerHTML = "Loading...";
         this.initApp();
     }
     decodeResponse(data, requestFunctions) {
@@ -88,6 +88,12 @@ export class App extends HTMLElement {
                 case "notice": //push, delay,
                     break;
             }
+        });
+    }
+    set cssSheets(data) {
+        console.log(data);
+        data.forEach((sheet) => {
+            loadCss(sheet, true);
         });
     }
     set paz(x) {
@@ -158,9 +164,11 @@ export class App extends HTMLElement {
     whenComponent(module) {
         return new Promise((resolve, reject) => {
             if (customElements.get(module.component)) {
+                console.log("   A   ", module.component);
                 resolve(customElements.get(module.component));
             }
             import(module.src).then(MyModule => {
+                console.log("   B   ", MyModule);
                 resolve(customElements.get(module.component));
             }).catch(error => {
                 reject(error);
@@ -168,6 +176,7 @@ export class App extends HTMLElement {
         });
     }
     updateElement(info) {
+        console.log("updateElement", info);
         const e = $.id(info.id);
         if (e) {
             if (info.props) {
@@ -204,8 +213,10 @@ export class App extends HTMLElement {
         });
     }
     initElement(element) {
+        console.log("initElement", element, this.modules);
         const module = this.modules.find((e) => e.component == element.wc);
         if (module) {
+            console.log("initElement", element);
             this.whenComponent(module).then((component) => {
             }).catch(error => {
                 console.log(error);
@@ -222,7 +233,7 @@ export class App extends HTMLElement {
             e.attr(element.attrs);
             let panel = null;
             if (element.setPanel) {
-                panel = $.id(element.setPanel);
+                panel = $(element.setPanel);
                 if (panel) {
                     panel.text("");
                     panel.append(e);

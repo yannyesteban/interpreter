@@ -1,28 +1,16 @@
 {
     "id": "gtcomm",
     "name": "home",
-    "templateFile": "{@TEMPLATES_PATH}webcar-login.html",
+    "templateFile": "whendy/templates/index.html",
     "elements": [
         {
-            "setPanel": "wh-banner",
+            "id": "banner1",
+            "setPanel": "#panel_01",
             "element": "fragment",
+            "source": "whendy/json/fragments/one.json",
             "name": "{@JSON_PATH}fragments/webcar-banner.json",
             "method": "load",
             "eparams": {}
-        },
-        {
-            "setPanel": "wh-logo",
-            "element": "fragment",
-            "name": "{@JSON_PATH}fragments/webcar-logo.json",
-            "method": "load",
-            "eparams": {}
-        },
-        {
-            "setPanel":"wh-body",
-            "element":"form",
-            "name":"{@JSON_PATH}/forms/login.json",
-            "method":"request",
-            "eparams":{"a":"x"}
         }
     ],
     "className": [
@@ -32,17 +20,17 @@
         "** public **"
     ],
     "cssSheets": [
-        "css/reset.css",
-        "css/main.css"
+        "sass/reset.css",
+        "sass/main.css"
     ],
     "jsModules1":[
         "../js/GTMap.js"
     ],
     "modules": [
         {
-            "src": "./WHHtml.js",
-            "name": "WHHtml",
-            "alias": "WHHtml",
+            "src": "./Html.js",
+            "name": "Html",
+            "alias": "Html",
             "component": "wh-html"
         },
         {

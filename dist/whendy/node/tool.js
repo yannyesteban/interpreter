@@ -5,6 +5,22 @@ export var LoadMode;
     LoadMode[LoadMode["JSON"] = 2] = "JSON";
     LoadMode[LoadMode["ARRAY"] = 3] = "ARRAY";
 })(LoadMode || (LoadMode = {}));
+export function loadJsonFile(name) {
+    return loadFile(name, LoadMode.JSON);
+}
+export function loadFile(name, mode) {
+    let source = fs.readFileSync(name, "utf8");
+    if (!source) {
+        console.error(source);
+        return "error";
+    }
+    switch (mode) {
+        case LoadMode.JSON:
+            return JSON.parse(source);
+        default:
+            return source;
+    }
+}
 export class Tool {
     static loadJsonFile(name) {
         return this.loadFile(name, LoadMode.JSON);

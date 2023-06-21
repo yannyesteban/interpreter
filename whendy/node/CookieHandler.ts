@@ -1,17 +1,16 @@
 import { IncomingMessage, ServerResponse } from "node:http";
 
 export function cookieParse(str: string) {
+
     const cookies: { [key: string]: CookieVar } = {};
+
     if (!str) {
         return cookies;
     }
 
-    
-
     let lines = str.split(";");
     let key = null;
     let value = null;
-
 
     for (let l of lines) {
         let aux = l.split("=");
@@ -19,8 +18,8 @@ export function cookieParse(str: string) {
         value = decodeURIComponent(aux[1]).trim() || key
 
         cookies[key] = new CookieVar(key, value);
-
     }
+
     return cookies;
 }
 /*
@@ -35,6 +34,7 @@ secure 	Boolean 	Marks the cookie to be used with HTTPS only.
 signed 	Boolean 	Indicates if the cookie should be signed.
 sameSite 	Boolean or String 	Value of the “SameSite” Set-Cookie attribute. More information at https://tools.ietf.org/html/draft-ietf-httpbis-cookie-same-site-00#section-4.1.1.
 */
+
 export class CookieVar {
     public name;
     public value;
@@ -81,7 +81,6 @@ export class CookieHandler {
     req;
     res;
 
-
     result = []
 
     public cookies: { [key: string]: CookieVar } = {}
@@ -90,9 +89,6 @@ export class CookieHandler {
 
         this.req = req;
         this.res = res;
-
-
-
 
         const cookies = req.headers?.cookie;
 
@@ -112,8 +108,6 @@ export class CookieHandler {
             this.cookies[key] = new CookieVar(key, value);
 
         }
-
-        console.log(this.cookies);
     }
 
     add(cookie: CookieVar) {
@@ -139,9 +133,6 @@ export class CookieHandler {
     }
 
     setCookie(cookie) {
-        //this.result.push(cookie);
         this.res.setHeader('Set-Cookie', [cookie]);
     }
-
-
 }

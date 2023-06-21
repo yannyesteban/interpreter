@@ -79,7 +79,6 @@ export class CookieHandler {
             value = aux[1].trim() || key;
             this.cookies[key] = new CookieVar(key, value);
         }
-        console.log(this.cookies);
     }
     add(cookie) {
         this.cookies[cookie.name] = cookie;
@@ -99,7 +98,6 @@ export class CookieHandler {
         return result;
     }
     setCookie(cookie) {
-        //this.result.push(cookie);
         this.res.setHeader('Set-Cookie', [cookie]);
     }
 }

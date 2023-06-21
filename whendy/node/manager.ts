@@ -10,6 +10,7 @@ export interface ISession {
     get(key: string): any;
     delete(key: string): void;
     getSessionId(): string;
+    loadSession(data: { [key: string]: any })
 }
 
 export interface IMachine {
@@ -17,7 +18,6 @@ export interface IMachine {
     init(sessionId: string): ISession;
     read(sessionId: string): ISession;
 }
-
 
 const machines: { [name: string]: IMachine } = {};
 
@@ -28,11 +28,12 @@ export function register(name: string, machine) {
     }
 
     machines[name] = machine;
-
 }
+
 export function create(config) {
 
     this.cookieName = config.cookieName;
+
     if (this.machines[config.machineType]) {
         let machine: IMachine = this.machines[config.machineType as string];
         return new Manager(config)
@@ -41,40 +42,30 @@ export function create(config) {
 
 function sessionId() {
     return randomBytes(32).toString("base64url");
-
 }
-
-
 
 export class Manager {
 
     cookieName;
-
-
-
     machine: IMachine;
-
     machineType: string = "memory";
 
     constructor(config: object) {
+
         for (const [key, value] of Object.entries(config)) {
             this[key] = value;
         }
 
         this.machine = new (machines[this.machineType] as any)()
-
-        console.log("'cookieName'", this.cookieName)
     }
 
-
-
     start(req: IncomingMessage, res: ServerResponse): ISession {
-        
+
         const cookies = cookieParse(req.headers?.cookie);
 
         let id = null;
         const cookie = cookies[this.cookieName];
-        
+
         if (!cookie) {
             id = sessionId();
             const sessionCookie = new CookieVar(this.cookieName, id);
@@ -84,8 +75,5 @@ export class Manager {
         }
 
         return this.machine.init(id);
-
     }
 }
-
-//register("memory", Memory);

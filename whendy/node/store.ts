@@ -2,15 +2,14 @@ import * as http from "http";
 import * as queryString from "node:querystring";
 import { cookieParse } from "./CookieHandler.js";
 import { ISession } from "./manager.js";
-//import { Session, Machine } from "./manager.js"
 
-export var test = 5;
-
-
+import { Outer } from "./../../core/outer/Outer.js";
+import { Logic } from "./../../core/Logic.js";
+import { loadFile, loadJsonFile } from "./tool.js";
 
 export class Store {
 
-
+    public vexp: { [id: string]: any } = {};
     public vreq: { [id: string]: any } = {};
     public vses: { [id: string]: any } = {};
     public qpar: { [id: string]: any } = {};
@@ -21,43 +20,47 @@ export class Store {
 
     request: http.IncomingMessage;
     response: http.ServerResponse;
-    
+
+    outer: Outer;
+
     constructor(session) {
-        this.session = session
+        this.session = session;
     }
+
     async start(req: http.IncomingMessage, res: http.ServerResponse) {
 
         this.request = req;
         this.response = res;
+        this.outer = new Outer();
+        this.outer.setMap("@", this.session.data, "");
 
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
 
             this.cookie = cookieParse(req.headers?.cookie);
 
             const method = req.method.toUpperCase();
             const contentType = req.headers["content-type"] || "";
-            
+
             let [, param] = req.url.split("?");
             this.queryParams(new URLSearchParams(param));
-                
+
             if (method == "POST") {
                 const chunks = [];
-    
+
                 req.on("data", (chunk) => {
                     chunks.push(chunk);
                 });
-                
+
                 req.on("end", () => {
-                    console.log("POST ..")
+
                     const postData = Buffer.concat(chunks).toString();
-                    
+
                     if (contentType == "application/json") {
-                       
+
                         this.vreq = { ...this.vreq, ...JSON.parse(postData) };
 
-                       
                     } else if (contentType == "application/x-www-form-urlencoded") {
-                       
+
                         this.queryParams(new URLSearchParams(postData));
 
                         this.vreq = { ...this.vreq, ...this.qpar };
@@ -66,14 +69,11 @@ export class Store {
                     }
 
                     resolve(true)
-    
                 });
             } else if (req.method.toUpperCase() == "GET") {
-                //let [, param] = req.url.split("?");
-                //this.queryParams(new URLSearchParams(param));
-                this.vreq = {...this.vreq, ...this.qpar}
+                this.vreq = { ...this.vreq, ...this.qpar }
                 resolve(true);
-            } else{
+            } else {
                 resolve(true);
             }
         })
@@ -86,27 +86,50 @@ export class Store {
         }
     }
 
-    getCookie(name){
+    getCookie(name) {
         return this.cookie[name];
     }
 
-    setCookie(name, value){
+    setCookie(name, value) {
         this.cookie[name] = value;
     }
+    getExp(name) {
+        return this.vexp[name];
+    }
 
-    getReq(name){
+    setExp(name, value) {
+        this.vexp[name] = value;
+    }
+
+    getReq(name) {
         return this.vreq[name];
     }
 
-    setReq(name, value){
+    setReq(name, value) {
         this.vreq[name] = value;
     }
 
-    getSes(key){
+    getSes(key) {
         return this.session.get(key);
     }
 
-    setSes(key, value){
+    setSes(key, value) {
         return this.session.set(key, value);
+    }
+
+    getHeader(key: string) {
+        return this.request.headers[key.toLowerCase()] || undefined;
+    }
+
+    loadFile(name: string) {
+
+        let file = loadFile(name);
+        return this.outer.execute(file);
+    }
+
+    loadJsonFile(name: string) {
+
+        let file = this.loadFile(name);
+        return JSON.parse(this.outer.execute(file));
     }
 }

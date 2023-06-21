@@ -17,6 +17,11 @@ class Session {
     delete(key) {
         delete this.data[key];
     }
+    loadSession(data) {
+        for (const [key, value] of Object.entries(data)) {
+            this.data[key] = value;
+        }
+    }
 }
 export class Memory {
     constructor() {

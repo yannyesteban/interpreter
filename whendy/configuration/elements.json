@@ -1,0 +1,14 @@
+[
+    {
+        "name": "app",
+        "enable": true,
+        "file": "./app.js",
+        "class": "App"
+    },
+    {
+        "name": "fragment",
+        "enable": true,
+        "file": "./fragment.js",
+        "class": "Fragment"
+    }
+]

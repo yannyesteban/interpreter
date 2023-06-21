@@ -5,7 +5,7 @@ export class Generic extends Element{
     setStore(store:Store){
 
     }
-    init(store:InfoElement){
+    init(info:InfoElement){
 
     }
     evalMethod(method: string){

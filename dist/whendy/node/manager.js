@@ -24,7 +24,6 @@ export class Manager {
             this[key] = value;
         }
         this.machine = new machines[this.machineType]();
-        console.log("'cookieName'", this.cookieName);
     }
     start(req, res) {
         var _a;
@@ -42,5 +41,4 @@ export class Manager {
         return this.machine.init(id);
     }
 }
-//register("memory", Memory);
 //# sourceMappingURL=manager.js.map

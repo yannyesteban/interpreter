@@ -8,10 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { cookieParse } from "./CookieHandler.js";
-//import { Session, Machine } from "./manager.js"
-export var test = 5;
+import { Outer } from "./../../core/outer/Outer.js";
+import { loadFile } from "./tool.js";
 export class Store {
     constructor(session) {
+        this.vexp = {};
         this.vreq = {};
         this.vses = {};
         this.qpar = {};
@@ -21,6 +22,8 @@ export class Store {
         return __awaiter(this, void 0, void 0, function* () {
             this.request = req;
             this.response = res;
+            this.outer = new Outer();
+            this.outer.setMap("@", this.session.data, "");
             return new Promise((resolve, reject) => {
                 var _a;
                 this.cookie = cookieParse((_a = req.headers) === null || _a === void 0 ? void 0 : _a.cookie);
@@ -34,7 +37,6 @@ export class Store {
                         chunks.push(chunk);
                     });
                     req.on("end", () => {
-                        console.log("POST ..");
                         const postData = Buffer.concat(chunks).toString();
                         if (contentType == "application/json") {
                             this.vreq = Object.assign(Object.assign({}, this.vreq), JSON.parse(postData));
@@ -50,8 +52,6 @@ export class Store {
                     });
                 }
                 else if (req.method.toUpperCase() == "GET") {
-                    //let [, param] = req.url.split("?");
-                    //this.queryParams(new URLSearchParams(param));
                     this.vreq = Object.assign(Object.assign({}, this.vreq), this.qpar);
                     resolve(true);
                 }
@@ -72,6 +72,12 @@ export class Store {
     setCookie(name, value) {
         this.cookie[name] = value;
     }
+    getExp(name) {
+        return this.vexp[name];
+    }
+    setExp(name, value) {
+        this.vexp[name] = value;
+    }
     getReq(name) {
         return this.vreq[name];
     }
@@ -83,6 +89,17 @@ export class Store {
     }
     setSes(key, value) {
         return this.session.set(key, value);
+    }
+    getHeader(key) {
+        return this.request.headers[key.toLowerCase()] || undefined;
+    }
+    loadFile(name) {
+        let file = loadFile(name);
+        return this.outer.execute(file);
+    }
+    loadJsonFile(name) {
+        let file = this.loadFile(name);
+        return JSON.parse(this.outer.execute(file));
     }
 }
 //# sourceMappingURL=store.js.map
