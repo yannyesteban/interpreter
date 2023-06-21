@@ -11,6 +11,15 @@
             "name": "{@JSON_PATH}fragments/webcar-banner.json",
             "method": "load",
             "eparams": {}
+        },
+        {
+            "id": "banner2",
+            "setPanel": "#panel_03",
+            "element": "fragment",
+            "source": "whendy/json/fragments/two.json",
+            "name": "{@JSON_PATH}fragments/webcar-banner.json",
+            "method": "load",
+            "eparams": {}
         }
     ],
     "className": [

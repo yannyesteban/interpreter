@@ -32,7 +32,6 @@ export class Store {
         this.request = req;
         this.response = res;
         this.outer = new Outer();
-        this.outer.setMap("@", this.session.data, "");
 
         return new Promise((resolve, reject) => {
 
@@ -58,6 +57,7 @@ export class Store {
                     if (contentType == "application/json") {
 
                         this.vreq = { ...this.vreq, ...JSON.parse(postData) };
+                        console.log(this.vreq)
 
                     } else if (contentType == "application/x-www-form-urlencoded") {
 
@@ -124,6 +124,11 @@ export class Store {
     loadFile(name: string) {
 
         let file = loadFile(name);
+        this.outer.resetData();
+        this.outer.setMap("@", this.session.getData(), "");
+        this.outer.setMap("&", this.vexp, "");
+        this.outer.setMap("#", this.vreq, "");
+
         return this.outer.execute(file);
     }
 

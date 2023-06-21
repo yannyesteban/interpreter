@@ -33,6 +33,10 @@ class Session implements ISession {
             this.data[key] = value;
         }
     }
+
+    getData(): { [key: string]: any; } {
+        return this.data;
+    }
 }
 
 export class Memory implements IMachine {

@@ -10,6 +10,9 @@ class Data {
 export class Outer {
     constructor() {
         this.indexOf = 0;
+        this.resetData();
+    }
+    resetData() {
         this.data = [];
     }
     setMap(token, data, pre) {

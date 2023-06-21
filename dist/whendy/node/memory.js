@@ -22,6 +22,9 @@ class Session {
             this.data[key] = value;
         }
     }
+    getData() {
+        return this.data;
+    }
 }
 export class Memory {
     constructor() {

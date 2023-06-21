@@ -23,7 +23,6 @@ export class Store {
             this.request = req;
             this.response = res;
             this.outer = new Outer();
-            this.outer.setMap("@", this.session.data, "");
             return new Promise((resolve, reject) => {
                 var _a;
                 this.cookie = cookieParse((_a = req.headers) === null || _a === void 0 ? void 0 : _a.cookie);
@@ -40,6 +39,7 @@ export class Store {
                         const postData = Buffer.concat(chunks).toString();
                         if (contentType == "application/json") {
                             this.vreq = Object.assign(Object.assign({}, this.vreq), JSON.parse(postData));
+                            console.log(this.vreq);
                         }
                         else if (contentType == "application/x-www-form-urlencoded") {
                             this.queryParams(new URLSearchParams(postData));
@@ -95,6 +95,10 @@ export class Store {
     }
     loadFile(name) {
         let file = loadFile(name);
+        this.outer.resetData();
+        this.outer.setMap("@", this.session.getData(), "");
+        this.outer.setMap("&", this.vexp, "");
+        this.outer.setMap("#", this.vreq, "");
         return this.outer.execute(file);
     }
     loadJsonFile(name) {

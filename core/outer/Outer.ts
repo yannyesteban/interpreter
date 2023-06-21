@@ -21,6 +21,10 @@ export class Outer {
     indexOf = 0;
 
     constructor() {
+        this.resetData();
+    }
+
+    public resetData(){
         this.data = [];
     }
 
