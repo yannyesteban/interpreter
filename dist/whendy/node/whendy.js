@@ -61,7 +61,7 @@ export class Whendy extends http.Server {
             }
             this.evalRequest(request);
         }
-        return `{"name":"Yanny", "lastname":"Nuñez"}`;
+        return `[{"name":"Yanny", "lastname":"Nuñez"}]`;
     }
     evalRequest(requests) {
         requests.forEach(request => {

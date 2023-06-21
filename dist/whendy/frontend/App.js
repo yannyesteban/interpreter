@@ -43,6 +43,10 @@ export class App extends HTMLElement {
     }
     decodeResponse(data, requestFunctions) {
         console.log(data);
+        console.log(data);
+        if (!Array.isArray(data)) {
+            return;
+        }
         data.forEach((item) => {
             if (item.replayToken && requestFunctions && requestFunctions[item.replayToken]) {
                 requestFunctions[item.replayToken](item.data);
@@ -120,12 +124,11 @@ export class App extends HTMLElement {
         this.go(request);
     }
     initApp() {
-        console.log("INIT");
         const request = {
             confirm: "?",
             valid: true,
             headers: {
-            //"Application-Mode": "start"
+                "Application-Mode": "start"
             },
             data: {
                 id: this.id,
@@ -244,7 +247,6 @@ export class App extends HTMLElement {
         $(this).addClass(classes);
     }
     go(info) {
-        console.log("xxxxxxxxxxxxxxxxxxxx");
         console.log(info);
         let body;
         if (info.dataForm) {
@@ -254,37 +256,27 @@ export class App extends HTMLElement {
         const data = Object.assign(info.data || {}, { __app_request: info.request, __app_id: this.id });
         const headers = Object.assign({
             "Content-Type": "application/json",
-            'Accept': 'application/json, text/javascript, */*; q=0.01',
-            //mode: "cors",
-            //credentials: "omit",
-            //'Authorization': 'Bearer tu-token-de-autenticacion' // Si es necesario enviar un token de autenticación
-            //"Authorization": `Bearer ${this.token}`,
-            //"SID": this.sid,
-            //"Application-Id": this.id,
-        }); //, info.headers || {});
+            "Authorization": `Bearer ${this.token}`,
+            "SID": this.sid,
+            "Application-Id": this.id,
+        }, info.headers || {});
         fetch(this.server, {
-            method: "POST",
-            //mode: "no-cors",
+            method: "post",
             headers,
-            body: JSON.stringify({ b: "yes" }),
+            body: JSON.stringify(data),
         })
             .then((response) => {
-            console.log("response ", response.body);
             return response.json();
         })
-            .catch((error) => {
-            console.log("error 1", error);
-        })
+            .catch((error) => { })
             .then((json) => {
             if (info.requestFunction) {
                 console.log(json);
-                //info.requestFunction(json);
+                info.requestFunction(json);
                 return true;
             }
             console.log(json);
-            //this.decodeResponse(json, info.requestFunctions || null);
-        }).catch(error => {
-            console.log("error 2", error);
+            this.decodeResponse(json, info.requestFunctions || null);
         });
     }
 }
