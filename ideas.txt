@@ -6,3 +6,11 @@ un formulario de edicion mas un formulario 2 de request etc.
 
 
 2.- crear un evento que se pueda suscribir onvisible, que se aplique a un scroll
+
+
+const path = require('path');
+const { createWorker } = require('tesseract.js');//Reconocimiento de imagenes
+const fs = require('fs');
+const playwright = require('playwright');
+const cheerio = require('cheerio'); //Equivalente a JQuery
+const axios = require('axios'); //Permite hacer requests

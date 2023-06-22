@@ -23,6 +23,10 @@ export interface IElementAdmin {
   getElements(): InfoElement[];
 }
 
+export interface IRestElement {
+  getEndData(): InfoElement[];
+}
+
 export abstract class Element {
 
   abstract setStore(store: Store): void;
@@ -30,9 +34,11 @@ export abstract class Element {
   abstract evalMethod(method: string): void;
   abstract getResponse(): object[];
 
+
 }
 
 
 export abstract class AppElement extends Element implements IElementAdmin {
   abstract getElements(): InfoElement[];
 }
+

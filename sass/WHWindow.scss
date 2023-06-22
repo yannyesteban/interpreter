@@ -1,0 +1,77 @@
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+	//line-height: 1.5em !important;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+	margin: 0;
+}
+:host {
+	position: fixed;
+
+	min-width: 10rem;
+	min-height: 2rem;
+	max-height: 100hv;
+	max-width: 100vw;
+
+	display: grid;
+	grid-template-columns: 1fr;
+	grid-template-rows: auto 1fr;
+
+	transition: 0.5s ease-in background-color;
+}
+
+::slotted(wh-win-body) {
+	
+	overflow: auto !important;
+}
+
+
+
+:host:not(:defined) {
+	display: inline-block;
+}
+
+:host([visibility="hidden"]) {
+	display: none;
+}
+
+:host([mode="max"]), :host([mode="modal"]) {
+	width: calc(100% - 20px) !important;
+	height: calc(100% - 20px) !important;
+	top: 10px !important;
+	left: 10px !important;
+}
+
+:host([mode="min"]) {
+	height: auto !important;
+	max-width: 10rem;
+	::slotted(wh-win-body) {
+		flex: 0 0 0px !important;
+		height: 0px;
+		//display: none;
+	}
+}
+
+:host([mode="auto"]) {
+	height: auto !important;
+	width: auto !important;
+	::slotted(wh-win-body) {
+		height: auto !important;
+		//width: auto !important;
+	}
+}
+
+

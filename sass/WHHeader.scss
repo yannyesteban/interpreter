@@ -1,0 +1,133 @@
+$delta_y: 100px;
+$delta_y_h: -240px;
+
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+	margin: 0;
+}
+
+:host {
+	height: 2rem;
+	line-height: 1rem;
+	font-size: 1rem;
+	//line-height: 2rem;
+	overflow: hidden;
+	vertical-align: middle;
+	align-items: center;
+	display: grid;
+	grid-template-columns: auto 1fr auto auto;
+	gap: 4px;
+	padding: 0.1rem;
+	gap: 6px;
+
+	& > .icon {
+		height: 1.2rem;
+		width: 1.2rem;
+		overflow: hidden;
+		pointer-events: none;
+	}
+
+	& > .caption {
+		white-space: nowrap;
+		overflow: hidden;
+		text-overflow: ellipsis;
+	}
+	.control {
+		display: flex;
+		gap: 2px;
+		padding: 2px;
+		align-items: center;
+		button {
+			background-color: transparent;
+			width: 1.2rem;
+			height: 1.2rem;
+			border: 0px;
+			font-size: 1rem;
+			line-height: 1rem;
+		}
+	}
+}
+:host([mode="min"]) {
+	.control {
+		.min {
+			display: none;
+		}
+	}
+}
+:host([mode="max"]) {
+	.control {
+		.max {
+			display: none;
+		}
+	}
+}
+:host([mode=""]),
+:host(:not([mode])) {
+	.control {
+		.auto {
+			display: none;
+		}
+	}
+}
+
+:host-context(wh-window-caption div) {
+	font-weight: bold;
+}
+
+:host-context(.rojo) {
+	font-weight: bold;
+}
+
+:host(.win) {
+	font-weight: bold;
+	color: rgb(38, 156, 14) !important;
+}
+
+
+.min{
+	background-image: url(../images/win_icons.png?i=18);
+	background-position: 0px -20px;
+}
+.max{
+	background-image: url(../images/win_icons.png?i=18);
+	background-position: 40px -20px;
+}
+
+.auto{
+	background-image: url(../images/win_icons.png?i=18);
+	background-position: -20px -20px;
+}
+
+.exit{
+	background-image: url(../images/win_icons.png?i=18);
+	background-position: -60px -20px;
+}
+
+
+:host([mode="modal"]) {
+	
+	.min{
+		display:none;
+	}
+	.max{
+		display:none;
+	}
+	.auto{
+		display:none;
+	}
+}

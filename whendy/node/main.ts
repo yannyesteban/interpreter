@@ -9,3 +9,5 @@ const classElement = Tool.loadJsonFile("whendy/configuration/elements.json");
 const whendy = new Whendy({ ...config, constants, classElement });
 
 whendy.start();
+
+//https://kinsta.com/blog/javascript-media-query/

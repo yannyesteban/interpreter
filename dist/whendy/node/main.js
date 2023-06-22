@@ -5,4 +5,5 @@ const constants = Tool.loadJsonFile("whendy/configuration/constants.json");
 const classElement = Tool.loadJsonFile("whendy/configuration/elements.json");
 const whendy = new Whendy(Object.assign(Object.assign({}, config), { constants, classElement }));
 whendy.start();
+//https://kinsta.com/blog/javascript-media-query/
 //# sourceMappingURL=main.js.map

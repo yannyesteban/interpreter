@@ -14,5 +14,4 @@ export class Generic extends Element{
     getResponse():object[]{
         return [];
     }
-
 }

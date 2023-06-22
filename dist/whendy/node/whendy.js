@@ -11,7 +11,6 @@ import * as http from "http";
 import { register, Manager } from "./manager.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
-import { AppElement } from "./element.js";
 import * as classManager from "./classManager.js";
 export class Whendy extends http.Server {
     constructor(opt) {
@@ -98,13 +97,14 @@ export class Whendy extends http.Server {
             ele.init(info);
             ele.evalMethod(info.method);
             this.addResponse(ele.getResponse());
+            this.doEndData(ele);
             //this.doUserAdmin(typ)
             yield this.doElementAdmin(ele);
         });
     }
     doElementAdmin(ele) {
         return __awaiter(this, void 0, void 0, function* () {
-            if (ele instanceof AppElement) {
+            if ("getElements" in ele) {
                 const elements = ele.getElements();
                 if (!Array.isArray(elements)) {
                     return false;
@@ -115,6 +115,14 @@ export class Whendy extends http.Server {
                 ;
             }
         });
+    }
+    doEndData(ele) {
+        if ("getEndData" in ele) {
+            this.setEndData(ele.getEndData());
+        }
+    }
+    setEndData(endData) {
+        this.endData = endData;
     }
 }
 //# sourceMappingURL=whendy.js.map

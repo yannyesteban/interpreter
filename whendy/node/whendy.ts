@@ -3,7 +3,7 @@ import { register, Manager } from "./manager.js"
 import { cookieParse, CookieVar } from "./CookieHandler.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
-import { InfoElement, Element, AppElement } from "./element.js";
+import { InfoElement, Element, AppElement, IRestElement, IElementAdmin } from "./element.js";
 import * as classManager from "./classManager.js";
 
 interface InfoClass {
@@ -33,6 +33,7 @@ export class Whendy extends http.Server {
     classElement: InfoClass[] = [];
 
     output: InfoElement[] = [];
+    private endData:any;
     constructor(opt: object) {
 
         super();
@@ -145,14 +146,16 @@ export class Whendy extends http.Server {
         ele.evalMethod(info.method);
 
         this.addResponse(ele.getResponse())
-
+        this.doEndData(ele);
         //this.doUserAdmin(typ)
         await this.doElementAdmin(ele);
     }
 
-    async doElementAdmin(ele: Element) {
+    
 
-        if (ele instanceof AppElement) {
+    async doElementAdmin(ele: IElementAdmin | Element) {
+
+        if ("getElements" in ele) {
 
             const elements = ele.getElements();
             if (!Array.isArray(elements)) {
@@ -162,7 +165,18 @@ export class Whendy extends http.Server {
             for (const element of elements) {
                 await this.setElement(element);
             };
-
         }
+    }
+
+    doEndData(ele: IRestElement | Element){
+        
+        if("getEndData" in ele){
+            this.setEndData(ele.getEndData());
+        }
+
+    }
+    
+    setEndData(endData) {
+        this.endData = endData;
     }
 }
