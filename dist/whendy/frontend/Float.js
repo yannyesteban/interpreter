@@ -623,7 +623,7 @@ class Resize {
     }
     stop() {
         this._drag.forEach(drag => drag.stop());
-        Array.from(document.body.querySelectorAll(`:scope > div.rs`)).map(child => child.remove);
+        Array.from(this.main.querySelectorAll(`:scope > div.rs`)).map(child => child.remove());
     }
     static init(config) {
         return new Resize(config);

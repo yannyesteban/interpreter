@@ -5,24 +5,32 @@ import { getParentElement, fire } from "./Tool.js";
 
 import { Float, Move, Drag, Resize } from "./Float.js";
 
+import { MediaQuery } from "./MediaQuery.js";
 
-const mediaQuery = window.matchMedia('(max-width: 400px)')
+const deviceMode = getComputedStyle(document.body).getPropertyValue("--device_mode").replace(/\W/g, "");
 
-mediaQuery.addEventListener('change', (e)=>{
+
+console.log("MediaQuery.resolution", MediaQuery.resolution)
+
+/*
+
+const mediaQuery = window.matchMedia(`(max-width: ${deviceMode}px)`);
+
+mediaQuery.addEventListener("change", (e)=>{
 	console.log("media change", e)
 });
 
-mediaQuery.addEventListener('load', (e)=>{
+mediaQuery.addEventListener("load", (e)=>{
 	console.log("media change 2", e)
 });
 
-
+*/
 
 let last = null;
 
 const screen = getComputedStyle(document.body)
-                 .getPropertyValue('--device_mode')
-                 .replace(/\W/g, '');
+                 .getPropertyValue("--device_mode")
+                 .replace(/\W/g, "");
 
 console.log("screen", screen)				 ;
 
@@ -172,38 +180,40 @@ customElements.define("wh-win-header", WHWinHeader);
 
 export class WHWin extends HTMLElement {
 
-	private lastMode = null;
-	private lastVisibility = null;
+	
 
+	private lastStatus = {
+		mode: null,
+		visibility : null,
+		resizable: null,
+	}
 	
-	
+	private _resize;
 
 	static get observedAttributes() {
-		return ["visibility", "mode", "resizable", "movible", "left", "top", "right", "bottom", "width", "height", "active"];
+		return ["hidden", "visibility", "mode", "resizable", "movible", "left", "top", "right", "bottom", "width", "height", "active", "no-exit", "no-min", "no-max", "no-responsive"];
 	}
 
 	constructor() {
 		super();
 
-		window.addEventListener("media-query-changed", (e=>{
-			let dim = Float.getBoundingPage();
-			if(dim.pageWidth < 500){
-				
+		window.addEventListener("media-query-changed", ((e:CustomEvent)=>{
+
+			if(e.detail.lowScreen){
 				if(this.mode !== "modal"){
-					this.lastMode = this.mode;
-					this.lastVisibility = this.visibility;
+					this.lastStatus.mode = this.mode;
+					this.lastStatus.visibility = this.visibility;
+					this.lastStatus.resizable = this.resizable;
+					
 				}
 				this.mode = "modal";
-				console.log("... this.active", this.getAttribute("active"))
-				if(!this.getAttribute("active")){
-					
-					this.visibility = "hidden";
-				}
+				this.visibility = "hidden";
+				this.resizable = false;
 				
-
-			}else {
-				this.mode = this.lastMode;
-				this.visibility = this.lastVisibility;
+			}else{
+				this.mode = this.lastStatus.mode;
+				this.visibility = this.lastStatus.visibility;
+				this.resizable = this.lastStatus.resizable;
 			}
 			
 		}));
@@ -249,19 +259,19 @@ export class WHWin extends HTMLElement {
 
 	public connectedCallback() {
 
-		let dim = Float.getBoundingPage();
-			if(dim.pageWidth < 500){
-				if(this.mode !== "modal"){
-					this.lastMode = this.mode;
-					this.lastVisibility = this.visibility;
-				}
+		if(!this.getAttribute("mode")){
+			this.setAttribute("mode", "auto");
+		}
+
+		if(!this.getAttribute("no-responsive")){
+			if(MediaQuery.isLowResolution() ){
+				console.log("isLowResolution")
 				this.mode = "modal";
-				console.log("... this.active", this.getAttribute("active"))
-				if(!this.getAttribute("active")){
-					
-					this.visibility = "hidden";
-				}
+				this.visibility = "hidden";
+				this.resizable = false;
 			}
+		}
+		
 
 		const holder = this.querySelector(`wh-win-header`) as HTMLElement;
 
@@ -409,11 +419,13 @@ export class WHWin extends HTMLElement {
 		}
 	}
 
-	
-
 	get visibility() {
 		return this.getAttribute("visibility");
 	}
+
+
+	
+
 	set resizable(value) {
 		if (Boolean(value)) {
 			this.setAttribute("resizable", "");
@@ -461,8 +473,9 @@ export class WHWin extends HTMLElement {
 	}
 
 	_resizable() {
+
 		if (this.resizable) {
-			Resize.init({
+			this._resize = Resize.init({
 				main: this,
 				onStart: (info) => {
 					this.style.left = info.left + "px";
@@ -478,7 +491,8 @@ export class WHWin extends HTMLElement {
 
 			});
 		} else {
-
+			this._resize.stop();
+			delete this._resize;
 		}
 	}
 

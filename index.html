@@ -15,24 +15,30 @@
     -->
     
     <!--<link rel="stylesheet" href="../css/homee.css">-->
-    <wh-win resizable>
+    
+    
+</head>
+<body>
+    <button onclick="document.getElementById('w1').visibility = true">W1</button>
+    <button onclick="document.getElementById('w2').visibility = true">W2</button>
+    <wh-win resizable id="w1">
         <wh-win-header>
             <wh-win-caption>Hola</wh-win-caption>
             </wh-win-header>
         <wh-win-body>Hello x</wh-win-body>
     </wh-win>
 
-    <wh-win resizable>
+    <wh-win resizable id="w2">
         <wh-win-header>
             <wh-win-caption>Hola 2</wh-win-caption>
             </wh-win-header>
         <wh-win-body>Hola 2</wh-win-body>
     </wh-win>
-    
-</head>
-<body>
+    <wh-app id="gtcomm" name="home" server="http://127.0.0.1:8080">
 
-    <wh-app id="gtcomm" name="home" server="http://127.0.0.1:8080"></wh-app>
+        
+
+    </wh-app>
     <script type="module" src="dist/whendy/frontend/App.js"></script>
     <script type="module" src="dist/whendy/frontend/Window.js"></script>
 </body>

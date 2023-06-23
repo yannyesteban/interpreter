@@ -2,17 +2,26 @@
 import { Q as $ } from "./Q.js";
 import { getParentElement, fire } from "./Tool.js";
 import { Float, Move, Resize } from "./Float.js";
-const mediaQuery = window.matchMedia('(max-width: 400px)');
-mediaQuery.addEventListener('change', (e) => {
-    console.log("media change", e);
+import { MediaQuery } from "./MediaQuery.js";
+const deviceMode = getComputedStyle(document.body).getPropertyValue("--device_mode").replace(/\W/g, "");
+console.log("MediaQuery.resolution", MediaQuery.resolution);
+/*
+
+const mediaQuery = window.matchMedia(`(max-width: ${deviceMode}px)`);
+
+mediaQuery.addEventListener("change", (e)=>{
+    console.log("media change", e)
 });
-mediaQuery.addEventListener('load', (e) => {
-    console.log("media change 2", e);
+
+mediaQuery.addEventListener("load", (e)=>{
+    console.log("media change 2", e)
 });
+
+*/
 let last = null;
 const screen = getComputedStyle(document.body)
-    .getPropertyValue('--device_mode')
-    .replace(/\W/g, '');
+    .getPropertyValue("--device_mode")
+    .replace(/\W/g, "");
 console.log("screen", screen);
 function setActive(win) {
     if (last) {
@@ -123,28 +132,30 @@ class WHWinHeader extends HTMLElement {
 customElements.define("wh-win-header", WHWinHeader);
 export class WHWin extends HTMLElement {
     static get observedAttributes() {
-        return ["visibility", "mode", "resizable", "movible", "left", "top", "right", "bottom", "width", "height", "active"];
+        return ["hidden", "visibility", "mode", "resizable", "movible", "left", "top", "right", "bottom", "width", "height", "active", "no-exit", "no-min", "no-max", "no-responsive"];
     }
     constructor() {
         super();
-        this.lastMode = null;
-        this.lastVisibility = null;
-        window.addEventListener("media-query-changed", (e => {
-            let dim = Float.getBoundingPage();
-            if (dim.pageWidth < 500) {
+        this.lastStatus = {
+            mode: null,
+            visibility: null,
+            resizable: null,
+        };
+        window.addEventListener("media-query-changed", ((e) => {
+            if (e.detail.lowScreen) {
                 if (this.mode !== "modal") {
-                    this.lastMode = this.mode;
-                    this.lastVisibility = this.visibility;
+                    this.lastStatus.mode = this.mode;
+                    this.lastStatus.visibility = this.visibility;
+                    this.lastStatus.resizable = this.resizable;
                 }
                 this.mode = "modal";
-                console.log("... this.active", this.getAttribute("active"));
-                if (!this.getAttribute("active")) {
-                    this.visibility = "hidden";
-                }
+                this.visibility = "hidden";
+                this.resizable = false;
             }
             else {
-                this.mode = this.lastMode;
-                this.visibility = this.lastVisibility;
+                this.mode = this.lastStatus.mode;
+                this.visibility = this.lastStatus.visibility;
+                this.resizable = this.lastStatus.resizable;
             }
         }));
         $(this).on("mousedown", e => {
@@ -179,16 +190,15 @@ export class WHWin extends HTMLElement {
         */
     }
     connectedCallback() {
-        let dim = Float.getBoundingPage();
-        if (dim.pageWidth < 500) {
-            if (this.mode !== "modal") {
-                this.lastMode = this.mode;
-                this.lastVisibility = this.visibility;
-            }
-            this.mode = "modal";
-            console.log("... this.active", this.getAttribute("active"));
-            if (!this.getAttribute("active")) {
+        if (!this.getAttribute("mode")) {
+            this.setAttribute("mode", "auto");
+        }
+        if (!this.getAttribute("no-responsive")) {
+            if (MediaQuery.isLowResolution()) {
+                console.log("isLowResolution");
+                this.mode = "modal";
                 this.visibility = "hidden";
+                this.resizable = false;
             }
         }
         const holder = this.querySelector(`wh-win-header`);
@@ -360,7 +370,7 @@ export class WHWin extends HTMLElement {
     }
     _resizable() {
         if (this.resizable) {
-            Resize.init({
+            this._resize = Resize.init({
                 main: this,
                 onStart: (info) => {
                     this.style.left = info.left + "px";
@@ -376,6 +386,8 @@ export class WHWin extends HTMLElement {
             });
         }
         else {
+            this._resize.stop();
+            delete this._resize;
         }
     }
 }

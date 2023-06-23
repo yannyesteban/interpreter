@@ -38,6 +38,10 @@ dd {
   display: inline-block;
 }
 
+:host:not([mode]) {
+  display: none;
+}
+
 :host([visibility=hidden]) {
   display: none;
 }
