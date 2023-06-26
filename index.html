@@ -19,6 +19,29 @@
     
 </head>
 <body>
+
+    <wh-tab>
+        <wh-tab-menu>X</wh-tab-menu>
+        <wh-tab-menu>Y</wh-tab-menu>
+        <wh-tab-panel>A</wh-tab-panel>
+        <wh-tab-panel>S</wh-tab-panel>
+
+    </wh-tab>
+    <wh-list-text>
+        <wh-option value="1">uno</wh-option>      
+        <wh-option value="2">dos</wh-option>      
+        <wh-option value="3">tres</wh-option>      
+        <wh-option value="4">cuatro</wh-option>      
+    </wh-list-text>
+    <wh-form>
+        <wh-form-caption>Form 1</wh-form-caption>
+        <wh-form-body>
+            <wh-form-field><label>xxxx</label><input></wh-form-field>
+        </wh-form-body>
+        
+
+    </wh-form>
+
     <button onclick="document.getElementById('w1').visibility = true">W1</button>
     <button onclick="document.getElementById('w2').visibility = true">W2</button>
     <wh-win resizable id="w1">
@@ -41,5 +64,8 @@
     </wh-app>
     <script type="module" src="dist/whendy/frontend/App.js"></script>
     <script type="module" src="dist/whendy/frontend/Window.js"></script>
+    <script type="module" src="dist/whendy/frontend/Tab.js"></script>
+    <script type="module" src="dist/whendy/frontend/ListText.js"></script>
+    <script type="module" src="dist/whendy/frontend/Form.js"></script>
 </body>
 </html>

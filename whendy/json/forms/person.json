@@ -1,0 +1,67 @@
+{
+    "name": "person",
+    "title": "Person",
+    "className": "main",
+    "record": [
+        "id",
+        "id2"
+    ],
+    "recordFrom": {
+        "table1.id": "#id"
+    },
+    "elements": [
+        {
+            "element": "section",
+            "title": "Page One",
+            "className": "main",
+            "collapsed": false,
+            "collapsing": true,
+            "elements": [
+                {
+                    "element": "input",
+                    "type": "text",
+                    "title": "cedula",
+                    "noFieldset": false,
+                    "className": "x",
+                    "id": "ci",
+                    "name": "cedula",
+                    "tooltip": "",
+                    "attr": {
+                        "multiple": true
+                    },
+                    "events": {},
+                    "rules": {}
+                }
+            ]
+        }
+    ],
+    "dataset": {
+        "codestado": [
+            [
+                0,
+                ""
+            ],
+            "SELECT"
+        ]
+    },
+    "rules": {
+        "name": {}
+    },
+    "sections": {
+        "name": "section 1"
+    },
+    "tab": {
+        "id": "page1",
+        "state": "page2"
+    },
+    "fields": [
+        {
+            "field": "id",
+            "title": "ID",
+            "input": "text",
+            "prop": {},
+            "data": [],
+            "default": "x"
+        }
+    ]
+}

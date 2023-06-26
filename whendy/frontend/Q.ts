@@ -104,7 +104,7 @@ export class QElement {
         return this;
     }
 
-    html(html?) {
+    html(html?): QElement | any {
 
         if (html === undefined) {
             return this.e.innerHTML;

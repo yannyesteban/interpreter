@@ -1,3 +1,8 @@
+:root {
+  --main-color: hotpink;
+  --pane-padding: 5px 42px;
+}
+
 * {
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif, tahoma;
@@ -5,7 +10,7 @@
 
 html,
 body {
-  --device_mode:500;
+  --device_mode:400;
   margin: 0px;
   height: 100%;
   padding: 0px;

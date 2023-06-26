@@ -1,0 +1,74 @@
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+:host(wh-form) {
+	display: flex;
+	flex-direction: column;
+
+	//height: 100vh;
+}
+
+:host(wh-form) ::slotted(wh-form-caption) {
+	text-align: center;
+}
+:host(wh-form) ::slotted(wh-form-body) {
+	flex-basis: 100%;
+
+	overflow: auto;
+}
+
+:host(wh-form) ::slotted(wh-nav) {
+	display: flex;
+	gap: 0.2em;
+	background-color: rgba(0, 0, 0, 0.08);
+	padding: 0.2em;
+	user-select: none;
+}
+
+:host(wh-nav) ::slotted(wh-nav-button) {
+	border: 1px solid rgb(255, 255, 255);
+	background-color: rgb(255, 252, 252);
+	background: linear-gradient(
+		180deg,
+		rgba(255, 255, 255, 1) 0%,
+		rgb(226, 226, 226) 100%
+	);
+	//height: 1.5rem;
+	//line-height: 1.5em;
+	padding-left: 0.5em;
+	padding-right: 0.5em;
+	border-radius: 0.2em;
+	font-size: 0.9em;
+	color: rgb(77, 77, 77);
+}
+
+:host(wh-nav) ::slotted(wh-nav-button:hover) {
+	outline: 1px solid rgb(156, 156, 156);
+
+	color: rgb(26, 26, 26);
+}
+
+:host(:focus) {
+	//border: 2px solid red;
+	//display: block;
+	//outline: 1px dashed rgb(173, 173, 173);
+}
+
+:host {
+	//border: 2px solid red;
+	display: block;
+	//outline: 1px dashed rgb(173, 173, 173);
+}
+
+:host(wh-page) {
+	padding: 10px;
+	border: 1.1em solid red;
+}
+
+:host(wh-page) ::slotted(wh-page-caption) {
+	background-color: aqua;
+	text-align: center;
+}

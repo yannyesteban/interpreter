@@ -7,24 +7,6 @@ import { Float, Move, Drag, Resize } from "./Float.js";
 
 import { MediaQuery } from "./MediaQuery.js";
 
-const deviceMode = getComputedStyle(document.body).getPropertyValue("--device_mode").replace(/\W/g, "");
-
-
-console.log("MediaQuery.resolution", MediaQuery.resolution)
-
-/*
-
-const mediaQuery = window.matchMedia(`(max-width: ${deviceMode}px)`);
-
-mediaQuery.addEventListener("change", (e)=>{
-	console.log("media change", e)
-});
-
-mediaQuery.addEventListener("load", (e)=>{
-	console.log("media change 2", e)
-});
-
-*/
 
 let last = null;
 
