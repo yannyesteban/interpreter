@@ -1,5 +1,6 @@
 <!DOCTYPE html>
 <html lang="en">
+
 <head>
     <meta charset="UTF-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
@@ -9,15 +10,16 @@
     <link rel="icon" type="image/png" href="favicon.png" sizes="16x16">
     <link rel="stylesheet" href="sass/reset.css">
     <link rel="stylesheet" href="sass/main.css">
-    
+
     <!--<link rel="stylesheet" href="https://api.mapbox.com/mapbox-gl-js/v2.7.0/mapbox-gl.css">
     
     -->
-    
+
     <!--<link rel="stylesheet" href="../css/homee.css">-->
-    
-    
+
+
 </head>
+
 <body>
 
     <wh-tab>
@@ -28,44 +30,162 @@
 
     </wh-tab>
     <wh-list-text>
-        <wh-option value="1">uno</wh-option>      
-        <wh-option value="2">dos</wh-option>      
-        <wh-option value="3">tres</wh-option>      
-        <wh-option value="4">cuatro</wh-option>      
+        <wh-option value="1">uno</wh-option>
+        <wh-option value="2">dos</wh-option>
+        <wh-option value="3">tres</wh-option>
+        <wh-option value="4">cuatro</wh-option>
     </wh-list-text>
     <wh-form>
         <wh-form-caption>Form 1</wh-form-caption>
         <wh-form-body>
             <wh-form-field><label>xxxx</label><input></wh-form-field>
         </wh-form-body>
-        
+
 
     </wh-form>
 
     <button onclick="document.getElementById('w1').visibility = true">W1</button>
     <button onclick="document.getElementById('w2').visibility = true">W2</button>
-    <wh-win resizable id="w1">
+    <!--
+        <wh-win resizable id="w1">
         <wh-win-header>
             <wh-win-caption>Hola</wh-win-caption>
-            </wh-win-header>
+        </wh-win-header>
         <wh-win-body>Hello x</wh-win-body>
     </wh-win>
 
     <wh-win resizable id="w2">
         <wh-win-header>
             <wh-win-caption>Hola 2</wh-win-caption>
-            </wh-win-header>
+        </wh-win-header>
         <wh-win-body>Hola 2</wh-win-body>
     </wh-win>
+-->
     <wh-app id="gtcomm" name="home" server="http://127.0.0.1:8080">
 
-        
+
 
     </wh-app>
-    <script type="module" src="dist/whendy/frontend/App.js"></script>
-    <script type="module" src="dist/whendy/frontend/Window.js"></script>
-    <script type="module" src="dist/whendy/frontend/Tab.js"></script>
-    <script type="module" src="dist/whendy/frontend/ListText.js"></script>
-    <script type="module" src="dist/whendy/frontend/Form.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/App.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/Window.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/Tab.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/ListText.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/Form.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/Radio.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/Check.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/Select.js"></script>
+    <script type="module" src="dist/whendy/frontend/wc/Menu.js"></script>
+
+    <script type="module">
+        import { Q as $ } from "./dist/whendy/frontend/Q.js";
+        let dataSource = {
+            "id": "person",
+            "caption": "Personas",
+            "className": "main",
+
+            "elements": [
+                {
+                    "element": "field",
+                    "input": "input",
+                    "type": "text",
+                    "title": "Cédula",
+                    "data": [],
+                    "parent": "#name",
+                    "childs": true,
+                    "noFieldset": false,
+                    "className": "x",
+                    "id": "ci",
+                    "name": "cedula",
+                    "tooltip": "",
+                    "attr": {
+                        "multiple": true
+                    },
+                    "events": {},
+                    "rules": {}
+                },
+                {
+                    element: "fieldset",
+                    "label": "main data",
+                    elements: [
+                        {
+                            "element": "field",
+                            "input": "wh-select",
+                            "type": "text",
+                            "title": "Cédula2",
+                            "data": [[1, "uno"], [2, "dos"]],
+                            "value": 1,
+                            "parent": "#name",
+                            "childs": true,
+                            "noFieldset": false,
+                            "className": "x",
+                            "id": "ci",
+                            "name": "cedula",
+                            "tooltip": "",
+                            "attr": {
+
+                            },
+                            "events": {},
+                            "rules": {}
+                        }
+                    ]
+                }
+            ],
+        };
+
+        let form = $(document.body).create("wh-form");
+        form.get().dataSource = dataSource;
+
+        let menu = $(document.body).create("wh-menu");
+        menu.get().dataSource = {
+            "addClass": ["exit-menu", "unit"],
+            "hideCheck": true,
+            "hideIcon": false,
+            "events": {
+                "link-action": "console.log('hola')"
+            },
+            "items": [
+                {
+                    "caption": "Mapa",
+                    "addClass": "map_01",
+                    "title": "GoogleMaps / MapBopx",
+                    "events": {
+                        "link-action": "document.getElementById('gt-map').toggle()"
+                    }
+                },
+
+                {
+                    "caption": "Conf",
+                    "addClass": "setting",
+                    "title": "Configuración del Sistema",
+                    "request": {
+                        "request": [
+                            {
+                                "id": "gt-config",
+                                "type": "element",
+                                "appendTo": "wh-app",
+                                "element": "gt-config",
+                                "name": null,
+                                "method": "init",
+                                "config": {}
+                            }
+                        ]
+                    },
+                    "events": {
+                        "link-action": "this.send = true;"
+                    }
+                },
+                {
+                    "caption": "Salir",
+                    "addClass": "exit",
+                    "title": "Salir",
+                    "events": {
+                        "link-action": "console.log(this)"
+                    }
+                }
+            ]
+        };
+
+    </script>
 </body>
+
 </html>

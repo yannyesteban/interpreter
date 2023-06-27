@@ -1,0 +1,29 @@
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+	box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+	margin: 0;
+}
+
+:host {
+	display: block;
+	height: auto;
+	//border: 2px solid rgb(197, 197, 197);
+	font-size: 1rem;
+	overflow: hidden;
+	padding: 0.1rem;
+	//margin:0.2rem;
+}
