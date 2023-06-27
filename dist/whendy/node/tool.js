@@ -9,6 +9,9 @@ export function loadJsonFile(name) {
     return loadFile(name, LoadMode.JSON);
 }
 export function loadFile(name, mode) {
+    if (!name) {
+        return null;
+    }
     let source = fs.readFileSync(name, "utf8");
     if (!source) {
         console.error(source);

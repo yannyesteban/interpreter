@@ -16,6 +16,9 @@ export function register(info) {
 export function getClass(name) {
     return __awaiter(this, void 0, void 0, function* () {
         const info = _class[name];
+        if (!(info === null || info === void 0 ? void 0 : info.file)) {
+            return null;
+        }
         let module = yield import(info.file);
         if (module[info.class]) {
             return module[info.class];

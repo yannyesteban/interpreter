@@ -14,7 +14,7 @@ export class WHSelect extends HTMLElement {
 		const template = document.createElement("template");
 
 		template.innerHTML = `
-		<link rel="stylesheet" href="./../css/WHRadio.css">
+		<link rel="stylesheet" href="./../sass/WHRadio.css">
 		<select></select><slot></slot>
 
 		`;

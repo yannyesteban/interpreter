@@ -12,6 +12,10 @@ export function loadJsonFile(name: string) {
 
 export function loadFile(name: string, mode?: LoadMode) {
 
+    if(!name){
+        return null;
+    }
+
     let source = fs.readFileSync(name, "utf8");
 
     if (!source) {

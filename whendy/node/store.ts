@@ -133,6 +133,9 @@ export class Store {
     }
 
     loadJsonFile(name: string) {
+        if(!name){
+            return null;
+        }
 
         let file = this.loadFile(name);
         return JSON.parse(this.outer.execute(file));

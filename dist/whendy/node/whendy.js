@@ -63,7 +63,7 @@ export class Whendy extends http.Server {
                 if (typeof request === "string") {
                     request = JSON.parse(request);
                 }
-                this.evalRequest(request);
+                yield this.evalRequest(request);
             }
             return JSON.stringify(this.output);
         });
@@ -72,19 +72,24 @@ export class Whendy extends http.Server {
         this.output = [...this.output, ...response];
     }
     evalRequest(requests) {
-        requests.forEach(request => {
-            this.evalCommand(request);
+        return __awaiter(this, void 0, void 0, function* () {
+            for (let request of requests) {
+                yield this.evalCommand(request);
+            }
         });
     }
     evalCommand(command) {
-        switch (command.Type) {
-            case "init":
-                this.setElement(command);
-            case "element":
-                this.setElement(command);
-            case "update":
-            default:
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            switch (command.type) {
+                case "init":
+                    yield this.setElement(command);
+                case "element":
+                    console.log(command);
+                    yield this.setElement(command);
+                case "update":
+                default:
+            }
+        });
     }
     setElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -92,6 +97,10 @@ export class Whendy extends http.Server {
             this.store.setExp("ELEMENT_", info.element);
             //this.store.LoadExp(info.eparams)
             const cls = yield classManager.getClass(info.element);
+            if (!cls) {
+                console.log("error, clas not found");
+                return;
+            }
             const ele = new cls();
             ele.setStore(this.store);
             ele.init(info);

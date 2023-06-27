@@ -1,9 +1,9 @@
 import * as http from "http"
 import { register, Manager } from "./manager.js"
-import { cookieParse, CookieVar } from "./CookieHandler.js";
+import { CookieVar } from "./CookieHandler.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
-import { InfoElement, Element, AppElement, IRestElement, IElementAdmin } from "./element.js";
+import { InfoElement, Element, IRestElement, IElementAdmin } from "./element.js";
 import * as classManager from "./classManager.js";
 
 interface InfoClass {
@@ -97,7 +97,9 @@ export class Whendy extends http.Server {
             if (typeof request === "string") {
                 request = JSON.parse(request);
             }
-            this.evalRequest(request);
+            
+            await this.evalRequest(request);
+            
         }
 
         return JSON.stringify(this.output);
@@ -107,22 +109,23 @@ export class Whendy extends http.Server {
         this.output = [...this.output, ...response];
     }
 
-    evalRequest(requests: []) {
+    async evalRequest(requests: []) {
 
-        requests.forEach(request => {
-            this.evalCommand(request);
-        });
+        for(let request of requests){
+            await this.evalCommand(request);
+        }
     }
 
-    evalCommand(command) {
+    async evalCommand(command) {
 
-        switch (command.Type) {
+        switch (command.type) {
 
             case "init":
-                this.setElement(command)
+                await this.setElement(command)
 
             case "element":
-                this.setElement(command)
+                console.log(command)
+                await this.setElement(command)
 
             case "update":
 
@@ -139,6 +142,11 @@ export class Whendy extends http.Server {
 
         const cls = await classManager.getClass(info.element);
 
+        if(!cls){
+            console.log("error, clas not found");
+            return;
+        }
+
         const ele: Element = new cls();
 
         ele.setStore(this.store);
@@ -150,8 +158,6 @@ export class Whendy extends http.Server {
         //this.doUserAdmin(typ)
         await this.doElementAdmin(ele);
     }
-
-    
 
     async doElementAdmin(ele: IElementAdmin | Element) {
 

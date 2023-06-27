@@ -274,6 +274,8 @@ export class WHForm extends HTMLElement {
         console.log(d);
         //.attr("for", field.attr.id || null);
         const input = formField.create(field.input);
+        input.prop("id", field.id);
+        input.prop("name", field.name);
         if (field.defPropertys) {
             field.defPropertys.forEach(prop => {
                 input.define(prop.name, prop.descriptor);

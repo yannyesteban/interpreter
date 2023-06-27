@@ -20,6 +20,10 @@ export async function getClass(name: string) {
 
     const info = _class[name];
 
+    if(!info?.file){
+        return null;
+    }
+
     let module = await import(info.file);
 
     if (module[info.class]) {

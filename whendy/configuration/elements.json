@@ -10,5 +10,11 @@
         "enable": true,
         "file": "./fragment.js",
         "class": "Fragment"
+    },
+    {
+        "name": "form",
+        "enable": true,
+        "file": "./form.js",
+        "class": "Form"
     }
 ]

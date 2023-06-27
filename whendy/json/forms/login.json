@@ -1,0 +1,100 @@
+{
+    "id": "person",
+    "caption": "Personas",
+    "className": "main",
+    "elements": [
+        {
+            "element": "field",
+            "input": "input",
+            "type": "text",
+            "title": "User",
+            "value": "yanny",
+            "parent": "#name",
+            "childs": true,
+            "noFieldset": false,
+            "className": "x",
+            "id": "user",
+            "name": "user",
+            "tooltip": "",
+            "attr": {},
+            "events": {},
+            "rules": {}
+        },
+        {
+            "element": "field",
+            "input": "input",
+            "type": "password",
+            "title": "Pass",
+            "value": "12345678",
+            "parent": "#name",
+            "childs": true,
+            "noFieldset": false,
+            "className": "x",
+            "id": "pass",
+            "name": "pass",
+            "tooltip": "",
+            "attr": {},
+            "events": {},
+            "rules": {}
+        }
+    ],
+    "nav": {
+        "className": "sevian",
+        "buttons": [
+            {
+                "caption": "Accept",
+                "send": {
+                    "valid": false,
+                    "confirm": "",
+                    "request": [{
+                        
+                            "id": "",
+                            "type": "element",
+                            "element": "user-admin",
+                            "method": "login",
+                            "name": "",
+                            "config": {}
+                        
+                    }]
+                }
+            },
+            {
+                "caption": "Remember",
+                "send": {
+                    "valid": false,
+                    "confirm": "",
+                    "request": [
+                        {
+                            
+                            "type": "element",
+                            "element": "app",
+                            "method": "init",
+                            "name": "{@APP_PATH}/webcar.json",
+                            "config": {}
+                        }
+                        
+                    ]
+                }
+            },
+            {
+                "caption": "Exit",
+                "send": {
+                    "valid": false,
+                    "confirm": "",
+                    "request": [
+                        {
+                            "id": "form-login2",
+                            "type": "element",
+                            "element": "form",
+                            "method": "request",
+                            "setPanel": "#panel_02",
+                            "source": "whendy/json/forms/employee.json",
+                            "config": {}
+                        }
+                        
+                    ]
+                }
+            }
+        ]
+    }
+}

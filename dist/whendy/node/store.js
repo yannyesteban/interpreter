@@ -102,6 +102,9 @@ export class Store {
         return this.outer.execute(file);
     }
     loadJsonFile(name) {
+        if (!name) {
+            return null;
+        }
         let file = this.loadFile(name);
         return JSON.parse(this.outer.execute(file));
     }

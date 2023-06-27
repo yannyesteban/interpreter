@@ -4,6 +4,14 @@
     "templateFile": "whendy/templates/index.html",
     "elements": [
         {
+            "id": "form-login",
+            "setPanel": "#panel_02",
+            "element": "form",
+            "source": "whendy/json/forms/login.json",
+            "method": "request",
+            "eparams": {}
+        },
+        {
             "id": "banner1",
             "setPanel": "#panel_01",
             "element": "fragment",
@@ -32,8 +40,8 @@
         "sass/reset.css",
         "sass/main.css"
     ],
-    "jsModules1":[
-        "../js/GTMap.js"
+    "jsModules":[
+        "dist/whendy/frontend/wc/Select.js"
     ],
     "modules": [
         {
@@ -43,7 +51,7 @@
             "component": "wh-html"
         },
         {
-            "src": "./WHForm.js",
+            "src": "./Form.js",
             "name": "WHForm",
             "alias": "WHForm",
             "component": "wh-form"
