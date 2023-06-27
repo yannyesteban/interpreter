@@ -2,7 +2,7 @@
 
 import * as sqlite3 from "sqlite3";
 
-let db = new sqlite3.Database(':memory:', (err) => {
+let db = new sqlite3.Database('./test.db', (err) => {
     if (err) {
       return console.error(err.message);
     }

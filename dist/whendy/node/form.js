@@ -47,4 +47,4 @@ export class Form extends Element {
         this.response.push(response);
     }
 }
-//# sourceMappingURL=Form.js.map
+//# sourceMappingURL=form.js.map
