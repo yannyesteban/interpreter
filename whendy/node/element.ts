@@ -1,5 +1,10 @@
 import { Store } from "./store.js";
 
+export class UserInfo {
+  user: string;
+  roles: string[];
+}
+
 export class InfoElement {
   id?: string;
   type?: string;
@@ -27,6 +32,10 @@ export interface IRestElement {
   getEndData(): InfoElement[];
 }
 
+export interface IUserAdmin {
+  getUserInfo(): UserInfo;
+}
+
 export abstract class Element {
 
   abstract setStore(store: Store): void;
@@ -41,4 +50,7 @@ export abstract class Element {
 export abstract class AppElement extends Element implements IElementAdmin {
   abstract getElements(): InfoElement[];
 }
+
+
+
 

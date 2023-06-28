@@ -1,47 +1,56 @@
 import { Element } from "./element.js";
-export class Form extends Element {
+export class User extends Element {
     constructor() {
         super(...arguments);
-        this.element = "wh-html";
+        this.element = "";
+        this.user = "";
+        this.roles = [];
         this.response = [];
         this.store = null;
-        this._config = {};
     }
     setStore(store) {
         this.store = store;
     }
     init(info) {
-        const config = this.store.loadJsonFile(info.source) || {};
-        this._config = config;
+        const config = this.store.loadJsonFile(info.source);
         for (const [key, value] of Object.entries(Object.assign(Object.assign({}, config), info))) {
-            console.log(key, "=", value);
             this[key] = value;
         }
-        //console.log("....FORM..", this._config)
     }
     evalMethod(method) {
         switch (method) {
-            case "request":
-                this.load();
+            case "login":
+                const user = this.store.getReq("user");
+                const pass = this.store.getReq("pass");
+                this.dbLogin(user, pass);
                 break;
         }
     }
-    load() {
-        //let template = this.store.loadFile(this.templateFile);
+    dbLogin(user, pass) {
+        let security = "md5";
+        let error = 0;
+        let auth = false;
+        if (error === 0) {
+            this.user = user;
+            this.roles = this.dbRoles(user);
+        }
         const data = {
             mode: "init",
             type: "element",
-            wc: "wh-form",
-            id: this.id,
+            wc: "wh-app",
             props: {
-                dataSource: this._config
+                store: {
+                    message: "ok"
+                }
             },
             //replayToken => $this->replayToken,
             appendTo: this.appendTo,
             setPanel: this.setPanel,
         };
-        console.log(data);
         this.addResponse(data);
+    }
+    dbRoles(user) {
+        return [""];
     }
     getResponse() {
         return this.response;
@@ -49,5 +58,11 @@ export class Form extends Element {
     addResponse(response) {
         this.response.push(response);
     }
+    getUserInfo() {
+        return {
+            user: this.user,
+            roles: this.roles
+        };
+    }
 }
-//# sourceMappingURL=form.js.map
+//# sourceMappingURL=user.js.map

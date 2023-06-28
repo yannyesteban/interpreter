@@ -107,7 +107,7 @@ export class Whendy extends http.Server {
             ele.evalMethod(info.method);
             this.addResponse(ele.getResponse());
             this.doEndData(ele);
-            //this.doUserAdmin(typ)
+            this.doUserAdmin(ele);
             yield this.doElementAdmin(ele);
         });
     }
@@ -122,6 +122,17 @@ export class Whendy extends http.Server {
                     yield this.setElement(element);
                 }
                 ;
+            }
+        });
+    }
+    doUserAdmin(ele) {
+        return __awaiter(this, void 0, void 0, function* () {
+            if ("getUserInfo" in ele) {
+                const info = ele.getUserInfo();
+                if (info.user != "") {
+                    //token := whendy.Store.User.Set(info)
+                    //whendy.w.Header().Set("Authorization", token)
+                }
             }
         });
     }

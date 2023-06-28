@@ -1,3 +1,5 @@
+export class UserInfo {
+}
 export class InfoElement {
     constructor(info) {
         for (const [key, value] of Object.entries(info)) {

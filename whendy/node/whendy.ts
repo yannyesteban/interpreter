@@ -3,7 +3,7 @@ import { register, Manager } from "./manager.js"
 import { CookieVar } from "./CookieHandler.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
-import { InfoElement, Element, IRestElement, IElementAdmin } from "./element.js";
+import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin } from "./element.js";
 import * as classManager from "./classManager.js";
 
 interface InfoClass {
@@ -155,7 +155,7 @@ export class Whendy extends http.Server {
 
         this.addResponse(ele.getResponse())
         this.doEndData(ele);
-        //this.doUserAdmin(typ)
+        this.doUserAdmin(ele)
         await this.doElementAdmin(ele);
     }
 
@@ -171,6 +171,19 @@ export class Whendy extends http.Server {
             for (const element of elements) {
                 await this.setElement(element);
             };
+        }
+    }
+
+    async doUserAdmin(ele: IUserAdmin | Element){
+        if ("getUserInfo" in ele) {
+
+            const info = ele.getUserInfo();
+
+            if (info.user != "") {
+                //token := whendy.Store.User.Set(info)
+                //whendy.w.Header().Set("Authorization", token)
+                
+            }
         }
     }
 

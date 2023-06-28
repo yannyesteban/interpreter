@@ -16,7 +16,7 @@ export class Form extends Element{
 
     store:Store = null;
 
-    config;
+    _config:any = {};
 
     setStore(store:Store){
         this.store = store;
@@ -27,16 +27,17 @@ export class Form extends Element{
         
 
         const config = this.store.loadJsonFile(info.source) || {};
-        
+        this._config = config;
 
         
+        
         for(const [key, value] of Object.entries({...config, ...info})){
+            console.log(key, "=", value)
             this[key] = value;
         }
 
-        this.config = config;
-
-        //console.log("FORM..", this.config)
+        //console.log("....FORM..", this._config)
+        
     }
 
     evalMethod(method: string){
@@ -58,9 +59,8 @@ export class Form extends Element{
             type: "element",
             wc:"wh-form",
             id: this.id,
-            props: {dataSource : this.config
-
-                
+            props: {
+                dataSource : this._config
             },
             //replayToken => $this->replayToken,
             appendTo:this.appendTo,
