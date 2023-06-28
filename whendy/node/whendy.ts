@@ -5,6 +5,8 @@ import { Store } from "./store.js";
 import { Memory } from "./memory.js";
 import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin } from "./element.js";
 import * as classManager from "./classManager.js";
+import { DBAdmin } from "./db.js";
+import { IConnectInfo } from "./dataModel.js";
 
 interface InfoClass {
     "name": string;
@@ -30,6 +32,7 @@ export class Whendy extends http.Server {
 
     setApp: InfoElement;
     constants;
+    db:IConnectInfo[];
     classElement: InfoClass[] = [];
 
     output: InfoElement[] = [];
@@ -60,7 +63,13 @@ export class Whendy extends http.Server {
             const session = manager.start(req, res);
             session.loadSession(this.constants);
 
-            const store = new Store(session);
+            const db = new DBAdmin();
+            db.init(this.db);
+
+            const store = new Store();
+            store.setSessionAdmin(session);
+            store.setDBAdmin(db);
+
             await store.start(req, res);
 
             this.store = store;
@@ -151,7 +160,7 @@ export class Whendy extends http.Server {
 
         ele.setStore(this.store);
         ele.init(info);
-        ele.evalMethod(info.method);
+        await ele.evalMethod(info.method);
 
         this.addResponse(ele.getResponse())
         this.doEndData(ele);
@@ -179,10 +188,13 @@ export class Whendy extends http.Server {
 
             const info = ele.getUserInfo();
 
-            if (info.user != "") {
+            if (info.auth) {
+                console.log(`********\nWelcome ${info.user}\n**`)
                 //token := whendy.Store.User.Set(info)
                 //whendy.w.Header().Set("Authorization", token)
                 
+            }else{
+                console.log("====\nError\n==")
             }
         }
     }

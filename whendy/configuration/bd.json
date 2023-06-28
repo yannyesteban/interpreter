@@ -1,0 +1,22 @@
+[
+	{
+		"name": "gt",
+		"driver": "mysql",
+		"host": "127.0.0.1",
+		"port": "3306",
+		"user": "root",
+		"pass": "123456",
+		"dbase": "gt",
+		"charset": "utf-8"
+	},
+	{
+		"name": "whendy",
+		"driver": "sqlite",
+		"host": "",
+		"port": "",
+		"user": "",
+		"pass": "",
+		"dbase": "./whendy.db",
+		"charset": ""
+	}
+]

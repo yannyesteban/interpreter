@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { Element } from "./element.js";
 export class Form extends Element {
     constructor() {
@@ -20,28 +29,31 @@ export class Form extends Element {
         //console.log("....FORM..", this._config)
     }
     evalMethod(method) {
-        switch (method) {
-            case "request":
-                this.load();
-                break;
-        }
+        return __awaiter(this, void 0, void 0, function* () {
+            switch (method) {
+                case "request":
+                    yield this.load();
+                    break;
+            }
+        });
     }
     load() {
-        //let template = this.store.loadFile(this.templateFile);
-        const data = {
-            mode: "init",
-            type: "element",
-            wc: "wh-form",
-            id: this.id,
-            props: {
-                dataSource: this._config
-            },
-            //replayToken => $this->replayToken,
-            appendTo: this.appendTo,
-            setPanel: this.setPanel,
-        };
-        console.log(data);
-        this.addResponse(data);
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = {
+                mode: "init",
+                type: "element",
+                wc: "wh-form",
+                id: this.id,
+                props: {
+                    dataSource: this._config
+                },
+                //replayToken => $this->replayToken,
+                appendTo: this.appendTo,
+                setPanel: this.setPanel,
+            };
+            //console.log(data)
+            this.addResponse(data);
+        });
     }
     getResponse() {
         return this.response;

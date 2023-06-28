@@ -1,6 +1,7 @@
 import { Store } from "./store.js";
 
 export class UserInfo {
+  auth: boolean;
   user: string;
   roles: string[];
 }

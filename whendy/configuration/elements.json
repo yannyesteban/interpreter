@@ -16,5 +16,11 @@
         "enable": true,
         "file": "./form.js",
         "class": "Form"
+    },
+    {
+        "name": "user",
+        "enable": true,
+        "file": "./user.js",
+        "class": "User"
     }
 ]

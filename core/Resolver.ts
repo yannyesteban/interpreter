@@ -306,7 +306,7 @@ export class Resolver {
         return null;
     }
 
-    visitObjectExpr(expr: Expr.Object) {
+    visitObjectExpr(expr: Expr.Obj) {
         console.error("visitObjectExpr", expr);
     }
 

@@ -12,6 +12,7 @@ import { register, Manager } from "./manager.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
 import * as classManager from "./classManager.js";
+import { DBAdmin } from "./db.js";
 export class Whendy extends http.Server {
     constructor(opt) {
         super();
@@ -36,7 +37,11 @@ export class Whendy extends http.Server {
             }
             const session = manager.start(req, res);
             session.loadSession(this.constants);
-            const store = new Store(session);
+            const db = new DBAdmin();
+            db.init(this.db);
+            const store = new Store();
+            store.setSessionAdmin(session);
+            store.setDBAdmin(db);
             yield store.start(req, res);
             this.store = store;
             /*for (const [key, value] of Object.entries(this.header)) {
@@ -104,7 +109,7 @@ export class Whendy extends http.Server {
             const ele = new cls();
             ele.setStore(this.store);
             ele.init(info);
-            ele.evalMethod(info.method);
+            yield ele.evalMethod(info.method);
             this.addResponse(ele.getResponse());
             this.doEndData(ele);
             this.doUserAdmin(ele);
@@ -129,9 +134,13 @@ export class Whendy extends http.Server {
         return __awaiter(this, void 0, void 0, function* () {
             if ("getUserInfo" in ele) {
                 const info = ele.getUserInfo();
-                if (info.user != "") {
+                if (info.auth) {
+                    console.log(`********\nWelcome ${info.user}\n**`);
                     //token := whendy.Store.User.Set(info)
                     //whendy.w.Header().Set("Authorization", token)
+                }
+                else {
+                    console.log("====\nError\n==");
                 }
             }
         });

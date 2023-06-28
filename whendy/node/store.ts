@@ -6,6 +6,7 @@ import { ISession } from "./manager.js";
 import { Outer } from "./../../core/outer/Outer.js";
 import { Logic } from "./../../core/Logic.js";
 import { loadFile, loadJsonFile } from "./tool.js";
+import { DBAdmin } from "./db.js";
 
 export class Store {
 
@@ -17,14 +18,19 @@ export class Store {
     header;
     cookie;
     session: ISession;
+    db:DBAdmin;
 
     request: http.IncomingMessage;
     response: http.ServerResponse;
 
     outer: Outer;
 
-    constructor(session) {
+    setSessionAdmin(session){
         this.session = session;
+    }
+
+    setDBAdmin(db){
+        this.db = db;
     }
 
     async start(req: http.IncomingMessage, res: http.ServerResponse) {

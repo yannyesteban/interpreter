@@ -13,13 +13,14 @@
     //"module": "es2015",
     
     "module": "es2020",
-    "moduleResolution":"node",
+    "moduleResolution":"Bundler",
     "rootDirs": ["./", "generated"]
   },
 
   "include": [
     "core//**//*",
     "whendy//**//*",
+    "test//**//*",
     "*"
     
   ]

@@ -471,7 +471,7 @@ export class Interpreter {
         return this.lookUpVariable(expr.name, expr);
     }
 
-    visitObjectExpr(expr: Expr.Object) {
+    visitObjectExpr(expr: Expr.Obj) {
         console.log("visitObjectExpr")
         const o = {};
         //console.error("visitObjectExpr", expr);

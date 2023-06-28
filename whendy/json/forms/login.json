@@ -42,7 +42,7 @@
         "className": "sevian",
         "buttons": [
             {
-                "caption": "Accept",
+                "caption": "IN",
                 "send": {
                     "valid": false,
                     "confirm": "",
@@ -50,7 +50,7 @@
                         
                             "id": "",
                             "type": "element",
-                            "element": "user-admin",
+                            "element": "user",
                             "method": "login",
                             "name": "",
                             "config": {}

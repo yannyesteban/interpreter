@@ -24,12 +24,8 @@ export class Form extends Element{
     
     init(info:InfoElement){
 
-        
-
         const config = this.store.loadJsonFile(info.source) || {};
         this._config = config;
-
-        
         
         for(const [key, value] of Object.entries({...config, ...info})){
             console.log(key, "=", value)
@@ -40,18 +36,17 @@ export class Form extends Element{
         
     }
 
-    evalMethod(method: string){
+    async evalMethod(method: string){
         
         switch(method){
             case "request":
-                this.load();
+                await this.load();
                 break;
         }
     }
 
-    load(){
+    async load(){
 
-        //let template = this.store.loadFile(this.templateFile);
         
         const data = {
             
@@ -66,7 +61,7 @@ export class Form extends Element{
             appendTo:this.appendTo,
             setPanel: this.setPanel,
         };
-        console.log(data)
+        //console.log(data)
         this.addResponse(data);
     }
     

@@ -244,7 +244,7 @@ export class Par implements Expression {
   }
 }
 
-export class Object implements Expression {
+export class Obj implements Expression {
 
   public childs: Par[];
   public clss: string;

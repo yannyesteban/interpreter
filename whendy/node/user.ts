@@ -1,95 +1,120 @@
 import { InfoElement, Element, IUserAdmin, UserInfo } from "./element.js";
 import { Store } from "./store.js";
 
-export class User extends Element implements IUserAdmin{
-    
+export class User extends Element implements IUserAdmin {
 
-    public id:string;
+
+    public id: string;
     public name: string;
-    public element:string =   "";
-    public className : string | string [];
-    public setPanel:string;
+    public element: string = "";
+    public className: string | string[];
+    public setPanel: string;
     public appendTo: string;
-    
-    public user:string = "";
-    public roles:string[] = [];
-    
-    
-    response:object[] = [];
 
-    store:Store = null;
+    public auth: boolean = false;
+    public user: string = "";
+    public roles: string[] = [];
 
-    setStore(store:Store){
+    response: object[] = [];
+
+    store: Store = null;
+
+    setStore(store: Store) {
         this.store = store;
     }
-    
-    init(info:InfoElement){
+
+    init(info: InfoElement) {
 
         const config = this.store.loadJsonFile(info.source);
-        
-        for(const [key, value] of Object.entries({...config, ...info})){
+
+        for (const [key, value] of Object.entries({ ...config, ...info })) {
             this[key] = value;
         }
     }
 
-    evalMethod(method: string){
-        
-        switch(method){
+    async evalMethod(method: string) {
+        console.log("user: ", method, this.store.getReq("user"), this.store.getReq("pass"))
+        switch (method) {
             case "login":
                 const user = this.store.getReq("user");
                 const pass = this.store.getReq("pass");
-                this.dbLogin(user, pass);
+                await this.dbLogin(user, pass);
                 break;
         }
     }
 
-    dbLogin(user:string, pass:string ){
+    async dbLogin(user: string, pass: string) {
 
         let security = "md5";
-        let error = 0;
-        let auth = false;
+        let error = 1;
         
-        if(error === 0){
-            this.user = user;
-            this.roles = this.dbRoles(user);
-        }
-        
-        const data = {
+        let message = "credentials is wrong!"
+
+        this.user = user;
+
+        let db = this.store.db.get("whendy");
+
+        const result = await db.getRecord("SELECT * FROM user WHERE user = ?", [user]);
+
+        if (result) {
             
+            if (result.pass == pass) {
+                error = 0;
+                this.auth = true;
+                this.roles = await this.dbRoles(user);
+                message = "user was autorized correctly";
+            }
+        }
+
+        const data = {
+
             mode: "init",
             type: "element",
-            wc:"wh-app",
-            
+            wc: "wh-app",
+
             props: {
 
                 store: {
-                    message:"ok"
+                    user: user,
+                    message,
+                    roles: this.roles,
+                    auth: this.auth
                 }
             },
             //replayToken => $this->replayToken,
-            appendTo:this.appendTo,
+            appendTo: this.appendTo,
             setPanel: this.setPanel,
         };
-        
+
         this.addResponse(data);
     }
 
-    dbRoles(user: string):string[]{
+    async dbRoles(user: string) {
 
-		
-        return [""];
+        let db = this.store.db.get("whendy");
+
+        const result = await db.getData("SELECT `group` FROM user_group WHERE user = ?", [user]);
+
+        if (result) {
+
+            return result.map(row => row.group);
+
+        }
+
+        return [];
     }
-    
-    getResponse():object[]{
+
+    getResponse(): object[] {
         return this.response;
     }
 
-    addResponse(response){
+    addResponse(response) {
         this.response.push(response);
     }
 
     getUserInfo(): UserInfo {
         return {
+            auth: this.auth,
             user: this.user,
             roles: this.roles
         }

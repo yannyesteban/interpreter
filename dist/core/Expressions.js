@@ -142,7 +142,7 @@ export class Par {
         return visitor.visitObjectExpr(this);
     }
 }
-export class Object {
+export class Obj {
     constructor(childs, pos) {
         this.childs = childs;
         this.pos = pos;

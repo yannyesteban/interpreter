@@ -221,7 +221,7 @@ export class Parser {
             const position = this.getPosition();
             try {
 
-                let expr = new Expr.Object(this.objectValue(true), this.peek().pos);
+                let expr = new Expr.Obj(this.objectValue(true), this.peek().pos);
                 //this.consume(Token.SEMICOLON, "Expect ';' after expression.");
                 if (!this.match(Token.SEMICOLON, Token.EOL) && !Token.EOF) {
                     this.consume(Token.SEMICOLON, "Expect ';' after expression..");
@@ -579,7 +579,7 @@ export class Parser {
 
         else if (this.match(Token.LBRACE)) {
 
-            expr = new Expr.Object(this.objectValue(), this.peek().pos);
+            expr = new Expr.Obj(this.objectValue(), this.peek().pos);
         }
 
         else if (this.match(Token.LPAREN)) {

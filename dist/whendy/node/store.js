@@ -11,12 +11,17 @@ import { cookieParse } from "./CookieHandler.js";
 import { Outer } from "./../../core/outer/Outer.js";
 import { loadFile } from "./tool.js";
 export class Store {
-    constructor(session) {
+    constructor() {
         this.vexp = {};
         this.vreq = {};
         this.vses = {};
         this.qpar = {};
+    }
+    setSessionAdmin(session) {
         this.session = session;
+    }
+    setDBAdmin(db) {
+        this.db = db;
     }
     start(req, res) {
         return __awaiter(this, void 0, void 0, function* () {
