@@ -3,7 +3,7 @@ import { register, Manager } from "./manager.js"
 import { CookieVar } from "./CookieHandler.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
-import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin } from "./element.js";
+import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin, OutputInfo } from "./element.js";
 import * as classManager from "./classManager.js";
 import { DBAdmin } from "./db.js";
 import { IConnectInfo } from "./dataModel.js";
@@ -22,7 +22,8 @@ export class Whendy extends http.Server {
     private port = 8080;
 
     private session;
-    store: Store;
+    private store: Store;
+    private userManager: UserManager;
 
     request: http.IncomingMessage;
     response: http.ServerResponse;
@@ -36,7 +37,7 @@ export class Whendy extends http.Server {
     db:IConnectInfo[];
     classElement: InfoClass[] = [];
 
-    output: InfoElement[] = [];
+    output: OutputInfo[] = [];
     private endData:any;
     constructor(opt: object) {
 
@@ -56,7 +57,9 @@ export class Whendy extends http.Server {
         this.on('request', async (req: http.IncomingMessage, res: http.ServerResponse) => {
 
 
-            let u = new UserManager();
+            this.userManager = new UserManager();
+
+            this.userManager.evalHeader(req, res);
 
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
                 res.writeHead(204, this.header);
@@ -86,6 +89,8 @@ export class Whendy extends http.Server {
             res.write(await this.render());
 
             res.end();
+
+            console.log("USER INFO", this.userManager.getUserInfo());
         });
     }
 
@@ -118,7 +123,7 @@ export class Whendy extends http.Server {
         return JSON.stringify(this.output);
     }
 
-    addResponse(response: InfoElement[]) {
+    addResponse(response: OutputInfo[]) {
         this.output = [...this.output, ...response];
     }
 
@@ -194,6 +199,16 @@ export class Whendy extends http.Server {
 
             if (info.auth) {
                 console.log(`********\nWelcome ${info.user}\n**`)
+
+                const token = this.userManager.setAuth(info);
+
+                this.addResponse([{
+            
+                    mode: "auth",
+                    props :{token}
+                    
+                }]);
+
                 //token := whendy.Store.User.Set(info)
                 //whendy.w.Header().Set("Authorization", token)
                 

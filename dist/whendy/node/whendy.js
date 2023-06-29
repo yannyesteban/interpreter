@@ -31,7 +31,8 @@ export class Whendy extends http.Server {
             cookieName: "whsessionid", machineType: "memory", maxLifeTime: 36000
         });
         this.on('request', (req, res) => __awaiter(this, void 0, void 0, function* () {
-            let u = new UserManager();
+            this.userManager = new UserManager();
+            this.userManager.evalHeader(req, res);
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
                 res.writeHead(204, this.header);
                 res.end();
@@ -52,6 +53,7 @@ export class Whendy extends http.Server {
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
             res.write(yield this.render());
             res.end();
+            console.log("USER INFO", this.userManager.getUserInfo());
         }));
     }
     //https://developer.mozilla.org/en-US/docs/Learn/Server-side/Node_server_without_framework
@@ -138,6 +140,11 @@ export class Whendy extends http.Server {
                 const info = ele.getUserInfo();
                 if (info.auth) {
                     console.log(`********\nWelcome ${info.user}\n**`);
+                    const token = this.userManager.setAuth(info);
+                    this.addResponse([{
+                            mode: "auth",
+                            props: { token }
+                        }]);
                     //token := whendy.Store.User.Set(info)
                     //whendy.w.Header().Set("Authorization", token)
                 }

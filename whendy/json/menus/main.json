@@ -1,0 +1,55 @@
+{
+    "id": "person",
+    "caption": "Personas",
+    "className": "main",
+    "element": {
+        "addClass": [
+            "exit-menu",
+            "unit"
+        ],
+        "hideCheck": true,
+        "hideIcon": false,
+        "events": {
+            "link-action": "console.log('hola')"
+        },
+        "items": [
+            {
+                "caption": "Mapa",
+                "addClass": "map_01",
+                "title": "GoogleMaps / MapBopx",
+                "events": {
+                    "link-action": "document.getElementById('gt-map').toggle()"
+                }
+            },
+            {
+                "caption": "Conf",
+                "addClass": "setting",
+                "title": "Configuración del Sistema",
+                "request": {
+                    "request": [
+                        {
+                            "id": "gt-config",
+                            "type": "element",
+                            "appendTo": "wh-app",
+                            "element": "gt-config",
+                            "name": null,
+                            "method": "init",
+                            "config": {}
+                        }
+                    ]
+                },
+                "events": {
+                    "link-action": "this.send = true;"
+                }
+            },
+            {
+                "caption": "Salir",
+                "addClass": "exit",
+                "title": "Salir",
+                "events": {
+                    "link-action": "console.log(this)"
+                }
+            }
+        ]
+    }
+}

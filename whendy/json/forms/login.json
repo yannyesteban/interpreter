@@ -46,33 +46,30 @@
                 "send": {
                     "valid": false,
                     "confirm": "",
-                    "request": [{
-                        
+                    "request": [
+                        {
                             "id": "",
                             "type": "element",
                             "element": "user",
                             "method": "login",
                             "name": "",
                             "config": {}
-                        
-                    }]
+                        }
+                    ]
                 }
             },
             {
-                "caption": "Remember",
+                "caption": "Change",
                 "send": {
                     "valid": false,
                     "confirm": "",
                     "request": [
                         {
-                            
                             "type": "element",
                             "element": "app",
-                            "method": "init",
-                            "name": "{@APP_PATH}/webcar.json",
-                            "config": {}
+                            "source": "whendy/json/app/admin.json",
+                            "method": "load"
                         }
-                        
                     ]
                 }
             },
@@ -91,7 +88,6 @@
                             "source": "whendy/json/forms/employee.json",
                             "config": {}
                         }
-                        
                     ]
                 }
             }

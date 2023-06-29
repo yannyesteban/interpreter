@@ -23,9 +23,8 @@
         {
             "id": "banner2",
             "setPanel": "#panel_03",
-            "element": "fragment",
-            "source": "whendy/json/fragments/two.json",
-            "name": "{@JSON_PATH}fragments/webcar-banner.json",
+            "element": "menu",
+            "source": "whendy/json/menus/main.json",
             "method": "load",
             "eparams": {}
         }
@@ -40,7 +39,7 @@
         "sass/reset.css",
         "sass/main.css"
     ],
-    "jsModules":[
+    "jsModules": [
         "dist/whendy/frontend/wc/Select.js"
     ],
     "modules": [
@@ -49,6 +48,12 @@
             "name": "Html",
             "alias": "Html",
             "component": "wh-html"
+        },
+        {
+            "src": "./Menu.js",
+            "name": "WHMenu",
+            "alias": "WHMenu",
+            "component": "wh-menu"
         },
         {
             "src": "./Form.js",

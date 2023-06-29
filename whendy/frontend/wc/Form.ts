@@ -531,6 +531,12 @@ export class WHForm extends HTMLElement {
 	_getBody() {
 		return this.querySelector(`:scope > wh-form-body`)
 	}
+
+	valid(){
+		
+	}
+
+
 }
 
 customElements.define("wh-form", WHForm);

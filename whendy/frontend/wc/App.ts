@@ -59,7 +59,7 @@ class WHPanel extends HTMLElement {
 customElements.define("wh-panel", WHPanel);
 
 export class App extends HTMLElement {
-    public server = "";
+    
     public modules = [];
     public components = [];
 
@@ -67,19 +67,19 @@ export class App extends HTMLElement {
 
     public token = "x.y.z";
     public sid = "energy";
-    public name = "";
+    
     public xx = "";
     constructor() {
         super();
     }
 
     static get observedAttributes() {
-        return ["server", "sid", "token"];
+        return ["server", "sid", "token", "name"];
     }
 
     attributeChangedCallback(name, oldVal, newVal) {
-        console.log({ name, oldVal, newVal });
-        this[name] = newVal;
+        console.log("attributeChangedCallback", { name, oldVal, newVal });
+        
 
     }
 
@@ -112,7 +112,15 @@ export class App extends HTMLElement {
                 return;
             }
 
+            console.log("item.mode", item.mode)
             switch (item.mode) {
+                case "auth":
+                    if(item?.props?.token){
+                        
+                        this.token = item.props.token;
+                        console.log("this.token ", this.token);
+                    }
+                    break;
                 case "debug":
                     console.log(item.info);
                     break;
@@ -376,6 +384,23 @@ export class App extends HTMLElement {
     set addClass(classes) {
         $(this).addClass(classes);
     }
+
+    set name(value) {
+		this.setAttribute("name", value);
+	}
+
+	get value() {
+		return this.getAttribute("name")
+	}
+
+    set server(value) {
+		this.setAttribute("server", value);
+	}
+
+	get server() {
+		return this.getAttribute("server")
+	}
+	
 
     go(info) {
 

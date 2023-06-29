@@ -20,21 +20,18 @@ customElements.define("wh-panel", WHPanel);
 export class App extends HTMLElement {
     constructor() {
         super();
-        this.server = "";
         this.modules = [];
         this.components = [];
         this._e = [];
         this.token = "x.y.z";
         this.sid = "energy";
-        this.name = "";
         this.xx = "";
     }
     static get observedAttributes() {
-        return ["server", "sid", "token"];
+        return ["server", "sid", "token", "name"];
     }
     attributeChangedCallback(name, oldVal, newVal) {
-        console.log({ name, oldVal, newVal });
-        this[name] = newVal;
+        console.log("attributeChangedCallback", { name, oldVal, newVal });
     }
     connectedCallback() {
         console.log("Custom square element added to page.");
@@ -48,6 +45,7 @@ export class App extends HTMLElement {
             return;
         }
         data.forEach((item) => {
+            var _a;
             if (item.replayToken && requestFunctions && requestFunctions[item.replayToken]) {
                 requestFunctions[item.replayToken](item.data);
                 return;
@@ -56,7 +54,14 @@ export class App extends HTMLElement {
                 requestFunctions[item.iToken](item.data);
                 return;
             }
+            console.log("item.mode", item.mode);
             switch (item.mode) {
+                case "auth":
+                    if ((_a = item === null || item === void 0 ? void 0 : item.props) === null || _a === void 0 ? void 0 : _a.token) {
+                        this.token = item.props.token;
+                        console.log("this.token ", this.token);
+                    }
+                    break;
                 case "debug":
                     console.log(item.info);
                     break;
@@ -256,6 +261,18 @@ export class App extends HTMLElement {
     }
     set addClass(classes) {
         $(this).addClass(classes);
+    }
+    set name(value) {
+        this.setAttribute("name", value);
+    }
+    get value() {
+        return this.getAttribute("name");
+    }
+    set server(value) {
+        this.setAttribute("server", value);
+    }
+    get server() {
+        return this.getAttribute("server");
     }
     go(info) {
         console.log(info);

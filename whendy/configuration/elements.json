@@ -22,5 +22,11 @@
         "enable": true,
         "file": "./user.js",
         "class": "User"
+    },
+    {
+        "name":"menu",
+        "enable":true,
+        "file":"./menu.js",
+        "class":"Menu"
     }
 ]

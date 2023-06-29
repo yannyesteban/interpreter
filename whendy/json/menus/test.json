@@ -1,0 +1,103 @@
+{
+    "id": "test",
+    "caption": "Test Menu",
+    "className": [
+        "test-class"
+    ],
+    "type": "default",
+    "items": [
+        {
+            "id": "",
+            "caption": "Mapa",
+            "className": [
+                "map_01"
+            ],
+            "title": "GoogleMaps / MapBopx",
+            "events": {
+                "app-submit":{
+                    "set":"element-request",
+                    "element":"wh-grid",
+
+                    "form":"#form2",
+                    "formData":null,
+                    "confirm":"",
+                    "alert":"",
+                    "valid":{
+                        "method":"valid",
+                        "params":["1","2"]
+                    },
+                    
+                    "actions":[
+                        {
+                            "id": "gt-config",
+                            "type": "element",
+                            "appendTo": "wh-app",
+                            "element": "gt-config",
+                            "name": null,
+                            "method": "init",
+                            "config": {}
+                        }
+                    ]
+                },
+                "app-request": {
+
+                    "data":{
+
+                    },
+                    "confirm": "secure?",
+                    "alert": "hi!",
+                    "form": "#form1",
+                    "panelId": "",
+                    "valid": true,
+                    "actions": [
+                        {
+                            "id": "gt-config",
+                            "type": "element",
+                            "appendTo": "wh-app",
+                            "element": "gt-config",
+                            "name": null,
+                            "method": "init",
+                            "config": {}
+                        }
+                    ]
+                },
+                "link-action": "document.getElementById('gt-map').toggle()"
+            }
+        },
+        {
+            "caption": "Conf",
+            "addClass": "setting",
+            "title": "Configuración del Sistema",
+            "request": {
+                "request": [
+                    {
+                        "id": "gt-config",
+                        "type": "element",
+                        "appendTo": "wh-app",
+                        "element": "gt-config",
+                        "name": null,
+                        "method": "init",
+                        "config": {}
+                    }
+                ]
+            },
+            "events": {
+                "link-action": "this.send = true;"
+            }
+        },
+        {
+            "caption": "Salir",
+            "addClass": "exit",
+            "title": "Salir",
+            "events": {
+                "link-action": "console.log(this)"
+            }
+        }
+    ],
+    "useIcon": true,
+    "useCheck": true,
+    "action": "console.log('hola')",
+    "events": {
+        "click": ""
+    }
+}
