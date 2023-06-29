@@ -15,7 +15,7 @@ const payload = {
 
 export class JWT {
 
-    private key = "super_secret_society";
+    private key = "your-256-bit-secret";
 
     constructor(opt){
         for(let key in opt){
@@ -29,7 +29,7 @@ export class JWT {
         
         const signature = Buffer.from(parts[2]);
         const expected = this.getSignature(parts[0] + "." + parts[1]);
-        
+
         if (timingSafeEqual(signature, Buffer.from(expected))) {
             return JSON.parse(Buffer.from(parts[1], "base64url").toString());
         }

@@ -78,7 +78,8 @@ export class User extends Element implements IUserAdmin {
                     user: user,
                     message,
                     roles: this.roles,
-                    auth: this.auth
+                    auth: this.auth,
+                    error
                 }
             },
             //replayToken => $this->replayToken,

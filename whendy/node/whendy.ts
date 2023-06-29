@@ -7,6 +7,7 @@ import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin } from ".
 import * as classManager from "./classManager.js";
 import { DBAdmin } from "./db.js";
 import { IConnectInfo } from "./dataModel.js";
+import { UserManager } from "./userManager.js";
 
 interface InfoClass {
     "name": string;
@@ -53,6 +54,9 @@ export class Whendy extends http.Server {
         });
 
         this.on('request', async (req: http.IncomingMessage, res: http.ServerResponse) => {
+
+
+            let u = new UserManager();
 
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
                 res.writeHead(204, this.header);
