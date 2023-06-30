@@ -8,7 +8,7 @@
             "setPanel": "#panel_02",
             "element": "form",
             "source": "whendy/json/forms/login.json",
-            "method": "request",
+            "method": "request{{if(@x>1){'xxxx'}else{''}}}",
             "eparams": {}
         },
         {

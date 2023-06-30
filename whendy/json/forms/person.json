@@ -1,5 +1,9 @@
 {
     "name": "person",
+    "__reeval":{
+        "title":"{{@title}}",
+        "className":"{{@class}}"
+    },
     "title": "Person",
     "className": "main",
     "record": [
