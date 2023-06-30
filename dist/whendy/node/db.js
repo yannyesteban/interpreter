@@ -15,5 +15,13 @@ export class DBAdmin {
     get(name) {
         return this.dbs[name];
     }
+    doInsert(table, data) {
+    }
+    doUpdate(table, data, key) {
+    }
+    begin() {
+    }
+    commit() {
+    }
 }
 //# sourceMappingURL=db.js.map

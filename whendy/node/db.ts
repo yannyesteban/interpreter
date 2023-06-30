@@ -21,6 +21,22 @@ export class DBAdmin{
     get(name: string): ISQLDBase {
         return this.dbs[name];
     }
+
+    doInsert(table, data){
+
+    }
+
+    doUpdate(table, data, key){
+
+    }
+
+    begin(){
+
+    }
+
+    commit(){
+        
+    }
 }
 
 
