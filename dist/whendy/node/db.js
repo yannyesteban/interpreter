@@ -19,6 +19,8 @@ export class DBAdmin {
     }
     doUpdate(table, data, key) {
     }
+    doInsertOrUPdate(table, data) {
+    }
     begin() {
     }
     commit() {

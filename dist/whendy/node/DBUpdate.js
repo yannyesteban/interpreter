@@ -1,3 +1,4 @@
+console.log("DB Update...");
 const data = {
     connection: "webcar",
     mode: "insert",
@@ -66,5 +67,50 @@ export class DBRecordField {
 export class DBRecord {
 }
 export class DBUpdate {
+    save() {
+        for (let record of this.records) {
+            console.log("save", record.data);
+            const fields = [];
+            for (const data of record.data) {
+                for (const [name, options] of Object.entries(record.fields)) {
+                    let field = {
+                        name,
+                        value: data[name]
+                    };
+                    fields.push(field);
+                }
+                console.log(fields);
+            }
+        }
+    }
 }
+const db = new DBUpdate();
+db.records = [
+    {
+        "table": "person",
+        "fields": {
+            "id": {},
+            "name": {},
+            "age": {},
+            "status": {}
+        },
+        data: [
+            {
+                id: 1,
+                name: "yanny",
+                age: 47,
+                status: 1,
+                __mode__: 1,
+            },
+            {
+                id: 2,
+                name: "esteban",
+                age: 30,
+                status: 1,
+                __mode__: 1,
+            }
+        ]
+    }
+];
+db.save();
 //# sourceMappingURL=DBUpdate.js.map

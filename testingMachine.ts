@@ -6,6 +6,7 @@ http.createServer(function (req, res) {
 }).listen(8080);*/
 
 import { DateUtil } from "./whendy/frontend/DateUtil.js";
+import { DBUpdate } from "./whendy/node/DBUpdate.js";
 
 const result = DateUtil.date("24/10/1975 10:22:05pm", "%d/%m/%y %h:%i:%s%p");
 
@@ -17,4 +18,6 @@ let result2 = valid({
     positive:{message_:"is {=value} is not num to {=title}",}
 }, value, "nombre")
 
-console.log("....", result2.message)
+console.log(" *** ", result2.message);
+
+let f = new DBUpdate()

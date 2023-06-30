@@ -30,12 +30,16 @@ export class DBAdmin{
 
     }
 
+    doInsertOrUPdate(table, data){
+
+    }
+
     begin(){
 
     }
 
     commit(){
-        
+
     }
 }
 

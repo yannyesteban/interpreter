@@ -1,3 +1,5 @@
+console.log("DB Update...")
+
 const data = {
 
     connection:"webcar",
@@ -86,17 +88,17 @@ export class DBRecordField{
 }
 
 export class DBRecord{
-    infoQuery;
-    table;
-    fieldList;
-    keys;
-    mode;
-    record;
-    fields;
-    data;
-    transaction:true;
-    masterData;
-    detail;
+    infoQuery?;
+    table?;
+    fieldList?;
+    keys?;
+    mode?;
+    record?;
+    fields?;
+    data?;
+    transaction?;
+    masterData?;
+    detail?;
 
 }
 
@@ -105,7 +107,62 @@ export class DBUpdate{
 
     connection;
     transaction;
-    records;
+    records:DBRecord[];
 
 
+    save(){
+        
+
+        for(let record of this.records){
+            console.log("save", record.data)
+            const fields = []
+
+
+            for(const data of record.data){
+                for(const [name, options] of Object.entries(record.fields)){
+                    let field = {
+                        name,
+                        value : data[name]
+                    };
+    
+                    fields.push(field);
+                }
+    
+                console.log(fields);
+            }
+
+            
+        }
+    }
 }
+
+const db = new DBUpdate()
+db.records = [
+    {
+        "table":"person",
+        "fields":{
+            "id":{},
+            "name":{},
+            "age":{},
+            "status":{}
+        },
+        data:[
+            {
+                id:1,
+                name:"yanny",
+                age:47,
+                status:1,
+                __mode__:1,
+            },
+            {
+                id:2,
+                name:"esteban",
+                age:30,
+                status:1,
+                __mode__:1,
+            }
+        ]
+    }
+];
+
+db.save();
