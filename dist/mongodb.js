@@ -10,7 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 // ./mongod --dbpath /data/db --port 27018
 import { MongoClient } from "mongodb";
 // Replace the uri string with your connection string.
-const uri = "mongodb://127.0.0.1:27018/";
+const uri = "mongodb://127.0.0.1:27017/";
 const client = new MongoClient(uri);
 function run() {
     return __awaiter(this, void 0, void 0, function* () {
