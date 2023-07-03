@@ -23,7 +23,7 @@ let value = "-198";
 let result2 = valid({
     positive: { message_: "is {=value} is not num to {=title}", }
 }, value, "nombre");
-console.log(" *** ", result2.message);
+console.log(" **** ", result2.message);
 let f = new DBUpdate();
 function start() {
     return __awaiter(this, void 0, void 0, function* () {

@@ -112,7 +112,6 @@ export class DBUpdate {
     transaction;
     records: DBRecord[];
 
-
     save() {
         let db;
         if (10 > 2) {
