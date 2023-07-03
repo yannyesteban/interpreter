@@ -1,4 +1,4 @@
-import { MysqlDB, PostgreDB } from "./db.js";
+import { MysqlDB, PostgreDB, SQLiteDB } from "./db.js";
 console.log("DB Update...");
 const data = {
     connection: "webcar",
@@ -70,7 +70,8 @@ export class DBRecord {
 export class DBUpdate {
     save() {
         let db;
-        if (10 > 2) {
+        let driver = "sqlite";
+        if (driver == "mysql") {
             db = new MysqlDB({
                 host: "localhost",
                 user: "root",
@@ -78,8 +79,16 @@ export class DBUpdate {
                 dbase: "whendy"
             });
         }
-        else {
+        else if (driver == "postgres") {
             db = new PostgreDB({
+                host: "localhost",
+                user: "postgres",
+                pass: "12345678",
+                dbase: "whendy"
+            });
+        }
+        else if (driver == "sqlite") {
+            db = new SQLiteDB({
                 host: "localhost",
                 user: "postgres",
                 pass: "12345678",
@@ -184,8 +193,66 @@ db.records = [
                     user: "yanny"
                 }
             }
-        ]
+        ],
+        detail: {
+            table: "child",
+            keys: ["id", "cod"],
+            fieldInfo: {},
+            fields: [
+                {
+                    field: "id",
+                    type: "i",
+                    realType: "INTEGER",
+                    null: false,
+                    serial: true,
+                    primaryKey: true,
+                    default: 0,
+                    masterValue: "master_id",
+                    dbValue: "now()+1",
+                    nowValue: true,
+                }
+            ],
+            //fields:["id", "cod", "name"],
+            data: [
+                [1, 1, 1],
+                [2, 2, 2]
+            ]
+        }
     }
 ];
+const recordInfo = {
+    table: "user",
+    key: [""],
+    unique: [""],
+    serial: "",
+    data: [],
+};
+let h = {
+    "name": "data1",
+    "table": "user",
+    _fields: ["id", "name", "age", "__mode__", "__record__"],
+    unique: ["name"],
+    "key": [],
+    "serial": "id",
+    fields: [
+        {
+            field: "id",
+            notNull: true,
+            default: "xx",
+            serial: true,
+            aux: false,
+        },
+        {
+            field: "name",
+            masterValue: "category",
+            dataValue: "age",
+            dbValue: "now()",
+            modifier: ["upper"],
+        }
+    ],
+    data: [
+        1, 1, 1, 1, null
+    ]
+};
 db.save();
 //# sourceMappingURL=DBUpdate.js.map

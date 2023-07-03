@@ -1,4 +1,4 @@
-import { DBAdmin, IRecordId, MysqlDB, PostgreDB, STMTResult } from "./db.js";
+import { DBAdmin, IRecordId, MysqlDB, PostgreDB, SQLiteDB, STMTResult } from "./db.js";
 
 
 console.log("DB Update...")
@@ -114,14 +114,15 @@ export class DBUpdate {
 
     save() {
         let db;
-        if (10 > 2) {
+        let driver = "sqlite";
+        if (driver == "mysql") {
             db = new MysqlDB({
                 host: "localhost",
                 user: "root",
                 pass: "123456",
                 dbase: "whendy"
             });
-        } else {
+        } else if(driver == "postgres") {
             db = new PostgreDB({
                 host: "localhost",
                 user: "postgres",
@@ -129,6 +130,13 @@ export class DBUpdate {
                 dbase: "whendy"
             });
 
+        } else if(driver == "sqlite"){
+            db = new SQLiteDB({
+                host: "localhost",
+                user: "postgres",
+                pass: "12345678",
+                dbase: "whendy"
+            });
         }
 
 
@@ -276,5 +284,46 @@ db.records = [
         }
     }
 ];
+
+
+const recordInfo = {
+    table :"user",
+    key:[""],
+    unique:[""],
+    serial:"",
+    data:[],
+
+}
+
+let h = {
+    "name":"data1",
+    "table":"user",
+    _fields:["id", "name", "age", "__mode__", "__record__"],
+    unique:["name"],
+    "key":[],
+    "serial":"id",
+    fields:[
+        {
+            field:"id",
+            notNull: true,
+            default:"xx",
+            serial:true,
+            aux:false,
+
+        },
+        {
+            field:"name",
+            masterValue : "category",
+            dataValue : "age",
+            dbValue:"now()",
+            modifier:["upper"],
+
+        }
+    ],
+    data:[
+        1,1,1,1,null
+
+    ]
+};
 
 db.save();
