@@ -2,6 +2,18 @@ import { IConnectInfo, ISQLDBase } from "./dataModel.js"
 import { WhSQLite } from "./wh-sqlite.js";
 import pg from "pg"
 import * as mysql from "mysql"
+
+export interface IRecordInfo {
+    table?: string;
+    key?: string[];
+    unique?: string[];
+    serial?: string;
+    data?: {},
+    sqlData?: {},
+    record?: {}
+
+}
+
 export interface IRecordId {
     name: string;
     value: any;
@@ -13,6 +25,13 @@ export interface STMTResult {
     info?;
     error?;
     errno?;
+}
+
+export interface IDBAdmin{
+    insertRecord(info: IRecordInfo): STMTResult;
+    updateRecord(info: IRecordInfo): STMTResult;
+    upsertRecord(info: IRecordInfo): STMTResult;
+    deleteRecord(info: IRecordInfo): STMTResult;
 }
 
 export class DBAdmin {
@@ -73,66 +92,60 @@ export class SQLiteDB {
         this.client.connect();
     }
 
-    doInsert(table, data): STMTResult {
+    insertRecord(info: IRecordInfo): STMTResult {
+        console.log("info ->", info)
+        const data = info.data;
+        if (info.serial !== undefined && !data[info.serial]) {
+            console.log("hello")
+            delete data[info.serial];
+        } else {
+            console.log("hello info", info, data)
+        }
 
-        console.log("data ->", data)
+
         const fields = Object.keys(data);
         const values = Object.values(data);
-        const wildcard = "?".repeat(fields.length).split("").join(",");
+        const wildcard = Object.keys(data).map((f, index) => "$" + (index + 1));
 
-        console.log("data ->", fields, values)
-        let query = `INSERT INTO \`${table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard});`
+
+
+        console.log("data ->", fields, values, wildcard)
+        let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) RETURNING *;`
 
         console.log(query)
 
-        this.client.query(query, values, function (err, rows, fields) {
-            if (err) throw err;
+        const res = /*await*/ this.client.query(query, values,
+            function (err, result) {
+                if (err) {
+                    console.log("err ", err)
+                    //handle error
+                }
+                else {
+                    console.log("result.rows:", result.rows);
+                }
+            });
 
-            //console.log(rows[0]);
-            console.log(rows, fields)
-        });
+
         return
     }
+    updateRecord(info: IRecordInfo): STMTResult {
 
-    doInsertOrUpdate(table, data): STMTResult {
-
-        console.log("data ->", data)
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        const wildcard = "?".repeat(fields.length).split("").join(",");
-        const update = fields.map(field => `\`${field}\`=new.` + field);
-
-        console.log("data ->", fields, values)
-        let query = `INSERT INTO \`${table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard}) AS new
-        ON DUPLICATE KEY UPDATE ${update};`
-
-        console.log(query)
-
-        this.client.query(query, values, function (err, rows, fields) {
-            if (err) throw err;
-
-            //console.log(rows[0]);
-            console.log(rows, fields)
-        });
-        return
-    }
-
-    doUpdate(table, data, record): STMTResult {
-
+        const data = info.data;
+        const record = info.record;
         console.log("data ->", data)
         const fields = Object.keys(data);
         const values = Object.values(data);
         //const wildcard = "?".repeat(fields.length).split("").join(",");
-        const update = fields.map(field => `\`${field}\`=?`);
+        const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
 
         const fields1 = Object.keys(record);
         const values1 = Object.values(record);
 
 
-        const where = fields1.map(field => `\`${field}\`=?`).join(" AND");
+        const where = fields1.map(field => `"${field}"=$${fields.length + 1}`).join(" AND ");
 
         console.log("data ->", fields, values)
-        let query = `UPDATE \`${table}\` SET ${update} WHERE ${where};`
+        let query = `UPDATE "${info.table}" SET ${update} WHERE ${where};`
 
         console.log(query)
 
@@ -145,19 +158,60 @@ export class SQLiteDB {
         return
     }
 
+    upsertRecord(info: IRecordInfo): STMTResult {
 
-    doDelete(table, record): STMTResult {
+        const data = info.data;
+
+        if (info.serial !== undefined && !data[info.serial]) {
+            console.log("hello")
+            delete data[info.serial];
+        } else {
+            console.log("hello info", info, data)
+        }
+
+        console.log("data ->", data)
+        const fields = Object.keys(data);
+        const values = Object.values(data);
+        const wildcard = fields.map((f, index) => "$" + (index + 1));
+        const update = fields.map(field => `"${field}"=EXCLUDED.` + field);
+
+        console.log("data ->", fields, values)
+        let query = `INSERT INTO "${info.table}" ("${fields.join("\",\"")}") VALUES (${wildcard.join(",")}) 
+            ON CONFLICT (id) DO UPDATE SET ${update} RETURNING *;`
 
 
+
+        console.log(query, values)
+        const res = /*await*/ this.client.query(query, values,
+            function (err, result) {
+                if (err) {
+                    console.log("err", err)
+                    //handle error
+                }
+                else {
+                    console.log("ALL ", result, "ROWS", result.rows);
+                }
+                return
+            });
+
+
+
+        return
+    }
+
+    deleteRecord(info: IRecordInfo): STMTResult {
+
+        const record = info.record;
         console.log("doDelete ->", record)
         const fields = Object.keys(record);
         const values = Object.values(record);
 
 
-        const where = fields.map(field => `\`${field}\`=?`).join(" AND ");
+        const where = fields.map((field, index) => `"${field}"=$${index + 1}`).join(" AND ");
 
         console.log("doDelete ->", fields, values)
-        let query = `DELETE FROM \`${table}\` WHERE ${where};`
+        console.log("Where  ->", where, `--${where}--`)
+        let query = `DELETE FROM "${info.table}" WHERE ${where};`
 
         console.log(query)
 
@@ -176,9 +230,11 @@ export class SQLiteDB {
         return
     }
 
+    
+
 }
 
-export class MysqlDB {
+export class MysqlDB implements IDBAdmin {
     client;
 
     constructor(info: IConnectInfo) {
@@ -191,15 +247,22 @@ export class MysqlDB {
         this.client.connect();
     }
 
-    doInsert(table, data): STMTResult {
+    insertRecord(info: IRecordInfo): STMTResult {
 
+        const data = info.data;
+        if (info.serial !== undefined && !data[info.serial]) {
+            console.log("hello")
+            delete data[info.serial];
+        } else {
+            console.log("hello info", info, data)
+        }
         console.log("data ->", data)
         const fields = Object.keys(data);
         const values = Object.values(data);
-        const wildcard = "?".repeat(fields.length).split("").join(",");
+        const wildcard = "?".repeat(fields.length).split("");
 
         console.log("data ->", fields, values)
-        let query = `INSERT INTO \`${table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard});`
+        let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")});`
 
         console.log(query)
 
@@ -212,16 +275,24 @@ export class MysqlDB {
         return
     }
 
-    doInsertOrUpdate(table, data): STMTResult {
+    upsertRecord(info: IRecordInfo): STMTResult {
 
+        const data = info.data;
+
+        if (info.serial !== undefined && !data[info.serial]) {
+            console.log("hello")
+            delete data[info.serial];
+        } else {
+            console.log("hello info", info, data)
+        }
         console.log("data ->", data)
         const fields = Object.keys(data);
         const values = Object.values(data);
-        const wildcard = "?".repeat(fields.length).split("").join(",");
+        const wildcard = "?".repeat(fields.length).split("");
         const update = fields.map(field => `\`${field}\`=new.` + field);
 
         console.log("data ->", fields, values)
-        let query = `INSERT INTO \`${table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard}) AS new
+        let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")}) AS new
         ON DUPLICATE KEY UPDATE ${update};`
 
         console.log(query)
@@ -235,7 +306,10 @@ export class MysqlDB {
         return
     }
 
-    doUpdate(table, data, record): STMTResult {
+    updateRecord(info: IRecordInfo): STMTResult {
+
+        const data = info.data;
+        const record = info.record;
 
         console.log("data ->", data)
         const fields = Object.keys(data);
@@ -247,10 +321,10 @@ export class MysqlDB {
         const values1 = Object.values(record);
 
 
-        const where = fields1.map(field => `\`${field}\`=?`).join(" AND");
+        const where = fields1.map(field => `\`${field}\`=?`).join(" AND ");
 
         console.log("data ->", fields, values)
-        let query = `UPDATE \`${table}\` SET ${update} WHERE ${where};`
+        let query = `UPDATE \`${info.table}\` SET ${update} WHERE ${where};`
 
         console.log(query)
 
@@ -264,7 +338,9 @@ export class MysqlDB {
     }
 
 
-    doDelete(table, record): STMTResult {
+    deleteRecord(info: IRecordInfo): STMTResult {
+
+        const record = info.record;
 
 
         console.log("doDelete ->", record)
@@ -275,7 +351,7 @@ export class MysqlDB {
         const where = fields.map(field => `\`${field}\`=?`).join(" AND ");
 
         console.log("doDelete ->", fields, values)
-        let query = `DELETE FROM \`${table}\` WHERE ${where};`
+        let query = `DELETE FROM \`${info.table}\` WHERE ${where};`
 
         console.log(query)
 
@@ -297,7 +373,7 @@ export class MysqlDB {
 }
 
 
-export class PostgreDB {
+export class PostgreDB implements IDBAdmin {
     client;
 
     constructor(info: IConnectInfo) {
@@ -312,6 +388,144 @@ export class PostgreDB {
         console.log("8888")
         this.client.connect()
 
+    }
+
+    insertRecord(info: IRecordInfo): STMTResult {
+        console.log("info ->", info)
+        const data = info.data;
+        if (info.serial !== undefined && !data[info.serial]) {
+            console.log("hello")
+            delete data[info.serial];
+        } else {
+            console.log("hello info", info, data)
+        }
+
+
+        const fields = Object.keys(data);
+        const values = Object.values(data);
+        const wildcard = Object.keys(data).map((f, index) => "$" + (index + 1));
+
+
+
+        console.log("data ->", fields, values, wildcard)
+        let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) RETURNING *;`
+
+        console.log(query)
+
+        const res = /*await*/ this.client.query(query, values,
+            function (err, result) {
+                if (err) {
+                    console.log("err ", err)
+                    //handle error
+                }
+                else {
+                    console.log("result.rows:", result.rows);
+                }
+            });
+
+
+        return
+    }
+    updateRecord(info: IRecordInfo): STMTResult {
+
+        const data = info.data;
+        const record = info.record;
+        console.log("data ->", data)
+        const fields = Object.keys(data);
+        const values = Object.values(data);
+        //const wildcard = "?".repeat(fields.length).split("").join(",");
+        const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
+
+        const fields1 = Object.keys(record);
+        const values1 = Object.values(record);
+
+
+        const where = fields1.map(field => `"${field}"=$${fields.length + 1}`).join(" AND ");
+
+        console.log("data ->", fields, values)
+        let query = `UPDATE "${info.table}" SET ${update} WHERE ${where};`
+
+        console.log(query)
+
+        this.client.query(query, [...values, ...values1], function (err, rows, fields) {
+            if (err) throw err;
+
+            //console.log(rows[0]);
+            console.log(rows, fields)
+        });
+        return
+    }
+
+    upsertRecord(info: IRecordInfo): STMTResult {
+
+        const data = info.data;
+
+        if (info.serial !== undefined && !data[info.serial]) {
+            console.log("hello")
+            delete data[info.serial];
+        } else {
+            console.log("hello info", info, data)
+        }
+
+        console.log("data ->", data)
+        const fields = Object.keys(data);
+        const values = Object.values(data);
+        const wildcard = fields.map((f, index) => "$" + (index + 1));
+        const update = fields.map(field => `"${field}"=EXCLUDED.` + field);
+
+        console.log("data ->", fields, values)
+        let query = `INSERT INTO "${info.table}" ("${fields.join("\",\"")}") VALUES (${wildcard.join(",")}) 
+            ON CONFLICT (id) DO UPDATE SET ${update} RETURNING *;`
+
+
+
+        console.log(query, values)
+        const res = /*await*/ this.client.query(query, values,
+            function (err, result) {
+                if (err) {
+                    console.log("err", err)
+                    //handle error
+                }
+                else {
+                    console.log("ALL ", result, "ROWS", result.rows);
+                }
+                return
+            });
+
+
+
+        return
+    }
+
+    deleteRecord(info: IRecordInfo): STMTResult {
+
+        const record = info.record;
+        console.log("doDelete ->", record)
+        const fields = Object.keys(record);
+        const values = Object.values(record);
+
+
+        const where = fields.map((field, index) => `"${field}"=$${index + 1}`).join(" AND ");
+
+        console.log("doDelete ->", fields, values)
+        console.log("Where  ->", where, `--${where}--`)
+        let query = `DELETE FROM "${info.table}" WHERE ${where};`
+
+        console.log(query)
+
+        const res = /*await*/ this.client.query(query, values,
+            function (err, result) {
+                if (err) {
+                    //handle error
+                    console.log("Error ONDELETE", query, err);
+                }
+                else {
+                    console.log(result.rows);
+                }
+            });
+
+
+        return
     }
 
     doInsert(table, data): STMTResult {
@@ -381,13 +595,13 @@ export class PostgreDB {
         const fields = Object.keys(data);
         const values = Object.values(data);
         //const wildcard = "?".repeat(fields.length).split("").join(",");
-        const update = fields.map((field, index) => `"${field}"=$${index+1}`);
+        const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
 
         const fields1 = Object.keys(record);
         const values1 = Object.values(record);
 
 
-        const where = fields1.map(field => `"${field}"=$${fields.length+1}`).join(" AND");
+        const where = fields1.map(field => `"${field}"=$${fields.length + 1}`).join(" AND ");
 
         console.log("data ->", fields, values)
         let query = `UPDATE "${table}" SET ${update} WHERE ${where};`

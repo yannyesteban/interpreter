@@ -1,4 +1,4 @@
-import { DBAdmin, IRecordId, MysqlDB, PostgreDB, SQLiteDB, STMTResult } from "./db.js";
+import { DBAdmin, IDBAdmin, IRecordId, MysqlDB, PostgreDB, SQLiteDB, STMTResult } from "./db.js";
 
 
 console.log("DB Update...")
@@ -112,9 +112,11 @@ export class DBUpdate {
     transaction;
     records: DBRecord[];
 
-    save() {
-        let db;
-        let driver = "sqlite";
+    db: IDBAdmin;
+
+    constructor() {
+        let db: IDBAdmin;
+        let driver = "mysql";
         if (driver == "mysql") {
             db = new MysqlDB({
                 host: "localhost",
@@ -122,7 +124,7 @@ export class DBUpdate {
                 pass: "123456",
                 dbase: "whendy"
             });
-        } else if(driver == "postgres") {
+        } else if (driver == "postgres") {
             db = new PostgreDB({
                 host: "localhost",
                 user: "postgres",
@@ -130,7 +132,7 @@ export class DBUpdate {
                 dbase: "whendy"
             });
 
-        } else if(driver == "sqlite"){
+        } else if (driver == "sqlite") {
             db = new SQLiteDB({
                 host: "localhost",
                 user: "postgres",
@@ -139,14 +141,21 @@ export class DBUpdate {
             });
         }
 
+        this.db = db;
+    }
+    save(records: DBRecord[], master?: {}) {
+
+
+        const db = this.db;
 
 
         //let db = new DBAdmin();
 
-        for (let record of this.records) {
+        for (let record of records) {
             console.log("save", record.keys)
             let serialField = null;
-            const find: IRecordId = record.keys.find(e => e.type == "serial");
+            const find: IRecordId = record.fields.find(e => e.serial);
+            const keys = record.fields.filter(e => e.key)
 
             if (find) {
                 serialField = find.name;
@@ -155,45 +164,110 @@ export class DBUpdate {
             for (const data of record.data) {
 
                 const mode = data.__mode__ || record.mode;
-                const recordId: IRecordId = record.keys.reduce((acc, value) => { return { ...acc, [value.name]: value } }, {});
+                let result: STMTResult;
+
+                if (mode == 3) {
+                    result = db.deleteRecord({
+                        "table": record.table,
+
+                        "record": data.__record__
+
+
+                    });
+
+                    continue;
+                }
+                const recordId: IRecordId = keys.reduce((acc, value) => { return { ...acc, [value.name]: value } }, {});
 
 
                 console.log("<", recordId, data.__mode__, ">")
-                const fields = {};
+                const newData = {};
 
-                for (const [name, options] of Object.entries(record.fields)) {
-                    let field = {
-                        name,
-                        value: data[name]
-                    };
 
-                    fields[name] = data[name];
-
+                for (const field of record.fields) {
+                    const name = field.name;
+                    let value = data[name]
                     if (name in recordId) {
-                        recordId[name] = data[name];
+                        recordId[name] = value;
                     }
+                    console.log("1 .*******************", master)
+
+                    if (!value) {
+                        console.log("2. *******************", field, master)
+                        if (field.masterValue && field.masterValue in master) {
+                            console.log("3.0 *******************")
+                            value = master[field.masterValue];
+                        } else if (field.default) {
+                            value = field.default;
+                        } else if (field.type == "C") {
+                            value = "";
+                        } else {
+                            continue;
+                        }
+
+                    }
+
+                    if (field.modifiers) {
+                        for (const m of field.modifiers) {
+                            switch (m) {
+                                case "upper":
+                                    value = String(value).toLocaleUpperCase();
+                                    break;
+                                case "lower":
+                                    value = String(value).toLocaleLowerCase();
+                                    break;
+                            }
+                        }
+                    }
+
+                    newData[name] = value;
                 }
-                let result: STMTResult;
+
                 if (mode == 1) {
-                    delete fields[serialField];
+                    //delete fields[serialField];
                     console.log("XXXX", serialField)
-                    result = db.doInsert(record.table, fields);
+                    result = db.insertRecord({
+                        "table": record.table,
+                        "serial": serialField,
+                        "data": newData,
+
+                    });
+                    //result = db.doInsert(record.table, fields);
                 } else if (mode == 2) {
-                    result = db.doUpdate(record.table, fields, data.__record__);
-                } else if (mode == 3) {
-                    result = db.doDelete(record.table, data.__record__);
+                    result = db.updateRecord({
+                        "table": record.table,
+                        "serial": serialField,
+                        "data": newData,
+                        "record": data.__record__,
+
+                    },);
+                    //result = db.doUpdate(record.table, newData, data.__record__);
                 } else if (mode == 4) {
-                    result = db.doInsertOrUpdate(record.table, fields);
+                    result = db.upsertRecord({
+                        "table": record.table,
+                        "serial": serialField,
+                        "data": newData,
+
+
+                    },);
+                    //result = db.doInsertOrUpdate(record.table, newData);
                 }
 
                 if (result?.lastId && serialField) {
                     recordId[serialField] = result.lastId;
                 }
 
-                
 
-                console.log(recordId, "...\n", fields);
+
+                console.log(recordId, "...\n", newData);
+
+                if (data.__detail__) {
+                    console.log("master ", data)
+                    this.save(data.__detail__, data)
+                }
             }
+
+            
         }
     }
 }
@@ -202,84 +276,148 @@ const db = new DBUpdate()
 db.records = [
     {
         "table": "user",
-
-        "keys": [
+        "fields": [
             {
-                name: "id",
-                type: "serial"
+                "name": "id",
+                "type": "I",
+                "key": true,
+                "serial": true,
+                "notNull": true,
+                "default": "",
+            },
+            {
+                "name": "user",
+                "modifiers": ["lower"]
+            },
+            {
+                "name": "pass"
+            },
+
+            {
+                "name": "expire",
+
+            },
+            {
+                "name": "status",
+
             }
         ],
-        "fields": {
-            "id": {},
-            "user": {},
-            "pass": {},
-            "expire": {},
-            "status": {}
-        },
+
         data: [
             {
-                id:26,
-                user: "CASE 5",
 
-                pass: 10,
-                expire: "2022-11-24",
-                status: 2,
+                __mode__: 3,
+                __record__: {
+                    id: 40
+                }
+            },
+            {
+                id: 21,
+                user: "Upsert 22",
+                pass: "9999",
+                expire: "2023-07-03",
+                status: 8,
                 __mode__: 4,
             },
             {
+                //id: 2,
+                user: "CASE 777",
+                pass: "2242",
+                expire: "2024-11-24",
+                status: 2,
+                __mode__: 1,
+                __detail__: [
+                    {
+                        table: "user_role",
+                        keys: ["id", "cod"],
+                        fieldInfo: {
 
-                //id:2,
-                user: "maria",
-                pass: 12,
+                        },
+                        fields: [
+                            {
+                                "name": "id",
+                                "type": "I",
+                                "key": true,
+                                "serial": true,
+                                "notNull": true,
+                                "default": "",
+                            },
+                            {
+                                name: "user",
+                                masterValue: "user"
+                            },
+                            {
+                                name: "rol"
+                            },
+                            {
+                                name: "status"
+                            }
+                        ],
+                        //fields:["id", "cod", "name"],
+                        data: [
+                            {
+
+
+                                role: "admin",
+                                user : null,
+                                status: 8,
+                                __mode__: 1,
+                            },
+                        ]
+                    }
+                ]
+            },
+            {
+
+
+                id: 4,
+                user: "pepe grillo III",
+                pass: "77889",
                 expire: "2024-10-10",
                 status: 1,
-                __mode__: 1,
-            },
-            {
-                id:4,
-                user: "pepe500y",
-
-                pass: "456600",
-                expire: "2020-02-14",
-                status: 2,
                 __mode__: 2,
-                __record__ : {
-                    id:4
-                }
-            },
-            {
-                __mode__: 3,
-                __record__ : {
-                    id:31,
-                    user:"yanny"
+                __record__: {
+                    id: 4
                 }
             }
         ],
 
-        detail:{
-            table:"child",
-            keys:["id","cod"],
-            fieldInfo:{
+        detail: {
+            table: "user_role",
+            keys: ["id", "cod"],
+            fieldInfo: {
 
             },
-            fields:[
+            fields: [
                 {
-                    field:"id",
-                    type:"i",
-                    realType :"INTEGER",
-                    null: false,
-                    serial:true,
-                    primaryKey: true,
-                    default:0,
-                    masterValue:"master_id",
-                    dbValue:"now()+1",
-                    nowValue:true,
+                    "name": "id",
+                    "type": "I",
+                    "key": true,
+                    "serial": true,
+                    "notNull": true,
+                    "default": "",
+                },
+                {
+                    name: "user",
+                    masterValue: "user"
+                },
+                {
+                    name: "rol"
+                },
+                {
+                    name: "status"
                 }
             ],
             //fields:["id", "cod", "name"],
-            data:[
-                [1,1,1],
-                [2,2,2]
+            data: [
+                {
+
+
+                    role: "admin",
+
+                    status: 8,
+                    __mode__: 1,
+                },
             ]
         }
     }
@@ -287,43 +425,35 @@ db.records = [
 
 
 const recordInfo = {
-    table :"user",
-    key:[""],
-    unique:[""],
-    serial:"",
-    data:[],
+    table: "user",
+    key: [""],
+    unique: [""],
+    serial: "",
+    data: [],
 
 }
 
 let h = {
-    "name":"data1",
-    "table":"user",
-    _fields:["id", "name", "age", "__mode__", "__record__"],
-    unique:["name"],
-    "key":[],
-    "serial":"id",
-    fields:[
-        {
-            field:"id",
-            notNull: true,
-            default:"xx",
-            serial:true,
-            aux:false,
+    "name": "data1",
+    "table": "user",
+    "unique": ["name"],
+    "key": [],
+    "serial": "id",
 
-        },
+    data: [
         {
-            field:"name",
-            masterValue : "category",
-            dataValue : "age",
-            dbValue:"now()",
-            modifier:["upper"],
+
+            "user": "joe",
+            "pass": "456789",
+            "expire": "2004-01-01",
+            "status": 1,
 
         }
     ],
-    data:[
-        1,1,1,1,null
+    data1: [
+        1, 1, 1, 2, null
 
     ]
 };
 
-db.save();
+db.save(db.records);
