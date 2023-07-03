@@ -246,7 +246,34 @@ db.records = [
                     user:"yanny"
                 }
             }
-        ]
+        ],
+
+        detail:{
+            table:"child",
+            keys:["id","cod"],
+            fieldInfo:{
+
+            },
+            fields:[
+                {
+                    field:"id",
+                    type:"i",
+                    realType :"INTEGER",
+                    null: false,
+                    serial:true,
+                    primaryKey: true,
+                    default:0,
+                    masterValue:"master_id",
+                    dbValue:"now()+1",
+                    nowValue:true,
+                }
+            ],
+            //fields:["id", "cod", "name"],
+            data:[
+                [1,1,1],
+                [2,2,2]
+            ]
+        }
     }
 ];
 
