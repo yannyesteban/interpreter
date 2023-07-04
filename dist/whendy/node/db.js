@@ -1,6 +1,13 @@
 import { WhSQLite } from "./wh-sqlite.js";
 import pg from "pg";
 import * as mysql from "mysql";
+var RecorMode;
+(function (RecorMode) {
+    RecorMode[RecorMode["INSERT"] = 1] = "INSERT";
+    RecorMode[RecorMode["UPDATE"] = 2] = "UPDATE";
+    RecorMode[RecorMode["DELETE"] = 3] = "DELETE";
+    RecorMode[RecorMode["UPSERT"] = 4] = "UPSERT";
+})(RecorMode || (RecorMode = {}));
 export class DBAdmin {
     constructor() {
         this.dbs = {};

@@ -2,6 +2,12 @@ import { IConnectInfo, ISQLDBase } from "./dataModel.js"
 import { WhSQLite } from "./wh-sqlite.js";
 import pg from "pg"
 import * as mysql from "mysql"
+enum RecorMode {
+    INSERT = 1,
+    UPDATE,
+    DELETE,
+    UPSERT,
+  }
 
 export interface IRecordInfo {
     table?: string;
@@ -12,6 +18,13 @@ export interface IRecordInfo {
     sqlData?: {},
     record?: {}
 
+}
+
+export interface IDataRecord{
+    mode:RecorMode;
+    record:{};
+    data:{};
+    detail:IRecordInfo[]
 }
 
 export interface IRecordId {
