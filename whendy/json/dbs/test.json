@@ -1,0 +1,129 @@
+{
+  "db": "whendy",
+  "transaction": true,
+  "schemes": [
+    {
+      "name": "unit",
+      "table": "user",
+      "keys": ["a", "b"],
+      "fields": [
+        {
+          "name": "id",
+          "type": "I",
+          "key": true,
+          "serial": true,
+          "notNull": true,
+          "default": ""
+        },
+        {
+          "name": "user",
+          "modifiers": ["lower"]
+        },
+        {
+          "name": "pass"
+        },
+        {
+          "name": "expire"
+        },
+        {
+          "name": "status",
+          "masterValue": "status"
+        }
+      ]
+    },
+    {
+      "name": "user_role",
+      "table": "user_role",
+      "key": ["a", "b"],
+      "fields": [
+        {
+          "name": "id",
+          "type": "I",
+          "key": true,
+          "serial": true,
+          "notNull": true,
+          "default": ""
+        },
+        {
+          "name": "user",
+          "modifiers": ["lower"],
+          "masterValue": "user"
+        },
+        {
+          "name": "role"
+        },
+
+        {
+          "name": "status"
+        }
+      ]
+    }
+  ],
+
+  "dataset": [
+    {
+      "scheme": "unit",
+      "mode": 2,
+      "record": {"id":5},
+      "data": {
+        "id": 1,
+        "user": "march 1024",
+        "pass": "123456",
+        "expire": "2015-10-10",
+        "status": "null"
+      },
+      "detail_": [
+        {
+          "scheme": "user_role",
+          "mode": 1,
+          "record": {},
+          "data": {
+            "id": null,
+            "user": null,
+            "role": "admin",
+            "status": 5
+          }
+        },
+        {
+          "scheme": "user_role",
+          "mode": 1,
+          "record": {},
+          "data": {
+            "id": null,
+            "user": null,
+            "role": "user",
+            "status": 2
+          }
+        },
+        {
+          "scheme": "user_role",
+          "mode": 1,
+          "record": {},
+          "data": {
+            "id": null,
+            "user": null,
+            "role": "basic",
+            "status": 5
+          }
+        }
+      ]
+    },
+    {
+      "scheme": "unit",
+      "mode": 0,
+      "record": {
+        "id": 80
+      },
+      "data": {
+        "id": 80,
+        "user": "alpha 80",
+        "pass": "998899",
+        "expire": "2024-10-05",
+        "status": 1
+      }
+    }
+  ],
+  "masterData":{
+    "status":2000
+  }
+}

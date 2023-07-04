@@ -1,74 +1,16 @@
-import { MysqlDB, PostgreDB, SQLiteDB } from "./db.js";
-console.log("DB Update...");
-const data = {
-    connection: "webcar",
-    mode: "insert",
-    table: "person",
-    record: {
-        codpersona: 5,
-        codempresa: 9
-    },
-    data: {
-        name: "yanny",
-        last: "esteban",
-        __record__: {
-            codpersona: 5,
-            codempresa: 9
-        },
-        __mode__: "insert"
-    },
-    fields: {
-        "name": {
-            field: "name",
-            uppercase: true,
-            aux: false,
-            masterValue: "master_field",
-            dbValue: "now()",
-            lastIdValue: true,
-            dataValue: "otherfield",
-            modifiers: ["uppper", ""],
-            mtype: "C",
-            callbackSerial: "funcserial",
-            rules: {
-                required: true
-            }
-        }
-    },
-    details: [
-        {
-            table: "child",
-            mode: "update",
-            record: {
-                id: 5
-            },
-            fields: {
-                "id": {
-                    mtype: "I"
-                },
-                "name": {
-                    mtype: "C"
-                },
-                "date": {
-                    mtype: "D"
-                }
-            },
-            data: [
-                {
-                    __mode__: 1
-                },
-                {
-                    __mode__: 2
-                }
-            ]
-        }
-    ]
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
 };
-export class DBRecordField {
-}
-export class DBRecord {
-}
+import { MysqlDB, PostgreDB, RecordMode, SQLiteDB } from "./db.js";
 export class DBUpdate {
-    constructor() {
+    constructor(config) {
+        this.config = config;
         let db;
         let driver = "mysql";
         if (driver == "mysql") {
@@ -96,52 +38,56 @@ export class DBUpdate {
             });
         }
         this.db = db;
+        this.schemes = config.schemes.reduce((a, b) => {
+            a[b.name] = b;
+            return a;
+        }, {});
+        this.save(config.dataset, (config === null || config === void 0 ? void 0 : config.masterData) || {});
     }
-    save(records, master) {
-        const db = this.db;
-        //let db = new DBAdmin();
-        for (let record of records) {
-            console.log("save", record.keys);
-            let serialField = null;
-            const find = record.fields.find(e => e.serial);
-            const keys = record.fields.filter(e => e.key);
-            if (find) {
-                serialField = find.name;
-            }
-            for (const data of record.data) {
-                const mode = data.__mode__ || record.mode;
+    save(dataset, master) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = this.db;
+            for (const info of dataset) {
+                const scheme = this.schemes[info.scheme];
+                const mode = info.mode;
                 let result;
-                if (mode == 3) {
-                    result = db.deleteRecord({
-                        "table": record.table,
-                        "record": data.__record__
+                if (mode === RecordMode.DELETE) {
+                    result = yield db.deleteRecord({
+                        "table": scheme.table,
+                        "record": info.record
                     });
                     continue;
                 }
+                const data = info.data;
+                //const find = scheme.fields.find(e => e.serial);
+                const keys = scheme.fields.filter(e => e.key);
                 const recordId = keys.reduce((acc, value) => { return Object.assign(Object.assign({}, acc), { [value.name]: value }); }, {});
-                console.log("<", recordId, data.__mode__, ">");
                 const newData = {};
-                for (const field of record.fields) {
+                let serialField = null;
+                for (const field of scheme.fields) {
                     const name = field.name;
                     let value = data[name];
+                    if (field.serial) {
+                        serialField = name;
+                    }
                     if (name in recordId) {
                         recordId[name] = value;
                     }
-                    console.log("1 .*******************", master);
+                    if (field.aux || mode === RecordMode.UPDATE && field.noUpdate) {
+                        continue;
+                    }
+                    if (field.masterValue && field.masterValue in master) {
+                        value = master[field.masterValue];
+                    }
                     if (!value) {
-                        console.log("2. *******************", field, master);
-                        if (field.masterValue && field.masterValue in master) {
-                            console.log("3.0 *******************");
-                            value = master[field.masterValue];
-                        }
-                        else if (field.default) {
+                        if (field.notNull && field.default) {
                             value = field.default;
                         }
                         else if (field.type == "C") {
                             value = "";
                         }
                         else {
-                            continue;
+                            value = null;
                         }
                     }
                     if (field.modifiers) {
@@ -158,202 +104,37 @@ export class DBUpdate {
                     }
                     newData[name] = value;
                 }
-                if (mode == 1) {
-                    //delete fields[serialField];
-                    console.log("XXXX", serialField);
-                    result = db.insertRecord({
-                        "table": record.table,
+                if (mode === RecordMode.INSERT) {
+                    result = yield db.insertRecord({
+                        "table": scheme.table,
+                        "serial": serialField,
+                        "data": newData
+                    });
+                }
+                else if (mode === RecordMode.UPDATE) {
+                    result = yield db.updateRecord({
+                        "table": scheme.table,
                         "serial": serialField,
                         "data": newData,
+                        "record": info.record
                     });
-                    //result = db.doInsert(record.table, fields);
                 }
-                else if (mode == 2) {
-                    result = db.updateRecord({
-                        "table": record.table,
+                else if (mode === RecordMode.UPSERT) {
+                    result = yield db.upsertRecord({
+                        "table": scheme.table,
                         "serial": serialField,
-                        "data": newData,
-                        "record": data.__record__,
+                        "data": newData
                     });
-                    //result = db.doUpdate(record.table, newData, data.__record__);
                 }
-                else if (mode == 4) {
-                    result = db.upsertRecord({
-                        "table": record.table,
-                        "serial": serialField,
-                        "data": newData,
-                    });
-                    //result = db.doInsertOrUpdate(record.table, newData);
-                }
+                console.log("result:", result);
                 if ((result === null || result === void 0 ? void 0 : result.lastId) && serialField) {
                     recordId[serialField] = result.lastId;
                 }
-                console.log(recordId, "...\n", newData);
-                if (data.__detail__) {
-                    console.log("master ", data);
-                    this.save(data.__detail__, data);
+                if (info.detail) {
+                    this.save(info.detail, Object.assign(Object.assign({}, master), data));
                 }
             }
-        }
+        });
     }
 }
-const db = new DBUpdate();
-db.records = [
-    {
-        "table": "user",
-        "fields": [
-            {
-                "name": "id",
-                "type": "I",
-                "key": true,
-                "serial": true,
-                "notNull": true,
-                "default": "",
-            },
-            {
-                "name": "user",
-                "modifiers": ["lower"]
-            },
-            {
-                "name": "pass"
-            },
-            {
-                "name": "expire",
-            },
-            {
-                "name": "status",
-            }
-        ],
-        data: [
-            {
-                __mode__: 3,
-                __record__: {
-                    id: 40
-                }
-            },
-            {
-                id: 21,
-                user: "Upsert 22",
-                pass: "9999",
-                expire: "2023-07-03",
-                status: 8,
-                __mode__: 4,
-            },
-            {
-                //id: 2,
-                user: "CASE 777",
-                pass: "2242",
-                expire: "2024-11-24",
-                status: 2,
-                __mode__: 1,
-                __detail__: [
-                    {
-                        table: "user_role",
-                        keys: ["id", "cod"],
-                        fieldInfo: {},
-                        fields: [
-                            {
-                                "name": "id",
-                                "type": "I",
-                                "key": true,
-                                "serial": true,
-                                "notNull": true,
-                                "default": "",
-                            },
-                            {
-                                name: "user",
-                                masterValue: "user"
-                            },
-                            {
-                                name: "rol"
-                            },
-                            {
-                                name: "status"
-                            }
-                        ],
-                        //fields:["id", "cod", "name"],
-                        data: [
-                            {
-                                role: "admin",
-                                user: null,
-                                status: 8,
-                                __mode__: 1,
-                            },
-                        ]
-                    }
-                ]
-            },
-            {
-                id: 4,
-                user: "pepe grillo III",
-                pass: "77889",
-                expire: "2024-10-10",
-                status: 1,
-                __mode__: 2,
-                __record__: {
-                    id: 4
-                }
-            }
-        ],
-        detail: {
-            table: "user_role",
-            keys: ["id", "cod"],
-            fieldInfo: {},
-            fields: [
-                {
-                    "name": "id",
-                    "type": "I",
-                    "key": true,
-                    "serial": true,
-                    "notNull": true,
-                    "default": "",
-                },
-                {
-                    name: "user",
-                    masterValue: "user"
-                },
-                {
-                    name: "rol"
-                },
-                {
-                    name: "status"
-                }
-            ],
-            //fields:["id", "cod", "name"],
-            data: [
-                {
-                    role: "admin",
-                    status: 8,
-                    __mode__: 1,
-                },
-            ]
-        }
-    }
-];
-const recordInfo = {
-    table: "user",
-    key: [""],
-    unique: [""],
-    serial: "",
-    data: [],
-};
-let h = {
-    "name": "data1",
-    "table": "user",
-    "unique": ["name"],
-    "key": [],
-    "serial": "id",
-    data: [
-        {
-            "user": "joe",
-            "pass": "456789",
-            "expire": "2004-01-01",
-            "status": 1,
-        }
-    ],
-    data1: [
-        1, 1, 1, 2, null
-    ]
-};
-db.save(db.records);
 //# sourceMappingURL=DBUpdate.js.map

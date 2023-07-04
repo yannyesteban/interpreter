@@ -13,6 +13,7 @@ import { DBUpdate } from "./whendy/node/DBUpdate.js";
 const result = DateUtil.date("24/10/1975 10:22:05pm", "%d/%m/%y %h:%i:%s%p");
 
 import { valid } from "./whendy/frontend/Valid.js";
+import { Tool } from "./whendy/node/tool.js";
 
 let value = "-198";
 let result2 = valid({
@@ -22,7 +23,7 @@ let result2 = valid({
 
 console.log(" **** ", result2.message);
 
-let f = new DBUpdate()
+//let f = new DBUpdate()
 
 
 
@@ -65,3 +66,6 @@ async function  start2(){
       connection.end();
 }
 //start2()
+
+const config = Tool.loadJsonFile("whendy/json/dbs/test.json");
+const db = new DBUpdate(config);

@@ -1,13 +1,24 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { WhSQLite } from "./wh-sqlite.js";
 import pg from "pg";
 import * as mysql from "mysql";
-var RecorMode;
-(function (RecorMode) {
-    RecorMode[RecorMode["INSERT"] = 1] = "INSERT";
-    RecorMode[RecorMode["UPDATE"] = 2] = "UPDATE";
-    RecorMode[RecorMode["DELETE"] = 3] = "DELETE";
-    RecorMode[RecorMode["UPSERT"] = 4] = "UPSERT";
-})(RecorMode || (RecorMode = {}));
+export var RecordMode;
+(function (RecordMode) {
+    RecordMode[RecordMode["NONE"] = 0] = "NONE";
+    RecordMode[RecordMode["INSERT"] = 1] = "INSERT";
+    RecordMode[RecordMode["UPDATE"] = 2] = "UPDATE";
+    RecordMode[RecordMode["DELETE"] = 3] = "DELETE";
+    RecordMode[RecordMode["UPSERT"] = 4] = "UPSERT";
+})(RecordMode || (RecordMode = {}));
+;
 export class DBAdmin {
     constructor() {
         this.dbs = {};
@@ -36,10 +47,8 @@ export class DBAdmin {
     doInsertOrUpdate(table, data) {
         return;
     }
-    begin() {
-    }
-    commit() {
-    }
+    begin() { }
+    commit() { }
 }
 export class SQLiteDB {
     constructor(info) {
@@ -47,7 +56,7 @@ export class SQLiteDB {
             host: info.host,
             user: info.user,
             password: info.pass,
-            database: info.dbase
+            database: info.dbase,
         });
         this.client.connect();
     }
@@ -88,7 +97,9 @@ export class SQLiteDB {
         const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
         const fields1 = Object.keys(record);
         const values1 = Object.values(record);
-        const where = fields1.map(field => `"${field}"=$${fields.length + 1}`).join(" AND ");
+        const where = fields1
+            .map((field) => `"${field}"=$${fields.length + 1}`)
+            .join(" AND ");
         console.log("data ->", fields, values);
         let query = `UPDATE "${info.table}" SET ${update} WHERE ${where};`;
         console.log(query);
@@ -113,9 +124,9 @@ export class SQLiteDB {
         const fields = Object.keys(data);
         const values = Object.values(data);
         const wildcard = fields.map((f, index) => "$" + (index + 1));
-        const update = fields.map(field => `"${field}"=EXCLUDED.` + field);
+        const update = fields.map((field) => `"${field}"=EXCLUDED.` + field);
         console.log("data ->", fields, values);
-        let query = `INSERT INTO "${info.table}" ("${fields.join("\",\"")}") VALUES (${wildcard.join(",")}) 
+        let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) 
             ON CONFLICT (id) DO UPDATE SET ${update} RETURNING *;`;
         console.log(query, values);
         const res = /*await*/ this.client.query(query, values, function (err, result) {
@@ -135,7 +146,9 @@ export class SQLiteDB {
         console.log("doDelete ->", record);
         const fields = Object.keys(record);
         const values = Object.values(record);
-        const where = fields.map((field, index) => `"${field}"=$${index + 1}`).join(" AND ");
+        const where = fields
+            .map((field, index) => `"${field}"=$${index + 1}`)
+            .join(" AND ");
         console.log("doDelete ->", fields, values);
         console.log("Where  ->", where, `--${where}--`);
         let query = `DELETE FROM "${info.table}" WHERE ${where};`;
@@ -158,101 +171,120 @@ export class MysqlDB {
             host: info.host,
             user: info.user,
             password: info.pass,
-            database: info.dbase
+            database: info.dbase,
         });
         this.client.connect();
     }
     insertRecord(info) {
-        const data = info.data;
-        if (info.serial !== undefined && !data[info.serial]) {
-            console.log("hello");
-            delete data[info.serial];
-        }
-        else {
-            console.log("hello info", info, data);
-        }
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        const wildcard = "?".repeat(fields.length).split("");
-        console.log("data ->", fields, values);
-        let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")});`;
-        console.log(query);
-        this.client.query(query, values, function (err, rows, fields) {
-            if (err)
-                throw err;
-            //console.log(rows[0]);
-            console.log(rows, fields);
+        return new Promise((resolve, reject) => {
+            const data = info.data;
+            if (info.serial !== undefined && !data[info.serial]) {
+                delete data[info.serial];
+            }
+            const fields = Object.keys(data);
+            const values = Object.values(data);
+            const wildcard = "?".repeat(fields.length).split("");
+            let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")});`;
+            console.log(query);
+            this.client.query(query, values, function (err, rows, fields) {
+                if (err) {
+                    reject(err);
+                }
+                data[info.serial] = rows.insertId;
+                console.log({ rows, fields });
+                resolve({
+                    row: data,
+                    errno: 0,
+                    error: "",
+                    lastId: rows.insertId
+                });
+            });
         });
-        return;
     }
     upsertRecord(info) {
-        const data = info.data;
-        if (info.serial !== undefined && !data[info.serial]) {
-            console.log("hello");
-            delete data[info.serial];
-        }
-        else {
-            console.log("hello info", info, data);
-        }
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        const wildcard = "?".repeat(fields.length).split("");
-        const update = fields.map(field => `\`${field}\`=new.` + field);
-        console.log("data ->", fields, values);
-        let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")}) AS new
-        ON DUPLICATE KEY UPDATE ${update};`;
-        console.log(query);
-        this.client.query(query, values, function (err, rows, fields) {
-            if (err)
-                throw err;
-            //console.log(rows[0]);
-            console.log(rows, fields);
-        });
-        return;
-    }
-    updateRecord(info) {
-        const data = info.data;
-        const record = info.record;
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        //const wildcard = "?".repeat(fields.length).split("").join(",");
-        const update = fields.map(field => `\`${field}\`=?`);
-        const fields1 = Object.keys(record);
-        const values1 = Object.values(record);
-        const where = fields1.map(field => `\`${field}\`=?`).join(" AND ");
-        console.log("data ->", fields, values);
-        let query = `UPDATE \`${info.table}\` SET ${update} WHERE ${where};`;
-        console.log(query);
-        this.client.query(query, [...values, ...values1], function (err, rows, fields) {
-            if (err)
-                throw err;
-            //console.log(rows[0]);
-            console.log(rows, fields);
-        });
-        return;
-    }
-    deleteRecord(info) {
-        const record = info.record;
-        console.log("doDelete ->", record);
-        const fields = Object.keys(record);
-        const values = Object.values(record);
-        const where = fields.map(field => `\`${field}\`=?`).join(" AND ");
-        console.log("doDelete ->", fields, values);
-        let query = `DELETE FROM \`${info.table}\` WHERE ${where};`;
-        console.log(query);
-        const res = /*await*/ this.client.query(query, values, function (err, result) {
-            if (err) {
-                //handle error
-                console.log("Error ONDELETE", query, err);
+        return new Promise((resolve, reject) => {
+            const data = info.data;
+            if (info.serial !== undefined && !data[info.serial]) {
+                console.log("hello");
+                delete data[info.serial];
             }
             else {
-                console.log(result.rows);
+                console.log("hello info", info, data);
             }
+            console.log("data ->", data);
+            const fields = Object.keys(data);
+            const values = Object.values(data);
+            const wildcard = "?".repeat(fields.length).split("");
+            const update = fields.map((field) => `\`${field}\`=new.` + field);
+            console.log("data ->", fields, values);
+            let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")}) AS new ON DUPLICATE KEY UPDATE ${update};`;
+            console.log(query);
+            this.client.query(query, values, function (err, rows, fields) {
+                if (err) {
+                    reject(err);
+                }
+                data[info.serial] = rows.insertId;
+                console.log({ rows, fields });
+                resolve({
+                    row: data,
+                    errno: 0,
+                    error: "",
+                    lastId: rows.insertId
+                });
+            });
         });
-        return;
+    }
+    updateRecord(info) {
+        return new Promise((resolve, reject) => {
+            const data = info.data;
+            const record = info.record;
+            console.log("data ->", data);
+            const fields = Object.keys(data);
+            const values = Object.values(data);
+            //const wildcard = "?".repeat(fields.length).split("").join(",");
+            const update = fields.map((field) => `\`${field}\`=?`);
+            const fields1 = Object.keys(record);
+            const values1 = Object.values(record);
+            const where = fields1.map((field) => `\`${field}\`=?`).join(" AND ");
+            console.log("data ->", fields, values);
+            let query = `UPDATE \`${info.table}\` SET ${update} WHERE ${where};`;
+            console.log(query);
+            this.client.query(query, [...values, ...values1], function (err, rows, fields) {
+                if (err) {
+                    reject(err);
+                }
+                console.log({ rows, fields });
+                resolve({
+                    row: data,
+                    errno: 0,
+                    error: "",
+                    lastId: null
+                });
+            });
+        });
+    }
+    deleteRecord(info) {
+        return new Promise((resolve, reject) => {
+            const record = info.record;
+            console.log("doDelete ->", record);
+            const fields = Object.keys(record);
+            const values = Object.values(record);
+            const where = fields.map((field) => `\`${field}\`=?`).join(" AND ");
+            console.log("doDelete ->", fields, values);
+            let query = `DELETE FROM \`${info.table}\` WHERE ${where};`;
+            console.log(query);
+            this.client.query(query, values, function (err, rows, fields) {
+                if (err) {
+                    reject(err);
+                }
+                console.log({ rows, fields });
+                resolve({
+                    errno: 0,
+                    error: "",
+                    lastId: rows.insertId
+                });
+            });
+        });
     }
 }
 export class PostgreDB {
@@ -264,188 +296,124 @@ export class PostgreDB {
             password: info.pass,
             port: +(info.port || 5432),
         });
-        console.log("8888");
         this.client.connect();
     }
     insertRecord(info) {
-        console.log("info ->", info);
-        const data = info.data;
-        if (info.serial !== undefined && !data[info.serial]) {
-            console.log("hello");
-            delete data[info.serial];
-        }
-        else {
-            console.log("hello info", info, data);
-        }
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        const wildcard = Object.keys(data).map((f, index) => "$" + (index + 1));
-        console.log("data ->", fields, values, wildcard);
-        let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) RETURNING *;`;
-        console.log(query);
-        const res = /*await*/ this.client.query(query, values, function (err, result) {
-            if (err) {
-                console.log("err ", err);
-                //handle error
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = info.data;
+            if (info.serial !== undefined && !data[info.serial]) {
+                delete data[info.serial];
             }
-            else {
-                console.log("result.rows:", result.rows);
-            }
+            const fields = Object.keys(data);
+            const values = Object.values(data);
+            const wildcard = Object.keys(data).map((f, index) => "$" + (index + 1));
+            let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) RETURNING *;`;
+            console.log(query);
+            return yield this.client.query(query, values).then(result => {
+                return {
+                    type: result.command,
+                    row: result.rows[0],
+                    errno: 0,
+                    error: "",
+                    lastId: result.rows[0][info.serial]
+                };
+            }).catch(e => {
+                console.log(e);
+                return {
+                    errno: e.code,
+                    error: e.error
+                };
+            });
         });
-        return;
     }
     updateRecord(info) {
-        const data = info.data;
-        const record = info.record;
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        //const wildcard = "?".repeat(fields.length).split("").join(",");
-        const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
-        const fields1 = Object.keys(record);
-        const values1 = Object.values(record);
-        const where = fields1.map(field => `"${field}"=$${fields.length + 1}`).join(" AND ");
-        console.log("data ->", fields, values);
-        let query = `UPDATE "${info.table}" SET ${update} WHERE ${where};`;
-        console.log(query);
-        this.client.query(query, [...values, ...values1], function (err, rows, fields) {
-            if (err)
-                throw err;
-            //console.log(rows[0]);
-            console.log(rows, fields);
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = info.data;
+            const record = info.record;
+            console.log("data ->", data);
+            const fields = Object.keys(data);
+            const values = Object.values(data);
+            //const wildcard = "?".repeat(fields.length).split("").join(",");
+            const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
+            const fields1 = Object.keys(record);
+            const values1 = Object.values(record);
+            const where = fields1
+                .map((field) => `"${field}"=$${fields.length + 1}`)
+                .join(" AND ");
+            console.log("data ->", fields, values);
+            let query = `UPDATE "${info.table}" SET ${update} WHERE ${where};`;
+            console.log(query);
+            return yield this.client.query(query, [...values, ...values1]).then(result => {
+                return {
+                    type: result.command,
+                    row: data,
+                    errno: 0,
+                    error: "",
+                    lastId: null
+                };
+            }).catch(e => {
+                console.log(e);
+                return {
+                    errno: e.code,
+                    error: e.error
+                };
+            });
         });
-        return;
     }
     upsertRecord(info) {
-        const data = info.data;
-        if (info.serial !== undefined && !data[info.serial]) {
-            console.log("hello");
-            delete data[info.serial];
-        }
-        else {
-            console.log("hello info", info, data);
-        }
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        const wildcard = fields.map((f, index) => "$" + (index + 1));
-        const update = fields.map(field => `"${field}"=EXCLUDED.` + field);
-        console.log("data ->", fields, values);
-        let query = `INSERT INTO "${info.table}" ("${fields.join("\",\"")}") VALUES (${wildcard.join(",")}) 
+        return __awaiter(this, void 0, void 0, function* () {
+            const data = info.data;
+            if (info.serial !== undefined && !data[info.serial]) {
+                delete data[info.serial];
+            }
+            const fields = Object.keys(data);
+            const values = Object.values(data);
+            const wildcard = fields.map((f, index) => "$" + (index + 1));
+            const update = fields.map((field) => `"${field}"=EXCLUDED.` + field);
+            let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) 
             ON CONFLICT (id) DO UPDATE SET ${update} RETURNING *;`;
-        console.log(query, values);
-        const res = /*await*/ this.client.query(query, values, function (err, result) {
-            if (err) {
-                console.log("err", err);
-                //handle error
-            }
-            else {
-                console.log("ALL ", result, "ROWS", result.rows);
-            }
-            return;
+            console.log(query, values);
+            return yield this.client.query(query, values).then(result => {
+                return {
+                    type: result.command,
+                    row: result.rows[0],
+                    errno: 0,
+                    error: "",
+                    lastId: result.rows[0][info.serial]
+                };
+            }).catch(e => {
+                return {
+                    errno: e.code,
+                    error: e.error
+                };
+            });
         });
-        return;
     }
     deleteRecord(info) {
-        const record = info.record;
-        console.log("doDelete ->", record);
-        const fields = Object.keys(record);
-        const values = Object.values(record);
-        const where = fields.map((field, index) => `"${field}"=$${index + 1}`).join(" AND ");
-        console.log("doDelete ->", fields, values);
-        console.log("Where  ->", where, `--${where}--`);
-        let query = `DELETE FROM "${info.table}" WHERE ${where};`;
-        console.log(query);
-        const res = /*await*/ this.client.query(query, values, function (err, result) {
-            if (err) {
-                //handle error
-                console.log("Error ONDELETE", query, err);
-            }
-            else {
-                console.log(result.rows);
-            }
+        return __awaiter(this, void 0, void 0, function* () {
+            const record = info.record;
+            const fields = Object.keys(record);
+            const values = Object.values(record);
+            const where = fields
+                .map((field, index) => `"${field}"=$${index + 1}`)
+                .join(" AND ");
+            let query = `DELETE FROM "${info.table}" WHERE ${where};`;
+            console.log(query);
+            return yield this.client.query(query, values).then(result => {
+                return {
+                    type: result.command,
+                    row: result.rows[0],
+                    errno: 0,
+                    error: "",
+                    lastId: result.rows[0][info.serial]
+                };
+            }).catch(e => {
+                return {
+                    errno: e.code,
+                    error: e.error
+                };
+            });
         });
-        return;
-    }
-    doInsert(table, data) {
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        const wildcard = fields.map((f, index) => "$" + (index + 1)).join(",");
-        console.log("data ->", fields, values, wildcard);
-        let query = `INSERT INTO "${table}" ("${fields.join('","')}") VALUES (${wildcard}) RETURNING *;`;
-        console.log(query);
-        const res = /*await*/ this.client.query(query, values, function (err, result) {
-            if (err) {
-                //handle error
-            }
-            else {
-                console.log(result.rows);
-            }
-        });
-        return;
-    }
-    doInsertOrUpdate(table, data) {
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        const wildcard = fields.map((f, index) => "$" + (index + 1)).join(",");
-        const update = fields.map(field => `"${field}"=EXCLUDED.` + field);
-        console.log("data ->", fields, values);
-        let query = `INSERT INTO "${table}" ("${fields.join("\",\"")}") VALUES (${wildcard}) 
-            ON CONFLICT (id) DO UPDATE SET ${update} RETURNING *;`;
-        console.log(query, values);
-        const res = /*await*/ this.client.query(query, values, function (err, result) {
-            if (err) {
-                console.log("err", err);
-                //handle error
-            }
-            else {
-                console.log("ALL ", result, "ROWS", result.rows);
-            }
-            return;
-        });
-        return;
-    }
-    doUpdate(table, data, record) {
-        console.log("data ->", data);
-        const fields = Object.keys(data);
-        const values = Object.values(data);
-        //const wildcard = "?".repeat(fields.length).split("").join(",");
-        const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
-        const fields1 = Object.keys(record);
-        const values1 = Object.values(record);
-        const where = fields1.map(field => `"${field}"=$${fields.length + 1}`).join(" AND ");
-        console.log("data ->", fields, values);
-        let query = `UPDATE "${table}" SET ${update} WHERE ${where};`;
-        console.log(query);
-        this.client.query(query, [...values, ...values1], function (err, rows, fields) {
-            if (err)
-                throw err;
-            //console.log(rows[0]);
-            console.log(rows, fields);
-        });
-        return;
-    }
-    doDelete(table, record) {
-        console.log("doDelete ->", record);
-        const fields = Object.keys(record);
-        const values = Object.values(record);
-        const where = fields.map((field, index) => `"${field}"=$${index + 1}`).join(" AND ");
-        console.log("doDelete ->", fields, values);
-        console.log("Where  ->", where, `--${where}--`);
-        let query = `DELETE FROM "${table}" WHERE ${where};`;
-        console.log(query);
-        const res = /*await*/ this.client.query(query, values, function (err, result) {
-            if (err) {
-                //handle error
-                console.log("Error ONDELETE", query, err);
-            }
-            else {
-                console.log(result.rows);
-            }
-        });
-        return;
     }
 }
 //# sourceMappingURL=db.js.map
