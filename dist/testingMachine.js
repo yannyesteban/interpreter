@@ -50,14 +50,14 @@ function start2() {
             host: 'localhost',
             user: 'root',
             password: '123456',
-            database: 'gt'
+            database: 'whendy'
         });
         connection.connect();
-        connection.query('SELECT * FROM unit limit 10', function (err, rows, fields) {
-            if (err)
-                throw err;
+        connection.query('SELECT 4 as d FROM unit limit 10', function (err, rows, fields) {
+            //if (err) throw err;
+            console.log("err");
             //console.log(rows[0]);
-            console.log(fields);
+            console.log(rows);
         });
         connection.end();
     });

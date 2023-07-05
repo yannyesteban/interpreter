@@ -267,42 +267,41 @@ export class MysqlDB implements IDBAdmin {
 
             this.client.query(query, values, function (err, rows, fields) {
                 if (err) {
-                    reject(err)
+                    resolve({
+                        row: null,
+                        errno: err.errno,
+                        error: err.sqlMessage,
+                        lastId: null
+                    });
                 }
+
                 data[info.serial] = rows.insertId;
-                console.log({ rows, fields })
+
                 resolve({
                     row: data,
                     errno: 0,
                     error: "",
                     lastId: rows.insertId
-                })
-
+                });
             });
-
         });
-
     }
 
     upsertRecord(info: IRecordInfo): Promise<STMTResult> {
 
-        return new Promise((resolve, reject) => {
-            
+        return new Promise((resolve) => {
+
             const data = info.data;
 
             if (info.serial !== undefined && !data[info.serial]) {
-                console.log("hello");
                 delete data[info.serial];
-            } else {
-                console.log("hello info", info, data);
             }
-            console.log("data ->", data);
+
             const fields = Object.keys(data);
             const values = Object.values(data);
             const wildcard = "?".repeat(fields.length).split("");
             const update = fields.map((field) => `\`${field}\`=new.` + field);
 
-            console.log("data ->", fields, values);
             let query = `INSERT INTO \`${info.table}\` (\`${fields.join(
                 "`,`"
             )}\`) VALUES (${wildcard.join(",")}) AS new ON DUPLICATE KEY UPDATE ${update};`;
@@ -310,65 +309,65 @@ export class MysqlDB implements IDBAdmin {
             console.log(query);
 
             this.client.query(query, values, function (err, rows, fields) {
+
                 if (err) {
-                    reject(err)
+                    resolve({
+                        row: null,
+                        errno: err.errno,
+                        error: err.sqlMessage,
+                        lastId: null
+                    });
                 }
+
                 data[info.serial] = rows.insertId;
-                console.log({ rows, fields })
+
                 resolve({
                     row: data,
                     errno: 0,
                     error: "",
                     lastId: rows.insertId
-                })
+                });
             });
-
         });
-
     }
 
     updateRecord(info: IRecordInfo): Promise<STMTResult> {
 
         return new Promise((resolve, reject) => {
+
             const data = info.data;
             const record = info.record;
-    
-            console.log("data ->", data);
             const fields = Object.keys(data);
             const values = Object.values(data);
             //const wildcard = "?".repeat(fields.length).split("").join(",");
             const update = fields.map((field) => `\`${field}\`=?`);
-    
             const fields1 = Object.keys(record);
             const values1 = Object.values(record);
-    
             const where = fields1.map((field) => `\`${field}\`=?`).join(" AND ");
-    
-            console.log("data ->", fields, values);
+
             let query = `UPDATE \`${info.table}\` SET ${update} WHERE ${where};`;
-    
+
             console.log(query);
-    
-            this.client.query(
-                query,
-                [...values, ...values1],
-                function (err, rows, fields) {
-                    if (err) {
-                        reject(err)
-                    }
-                    
-                    console.log({ rows, fields })
+
+            this.client.query(query, [...values, ...values1], (err, rows, fields) => {
+
+                if (err) {
                     resolve({
-                        row: data,
-                        errno: 0,
-                        error: "",
+                        row: null,
+                        errno: err.errno,
+                        error: err.sqlMessage,
                         lastId: null
-                    })
+                    });
                 }
-            );
-            
+
+                resolve({
+                    row: data,
+                    errno: 0,
+                    error: "",
+                    lastId: null
+                });
+            });
         });
-        
     }
 
     deleteRecord(info: IRecordInfo): Promise<STMTResult> {
@@ -379,14 +378,14 @@ export class MysqlDB implements IDBAdmin {
             console.log("doDelete ->", record);
             const fields = Object.keys(record);
             const values = Object.values(record);
-    
+
             const where = fields.map((field) => `\`${field}\`=?`).join(" AND ");
-    
+
             console.log("doDelete ->", fields, values);
             let query = `DELETE FROM \`${info.table}\` WHERE ${where};`;
-    
+
             console.log(query);
-    
+
             this.client.query(
                 query,
                 values,
@@ -394,21 +393,21 @@ export class MysqlDB implements IDBAdmin {
                     if (err) {
                         reject(err)
                     }
-                    
+
                     console.log({ rows, fields })
                     resolve({
-                        
+
                         errno: 0,
                         error: "",
                         lastId: rows.insertId
                     })
                 }
             );
-    
-            
+
+
 
         });
-        
+
     }
 }
 
