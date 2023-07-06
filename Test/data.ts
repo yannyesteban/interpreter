@@ -1,4 +1,4 @@
-import { WhSQLite } from "./../whendy/node/wh-sqlite.js"
+import { WhSQLite } from "../whendy/node/db/wh-sqlite.js"
 
 
 let db = new WhSQLite();

@@ -1,7 +1,9 @@
 import sqlite3 from "sqlite3";
-import { IConnectInfo, ISQLDBase } from "./dataModel.js"
+import { IConnectInfo, ISQLDBase } from "../dataModel.js"
+import { DB } from "./db.js";
 
-export class WhSQLite implements ISQLDBase {
+export class WhSQLite extends DB implements ISQLDBase {
+    
     db: sqlite3.Database;
     
     connect(info: IConnectInfo) {
@@ -55,5 +57,9 @@ export class WhSQLite implements ISQLDBase {
 
     run(sql: string, data: any, options: object) {
         const stmt = this.db.run(sql, ...data);
+    }
+
+    close() {
+        throw new Error("Method not implemented.");
     }
 }

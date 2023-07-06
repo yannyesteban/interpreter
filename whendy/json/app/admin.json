@@ -3,7 +3,14 @@
     "name": "admin",
     "templateFile": "whendy/templates/index.html",
     "elements": [
-        
+        {
+            "id": "form-login",
+            "setPanel": "#panel_02",
+            "element": "form",
+            "source": "whendy/json/forms/login.json",
+            "method": "request",
+            "eparams": {}
+        }
     ],
     "className": [
         "home"

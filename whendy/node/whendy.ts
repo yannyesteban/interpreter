@@ -5,9 +5,10 @@ import { Store } from "./store.js";
 import { Memory } from "./memory.js";
 import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin, OutputInfo } from "./element.js";
 import * as classManager from "./classManager.js";
-import { DBAdmin } from "./db.js";
+
 import { IConnectInfo } from "./dataModel.js";
 import { UserManager } from "./userManager.js";
+import { DBAdmin } from "./db/dbAdmin.js";
 
 interface InfoClass {
     "name": string;

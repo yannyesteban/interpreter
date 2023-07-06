@@ -1,3 +1,4 @@
+import { DBSql } from "./db/db.js";
 import { InfoElement, Element, IUserAdmin, UserInfo } from "./element.js";
 import { Store } from "./store.js";
 
@@ -52,9 +53,9 @@ export class User extends Element implements IUserAdmin {
 
         this.user = user;
 
-        let db = this.store.db.get("whendy");
+        let db = this.store.db.get<DBSql>("postgres");
 
-        const result = await db.getRecord("SELECT * FROM user WHERE user = ?", [user]);
+        const [result] = await db.query('SELECT * FROM "user" WHERE "user" = $1', [user]);
 
         if (result) {
             
@@ -92,9 +93,9 @@ export class User extends Element implements IUserAdmin {
 
     async dbRoles(user: string) {
 
-        let db = this.store.db.get("whendy");
+        let db = this.store.db.get<DBSql>("whendy");
 
-        const result = await db.getData("SELECT `group` FROM user_group WHERE user = ?", [user]);
+        const result = await db.query("SELECT `group` FROM user_group WHERE user = ?", [user]);
 
         if (result) {
 

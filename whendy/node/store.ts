@@ -6,7 +6,8 @@ import { ISession } from "./manager.js";
 import { Outer } from "./../../core/outer/Outer.js";
 import { Logic } from "./../../core/Logic.js";
 import { loadFile, loadJsonFile } from "./tool.js";
-import { DBAdmin } from "./db.js";
+import { DBAdmin } from "./db/dbAdmin.js";
+
 
 export class Store {
 

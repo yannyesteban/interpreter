@@ -1,12 +1,12 @@
 [
 	{
-		"name": "gt",
+		"name": "mysql",
 		"driver": "mysql",
 		"host": "127.0.0.1",
 		"port": "3306",
 		"user": "root",
 		"pass": "123456",
-		"dbase": "gt",
+		"dbase": "whendy",
 		"charset": "utf-8"
 	},
 	{
@@ -18,5 +18,13 @@
 		"pass": "",
 		"dbase": "./whendy.db",
 		"charset": ""
+	},
+	{
+		"name": "postgres",
+		"driver": "postgres",
+		"host": "localhost",
+		"user": "postgres",
+		"pass": "12345678",
+		"dbase": "whendy"
 	}
 ]

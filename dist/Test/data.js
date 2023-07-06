@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { WhSQLite } from "./../whendy/node/wh-sqlite.js";
+import { WhSQLite } from "../whendy/node/db/wh-sqlite.js";
 let db = new WhSQLite();
 db.connect({
     dbase: "./whendy.db"

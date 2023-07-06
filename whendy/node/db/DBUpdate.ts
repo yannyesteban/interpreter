@@ -1,4 +1,5 @@
-import { DBAdmin, IDBAdmin, IRecordInfo, MysqlDB, PostgreDB, RecordMode, SQLiteDB, STMTResult } from "./db.js";
+import { DBSql, IRecordAdmin, IRecordInfo, RecordMode, STMTResult } from "./db.js";
+import { DBAdmin } from "./dbAdmin.js";
 
 export interface IFieldInfo {
     field: string;
@@ -13,7 +14,7 @@ export interface IFieldInfo {
     aux: boolean;
     masterValue: string;
     inputValue: string;
-    noUpdate:boolean;
+    noUpdate: boolean;
 }
 
 export interface ISchemeInfo {
@@ -24,7 +25,7 @@ export interface ISchemeInfo {
 }
 
 export interface IDataInfo {
-    scheme:string;
+    scheme: string;
     mode: RecordMode;
     record: {};
     data: {};
@@ -44,39 +45,45 @@ export class DBUpdate {
     connection;
     transaction;
 
-    private db: IDBAdmin;
+    private db: DBSql;
     private config;
-    private schemes:{[name:string]:ISchemeInfo};
-    
-    constructor(config?:DBSaveInfo) {
-  
-        this.config = config;
-        let db: IDBAdmin;
-        let driver = "mysql";
-        
-        if (driver == "mysql") {
-            db = new MysqlDB({
+    private schemes: { [name: string]: ISchemeInfo };
+
+    constructor(config?: DBSaveInfo) {
+        let dbAdmin = new DBAdmin();
+        dbAdmin.init([
+            {
+                name: "mysql",
+                driver: "mysql",
                 host: "localhost",
                 user: "root",
                 pass: "123456",
                 dbase: "whendy"
-            });
-        } else if (driver == "postgres") {
-            db = new PostgreDB({
+            },
+            {
+                name: "postgres",
+                driver: "postgres",
                 host: "localhost",
                 user: "postgres",
                 pass: "12345678",
                 dbase: "whendy"
-            });
+            },
+            {
+                name: "sqlite",
+                driver: "sqlite",
+                host: "",
+                user: "",
+                pass: "",
+                dbase: "./whendy.db"
+            }
+        ])
 
-        } else if (driver == "sqlite") {
-            db = new SQLiteDB({
-                host: "localhost",
-                user: "postgres",
-                pass: "12345678",
-                dbase: "whendy"
-            });
-        }
+
+        this.config = config;
+        let db: DBSql;
+        let driver = "postgres";
+        db = dbAdmin.get<DBSql>(driver)
+
 
         this.db = db;
 
@@ -87,13 +94,13 @@ export class DBUpdate {
 
         this.save(config.dataset, config?.masterData || {});
     }
-    
+
     async save(dataset: IDataInfo[], master?: {}) {
 
         const db = this.db;
 
         for (const info of dataset) {
-            
+
             const scheme = this.schemes[info.scheme];
             const mode = info.mode;
             let result: STMTResult;
@@ -106,35 +113,35 @@ export class DBUpdate {
 
                 continue;
             }
-            
+
             const data = info.data;
             //const find = scheme.fields.find(e => e.serial);
             const keys = scheme.fields.filter(e => e.key)
             const recordId = keys.reduce((acc, value) => { return { ...acc, [value.name]: value } }, {});
             const newData = {};
             let serialField = null;
-            
+
             for (const field of scheme.fields) {
-                
+
                 const name = field.name;
                 let value = data[name];
                 if (field.serial) {
                     serialField = name;
                 }
-                                
+
                 if (name in recordId) {
                     recordId[name] = value;
                 }
 
-                if(field.aux || mode === RecordMode.UPDATE && field.noUpdate){
+                if (field.aux || mode === RecordMode.UPDATE && field.noUpdate) {
                     continue;
                 }
- 
+
                 if (field.masterValue && field.masterValue in master) {
                     value = master[field.masterValue];
                 }
-                
-                if(!value){
+
+                if (!value) {
                     if (field.notNull && field.default) {
                         value = field.default;
                     } else if (field.type == "C") {
@@ -143,9 +150,9 @@ export class DBUpdate {
                         value = null;
                     }
                 }
- 
+
                 if (field.modifiers) {
-                    
+
                     for (const m of field.modifiers) {
                         switch (m) {
                             case "upper":
@@ -162,22 +169,22 @@ export class DBUpdate {
             }
 
             if (mode === RecordMode.INSERT) {
-                
+
                 result = await db.insertRecord({
                     "table": scheme.table,
                     "serial": serialField,
                     "data": newData
                 });
-               
+
             } else if (mode === RecordMode.UPDATE) {
-                
+
                 result = await db.updateRecord({
                     "table": scheme.table,
                     "serial": serialField,
                     "data": newData,
                     "record": info.record
                 });
-                
+
             } else if (mode === RecordMode.UPSERT) {
                 result = await db.upsertRecord({
                     "table": scheme.table,
@@ -186,14 +193,14 @@ export class DBUpdate {
                 });
             }
 
-            console.log("result:", result)
-            
+            console.log("result::::", mode, result)
+
             if (result?.lastId && serialField) {
                 recordId[serialField] = result.lastId;
             }
-            
+
             if (info.detail) {
-                this.save(info.detail, {...master, ...data});
+                this.save(info.detail, { ...master, ...data });
             }
         }
     }

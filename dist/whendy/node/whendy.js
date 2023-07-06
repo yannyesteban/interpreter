@@ -12,8 +12,8 @@ import { register, Manager } from "./manager.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
 import * as classManager from "./classManager.js";
-import { DBAdmin } from "./db.js";
 import { UserManager } from "./userManager.js";
+import { DBAdmin } from "./db/dbAdmin.js";
 export class Whendy extends http.Server {
     constructor(opt) {
         super();

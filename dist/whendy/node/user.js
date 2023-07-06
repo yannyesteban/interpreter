@@ -45,8 +45,8 @@ export class User extends Element {
             let error = 1;
             let message = "credentials is wrong!";
             this.user = user;
-            let db = this.store.db.get("whendy");
-            const result = yield db.getRecord("SELECT * FROM user WHERE user = ?", [user]);
+            let db = this.store.db.get("postgres");
+            const [result] = yield db.query('SELECT * FROM "user" WHERE "user" = $1', [user]);
             if (result) {
                 if (result.pass == pass) {
                     error = 0;
@@ -78,7 +78,7 @@ export class User extends Element {
     dbRoles(user) {
         return __awaiter(this, void 0, void 0, function* () {
             let db = this.store.db.get("whendy");
-            const result = yield db.getData("SELECT `group` FROM user_group WHERE user = ?", [user]);
+            const result = yield db.query("SELECT `group` FROM user_group WHERE user = ?", [user]);
             if (result) {
                 return result.map(row => row.group);
             }

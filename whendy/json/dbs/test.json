@@ -63,14 +63,14 @@
   "dataset": [
     {
       "scheme": "unit",
-      "mode": 2,
-      "record": {"id":2},
+      "mode": 1,
+      "record": {"id":23},
       "data": {
-        "id": 27,
-        "user": "march 1024",
-        "pass": "123456",
+        "id": null,
+        "user": "yanny E",
+        "pass": "33553311",
         "expire": "2015-10-10",
-        "status": "null"
+        "status": 1
       },
       "detail_": [
         {
@@ -110,13 +110,13 @@
     },
     {
       "scheme": "unit",
-      "mode": 0,
+      "mode": 1,
       "record": {
-        "id": 80
+        "id": 28
       },
       "data": {
-        "id": 80,
-        "user": "alpha 80",
+        "id": null,
+        "user": "upsert pepe 2000",
         "pass": "998899",
         "expire": "2024-10-05",
         "status": 1

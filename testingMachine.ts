@@ -8,7 +8,7 @@ import  pg from "pg"
 import * as my from "mysql"
 
 import { DateUtil } from "./whendy/frontend/DateUtil.js";
-import { DBUpdate } from "./whendy/node/DBUpdate.js";
+import { DBUpdate } from "./whendy/node/db/DBUpdate.js";
 
 const result = DateUtil.date("24/10/1975 10:22:05pm", "%d/%m/%y %h:%i:%s%p");
 
