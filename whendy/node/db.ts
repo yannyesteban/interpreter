@@ -40,6 +40,25 @@ export interface IDBAdmin {
     deleteRecord(info: IRecordInfo): Promise<STMTResult>;
 }
 
+export abstract class STMT{
+    abstract query(...args:any);
+    abstract execute(...args:any);
+}
+
+export abstract class DB{
+    abstract connect();
+    abstract prepare():Promise<STMT>;
+    abstract begin();
+    abstract commit();
+    abstract rollback();
+    abstract close()
+}
+
+export abstract class DBSql{
+    abstract query(q:string);
+
+}
+
 export class DBAdmin {
     dbs: { [key: string]: ISQLDBase } = {};
 
@@ -386,22 +405,24 @@ export class MysqlDB implements IDBAdmin {
 
             console.log(query);
 
-            this.client.query(
-                query,
-                values,
-                function (err, rows, fields) {
-                    if (err) {
-                        reject(err)
-                    }
+            this.client.query(query, values, function (err, rows, fields) {
 
-                    console.log({ rows, fields })
+                if (err) {
                     resolve({
-
-                        errno: 0,
-                        error: "",
-                        lastId: rows.insertId
-                    })
+                        row: null,
+                        errno: err.errno,
+                        error: err.sqlMessage,
+                        lastId: null
+                    });
                 }
+
+                resolve({
+                    row: null,
+                    errno: 0,
+                    error: "",
+                    lastId: null
+                });
+            }
             );
 
 
