@@ -19,6 +19,10 @@ export interface IConnectInfo {
     pass?: string;
     dbase?: string;
     charset?: string;
+    
+    connLimit?:number;
+    idleTimeout?:number;
+    connTimeout?:number; 
 }
 
 interface IQueryInfo {

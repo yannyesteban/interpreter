@@ -1,0 +1,17 @@
+{
+    "name":"user_role",
+    "primaryKey": null,
+    "fields":[
+        {
+            "name":"id",
+            "serial":true,
+            "type":"I",
+            "length":0,
+            "primaryKey":true,
+            "unsigned":true,
+            "index":true,
+            "default":"",
+            "unique":true
+        }
+    ]
+}

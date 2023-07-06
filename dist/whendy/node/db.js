@@ -19,6 +19,12 @@ export var RecordMode;
     RecordMode[RecordMode["UPSERT"] = 4] = "UPSERT";
 })(RecordMode || (RecordMode = {}));
 ;
+export class STMT {
+}
+export class DB {
+}
+export class DBSql {
+}
 export class DBAdmin {
     constructor() {
         this.dbs = {};
@@ -279,13 +285,18 @@ export class MysqlDB {
             console.log(query);
             this.client.query(query, values, function (err, rows, fields) {
                 if (err) {
-                    reject(err);
+                    resolve({
+                        row: null,
+                        errno: err.errno,
+                        error: err.sqlMessage,
+                        lastId: null
+                    });
                 }
-                console.log({ rows, fields });
                 resolve({
+                    row: null,
                     errno: 0,
                     error: "",
-                    lastId: rows.insertId
+                    lastId: null
                 });
             });
         });
