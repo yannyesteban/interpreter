@@ -6,20 +6,34 @@ import pg from "pg";
 export class PostgreDB extends DBSql {
     client;
 
-    
-    query(sql: string, param?: any[]) {
-        return new Promise((resolve, reject) => {
+
+    async query(sql: string, param?: any[]) {
+
+        sql = sql.replace(/`/igm, '"');
+        let index = 1;
+        sql = sql.replace(/\?/igm, (e) => {
+            console.log(e, index)
+            return "$" + index.toString()
+        });
+
+        return await this.client.query(sql, param).then(result => {
             
-               this.client.query(sql, param, async (err, rows) => {
-                console.log("m,,,,", err, rows)
-                    if (err) {
-                        reject(err);
-                    }
-                    resolve(rows.rows);
-                })
-            
+            return {
+                errno: 0,
+                error: null,
+                rows: result.rows
+                
+            };
+
+        }).catch(err => {
+            return {
+                errno: err.errno,
+                error: err.error,
+                rows: [],
+            }
         });
     }
+
     infoQuery(q: string) {
         throw new Error("Method not implemented.");
     }
@@ -41,7 +55,7 @@ export class PostgreDB extends DBSql {
     close() {
         throw new Error("Method not implemented.");
     }
-    
+
 
     connect(info: IConnectInfo) {
         this.client = new pg.Client({

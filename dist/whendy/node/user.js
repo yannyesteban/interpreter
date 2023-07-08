@@ -17,12 +17,18 @@ export class User extends Element {
         this.roles = [];
         this.response = [];
         this.store = null;
+        this.connection = "_defaul";
+        this.sqlUser = "SELECT * FROM `user` WHERE `user` = ?";
+        this.sqlGroup = "SELECT `group` FROM user_group WHERE `user` = ?";
+        this.message = "user was autorized correctly";
+        this.messageError = "credentials is wrong!";
     }
     setStore(store) {
         this.store = store;
     }
     init(info) {
-        const config = this.store.loadJsonFile(info.source);
+        const source = this.store.getSes("JSON_PATH") + info.source + ".json";
+        const config = this.store.loadJsonFile(source);
         for (const [key, value] of Object.entries(Object.assign(Object.assign({}, config), info))) {
             this[key] = value;
         }
@@ -43,16 +49,17 @@ export class User extends Element {
         return __awaiter(this, void 0, void 0, function* () {
             let security = "md5";
             let error = 1;
-            let message = "credentials is wrong!";
+            let message = this.messageError;
             this.user = user;
-            let db = this.store.db.get("postgres");
-            const [result] = yield db.query('SELECT * FROM "user" WHERE "user" = $1', [user]);
-            if (result) {
-                if (result.pass == pass) {
+            this.db = this.store.db.get(this.connection);
+            const result = yield this.db.query(this.sqlUser, [user]);
+            if (result.rows) {
+                const row = result.rows[0];
+                if (row.pass == pass) {
                     error = 0;
                     this.auth = true;
                     this.roles = yield this.dbRoles(user);
-                    message = "user was autorized correctly";
+                    message = this.message;
                 }
             }
             const data = {
@@ -77,10 +84,9 @@ export class User extends Element {
     }
     dbRoles(user) {
         return __awaiter(this, void 0, void 0, function* () {
-            let db = this.store.db.get("whendy");
-            const result = yield db.query("SELECT `group` FROM user_group WHERE user = ?", [user]);
-            if (result) {
-                return result.map(row => row.group);
+            const result = yield this.db.query(this.sqlGroup, [user]);
+            if (result.rows) {
+                return result.rows.map(row => row.group);
             }
             return [];
         });

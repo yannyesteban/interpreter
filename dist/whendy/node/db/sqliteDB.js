@@ -11,13 +11,24 @@ import { DBSql } from "./db.js";
 import sqlite3 from "sqlite3";
 export class SQLiteDB extends DBSql {
     query(sql, param) {
+        sql = sql.replace(/`/igm, '"');
         return new Promise((resolve, reject) => {
             this.db.serialize(() => {
-                this.db.all(sql, param, (err, rows) => __awaiter(this, void 0, void 0, function* () {
-                    if (err) {
-                        reject(err);
+                this.db.all(sql, param, (error, rows) => __awaiter(this, void 0, void 0, function* () {
+                    if (error) {
+                        resolve({
+                            rows: null,
+                            errno: error.errno,
+                            error: error.message,
+                        });
                     }
-                    resolve(rows);
+                    else {
+                        resolve({
+                            errno: 0,
+                            error: null,
+                            rows: rows
+                        });
+                    }
                 }));
             });
         });

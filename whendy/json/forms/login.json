@@ -52,7 +52,7 @@
                             "type": "element",
                             "element": "user",
                             "method": "login",
-                            "name": "",
+                            "source": "admin/login",
                             "config": {}
                         }
                     ]

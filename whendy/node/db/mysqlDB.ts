@@ -7,17 +7,25 @@ export class MysqlDB extends DBSql {
     client;
 
     query(sql: string, param?: any[]) {
-        return new Promise((resolve, reject)=>{
+        return new Promise((resolve, reject) => {
             this.client.query(sql, param, function (error, results, fields) {
-                
-                if (error) 
-                {
-                    console.error(sql)
-                };
-                resolve(results || [])
-              });
+
+                if (error) {
+                    resolve({
+                        errno: 0,
+                        error: null,
+                        rows: results
+                    });
+                } else {
+                    resolve({
+                        errno: 0,
+                        error: null,
+                        rows: results
+                    });
+                }
+            });
         });
-        
+
     }
     infoQuery(q: string) {
         throw new Error("Method not implemented.");
@@ -37,7 +45,7 @@ export class MysqlDB extends DBSql {
     rollback() {
         throw new Error("Method not implemented.");
     }
-    
+
     connect(info: IConnectInfo) {
         this.client = mysql.createConnection({
             host: info.host,
@@ -50,9 +58,9 @@ export class MysqlDB extends DBSql {
     close() {
         throw new Error("Method not implemented.");
     }
-    
 
-    
+
+
 
     insertRecord(info: IRecordInfo): Promise<STMTResult> {
 
@@ -74,7 +82,7 @@ export class MysqlDB extends DBSql {
 
             this.client.query(query, values, function (err, rows, fields) {
                 if (err) {
-                    
+
                     resolve({
                         row: null,
                         errno: err.errno,
@@ -82,7 +90,7 @@ export class MysqlDB extends DBSql {
                         lastId: null
                     });
                 }
-                
+
                 data[info.serial] = rows?.insertId;
 
                 resolve({

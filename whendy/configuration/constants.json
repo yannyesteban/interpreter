@@ -1,7 +1,7 @@
 {
     "MAIN_PATH": "../",
     "MODULE_PATH": "",
-    "JSON_PATH": "json/",
+    "JSON_PATH": "whendy/json/",
     "CONFIG_PATH": "../config/",
     "TEMPLATES_PATH": "templates/",
     "IMAGES_PATH": "images/",

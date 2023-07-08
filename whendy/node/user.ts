@@ -20,17 +20,30 @@ export class User extends Element implements IUserAdmin {
 
     store: Store = null;
 
+    db: DBSql;
+
+    private connection: string = "_defaul";
+    private sqlUser: string = "SELECT * FROM `user` WHERE `user` = ?";
+    private sqlGroup: string = "SELECT `group` FROM user_group WHERE `user` = ?";
+    private message: string = "user was autorized correctly";
+    private messageError: string = "credentials is wrong!";
+
     setStore(store: Store) {
         this.store = store;
     }
 
     init(info: InfoElement) {
 
-        const config = this.store.loadJsonFile(info.source);
+
+        const source = this.store.getSes("JSON_PATH") + info.source + ".json";
+
+        const config = this.store.loadJsonFile(source);
 
         for (const [key, value] of Object.entries({ ...config, ...info })) {
             this[key] = value;
         }
+
+        
     }
 
     async evalMethod(method: string) {
@@ -48,22 +61,23 @@ export class User extends Element implements IUserAdmin {
 
         let security = "md5";
         let error = 1;
-        
-        let message = "credentials is wrong!"
+
+        let message = this.messageError;
 
         this.user = user;
 
-        let db = this.store.db.get<DBSql>("postgres");
+        this.db = this.store.db.get<DBSql>(this.connection);
 
-        const [result] = await db.query('SELECT * FROM "user" WHERE "user" = $1', [user]);
+        const result = await this.db.query(this.sqlUser, [user]);
 
-        if (result) {
-            
-            if (result.pass == pass) {
+        if (result.rows) {
+            const row = result.rows[0];
+
+            if (row.pass == pass) {
                 error = 0;
                 this.auth = true;
                 this.roles = await this.dbRoles(user);
-                message = "user was autorized correctly";
+                message = this.message;
             }
         }
 
@@ -93,14 +107,10 @@ export class User extends Element implements IUserAdmin {
 
     async dbRoles(user: string) {
 
-        let db = this.store.db.get<DBSql>("whendy");
+        const result = await this.db.query(this.sqlGroup, [user]);
 
-        const result = await db.query("SELECT `group` FROM user_group WHERE user = ?", [user]);
-
-        if (result) {
-
-            return result.map(row => row.group);
-
+        if (result.rows) {
+            return result.rows.map(row => row.group);
         }
 
         return [];
@@ -115,6 +125,7 @@ export class User extends Element implements IUserAdmin {
     }
 
     getUserInfo(): UserInfo {
+
         return {
             auth: this.auth,
             user: this.user,

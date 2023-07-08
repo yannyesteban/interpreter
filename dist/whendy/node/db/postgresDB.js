@@ -11,14 +11,26 @@ import { DBSql } from "./db.js";
 import pg from "pg";
 export class PostgreDB extends DBSql {
     query(sql, param) {
-        return new Promise((resolve, reject) => {
-            this.client.query(sql, param, (err, rows) => __awaiter(this, void 0, void 0, function* () {
-                console.log("m,,,,", err, rows);
-                if (err) {
-                    reject(err);
-                }
-                resolve(rows.rows);
-            }));
+        return __awaiter(this, void 0, void 0, function* () {
+            sql = sql.replace(/`/igm, '"');
+            let index = 1;
+            sql = sql.replace(/\?/igm, (e) => {
+                console.log(e, index);
+                return "$" + index.toString();
+            });
+            return yield this.client.query(sql, param).then(result => {
+                return {
+                    errno: 0,
+                    error: null,
+                    rows: result.rows
+                };
+            }).catch(err => {
+                return {
+                    errno: err.errno,
+                    error: err.error,
+                    rows: [],
+                };
+            });
         });
     }
     infoQuery(q) {

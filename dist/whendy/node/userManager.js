@@ -26,6 +26,7 @@ export class UserManager {
         }
     }
     setAuth(info) {
+        this.auth = info.auth;
         this.user = info.user;
         this.roles = info.roles;
         const token = this.jwt.generate({

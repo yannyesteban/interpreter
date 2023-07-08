@@ -3,14 +3,27 @@ import { DBSql, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
 import * as mysql from "mysql";
 import sqlite3 from "sqlite3";
 export class SQLiteDB extends DBSql {
+    
     query(sql: string, param?: any[]) {
+        sql = sql.replace(/`/igm, '"');
+
         return new Promise((resolve, reject) => {
             this.db.serialize(() => {
-                this.db.all(sql, param, async (err, rows) => {
-                    if (err) {
-                        reject(err);
+                this.db.all(sql, param, async (error: any, rows) => {
+                    
+                    if (error) {
+                        resolve({
+                            rows: null,
+                            errno: error.errno,
+                            error: error.message,
+                        });
+                    } else {
+                        resolve({
+                            errno: 0,
+                            error: null,
+                            rows: rows
+                        });
                     }
-                    resolve(rows);
                 })
             });
         });

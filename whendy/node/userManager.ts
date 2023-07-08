@@ -44,6 +44,7 @@ export class UserManager {
 
     setAuth(info:UserInfo){
 
+        this.auth = info.auth;
         this.user = info.user;
         this.roles = info.roles;
 
