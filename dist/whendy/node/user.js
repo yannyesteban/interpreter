@@ -8,6 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { Element } from "./element.js";
+import { createHash } from "node:crypto";
 export class User extends Element {
     constructor() {
         super(...arguments);
@@ -18,6 +19,7 @@ export class User extends Element {
         this.response = [];
         this.store = null;
         this.connection = "_defaul";
+        this.security = null;
         this.sqlUser = "SELECT * FROM `user` WHERE `user` = ?";
         this.sqlGroup = "SELECT `group` FROM user_group WHERE `user` = ?";
         this.message = "user was autorized correctly";
@@ -47,7 +49,6 @@ export class User extends Element {
     }
     dbLogin(user, pass) {
         return __awaiter(this, void 0, void 0, function* () {
-            let security = "md5";
             let error = 1;
             let message = this.messageError;
             this.user = user;
@@ -55,6 +56,9 @@ export class User extends Element {
             const result = yield this.db.query(this.sqlUser, [user]);
             if (result.rows) {
                 const row = result.rows[0];
+                if (this.security) {
+                    pass = this.encrypt(this.security, pass);
+                }
                 if (row.pass == pass) {
                     error = 0;
                     this.auth = true;
@@ -72,8 +76,8 @@ export class User extends Element {
                         message,
                         roles: this.roles,
                         auth: this.auth,
-                        error
-                    }
+                        error,
+                    },
                 },
                 //replayToken => $this->replayToken,
                 appendTo: this.appendTo,
@@ -86,7 +90,7 @@ export class User extends Element {
         return __awaiter(this, void 0, void 0, function* () {
             const result = yield this.db.query(this.sqlGroup, [user]);
             if (result.rows) {
-                return result.rows.map(row => row.group);
+                return result.rows.map((row) => row.group);
             }
             return [];
         });
@@ -101,8 +105,18 @@ export class User extends Element {
         return {
             auth: this.auth,
             user: this.user,
-            roles: this.roles
+            roles: this.roles,
         };
+    }
+    encrypt(type, pass) {
+        switch (type.toLowerCase()) {
+            case "md5":
+                return createHash("md5").update(pass).digest("hex");
+            case "sha1":
+                return createHash("sha1").update(pass).digest("hex");
+            case "sha256":
+                return createHash("sha256").update(pass).digest("hex");
+        }
     }
 }
 //# sourceMappingURL=user.js.map

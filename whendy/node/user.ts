@@ -1,10 +1,9 @@
 import { DBSql } from "./db/db.js";
 import { InfoElement, Element, IUserAdmin, UserInfo } from "./element.js";
 import { Store } from "./store.js";
+import { createHash } from "node:crypto";
 
 export class User extends Element implements IUserAdmin {
-
-
     public id: string;
     public name: string;
     public element: string = "";
@@ -23,6 +22,7 @@ export class User extends Element implements IUserAdmin {
     db: DBSql;
 
     private connection: string = "_defaul";
+    private security: string = null;
     private sqlUser: string = "SELECT * FROM `user` WHERE `user` = ?";
     private sqlGroup: string = "SELECT `group` FROM user_group WHERE `user` = ?";
     private message: string = "user was autorized correctly";
@@ -33,8 +33,6 @@ export class User extends Element implements IUserAdmin {
     }
 
     init(info: InfoElement) {
-
-
         const source = this.store.getSes("JSON_PATH") + info.source + ".json";
 
         const config = this.store.loadJsonFile(source);
@@ -42,12 +40,10 @@ export class User extends Element implements IUserAdmin {
         for (const [key, value] of Object.entries({ ...config, ...info })) {
             this[key] = value;
         }
-
-        
     }
 
     async evalMethod(method: string) {
-        console.log("user: ", method, this.store.getReq("user"), this.store.getReq("pass"))
+        console.log("user: ", method, this.store.getReq("user"), this.store.getReq("pass"));
         switch (method) {
             case "login":
                 const user = this.store.getReq("user");
@@ -58,8 +54,6 @@ export class User extends Element implements IUserAdmin {
     }
 
     async dbLogin(user: string, pass: string) {
-
-        let security = "md5";
         let error = 1;
 
         let message = this.messageError;
@@ -72,6 +66,9 @@ export class User extends Element implements IUserAdmin {
 
         if (result.rows) {
             const row = result.rows[0];
+            if (this.security) {
+                pass = this.encrypt(this.security, pass);
+            }
 
             if (row.pass == pass) {
                 error = 0;
@@ -82,20 +79,18 @@ export class User extends Element implements IUserAdmin {
         }
 
         const data = {
-
             mode: "init",
             type: "element",
             wc: "wh-app",
 
             props: {
-
                 store: {
                     user: user,
                     message,
                     roles: this.roles,
                     auth: this.auth,
-                    error
-                }
+                    error,
+                },
             },
             //replayToken => $this->replayToken,
             appendTo: this.appendTo,
@@ -106,11 +101,10 @@ export class User extends Element implements IUserAdmin {
     }
 
     async dbRoles(user: string) {
-
         const result = await this.db.query(this.sqlGroup, [user]);
 
         if (result.rows) {
-            return result.rows.map(row => row.group);
+            return result.rows.map((row) => row.group);
         }
 
         return [];
@@ -125,11 +119,21 @@ export class User extends Element implements IUserAdmin {
     }
 
     getUserInfo(): UserInfo {
-
         return {
             auth: this.auth,
             user: this.user,
-            roles: this.roles
+            roles: this.roles,
+        };
+    }
+
+    encrypt(type: string, pass: string) {
+        switch (type.toLowerCase()) {
+            case "md5":
+                return createHash("md5").update(pass).digest("hex");
+            case "sha1":
+                return createHash("sha1").update(pass).digest("hex");
+            case "sha256":
+                return createHash("sha256").update(pass).digest("hex");
         }
     }
 }

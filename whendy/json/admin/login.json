@@ -4,5 +4,6 @@
     "sqlUser": "SELECT * FROM `user` WHERE `user` = ?",
     "sqlGroup": "SELECT `group` FROM user_group WHERE `user` = ?",
     "message": "User was autorized correctly",
-    "messageError": "credentials is wrong!"
+    "messageError": "credentials is wrong!",
+    "security": null
 }

@@ -31,17 +31,16 @@ export class UserManager {
         this.roles = info.roles;
         const token = this.jwt.generate({
             user: info.user,
-            roles: info.roles
+            roles: info.roles,
         });
         return token;
     }
-    setUserInfo(info) {
-    }
+    setUserInfo(info) { }
     getUserInfo() {
         return {
             auth: this.auth,
             user: this.user,
-            roles: this.roles
+            roles: this.roles,
         };
     }
     getRoles() {
