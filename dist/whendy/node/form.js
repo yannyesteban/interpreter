@@ -15,6 +15,7 @@ export class Form extends Element {
         this.response = [];
         this.store = null;
         this._config = {};
+        this.connection = "mysql";
     }
     setStore(store) {
         this.store = store;
@@ -34,7 +35,18 @@ export class Form extends Element {
                 case "request":
                     yield this.load();
                     break;
+                case "request2":
+                    yield this.form();
+                    break;
             }
+        });
+    }
+    form() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = this.db = this.store.db.get(this.connection);
+            console.log(this.query);
+            let result = yield db.infoTable("person");
+            console.log(result);
         });
     }
     load() {

@@ -27,6 +27,16 @@ export interface IRecordInfo {
     //infoQuery?:string;
 }
 
+export interface QueryResult {
+    type?: string;
+    lastId?;
+    rows?;
+    info?;
+    error?;
+    errno?;
+    table?: string;
+    fields?:any
+}
 
 export interface STMTResult {
     type?: string;
@@ -53,7 +63,7 @@ export abstract class STMT{
 export abstract class DBSql implements IRecordAdmin{
     
     abstract connect(info:IConnectInfo);
-    abstract query(sql: string, param?: any[]);
+    abstract query(sql: string, param?: any[]):Promise<QueryResult>;
     abstract infoQuery(q:string);
     abstract infoTable(table:string);
     abstract prepare():Promise<STMT>;

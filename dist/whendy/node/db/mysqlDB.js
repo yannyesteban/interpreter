@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { DBSql } from "./db.js";
 import * as mysql from "mysql";
 export class MysqlDB extends DBSql {
@@ -8,14 +17,16 @@ export class MysqlDB extends DBSql {
                     resolve({
                         errno: 0,
                         error: null,
-                        rows: results
+                        rows: results,
+                        fields
                     });
                 }
                 else {
                     resolve({
                         errno: 0,
                         error: null,
-                        rows: results
+                        rows: results,
+                        fields
                     });
                 }
             });
@@ -24,8 +35,97 @@ export class MysqlDB extends DBSql {
     infoQuery(q) {
         throw new Error("Method not implemented.");
     }
-    infoTable(table) {
-        throw new Error("Method not implemented.");
+    infoTable(table, dbase) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const { rows } = yield this.query(`SELECT
+                TABLE_CATALOG as 'cat', TABLE_SCHEMA as db, TABLE_NAME as 'table', COLUMN_NAME as 'field', ORDINAL_POSITION as 'pos', IS_NULLABLE as 'null', DATA_TYPE as  'type',
+                 CHARACTER_MAXIMUM_LENGTH as length, NUMERIC_PRECISION as 'numeric', NUMERIC_SCALE as 'decimal',
+                 COLUMN_KEY as 'key', EXTRA as extra
+            FROM INFORMATION_SCHEMA.COLUMNS
+            WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
+            ORDER BY pos;`, [dbase || this.dbase, table]);
+            return rows.map(row => {
+                const { type, length, numeric, decimal } = this.evalType(row);
+                return {
+                    cat: row.cat,
+                    db: row.db,
+                    table: row.table,
+                    field: row.field,
+                    serial: row.extra === "auto_increment" ? true : false,
+                    primaryKey: row.key === "PRI" ? true : false,
+                    unique: row.key === "UNI" ? true : false,
+                    pos: row.pos,
+                    notNull: (row.null === "NO") ? true : false,
+                    type,
+                    length,
+                    numeric,
+                    decimal
+                };
+            });
+        });
+    }
+    evalType(row) {
+        let type = row.type;
+        let length = +row.length;
+        let numeric = +row.numeric;
+        let decimal = +row.decimal;
+        switch (type) {
+            //case "int":
+            //case "bigint":
+            //case "tinyint":
+            case "int":
+            case "1": //TINY
+            case "2": //SHORT
+            case "3": //LONG
+            case "8": //LONGLONG
+            case "9": //INT24
+                length = numeric;
+                type = "I";
+                break;
+            case "date":
+            case "10": //DATE
+            case "12": //DATETIME
+                length = 10;
+                type = "D";
+                break;
+            case "datetime":
+            case "timestamp":
+            case "7": //TIMESTAMP
+                type = "S";
+                break;
+            case "decimal":
+            case "real":
+            case "float":
+            case "numeric":
+            case "double":
+            case "246": //DECIMAL
+            case "4": //FLOAT
+            case "5": //DOUBLE
+                length = numeric + decimal;
+                type = "R";
+                break;
+            case "time":
+            case "11": //TIME
+                length = 8;
+                type = "T";
+                break;
+            case "char":
+                type = "CH";
+                break;
+            case "varchar":
+            case "253": //VAR_STRING
+            case "254": //STRING
+                type = "C";
+                break;
+            case "text":
+            case "249": //TINY_BLOB
+            case "250": //MEDIUM_BLOB 
+            case "251": //LONG_BLOB
+            case "252": //BLOB
+                type = "B";
+                break;
+        }
+        return { type, length, numeric, decimal };
     }
     prepare() {
         throw new Error("Method not implemented.");
@@ -46,6 +146,7 @@ export class MysqlDB extends DBSql {
             password: info.pass,
             database: info.dbase,
         });
+        this.dbase = info.dbase;
         this.client.connect();
     }
     close() {

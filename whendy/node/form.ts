@@ -1,3 +1,4 @@
+import { DBSql } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
 
@@ -18,6 +19,10 @@ export class Form extends Element{
 
     _config:any = {};
 
+    private query: string;
+    private db: DBSql;
+
+    private connection: string = "mysql";
     setStore(store:Store){
         this.store = store;
     }
@@ -42,9 +47,19 @@ export class Form extends Element{
             case "request":
                 await this.load();
                 break;
+            case "request2":
+                await this.form();
+                break;
         }
     }
 
+    async form(){
+
+        const db = this.db = this.store.db.get<DBSql>(this.connection);
+        console.log(this.query);
+        let result = await db.infoTable("person");
+        console.log(result);
+    }
     async load(){
 
         

@@ -18,6 +18,7 @@ export class User extends Element implements IUserAdmin {
     response: object[] = [];
 
     store: Store = null;
+    
 
     db: DBSql;
 

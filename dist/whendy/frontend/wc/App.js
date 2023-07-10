@@ -1,22 +1,6 @@
 import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
-class WHLayout extends HTMLElement {
-    constructor() {
-        super();
-    }
-    connectedCallback() {
-    }
-}
-customElements.define("wh-layout", WHLayout);
-class WHPanel extends HTMLElement {
-    constructor() {
-        super();
-    }
-    connectedCallback() {
-    }
-}
-customElements.define("wh-panel", WHPanel);
 export class App extends HTMLElement {
     constructor() {
         super();
@@ -112,7 +96,7 @@ export class App extends HTMLElement {
         const request = {
             confirm: "?",
             valid: true,
-            data: {},
+            body: {},
             //requestFunction : null,
             requestFunctionss: {
                 getEven: (json) => { },
@@ -245,7 +229,7 @@ export class App extends HTMLElement {
                     return;
                 }
             }
-            if (element.appendTo) {
+            else if (element.appendTo) {
                 panel = $(element.appendTo);
                 if (panel) {
                     panel.append(e);
@@ -275,29 +259,21 @@ export class App extends HTMLElement {
         return this.getAttribute("server");
     }
     go(info) {
-        console.log(info);
-        let body;
-        if (info.dataForm) {
-        }
-        else {
-        }
-        const data = Object.assign(info.data || {}, { __app_request: info.request, __app_id: this.id });
-        const headers = Object.assign({
+        const body = JSON.stringify(Object.assign(Object.assign({}, info.body || {}), { __app_request: info.request, __app_id: this.id }));
+        const headers = {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${this.token}`,
             "SID": this.sid,
             "Application-Id": this.id,
-        }, info.headers || {});
+        };
         fetch(this.server, {
             method: "post",
-            headers,
-            body: JSON.stringify(data),
-        })
-            .then((response) => {
+            headers: Object.assign(Object.assign({}, headers), info.headers),
+            body,
+        }).then((response) => {
             return response.json();
-        })
-            .catch((error) => { })
-            .then((json) => {
+        }).catch((error) => {
+        }).then((json) => {
             if (info.requestFunction) {
                 console.log(json);
                 info.requestFunction(json);

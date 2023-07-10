@@ -4,6 +4,23 @@ import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
 import { log } from "console";
 
+export type selector = string;
+export interface IForm{
+    getValues():any;
+    isValid(arg?:any):boolean;
+}
+interface InfoRequest {
+    sendTo?:selector
+    dataForm?;
+    request?;
+    headers?;
+    body?;
+    requestFunctions?;
+    requestFunction?;
+    blockWhile?:selector[];
+    confirm?:string;
+    valid:any;
+}
 
 
 
@@ -32,34 +49,9 @@ interface IElement {
     appendTo: string;
 }
 
-class WHLayout extends HTMLElement {
-    constructor() {
-        super();
-
-
-    }
-    public connectedCallback() {
-
-    }
-}
-
-customElements.define("wh-layout", WHLayout);
-
-class WHPanel extends HTMLElement {
-    constructor() {
-        super();
-
-
-    }
-    public connectedCallback() {
-
-    }
-}
-
-customElements.define("wh-panel", WHPanel);
 
 export class App extends HTMLElement {
-    
+
     public modules = [];
     public components = [];
 
@@ -67,7 +59,7 @@ export class App extends HTMLElement {
 
     public token = "x.y.z";
     public sid = "energy";
-    
+
     public xx = "";
     constructor() {
         super();
@@ -79,7 +71,7 @@ export class App extends HTMLElement {
 
     attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback", { name, oldVal, newVal });
-        
+
 
     }
 
@@ -94,10 +86,10 @@ export class App extends HTMLElement {
         console.log(data);
 
         console.log(data);
-        if(!Array.isArray(data)){
+        if (!Array.isArray(data)) {
             return;
         }
-        
+
 
         data.forEach((item) => {
 
@@ -115,8 +107,8 @@ export class App extends HTMLElement {
             console.log("item.mode", item.mode)
             switch (item.mode) {
                 case "auth":
-                    if(item?.props?.token){
-                        
+                    if (item?.props?.token) {
+
                         this.token = item.props.token;
                         console.log("this.token ", this.token);
                     }
@@ -156,7 +148,7 @@ export class App extends HTMLElement {
         });
     }
 
-    set cssSheets(data){
+    set cssSheets(data) {
         console.log(data)
         data.forEach((sheet) => {
             loadCss(sheet, true);
@@ -177,7 +169,7 @@ export class App extends HTMLElement {
             confirm: "?",
             valid: true,
 
-            data: {},
+            body: {},
             //requestFunction : null,
             requestFunctionss: {
 
@@ -249,13 +241,13 @@ export class App extends HTMLElement {
 
         return new Promise((resolve, reject) => {
             if (customElements.get(module.component)) {
-                console.log(   "   A   ", module.component);
-                
+                console.log("   A   ", module.component);
+
                 resolve(customElements.get(module.component));
             }
 
             import(module.src).then(MyModule => {
-                console.log(   "   B   ", MyModule);
+                console.log("   B   ", MyModule);
                 resolve(customElements.get(module.component));
 
             }).catch(error => {
@@ -312,7 +304,7 @@ export class App extends HTMLElement {
 
     initElement(element: IElement | IResponse) {
 
-       console.log("initElement", element, this.modules)
+        console.log("initElement", element, this.modules)
 
         const module = this.modules.find((e) => e.component == element.wc);
 
@@ -320,7 +312,7 @@ export class App extends HTMLElement {
             console.log("initElement", element)
             this.whenComponent(module).then((component) => {
 
-               
+
             }).catch(error => {
                 console.log(error)
             });
@@ -330,16 +322,16 @@ export class App extends HTMLElement {
 
 
         const e = document.getElementById(element.id);
-        if(e){
+        if (e) {
             e.remove();
         }
-        
 
-        
+
+
         customElements.whenDefined(element.wc).then(() => {
-            
+
             const e = $.create(element.wc);
-            
+
             e.id(element.id);
             e.prop(element.props);
             e.attr(element.attrs);
@@ -348,18 +340,16 @@ export class App extends HTMLElement {
 
             let panel = null;
             if (element.setPanel) {
-                
+
                 panel = $(element.setPanel);
 
                 if (panel) {
                     panel.text("");
                     panel.append(e);
-            
+
                     return;
                 }
-            }
-            
-            if (element.appendTo) {
+            }else if (element.appendTo) {
 
                 panel = $(element.appendTo);
 
@@ -386,57 +376,50 @@ export class App extends HTMLElement {
     }
 
     set name(value) {
-		this.setAttribute("name", value);
-	}
+        this.setAttribute("name", value);
+    }
 
-	get value() {
-		return this.getAttribute("name")
-	}
+    get value() {
+        return this.getAttribute("name")
+    }
 
     set server(value) {
-		this.setAttribute("server", value);
-	}
+        this.setAttribute("server", value);
+    }
 
-	get server() {
-		return this.getAttribute("server")
-	}
-	
+    get server() {
+        return this.getAttribute("server")
+    }
 
-    go(info) {
 
-        console.log(info)
-        let body;
-        if (info.dataForm) {
-        } else {
-        }
+    go(info:InfoRequest) {
 
-        const data = Object.assign(info.data || {}, { __app_request: info.request, __app_id: this.id });
-
-        const headers = Object.assign({
+        const body = JSON.stringify({...info.body || {}, __app_request: info.request, __app_id: this.id });
+        const headers = {
             "Content-Type": "application/json",
             "Authorization": `Bearer ${this.token}`,
             "SID": this.sid,
             "Application-Id": this.id,
-        }, info.headers || {});
+        };
+
         fetch(this.server, {
             method: "post",
-            headers,
-            body: JSON.stringify(data),
-        })
-            .then((response) => {
-                return response.json();
-            })
-            .catch((error) => { })
-            .then((json) => {
-               
-                if (info.requestFunction) {
-                    console.log(json);
-                    info.requestFunction(json);
-                    return true;
-                }
+            headers: { ...headers, ...info.headers },
+            body,
+        }).then((response) => {
+            return response.json();
+        }).catch((error) => {
+
+        }).then((json) => {
+
+            if (info.requestFunction) {
                 console.log(json);
-                this.decodeResponse(json, info.requestFunctions || null);
-            });
+                info.requestFunction(json);
+                return true;
+            }
+            console.log(json);
+            this.decodeResponse(json, info.requestFunctions || null);
+        });
     }
 }
 

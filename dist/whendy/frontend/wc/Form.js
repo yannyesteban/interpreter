@@ -187,7 +187,7 @@ class WHNavButton extends HTMLElement {
         $(this).on("click", (event) => {
             const app = this.getApp();
             if (app) {
-                info.data = this.getForm().getValues();
+                info.body = this.getForm().getValues();
                 app.go(info);
             }
         });
@@ -250,6 +250,9 @@ export class WHForm extends HTMLElement {
         slot.addEventListener("slotchange", (e) => {
             //const nodes = slot.assignedNodes();
         });
+    }
+    isValid(arg) {
+        throw new Error("Method not implemented.");
     }
     connectedCallback() {
     }

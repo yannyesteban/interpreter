@@ -2,6 +2,8 @@ import { Q as $ } from "./../Q.js";
 import { getParentElement } from "./../Tool.js";
 import "./Tab.js";
 
+import { IForm } from "./App.js";
+
 function dispatchEvent(element, eventName, detail) {
 	const event = new CustomEvent(eventName, {
 		detail,
@@ -251,7 +253,7 @@ class WHNavButton extends HTMLElement {
 		$(this).on("click", (event) => {
 			const app = this.getApp();
 			if (app) {
-				info.data = this.getForm().getValues();
+				info.body = this.getForm().getValues();
 
 				app.go(info);
 			}
@@ -309,7 +311,7 @@ customElements.define("wh-nav", WHNav);
 
 
 
-export class WHForm extends HTMLElement {
+export class WHForm extends HTMLElement implements IForm {
 	_caption = null;
 
 	static get observedAttributes() {
@@ -340,6 +342,9 @@ export class WHForm extends HTMLElement {
 			//const nodes = slot.assignedNodes();
 		});
 
+	}
+	isValid(arg?: any): boolean {
+		throw new Error("Method not implemented.");
 	}
 
 

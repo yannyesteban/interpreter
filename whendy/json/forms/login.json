@@ -83,9 +83,9 @@
                             "id": "form-login2",
                             "type": "element",
                             "element": "form",
-                            "method": "request",
+                            "method": "request2",
                             "setPanel": "#panel_02",
-                            "source": "whendy/json/forms/employee.json",
+                            "source": "whendy/json/forms/form_basic.json",
                             "config": {}
                         }
                     ]

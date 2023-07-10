@@ -1,0 +1,5 @@
+{
+    "name":"persons",
+    "query":"SELECT * FROM person",
+    "title": "Personas"
+}
