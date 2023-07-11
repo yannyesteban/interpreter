@@ -9,43 +9,75 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { DBSql } from "./db.js";
 import * as mysql from "mysql";
+var FLAGS;
+(function (FLAGS) {
+    FLAGS[FLAGS["NOT_NULL_FLAG"] = 1] = "NOT_NULL_FLAG";
+    FLAGS[FLAGS["PRI_KEY_FLAG"] = 2] = "PRI_KEY_FLAG";
+    FLAGS[FLAGS["MULTIPLE_KEY_FLAG"] = 8] = "MULTIPLE_KEY_FLAG";
+    FLAGS[FLAGS["BLOB_FLAG"] = 16] = "BLOB_FLAG";
+    FLAGS[FLAGS["UNSIGNED_FLAG"] = 32] = "UNSIGNED_FLAG";
+    FLAGS[FLAGS["ENUM_FLAG"] = 256] = "ENUM_FLAG";
+    FLAGS[FLAGS["AUTO_INCREMENT_FLAG"] = 512] = "AUTO_INCREMENT_FLAG";
+    FLAGS[FLAGS["TIMESTAMP_FLAG"] = 1024] = "TIMESTAMP_FLAG";
+    FLAGS[FLAGS["UNIQUE_FLAG"] = 65536] = "UNIQUE_FLAG";
+})(FLAGS || (FLAGS = {}));
 export class MysqlDB extends DBSql {
     query(sql, param) {
         return new Promise((resolve, reject) => {
-            this.client.query(sql, param, function (error, results, fields) {
+            this.client.query(sql, param, (error, results, fields) => {
                 if (error) {
                     resolve({
                         errno: 0,
                         error: null,
                         rows: results,
-                        fields
+                        fields,
                     });
                 }
                 else {
+                    fields = fields.map((field, index) => {
+                        const { type, length, decimals } = this.evalType(field);
+                        const { serial, unique, notNull, primaryKey } = this.evalFlags(field.flags);
+                        return {
+                            cat: field.catalog,
+                            db: field.db,
+                            table: field.table,
+                            field: field.name,
+                            serial,
+                            primaryKey,
+                            unique,
+                            pos: index + 1,
+                            notNull,
+                            type,
+                            length,
+                            decimals,
+                        };
+                    });
                     resolve({
                         errno: 0,
                         error: null,
                         rows: results,
-                        fields
+                        fields,
                     });
                 }
             });
         });
     }
     infoQuery(q) {
-        throw new Error("Method not implemented.");
+        return __awaiter(this, void 0, void 0, function* () {
+            throw new Error("Method not implemented.");
+        });
     }
     infoTable(table, dbase) {
         return __awaiter(this, void 0, void 0, function* () {
             const { rows } = yield this.query(`SELECT
                 TABLE_CATALOG as 'cat', TABLE_SCHEMA as db, TABLE_NAME as 'table', COLUMN_NAME as 'field', ORDINAL_POSITION as 'pos', IS_NULLABLE as 'null', DATA_TYPE as  'type',
-                 CHARACTER_MAXIMUM_LENGTH as length, NUMERIC_PRECISION as 'numeric', NUMERIC_SCALE as 'decimal',
-                 COLUMN_KEY as 'key', EXTRA as extra
+                COALESCE(CHARACTER_MAXIMUM_LENGTH, NUMERIC_PRECISION) as length, COALESCE(NUMERIC_SCALE, 0) as 'decimals',
+                COLUMN_KEY as 'key', EXTRA as extra
             FROM INFORMATION_SCHEMA.COLUMNS
             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
             ORDER BY pos;`, [dbase || this.dbase, table]);
-            return rows.map(row => {
-                const { type, length, numeric, decimal } = this.evalType(row);
+            return rows.map((row) => {
+                const { type, length, decimals } = this.evalType(row);
                 return {
                     cat: row.cat,
                     db: row.db,
@@ -55,20 +87,37 @@ export class MysqlDB extends DBSql {
                     primaryKey: row.key === "PRI" ? true : false,
                     unique: row.key === "UNI" ? true : false,
                     pos: row.pos,
-                    notNull: (row.null === "NO") ? true : false,
+                    notNull: row.null === "NO" ? true : false,
                     type,
-                    length,
-                    numeric,
-                    decimal
+                    length: length + decimals,
+                    decimals,
                 };
             });
         });
     }
+    evalFlags(flags) {
+        let serial = false;
+        let unique = false;
+        let notNull = false;
+        let primaryKey = false;
+        if (flags & FLAGS.NOT_NULL_FLAG) {
+            notNull = true;
+        }
+        if (flags & FLAGS.PRI_KEY_FLAG) {
+            primaryKey = true;
+        }
+        if (flags & FLAGS.AUTO_INCREMENT_FLAG) {
+            serial = true;
+        }
+        if (flags & FLAGS.UNIQUE_FLAG) {
+            unique = true;
+        }
+        return { serial, unique, notNull, primaryKey };
+    }
     evalType(row) {
-        let type = row.type;
-        let length = +row.length;
-        let numeric = +row.numeric;
-        let decimal = +row.decimal;
+        let type = String(row.type);
+        let length = +row.length || 0;
+        let decimals = +row.decimals || 0;
         switch (type) {
             //case "int":
             //case "bigint":
@@ -79,7 +128,7 @@ export class MysqlDB extends DBSql {
             case "3": //LONG
             case "8": //LONGLONG
             case "9": //INT24
-                length = numeric;
+                //length = length || numeric;
                 type = "I";
                 break;
             case "date":
@@ -101,7 +150,6 @@ export class MysqlDB extends DBSql {
             case "246": //DECIMAL
             case "4": //FLOAT
             case "5": //DOUBLE
-                length = numeric + decimal;
                 type = "R";
                 break;
             case "time":
@@ -119,13 +167,13 @@ export class MysqlDB extends DBSql {
                 break;
             case "text":
             case "249": //TINY_BLOB
-            case "250": //MEDIUM_BLOB 
+            case "250": //MEDIUM_BLOB
             case "251": //LONG_BLOB
             case "252": //BLOB
                 type = "B";
                 break;
         }
-        return { type, length, numeric, decimal };
+        return { type, length, decimals };
     }
     prepare() {
         throw new Error("Method not implemented.");
@@ -169,7 +217,7 @@ export class MysqlDB extends DBSql {
                         row: null,
                         errno: err.errno,
                         error: err.sqlMessage,
-                        lastId: null
+                        lastId: null,
                     });
                 }
                 data[info.serial] = rows === null || rows === void 0 ? void 0 : rows.insertId;
@@ -177,7 +225,7 @@ export class MysqlDB extends DBSql {
                     row: data,
                     errno: 0,
                     error: "",
-                    lastId: (rows === null || rows === void 0 ? void 0 : rows.insertId) || null
+                    lastId: (rows === null || rows === void 0 ? void 0 : rows.insertId) || null,
                 });
             });
         });
@@ -200,7 +248,7 @@ export class MysqlDB extends DBSql {
                         row: null,
                         errno: err.errno,
                         error: err.sqlMessage,
-                        lastId: null
+                        lastId: null,
                     });
                 }
                 data[info.serial] = rows.insertId;
@@ -208,7 +256,7 @@ export class MysqlDB extends DBSql {
                     row: data,
                     errno: 0,
                     error: "",
-                    lastId: rows.insertId
+                    lastId: rows.insertId,
                 });
             });
         });
@@ -232,14 +280,14 @@ export class MysqlDB extends DBSql {
                         row: null,
                         errno: err.errno,
                         error: err.sqlMessage,
-                        lastId: null
+                        lastId: null,
                     });
                 }
                 resolve({
                     row: data,
                     errno: 0,
                     error: "",
-                    lastId: null
+                    lastId: null,
                 });
             });
         });
@@ -247,11 +295,9 @@ export class MysqlDB extends DBSql {
     deleteRecord(info) {
         return new Promise((resolve, reject) => {
             const record = info.record;
-            console.log("doDelete ->", record);
             const fields = Object.keys(record);
             const values = Object.values(record);
             const where = fields.map((field) => `\`${field}\`=?`).join(" AND ");
-            console.log("doDelete ->", fields, values);
             let query = `DELETE FROM \`${info.table}\` WHERE ${where};`;
             console.log(query);
             this.client.query(query, values, function (err, rows, fields) {
@@ -260,14 +306,14 @@ export class MysqlDB extends DBSql {
                         row: null,
                         errno: err.errno,
                         error: err.sqlMessage,
-                        lastId: null
+                        lastId: null,
                     });
                 }
                 resolve({
                     row: null,
                     errno: 0,
                     error: "",
-                    lastId: null
+                    lastId: null,
                 });
             });
         });

@@ -1,5 +1,5 @@
 
-import { DBSql, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
+import { DBSql, IFieldInfo, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
 import { IConnectInfo } from "../dataModel.js";
 import pg from "pg";
 
@@ -34,10 +34,10 @@ export class PostgreDB extends DBSql {
         });
     }
 
-    infoQuery(q: string) {
+    infoQuery(q: string):Promise<IFieldInfo[]> {
         throw new Error("Method not implemented.");
     }
-    infoTable(table: string) {
+    infoTable(table: string):Promise<IFieldInfo[]> {
         throw new Error("Method not implemented.");
     }
     prepare(): Promise<STMT> {

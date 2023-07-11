@@ -1,0 +1,73 @@
+{
+    "name": "person",
+    "title": "The Persons",
+    "db": "whendy",
+    "schemes": [
+        {
+            "name": "person1",
+            "query": "select * FROM person",
+            "table": "person"
+        },
+        {
+            "name": "unit",
+            "table": "user",
+            "keys": ["a", "b"],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "I",
+                    "key": true,
+                    "serial": true,
+                    "notNull": true,
+                    "default": ""
+                },
+                {
+                    "name": "user",
+                    "modifiers": ["lower"]
+                },
+                {
+                    "name": "pass"
+                },
+                {
+                    "name": "expire"
+                },
+                {
+                    "name": "status",
+                    "masterValue": "status"
+                }
+            ]
+        }
+    ],
+    "interfaces": [
+        {
+            "name": "create",
+            "mode": "recreate",
+            "schemes": ["user", "user_group"]
+        },
+        {
+            "name": "get",
+            "mode": "query",
+            "sql": "select * from person where id=?",
+            "params": ["#id"],
+            "record": { "id": 4 },
+            "filter": [{ "a": 1, "d:>=": 2 }],
+            "typeReturn": "record or list"
+        },
+        {
+            "name": "save",
+            "mode": "update",
+            "transaction": true,
+            "field":{
+                "id":{
+
+                }
+            },
+            "fields":[
+
+            ],
+            "masterData": {
+                "status": 2000
+            }
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 import { IConnectInfo } from "../dataModel.js";
-import { DBSql, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
+import { DBSql, IFieldInfo, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
 import * as mysql from "mysql";
 import sqlite3 from "sqlite3";
 export class SQLiteDB extends DBSql {
@@ -28,10 +28,10 @@ export class SQLiteDB extends DBSql {
             });
         });
     }
-    infoQuery(q: string) {
+    infoQuery(q: string):Promise<IFieldInfo[]> {
         throw new Error("Method not implemented.");
     }
-    infoTable(table: string) {
+    infoTable(table: string):Promise<IFieldInfo[]> {
         throw new Error("Method not implemented.");
     }
     prepare(): Promise<STMT> {

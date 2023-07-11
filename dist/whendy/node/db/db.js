@@ -8,7 +8,6 @@ export var RecordMode;
     RecordMode[RecordMode["DELETE"] = 3] = "DELETE";
     RecordMode[RecordMode["UPSERT"] = 4] = "UPSERT";
 })(RecordMode || (RecordMode = {}));
-;
 export class STMT {
 }
 export class DBSql {

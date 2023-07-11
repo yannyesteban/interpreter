@@ -1,11 +1,9 @@
 import { IConnectInfo, ISQLDBase } from "../dataModel.js";
 import { WhSQLite } from "./wh-sqlite.js";
 
-
-
-export abstract class DB{
-    abstract connect(info:IConnectInfo);
-    abstract close()
+export abstract class DB {
+    abstract connect(info: IConnectInfo);
+    abstract close();
 }
 
 export enum RecordMode {
@@ -14,8 +12,21 @@ export enum RecordMode {
     UPDATE,
     DELETE,
     UPSERT,
-};
-
+}
+export interface IFieldInfo {
+    cat: string;
+    db: string;
+    table: string;
+    field: string;
+    serial: boolean;
+    primaryKey: boolean;
+    unique: boolean;
+    pos: number;
+    notNull: boolean;
+    type: string;
+    length: number;
+    decimals: number;
+}
 export interface IRecordInfo {
     table?: string;
     key?: string[];
@@ -35,7 +46,7 @@ export interface QueryResult {
     error?;
     errno?;
     table?: string;
-    fields?:any
+    fields?: IFieldInfo[];
 }
 
 export interface STMTResult {
@@ -55,18 +66,17 @@ export interface IRecordAdmin {
     deleteRecord(info: IRecordInfo): Promise<STMTResult>;
 }
 
-export abstract class STMT{
-    abstract query(...args:any);
-    abstract execute(...args:any);
+export abstract class STMT {
+    abstract query(...args: any);
+    abstract execute(...args: any);
 }
 
-export abstract class DBSql implements IRecordAdmin{
-    
-    abstract connect(info:IConnectInfo);
-    abstract query(sql: string, param?: any[]):Promise<QueryResult>;
-    abstract infoQuery(q:string);
-    abstract infoTable(table:string);
-    abstract prepare():Promise<STMT>;
+export abstract class DBSql implements IRecordAdmin {
+    abstract connect(info: IConnectInfo);
+    abstract query(sql: string, param?: any[]): Promise<QueryResult>;
+    abstract infoQuery(q: string):Promise<IFieldInfo[]>;
+    abstract infoTable(table: string):Promise<IFieldInfo[]>;
+    abstract prepare(): Promise<STMT>;
     abstract begin();
     abstract commit();
     abstract rollback();
@@ -77,14 +87,6 @@ export abstract class DBSql implements IRecordAdmin{
     abstract deleteRecord(info: IRecordInfo): Promise<STMTResult>;
 }
 
-export abstract class DBSqll{
-    abstract query(q:string);
-
+export abstract class DBSqll {
+    abstract query(q: string);
 }
-
-
-
-
-
-
-

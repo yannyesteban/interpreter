@@ -59,6 +59,14 @@ export class Form extends Element{
         console.log(this.query);
         let result = await db.infoTable("person");
         console.log(result);
+        this.addResponse({
+            logs: result
+        });
+
+        let result1 = await db.query("select a,b,c, d as x, 123 as num, id as f from person");
+        this.addResponse({
+            logs: result1
+        });
     }
     async load(){
 

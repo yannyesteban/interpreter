@@ -1,0 +1,127 @@
+{
+    "name": "person",
+    "title": "the persons",
+    "recordFrom": {
+        "person.id": "&EX_id"
+    },
+    "filters": [
+        {
+            "id": "&EX_id"
+        }
+    ],
+    "schemes": [
+        {
+            "name": "person1",
+            "query": "select * FROM person"
+        },
+        {
+            "name": "person",
+            "table": "person",
+            "keys": ["a", "b"],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "I",
+                    "primaryKey": true,
+                    "serial": true,
+                    "notNull": true,
+                    "default": ""
+                },
+                {
+                    "name": "user",
+                    "type": "C",
+                    "length": 45,
+                    "notNull": false
+                }
+            ]
+        }
+    ],
+    "method": {
+        "update": {
+            "query": "select ..."
+        },
+        "list": {
+            "query": "select ..."
+        }
+    },
+    "onsave": {
+        "user": {
+            "modifiers": ["lower"]
+        },
+        "status": {
+            "masterValue": "status"
+        }
+    },
+    "fieldData": {
+        "municipio": {
+            "sql": "select id, municipio, stateid FROM municipios WHERE stateid=? or masterid=?",
+            "params": ["stateId", "masterId"],
+            "parent": "state"
+        },
+        "codestado": ["select id, state, 0 FROM status"],
+        "codmunicipio": ["select id, municipio, stateid FROM municipios WHERE stateid=&id"]
+    },
+    "rule": {
+        "name": {
+            "required": true,
+            "alpha": true
+        }
+    },
+    "form": {
+        "title": "Person",
+        "className":"sevian",
+        "sections":[
+            {
+                "field":"id",
+                "title":"zone ONE",
+                "className":["sevian", "section"],
+                "colapsed":false
+            }
+        ],
+        "fields": [
+            {
+                "name": "id",
+                "title": "ID",
+                "input": "input",
+                "type": "text",
+                "default": "0",
+                "data": "codestado",
+                "childs": true,
+                "className": "sevian",
+                "rule": {
+                    "required": {},
+                    "integer": {}
+                }
+            }
+        ],
+        
+        "elements": [
+            {
+                "element": "field",
+                "input": "input",
+                "type": "text",
+                "title": "is id",
+                "value": "",
+                "parent": "#name",
+                "childs": true,
+                "noFieldset": false,
+                "className": "x",
+                "id": "id",
+                "name": "id",
+                "tooltip": "",
+                "attr": {},
+                "events": {},
+                "rules": {},
+                "data": "codestado"
+            }
+        ]
+    },
+    "loadData": {
+        "x": {
+            "type": "rest",
+            "element": "form",
+            "source": "states",
+            "method": "getData"
+        }
+    }
+}
