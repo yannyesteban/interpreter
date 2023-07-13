@@ -2,97 +2,161 @@ import { DBSql } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
 
-export class Form extends Element{
-
-    public id:string;
+export class Form extends Element {
+    public id: string;
     public name: string;
-    public element:string =   "wh-html";
-    public className : string | string [];
-    public setPanel:string;
+    public element: string = "wh-html";
+    public className: string | string[];
+    public setPanel: string;
     public appendTo: string;
-    
+
     templateFile: string;
-    
-    response:object[] = [];
 
-    store:Store = null;
+    response: object[] = [];
 
-    _config:any = {};
+    store: Store = null;
 
     private query: string;
     private db: DBSql;
 
     private connection: string = "mysql";
-    setStore(store:Store){
+    private _info: any;
+    private fields;
+    setStore(store: Store) {
         this.store = store;
     }
-    
-    init(info:InfoElement){
 
-        const config = this.store.loadJsonFile(info.source) || {};
-        this._config = config;
-        
-        for(const [key, value] of Object.entries({...config, ...info})){
-            console.log(key, "=", value)
+    init(info: InfoElement) {
+        this._info = this.store.loadJsonFile(info.source) || {};
+
+        for (const [key, value] of Object.entries({ ...this._info, ...info })) {
+            console.log(key, "=", value);
             this[key] = value;
         }
 
         //console.log("....FORM..", this._config)
-        
     }
 
-    async evalMethod(method: string){
-        
-        switch(method){
+    async evalMethod(method: string) {
+        switch (method) {
             case "request":
                 await this.load();
                 break;
             case "request2":
-                await this.form();
+                await this.evalFields();
                 break;
         }
     }
 
-    async form(){
-
-        const db = this.db = this.store.db.get<DBSql>(this.connection);
+    async form() {
+        const db = (this.db = this.store.db.get<DBSql>(this.connection));
         console.log(this.query);
         let result = await db.infoTable("person");
         console.log(result);
         this.addResponse({
-            logs: result
+            logs: result,
         });
 
         let result1 = await db.query("select a,b,c, d as x, 123 as num, id as f from person");
         this.addResponse({
-            logs: result1
+            logs: result1,
         });
     }
-    async load(){
-
-        
+    async load() {
         const data = {
-            
             mode: "init",
             type: "element",
-            wc:"wh-form",
+            wc: "wh-form",
             id: this.id,
             props: {
-                dataSource : this._config
+                dataSource: this._info,
             },
             //replayToken => $this->replayToken,
-            appendTo:this.appendTo,
+            appendTo: this.appendTo,
             setPanel: this.setPanel,
         };
         //console.log(data)
         this.addResponse(data);
     }
-    
-    getResponse():object[]{
+
+    getResponse(): object[] {
         return this.response;
     }
 
-    addResponse(response){
+    addResponse(response) {
         this.response.push(response);
+    }
+
+    private async evalFields() {
+        const mainElements = [];
+        const fields = this.fields;
+
+        let tab = null;
+        let section = {};
+
+        if ("sections" in this._info) {
+            section = this._info.sections.reduce((a, s) => {
+                a[s.from] = {
+                    element: "section",
+                    title: s.title,
+                    elements: [],
+                };
+                return a;
+            }, {});
+        }
+
+        if ("tabs" in this._info) {
+            tab = this._info.tabs.reduce((tab, s) => {
+                tab[s.from] = {
+                    element: "tab",
+                    to: s.to,
+                    title: s.title,
+                    page: s.pages.reduce((page, p) => {
+                        page[p.field] = {
+                            element: "section",
+                            title: p.title,
+                            elements: [],
+                        };
+                        return page;
+                    }, {}),
+                };
+                return tab;
+            }, {});
+        }
+
+        let elements = mainElements;
+        let infoTab = null;
+        let lastTab = null;
+        for (const field of fields) {
+            if (field.name in tab) {
+                console.log("STEP ONE", field.name);
+
+                lastTab = {
+                    element: "tab",
+                    title: tab[field.name].title,
+                    pages: [],
+                };
+                mainElements.push(lastTab);
+                infoTab = tab[field.name];
+            }
+
+            if (infoTab) {
+                if (field.name in infoTab.page) {
+                    elements = [];
+                    lastTab.pages.push(elements);
+                }
+            }
+
+            if (field.name in section) {
+                mainElements.push(section[field.name]);
+                elements = section[field.name].elements;
+            }
+
+            elements.push(field);
+        }
+        this.addResponse({
+            logs: section,
+            con: mainElements,
+        });
     }
 }

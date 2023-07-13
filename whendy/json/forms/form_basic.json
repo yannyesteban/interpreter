@@ -1,5 +1,198 @@
 {
-    "name":"persons",
-    "query":"SELECT * FROM person",
-    "title": "Personas"
+    "name": "persons",
+    "title": "Personas 2023",
+    "className": "whendy",
+     
+    "query": "SELECT * FROM person",
+    "table": "person",
+    
+    "methods": [
+        {
+            "method": "request"
+        },
+        {
+            "method": "load"
+        },
+        {
+            "method": "save",
+            "scheme": "person",
+            "rules": [
+                {
+                    "modifiers": ["lower", "md5", "sha256", "ignore"],
+                    "masterValue": "status"
+                }
+            ]
+        }
+    ],
+    
+    "schemes": [
+        {
+            "name": "person1",
+            "query": "select * FROM person",
+            "table": "person"
+        },
+        {
+            "name": "unit",
+            "table": "user",
+            "keys": ["a", "b"],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "I",
+                    "key": true,
+                    "serial": true,
+                    "notNull": true,
+                    "default": ""
+                },
+                {
+                    "name": "user",
+                    "modifiers": ["lower", "md5", "sha256", "ignore"]
+                },
+                {
+                    "name": "pass"
+                },
+                {
+                    "name": "expire"
+                },
+                {
+                    "name": "status",
+                    "masterValue": "status"
+                }
+            ]
+        }
+    ],
+    
+    "record": {
+        "id": "$id"
+    },
+    "filter": {
+        "id:>": 0
+    },
+    "fields": [
+        {
+            "name": "id",
+            "title": "ID",
+            "input": "input",
+            "type": "text",
+            "default": "0",
+            "data": "codestado",
+            "childs": true,
+            "className": "sevian",
+            "size": 10,
+            "maxlength": 10,
+            "pattern": "\\d",
+            "rule": {
+                "required": {},
+                "integer": {}
+            }
+        }
+    ],
+    
+    "tabs": [
+        {
+            "from": "id",
+            "to": "state",
+            "title": "info person",
+            "pages": [
+                {
+                    "field": "state",
+                    "title": "tab two"
+                },
+                {
+                    "field": "id",
+                    "title": "tab one"
+                }
+            ]
+        },
+        {
+            "from": "a",
+            "to": "d",
+            "title": "info jobs",
+            "pages": [
+                {
+                    "field": "a",
+                    "title": "tab two"
+                },
+                {
+                    "field": "c",
+                    "title": "tab one"
+                }
+            ]
+        }
+    ],
+    "sections__": [
+        {
+            "from": "name",
+            "title": "tab one"
+        },
+        {
+            "from": "state",
+            "title": "tab two"
+        },
+        {
+            "from": "birth",
+            "to":"anotherfield",
+            "title": "tab three"
+        }
+    ],
+    
+    "interfaces": [
+        {
+            "name": "create",
+            "mode": "recreate",
+            "schemes": ["user", "user_group"]
+        },
+        {
+            "name": "get",
+            "mode": "query",
+            "sql": "select * from person where id=?",
+            "params": ["#id"],
+            "record": {
+                "id": 4
+            },
+            "filter": [
+                {
+                    "a": 1,
+                    "d:>=": 2
+                }
+            ],
+            "typeReturn": "record or list"
+        },
+        {
+            "name": "save",
+            "mode": "update",
+            "transaction": true,
+            "field": {
+                "id": {}
+            },
+            "fields": [],
+            "masterData": {
+                "status": 2000
+            }
+        }
+    ],
+    "list": {
+        "recordPages": 20,
+        "pagination": true,
+        "maxPages": 10,
+        "editMode": "none",
+        "nav": []
+    },
+    "fieldData": {
+        "municipio": {
+            "sql": "select id, municipio, stateid FROM municipios WHERE stateid=? or masterid=?",
+            "params": ["stateId", "masterId"],
+            "parent": "state"
+        },
+        "codestado": ["select id, state, 0 FROM status"],
+        "codmunicipio": ["select id, municipio, stateid FROM municipios WHERE stateid=&id"]
+    },
+    "datafield": [
+        {
+            "name": "codestado",
+            "data": [["", "- select", "*"], { "sql": "select * from table where id=? and b=?", "params": [1, 2] }],
+            "parent":"idcountry"
+        }
+    ],
+    "nav":[]
 }
