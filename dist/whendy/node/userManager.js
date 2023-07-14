@@ -16,6 +16,11 @@ export class UserManager {
             this.verify(value.toString().split(" ").pop());
         }
     }
+    evalToken(token) {
+        if (token) {
+            this.verify(token);
+        }
+    }
     verify(token) {
         const payload = this.jwt.verify(token);
         console.log(payload);

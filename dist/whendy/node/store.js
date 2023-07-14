@@ -16,6 +16,7 @@ export class Store {
         this.vreq = {};
         this.vses = {};
         this.qpar = {};
+        this.outer = new Outer();
     }
     setSessionAdmin(session) {
         this.session = session;
@@ -27,7 +28,7 @@ export class Store {
         return __awaiter(this, void 0, void 0, function* () {
             this.request = req;
             this.response = res;
-            this.outer = new Outer();
+            //this.outer = new Outer();
             return new Promise((resolve, reject) => {
                 var _a;
                 this.cookie = cookieParse((_a = req.headers) === null || _a === void 0 ? void 0 : _a.cookie);
@@ -82,6 +83,9 @@ export class Store {
     }
     setExp(name, value) {
         this.vexp[name] = value;
+    }
+    setVReq(vreq) {
+        this.vreq = vreq;
     }
     getReq(name) {
         return this.vreq[name];

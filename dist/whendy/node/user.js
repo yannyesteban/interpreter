@@ -54,7 +54,7 @@ export class User extends Element {
             this.user = user;
             this.db = this.store.db.get(this.connection);
             const result = yield this.db.query(this.sqlUser, [user]);
-            if (result.rows) {
+            if (result.rows && result.rows.length > 0) {
                 const row = result.rows[0];
                 if (this.security) {
                     pass = this.encrypt(this.security, pass);

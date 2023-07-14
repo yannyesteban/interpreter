@@ -48,7 +48,7 @@ export interface IElementAdmin {
 }
 
 export interface IRestElement {
-  getEndData(): InfoElement[];
+  getRestData(): any;
 }
 
 export interface IUserAdmin {

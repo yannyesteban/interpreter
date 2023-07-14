@@ -1,0 +1,33 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>WH Websocket V 0.1</title>
+        <link rel="icon" type="image/png" href="favicon.png" sizes="16x16" />
+        <link rel="stylesheet" href="sass/reset.css" />
+        <link rel="stylesheet" href="sass/main.css" />
+    </head>
+    <body>
+        <wh-socket name="socket" id="socket" server="localhost:8088"></wh-socket>
+        <form>
+            User:<input type="text" id="user" /><br />
+            Pass:<input type="text" id="pass" /><br />
+            <button type="button" id="button">Login</button>
+        </form>
+
+        <script type="module" src="dist/whendy/frontend/wc/Socket.js"></script>
+        <script>
+            const s = document.getElementById("socket");
+
+            const b = document.getElementById("button");
+
+            b.addEventListener("click", (event) => {
+                const user = document.getElementById("user").value;
+                const pass = document.getElementById("pass").value;
+                const body = { user, pass };
+                s.send(body);
+            });
+        </script>
+    </body>
+</html>

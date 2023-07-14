@@ -30,6 +30,14 @@ export class UserManager {
         }
     }
 
+    evalToken(token:string) {
+        
+
+        if (token) {
+            this.verify(token);
+        }
+    }
+
     verify(token) {
         const payload = this.jwt.verify(token);
 

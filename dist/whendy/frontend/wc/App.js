@@ -107,8 +107,8 @@ export class App extends HTMLElement {
                     element: "GTMap",
                     id: "test",
                     config: {
-                        "name": "one",
-                        "method": "load",
+                        name: "one",
+                        method: "load",
                     },
                     setPanel: "wh-body",
                     setTemplate: null,
@@ -123,7 +123,7 @@ export class App extends HTMLElement {
             confirm: "?",
             valid: true,
             headers: {
-                "Application-Mode": "start"
+                "Application-Mode": "start",
             },
             data: {
                 id: this.id,
@@ -156,10 +156,12 @@ export class App extends HTMLElement {
                 console.log("   A   ", module.component);
                 resolve(customElements.get(module.component));
             }
-            import(module.src).then(MyModule => {
+            import(module.src)
+                .then((MyModule) => {
                 console.log("   B   ", MyModule);
                 resolve(customElements.get(module.component));
-            }).catch(error => {
+            })
+                .catch((error) => {
                 reject(error);
             });
         });
@@ -206,8 +208,9 @@ export class App extends HTMLElement {
         const module = this.modules.find((e) => e.component == element.wc);
         if (module) {
             console.log("initElement", element);
-            this.whenComponent(module).then((component) => {
-            }).catch(error => {
+            this.whenComponent(module)
+                .then((component) => { })
+                .catch((error) => {
                 console.log(error);
             });
         }
@@ -239,7 +242,7 @@ export class App extends HTMLElement {
         });
     }
     set jsModules(jsFiles) {
-        jsFiles.forEach(src => {
+        jsFiles.forEach((src) => {
             loadScript(src, { async: true, type: "module" });
         });
     }
@@ -258,22 +261,34 @@ export class App extends HTMLElement {
     get server() {
         return this.getAttribute("server");
     }
+    send(info) {
+        return new Promise((resolve, reject) => {
+            const headers = {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${this.token}`,
+                SID: this.sid,
+                "Application-Id": this.id,
+                "Application-Mode": info.mode,
+            };
+            fetch(this.server, {
+                method: info.method || "post",
+                headers: Object.assign(Object.assign({}, headers), info.headers),
+                body: info.body,
+            })
+                .then((response) => {
+                return response.json();
+            })
+                .catch((error) => {
+                reject(error);
+            })
+                .then((json) => {
+                resolve(json);
+            });
+        });
+    }
     go(info) {
-        const body = JSON.stringify(Object.assign(Object.assign({}, info.body || {}), { __app_request: info.request, __app_id: this.id }));
-        const headers = {
-            "Content-Type": "application/json",
-            "Authorization": `Bearer ${this.token}`,
-            "SID": this.sid,
-            "Application-Id": this.id,
-        };
-        fetch(this.server, {
-            method: "post",
-            headers: Object.assign(Object.assign({}, headers), info.headers),
-            body,
-        }).then((response) => {
-            return response.json();
-        }).catch((error) => {
-        }).then((json) => {
+        info.body = JSON.stringify(Object.assign(Object.assign({}, (info.body || {})), { __app_request: info.request, __app_id: this.id }));
+        this.send(info).then((json) => {
             if (info.requestFunction) {
                 console.log(json);
                 info.requestFunction(json);

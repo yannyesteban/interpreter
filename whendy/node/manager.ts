@@ -60,6 +60,24 @@ export class Manager {
         this.machine = new (machines[this.machineType] as any)()
     }
 
+    create(value:string): ISession {
+
+        
+
+        let id = null;
+        
+
+        if (!value) {
+            id = sessionId();
+           
+           
+        } else {
+            id = value;
+        }
+
+        return this.machine.init(id);
+    }
+
     start(req: IncomingMessage, res: ServerResponse): ISession {
 
         const cookies = cookieParse(req.headers?.cookie);

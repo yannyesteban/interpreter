@@ -25,6 +25,16 @@ export class Manager {
         }
         this.machine = new machines[this.machineType]();
     }
+    create(value) {
+        let id = null;
+        if (!value) {
+            id = sessionId();
+        }
+        else {
+            id = value;
+        }
+        return this.machine.init(id);
+    }
     start(req, res) {
         var _a;
         const cookies = cookieParse((_a = req.headers) === null || _a === void 0 ? void 0 : _a.cookie);

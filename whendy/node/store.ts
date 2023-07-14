@@ -24,7 +24,7 @@ export class Store {
     request: http.IncomingMessage;
     response: http.ServerResponse;
 
-    outer: Outer;
+    outer: Outer = new Outer();
 
     setSessionAdmin(session){
         this.session = session;
@@ -38,7 +38,7 @@ export class Store {
 
         this.request = req;
         this.response = res;
-        this.outer = new Outer();
+        //this.outer = new Outer();
 
         return new Promise((resolve, reject) => {
 
@@ -108,6 +108,9 @@ export class Store {
         this.vexp[name] = value;
     }
 
+    setVReq(vreq) {
+        this.vreq = vreq;
+    }
     getReq(name) {
         return this.vreq[name];
     }
