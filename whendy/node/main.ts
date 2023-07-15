@@ -6,6 +6,7 @@ const constants = Tool.loadJsonFile("whendy/configuration/constants.json");
 const classElement = Tool.loadJsonFile("whendy/configuration/elements.json");
 const db = Tool.loadJsonFile("whendy/configuration/bd.json");
 
+console.log("Welcome to Whendy");
 const whendy = new Server({ ...config, constants, classElement, db });
 
 //whendy.start();

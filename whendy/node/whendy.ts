@@ -228,7 +228,7 @@ export class Server extends Whendy {
 }
 
 export class Socket extends Whendy {
-    private port = 8080;
+    private port = 8088;
     private classElement: InfoClass[] = [];
     private constants: { [key: string]: any } = {};
     private header: { [key: string]: string | number } = {};
@@ -250,9 +250,10 @@ export class Socket extends Whendy {
             maxLifeTime: 36000,
         });
 
-        const wss = new WebSocketServer({ port: this.port });
-
+        const wss = new WebSocketServer({ port: 8088 });
+        console.log("connecting")
         wss.on("connection", async (ws,req) => {
+            console.log("connecting 2")
             const store = new Store();
             this.userManager = new UserManager();
             const session = manager.create("xxxx");
