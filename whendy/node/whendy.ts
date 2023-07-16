@@ -58,6 +58,9 @@ export class Whendy {
         if (this.mode === "restapi") {
             return JSON.stringify(this.restData);
         }
+        this.addResponse([{
+            props:{logs: this.userManager.getUserInfo()},
+        }]);
         return JSON.stringify(this.output);
     }
 
@@ -171,6 +174,7 @@ export class Server extends Whendy {
 
     private db: IConnectInfo[];
     //private userManager:UserManager;
+    
     constructor(opt) {
         super();
 
@@ -218,6 +222,7 @@ export class Server extends Whendy {
 
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
             const mode = this.store.getHeader("Application-Mode").toString();
+            
             res.write(await this.render(mode));
 
             res.end();
@@ -252,7 +257,9 @@ export class Socket extends Whendy {
 
         const wss = new WebSocketServer({ port: 8088 });
         console.log("connecting")
+        
         wss.on("connection", async (ws,req) => {
+            
             console.log("connecting 2")
             const store = new Store();
             this.userManager = new UserManager();
@@ -261,9 +268,9 @@ export class Socket extends Whendy {
 
             this.userManager.evalToken("");
             console.log(req.headers.cookie)
-            
 
-            
+            ws.send(JSON.stringify(req.headers))
+                        
             session.loadSession(this.constants);
 
             const db = new DBAdmin();
@@ -277,25 +284,40 @@ export class Socket extends Whendy {
 
             this.store = store;
 
-            ws.on("error", console.error);
+            ws.on("error", (err)=>{
+                console.log("error",err)
+            });
 
             ws.on("message", async (data)=> {
 
-                const request = JSON.parse(data.toString());
+                const {body, mode, token} = JSON.parse(data.toString());
+
+                if(mode === "auth"){
+                    console.log("token", token)
+                    ws.send("token received", token);
+                    return;
+                }
+
+
                 console.log("received: %s", data);
-                console.log("body: ",request.body || {})
-                store.setVReq(request.body || {})
-                const result = await this.render(request.mode);
+                console.log("body: ",body || {})
+                store.setVReq(body || {})
+                const result = await this.render(mode);
                 console.log(result)
                 ws.send(result);
+                //ws.close();
 
 
             });
 
+            ws.on("close",async (params) => {
+                console.log("cerrando")
+            })
+
             //console.log(ws);
             ws.send("whendy 2023..");
             
-
+            
             console.log("END OF FILE...")
             
 

@@ -1,5 +1,9 @@
 {
     "port": 8080,
+    "websocket":{
+        "port": 8088,
+        "auth":true
+    },
     "session": {
         "cookieName": "whsessionid",
         "machineType": "memory",

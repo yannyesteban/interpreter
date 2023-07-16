@@ -7,13 +7,31 @@
         <link rel="icon" type="image/png" href="favicon.png" sizes="16x16" />
         <link rel="stylesheet" href="sass/reset.css" />
         <link rel="stylesheet" href="sass/main.css" />
+        <style>
+
+            wh-socket[status=connected] #dcn{
+                background-color: darkgreen;
+            }
+            wh-socket[status=disconnected] #dcn{
+                background-color: rgb(95, 95, 95);
+            }
+
+            wh-socket[status=connecting] #dcn{
+                background-color: rgb(212, 106, 20);
+            }
+        </style>
     </head>
     <body>
-        <wh-socket name="socket" id="socket" server="localhost:8088"></wh-socket>
+        <wh-socket name="socket" id="socket" server="localhost:8088" reconnection="1200000">
+            <button type="button" id="cn">Connect</button>
+            <button type="button" id="dcn">Disonnect</button>
+
+        </wh-socket>
         <form>
             User:<input type="text" id="user" /><br />
             Pass:<input type="text" id="pass" /><br />
             <button type="button" id="button">Login</button>
+            
         </form>
 
         <script type="module" src="dist/whendy/frontend/wc/Socket.js"></script>
@@ -21,7 +39,15 @@
             const s = document.getElementById("socket");
 
             const b = document.getElementById("button");
+            const cn = document.getElementById("cn");
+            const dcn = document.getElementById("dcn");
 
+            cn.addEventListener("click", event=>{
+                s.connect()
+            });
+            dcn.addEventListener("click", event=>{
+                s.disconnect()
+            });
             b.addEventListener("click", (event) => {
                 const user = document.getElementById("user").value;
                 const pass = document.getElementById("pass").value;

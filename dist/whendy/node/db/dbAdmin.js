@@ -22,7 +22,6 @@ export class DBAdmin {
                 default:
                     continue;
             }
-            console.log(info, "....");
             this.dbs[info.name].connect(info);
         }
     }

@@ -37,6 +37,9 @@ export class Whendy {
             if (this.mode === "restapi") {
                 return JSON.stringify(this.restData);
             }
+            this.addResponse([{
+                    props: { logs: this.userManager.getUserInfo() },
+                }]);
             return JSON.stringify(this.output);
         });
     }
@@ -204,6 +207,7 @@ export class Socket extends Whendy {
             const session = manager.create("xxxx");
             this.userManager.evalToken("");
             console.log(req.headers.cookie);
+            ws.send(JSON.stringify(req.headers));
             session.loadSession(this.constants);
             const db = new DBAdmin();
             db.init(this.db);
@@ -211,15 +215,26 @@ export class Socket extends Whendy {
             store.setDBAdmin(db);
             //await store.start(null, null);
             this.store = store;
-            ws.on("error", console.error);
+            ws.on("error", (err) => {
+                console.log("error", err);
+            });
             ws.on("message", (data) => __awaiter(this, void 0, void 0, function* () {
-                const request = JSON.parse(data.toString());
+                const { body, mode, token } = JSON.parse(data.toString());
+                if (mode === "auth") {
+                    console.log("token", token);
+                    ws.send("token received", token);
+                    return;
+                }
                 console.log("received: %s", data);
-                console.log("body: ", request.body || {});
-                store.setVReq(request.body || {});
-                const result = yield this.render(request.mode);
+                console.log("body: ", body || {});
+                store.setVReq(body || {});
+                const result = yield this.render(mode);
                 console.log(result);
                 ws.send(result);
+                //ws.close();
+            }));
+            ws.on("close", (params) => __awaiter(this, void 0, void 0, function* () {
+                console.log("cerrando");
             }));
             //console.log(ws);
             ws.send("whendy 2023..");
