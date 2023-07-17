@@ -118,7 +118,7 @@ class WHSocket extends HTMLElement {
         this.status = "connected";
         this.ws.send(JSON.stringify({
             mode: "auth",
-            token: "vre5t4r7tretby78t8t4557y7y5687retebryh",
+            token: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJ1c2VyIjoieWFubnkiLCJyb2xlcyI6WyJhZG1pbiIsImNoaWVmMiIsInVzZXIiXX0.5EH2K21pix-acfJkEds_PxdvH8nksV9c1i6P1I4Ju1w",
         }));
     }
     private onMessage(event) {

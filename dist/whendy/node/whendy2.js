@@ -12,7 +12,7 @@ import { register, Manager } from "./manager.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
 import * as classManager from "./classManager.js";
-import { UserManager } from "./userManager.js";
+import { Authorization } from "./Authorization.js";
 import { DBAdmin } from "./db/dbAdmin.js";
 export class Whendy extends http.Server {
     constructor(opt) {
@@ -33,7 +33,7 @@ export class Whendy extends http.Server {
             maxLifeTime: 36000,
         });
         this.on("request", (req, res) => __awaiter(this, void 0, void 0, function* () {
-            this.userManager = new UserManager();
+            this.userManager = new Authorization();
             this.userManager.evalHeader(req, res);
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
                 res.writeHead(204, this.header);

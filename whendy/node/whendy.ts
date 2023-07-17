@@ -9,8 +9,13 @@ import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin, OutputIn
 import * as classManager from "./classManager.js";
 
 import { IConnectInfo } from "./dataModel.js";
-import { UserManager } from "./userManager.js";
+import { Authorization } from "./Authorization.js";
 import { DBAdmin } from "./db/dbAdmin.js";
+
+enum AppMode {
+    START = 1,
+    RESTAPI,
+}
 
 interface InfoClass {
     name: string;
@@ -23,26 +28,18 @@ export class Whendy {
     private manager: Manager;
 
     public store: Store;
-    public userManager: UserManager;
-
-    //request: http.IncomingMessage;
-    //response: http.ServerResponse;
-
-    //cookies: CookieVar[] = [];
-
-    private setApp: InfoElement;
-
-    //private classElement: InfoClass[] = [];
-
+    public authorization: Authorization;
     private output: OutputInfo[] = [];
     private restData: any;
-    private mode: string;
+    private mode: AppMode;
+    private appInfo: InfoElement;
 
-    async render(mode: string) {
+    async render() {
         this.output = [];
-        this.mode = mode;
-        if (this.mode === "start") {
-            await this.setElement(this.setApp);
+
+        if (this.mode === AppMode.START) {
+            console.log("START");
+            await this.setElement(this.appInfo);
         }
 
         let request = this.store.getReq("__app_request");
@@ -55,15 +52,19 @@ export class Whendy {
             await this.evalRequest(request);
         }
 
-        if (this.mode === "restapi") {
+        if (this.mode === AppMode.RESTAPI) {
             return JSON.stringify(this.restData);
         }
-        this.addResponse([{
-            props:{logs: this.userManager.getUserInfo()},
-        }]);
+        
         return JSON.stringify(this.output);
     }
 
+    setApp(info: InfoElement) {
+        this.appInfo = info;
+    }
+    setMode(mode: AppMode) {
+        this.mode = mode;
+    }
     addResponse(response: OutputInfo[]) {
         this.output = [...this.output, ...response];
     }
@@ -78,11 +79,12 @@ export class Whendy {
         switch (command.type) {
             case "init":
                 await this.setElement(command);
+                break;
 
             case "element":
                 console.log(command);
                 await this.setElement(command);
-
+                break;
             case "update":
 
             default:
@@ -107,7 +109,7 @@ export class Whendy {
         ele.init(info);
         await ele.evalMethod(info.method);
 
-        if (this.mode == "restapi") {
+        if (this.mode == AppMode.RESTAPI) {
             this.doRestData(ele);
         } else {
             this.addResponse(ele.getResponse());
@@ -137,7 +139,7 @@ export class Whendy {
             if (info.auth) {
                 console.log(`********\nWelcome ${info.user}\n**`);
 
-                const token = this.userManager.setAuth(info);
+                const token = this.authorization.setAuth(info);
 
                 this.addResponse([
                     {
@@ -166,18 +168,18 @@ export class Whendy {
 }
 
 /**************************** */
-export class Server extends Whendy {
+export class Server {
     private port = 8080;
     private classElement: InfoClass[] = [];
     private constants: { [key: string]: any } = {};
     private header: { [key: string]: string | number } = {};
 
     private db: IConnectInfo[];
-    //private userManager:UserManager;
-    
-    constructor(opt) {
-        super();
+    private setApp: InfoElement;
+    private apps: { [name: string]: InfoElement };
+    //private authorization:authorization;
 
+    constructor(opt) {
         for (const [key, value] of Object.entries(opt)) {
             this[key] = value;
         }
@@ -192,15 +194,17 @@ export class Server extends Whendy {
         });
 
         http.createServer(async (req: http.IncomingMessage, res: http.ServerResponse) => {
-            this.userManager = new UserManager();
-
-            this.userManager.evalHeader(req, res);
-
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
                 res.writeHead(204, this.header);
                 res.end();
                 return;
             }
+
+            const wh = new Whendy();
+
+            wh.authorization = new Authorization();
+
+            wh.authorization.evalHeader(req, res);
 
             const session = manager.start(req, res);
             session.loadSession(this.constants);
@@ -214,34 +218,40 @@ export class Server extends Whendy {
 
             await store.start(req, res);
 
-            this.store = store;
+            wh.store = store;
 
-            /*for (const [key, value] of Object.entries(this.header)) {
+            /*
+          for (const [key, value] of Object.entries(this.header)) {
                res.setHeader(key, value);
-            }*/
+          }*/
 
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
-            const mode = this.store.getHeader("Application-Mode").toString();
-            
-            res.write(await this.render(mode));
+            const appName = wh.store.getHeader("Application-Name").toString() || null;
+            const mode: string = null;
+            if (appName) {
+                wh.setApp(this.apps[appName]);
+                wh.setMode(AppMode.START);
+            }
+            res.write(await wh.render());
 
             res.end();
 
-            console.log("USER INFO", this.userManager.getUserInfo());
+            console.log("USER INFO", wh.authorization.getUserInfo());
         }).listen(this.port);
     }
 }
 
-export class Socket extends Whendy {
+export class Socket {
     private port = 8088;
     private classElement: InfoClass[] = [];
     private constants: { [key: string]: any } = {};
     private header: { [key: string]: string | number } = {};
 
+    private websocket: { port: string; roles: string[] };
     private db: IConnectInfo[];
-    constructor(opt) {
-        super();
+    private apps: { [name: string]: InfoElement };
 
+    constructor(opt) {
         for (const [key, value] of Object.entries(opt)) {
             this[key] = value;
         }
@@ -255,78 +265,75 @@ export class Socket extends Whendy {
             maxLifeTime: 36000,
         });
 
-        const wss = new WebSocketServer({ port: 8088 });
-        console.log("connecting")
-        
-        wss.on("connection", async (ws,req) => {
-            
-            console.log("connecting 2")
-            const store = new Store();
-            this.userManager = new UserManager();
-            const session = manager.create("xxxx");
+        const wss = new WebSocketServer({ port: +this.websocket.port });
 
+        wss.on("connection", async (ws, req) => {
+            const wh = new Whendy();
 
-            this.userManager.evalToken("");
-            console.log(req.headers.cookie)
+            ws.on("message", async (data) => {
+                const { body, mode, token, applicationName } = JSON.parse(data.toString());
 
-            ws.send(JSON.stringify(req.headers))
-                        
-            session.loadSession(this.constants);
+                if (mode === "auth" || this.websocket.roles.length == 0) {
+                    const auth = new Authorization();
+                    auth.verify(token);
+                    if (this.websocket.roles.length > 0 && !auth.validRoles(this.websocket.roles)) {
+                        ws.send("user don't authorized");
+                        ws.close();
+                    }
 
-            const db = new DBAdmin();
-            db.init(this.db);
+                    const store = new Store();
+                    const session = manager.create("sessionId");
+                    session.loadSession(this.constants);
 
-            
-            store.setSessionAdmin(session);
-            store.setDBAdmin(db);
-            
-            //await store.start(null, null);
+                    const db = new DBAdmin();
+                    db.init(this.db);
 
-            this.store = store;
+                    store.setSessionAdmin(session);
+                    store.setDBAdmin(db);
 
-            ws.on("error", (err)=>{
-                console.log("error",err)
-            });
+                    //await store.start(null, null);
 
-            ws.on("message", async (data)=> {
+                    wh.authorization = auth;
+                    wh.store = store;
 
-                const {body, mode, token} = JSON.parse(data.toString());
-
-                if(mode === "auth"){
-                    console.log("token", token)
-                    ws.send("token received", token);
-                    return;
+                    console.log("token", token);
                 }
 
-
                 console.log("received: %s", data);
-                console.log("body: ",body || {})
-                store.setVReq(body || {})
-                const result = await this.render(mode);
-                console.log(result)
+                console.log("body: ", body || {});
+                wh.store.setVReq(body || {});
+
+                
+            
+            if (applicationName) {
+                wh.setApp(this.apps[applicationName]);
+                wh.setMode(AppMode.START);
+            }
+
+                const result = await wh.render();
+                console.log(result);
                 ws.send(result);
                 //ws.close();
-
-
             });
 
-            ws.on("close",async (params) => {
-                console.log("cerrando")
-            })
+            ws.on("close", async (params) => {
+                console.log("cerrando");
+            });
+
+            ws.on("error", (err) => {
+                console.log("error", err);
+            });
 
             //console.log(ws);
             ws.send("whendy 2023..");
-            
-            
-            console.log("END OF FILE...")
-            
+
+            console.log("END OF FILE...");
 
             /*for (const [key, value] of Object.entries(this.header)) {
                res.setHeader(key, value);
             }*/
 
-            
-            console.log("USER INFO", this.userManager.getUserInfo());
+            //console.log("USER INFO", wh.authorization.getUserInfo());
         });
     }
 }
@@ -336,7 +343,7 @@ export class Server1 extends http.Server {
 
     private session;
     private store: Store;
-    private userManager: UserManager;
+    private authorization: Authorization;
 
     request: http.IncomingMessage;
     response: http.ServerResponse;
@@ -371,9 +378,9 @@ export class Server1 extends http.Server {
         });
 
         this.on("request", async (req: http.IncomingMessage, res: http.ServerResponse) => {
-            this.userManager = new UserManager();
+            this.authorization = new Authorization();
 
-            this.userManager.evalHeader(req, res);
+            this.authorization.evalHeader(req, res);
 
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
                 res.writeHead(204, this.header);
@@ -404,7 +411,7 @@ export class Server1 extends http.Server {
 
             res.end();
 
-            console.log("USER INFO", this.userManager.getUserInfo());
+            console.log("USER INFO", this.authorization.getUserInfo());
         });
     }
 
@@ -511,7 +518,7 @@ export class Server1 extends http.Server {
             if (info.auth) {
                 console.log(`********\nWelcome ${info.user}\n**`);
 
-                const token = this.userManager.setAuth(info);
+                const token = this.authorization.setAuth(info);
 
                 this.addResponse([
                     {

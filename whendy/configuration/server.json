@@ -2,7 +2,8 @@
     "port": 8080,
     "websocket":{
         "port": 8088,
-        "auth":true
+        "auth":true,
+        "roles":["user", "admin"]
     },
     "session": {
         "cookieName": "whsessionid",
@@ -52,6 +53,19 @@
         "id": "MyAppId",
         "eparams": {
             "cedula": 12474737
+        }
+    },
+    "apps":{
+        "summer":{
+            "type": "element",
+            "element": "app",
+            "source": "whendy/json/app/home.json",
+            "name1": "{@APP_PATH}/webcar-app.json",
+            "method": "load",
+            "id": "MyAppId",
+            "eparams": {
+                "cedula": 12474737
+            }
         }
     }
 }

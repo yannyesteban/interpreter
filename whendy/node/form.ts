@@ -30,11 +30,8 @@ export class Form extends Element {
         this._info = this.store.loadJsonFile(info.source) || {};
 
         for (const [key, value] of Object.entries({ ...this._info, ...info })) {
-            console.log(key, "=", value);
             this[key] = value;
         }
-
-        //console.log("....FORM..", this._config)
     }
 
     async evalMethod(method: string) {
@@ -50,9 +47,9 @@ export class Form extends Element {
 
     async form() {
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
-        console.log(this.query);
+
         let result = await db.infoTable("person");
-        console.log(result);
+
         this.addResponse({
             logs: result,
         });
@@ -75,7 +72,7 @@ export class Form extends Element {
             appendTo: this.appendTo,
             setPanel: this.setPanel,
         };
-        //console.log(data)
+
         this.addResponse(data);
     }
 
@@ -129,8 +126,6 @@ export class Form extends Element {
         let lastTab = null;
         for (const field of fields) {
             if (field.name in tab) {
-                console.log("STEP ONE", field.name);
-
                 lastTab = {
                     element: "tab",
                     title: tab[field.name].title,

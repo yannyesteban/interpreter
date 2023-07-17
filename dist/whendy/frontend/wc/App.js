@@ -123,7 +123,7 @@ export class App extends HTMLElement {
             confirm: "?",
             valid: true,
             headers: {
-                "Application-Mode": "start",
+                "Application-Name": "summer",
             },
             data: {
                 id: this.id,

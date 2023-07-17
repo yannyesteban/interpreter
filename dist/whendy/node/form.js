@@ -22,10 +22,8 @@ export class Form extends Element {
     init(info) {
         this._info = this.store.loadJsonFile(info.source) || {};
         for (const [key, value] of Object.entries(Object.assign(Object.assign({}, this._info), info))) {
-            console.log(key, "=", value);
             this[key] = value;
         }
-        //console.log("....FORM..", this._config)
     }
     evalMethod(method) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -42,9 +40,7 @@ export class Form extends Element {
     form() {
         return __awaiter(this, void 0, void 0, function* () {
             const db = (this.db = this.store.db.get(this.connection));
-            console.log(this.query);
             let result = yield db.infoTable("person");
-            console.log(result);
             this.addResponse({
                 logs: result,
             });
@@ -68,7 +64,6 @@ export class Form extends Element {
                 appendTo: this.appendTo,
                 setPanel: this.setPanel,
             };
-            //console.log(data)
             this.addResponse(data);
         });
     }
@@ -117,7 +112,6 @@ export class Form extends Element {
             let lastTab = null;
             for (const field of fields) {
                 if (field.name in tab) {
-                    console.log("STEP ONE", field.name);
                     lastTab = {
                         element: "tab",
                         title: tab[field.name].title,

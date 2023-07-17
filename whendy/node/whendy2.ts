@@ -7,7 +7,7 @@ import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin, OutputIn
 import * as classManager from "./classManager.js";
 
 import { IConnectInfo } from "./dataModel.js";
-import { UserManager } from "./userManager.js";
+import { Authorization } from "./Authorization.js";
 import { DBAdmin } from "./db/dbAdmin.js";
 
 interface InfoClass {
@@ -22,7 +22,7 @@ export class Whendy extends http.Server {
 
     private session;
     private store: Store;
-    private userManager: UserManager;
+    private userManager: Authorization;
 
     request: http.IncomingMessage;
     response: http.ServerResponse;
@@ -57,7 +57,7 @@ export class Whendy extends http.Server {
         });
 
         this.on("request", async (req: http.IncomingMessage, res: http.ServerResponse) => {
-            this.userManager = new UserManager();
+            this.userManager = new Authorization();
 
             this.userManager.evalHeader(req, res);
 
