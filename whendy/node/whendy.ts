@@ -25,7 +25,7 @@ interface InfoClass {
 }
 
 export class Whendy {
-    private manager: Manager;
+    
 
     public store: Store;
     public authorization: Authorization;
@@ -55,7 +55,7 @@ export class Whendy {
         if (this.mode === AppMode.RESTAPI) {
             return JSON.stringify(this.restData);
         }
-        
+
         return JSON.stringify(this.output);
     }
 
@@ -195,6 +195,7 @@ export class Server {
 
         http.createServer(async (req: http.IncomingMessage, res: http.ServerResponse) => {
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
+                
                 res.writeHead(204, this.header);
                 res.end();
                 return;
@@ -226,12 +227,15 @@ export class Server {
           }*/
 
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
-            const appName = wh.store.getHeader("Application-Name").toString() || null;
+            const appName = wh.store.getHeader("Application-Name") || null;
             const mode: string = null;
+            
             if (appName) {
-                wh.setApp(this.apps[appName]);
+                
+                wh.setApp(this.apps[appName.toString()]);
                 wh.setMode(AppMode.START);
             }
+            
             res.write(await wh.render());
 
             res.end();
@@ -265,7 +269,7 @@ export class Socket {
             maxLifeTime: 36000,
         });
 
-        const wss = new WebSocketServer({ port: +this.websocket.port });
+        const wss = new WebSocketServer({ port: +this.websocket.port || this.port});
 
         wss.on("connection", async (ws, req) => {
             const wh = new Whendy();
@@ -273,10 +277,10 @@ export class Socket {
             ws.on("message", async (data) => {
                 const { body, mode, token, applicationName } = JSON.parse(data.toString());
 
-                if (mode === "auth" || this.websocket.roles.length == 0) {
+                if (mode === "auth" || this.websocket.roles?.length == 0) {
                     const auth = new Authorization();
                     auth.verify(token);
-                    if (this.websocket.roles.length > 0 && !auth.validRoles(this.websocket.roles)) {
+                    if (this.websocket.roles?.length > 0 && !auth.validRoles(this.websocket.roles)) {
                         ws.send("user don't authorized");
                         ws.close();
                     }
@@ -298,22 +302,18 @@ export class Socket {
 
                     console.log("token", token);
                 }
-
-                console.log("received: %s", data);
-                console.log("body: ", body || {});
+            
                 wh.store.setVReq(body || {});
 
-                
-            
-            if (applicationName) {
-                wh.setApp(this.apps[applicationName]);
-                wh.setMode(AppMode.START);
-            }
+                if (applicationName) {
+                    wh.setApp(this.apps[applicationName]);
+                    wh.setMode(AppMode.START);
+                }
 
                 const result = await wh.render();
                 console.log(result);
                 ws.send(result);
-                //ws.close();
+               
             });
 
             ws.on("close", async (params) => {
@@ -324,16 +324,6 @@ export class Socket {
                 console.log("error", err);
             });
 
-            //console.log(ws);
-            ws.send("whendy 2023..");
-
-            console.log("END OF FILE...");
-
-            /*for (const [key, value] of Object.entries(this.header)) {
-               res.setHeader(key, value);
-            }*/
-
-            //console.log("USER INFO", wh.authorization.getUserInfo());
         });
     }
 }

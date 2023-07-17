@@ -1,0 +1,27 @@
+/* Box sizing rules */
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+body,
+h1,
+h2,
+h3,
+h4,
+p,
+figure,
+blockquote,
+dl,
+dd {
+  margin: 0;
+}
+
+:host {
+  display: block;
+  height: auto;
+  font-size: 1rem;
+  overflow: hidden;
+  padding: 0.1rem;
+}/*# sourceMappingURL=WHmenu.css.map */

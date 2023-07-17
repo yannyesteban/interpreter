@@ -1,0 +1,145 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:host([slot=item]) {
+  display: block;
+  border: 1px solid rgb(226, 226, 226);
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
+:host([slot=item][hidden]) {
+  display: none;
+}
+
+:host([opened]) ::slotted(wh-menu-group) {
+  max-height: 100vh;
+  overflow: auto;
+  opacity: 1;
+  transition-duration: 0.5s;
+  transition-property: all;
+  transition-timing-function: ease-in;
+}
+
+:host(:not([opened])) ::slotted(wh-menu-group) {
+  max-height: 0px;
+  overflow: hidden;
+  padding-left: 10px;
+  opacity: 0;
+  transition-duration: 0.2s;
+  transition-property: all;
+}
+
+::slotted(div) {
+  display: inline-block;
+  margin: 10px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 4px 0 4px;
+  border-color: var(--color, steelblue) transparent transparent transparent;
+  background-color: transparent;
+  transform: rotateZ(var(--heading, 0deg));
+  transition: all 0.4s ease;
+}
+
+:host([slot=item].sub-menu[opened]) .ind {
+  margin: 10px;
+  width: 8px;
+  height: 3px;
+  margin-right: 12px;
+  background-size: 100%;
+  background-color: rgb(196, 196, 196);
+}
+
+:host([slot=item].sub-menu:not([opened])) .ind {
+  margin: 10px;
+  width: 0;
+  height: 0;
+  border-style: solid;
+  border-width: 6px 4px 0 4px;
+  border-color: #ff004c transparent transparent transparent;
+  background-color: transparent;
+}
+
+:host([slot=link]) ::slotted(wh-menu-icon) {
+  width: 1.5rem;
+  height: 1.5rem;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  display: flex;
+  flex-direction: row;
+  align-items: center;
+}
+
+.link:hover {
+  background-color: rgba(0, 0, 0, 0.1);
+}
+
+:host([slot=group]) {
+  display: block;
+  padding: 1px;
+  background-color: rgba(0, 0, 0, 0.05);
+  margin: auto 10px auto 10px;
+}
+
+:host(wh-menu-link) {
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+  display: grid;
+  grid-template-columns: 2em 2em 1fr auto;
+  grid-template-areas: "check icon caption ind";
+  align-items: center;
+}
+
+::slotted(wh-menu-caption) {
+  grid-area: caption;
+}
+
+::slotted(wh-menu-check) {
+  grid-area: check;
+}
+
+::slotted(wh-menu-icon) {
+  grid-area: icon;
+  width: 1.8rem;
+  height: 1.8rem;
+}
+
+::slotted(div) {
+  grid-area: ind;
+}
+
+:host ::slotted(wh-group) {
+  display: block;
+}
+
+:host(:not([use-check])) input {
+  display: none;
+}
+
+.checkbox {
+  width: 1.2em;
+  height: 1.2em;
+  display: grid;
+}
+
+:host([hide-icon]) ::slotted(wh-icon) {
+  display: none;
+}
+
+:host([hide-check]) .checkbox {
+  display: none;
+}
+
+:host(wh-menu-item[opened]) ::slotted(wh-menu-link ::slotted(wh-menu-caption)) {
+  --color: orangered;
+  --heading: -90deg;
+  border: 1px solid var(--color, steelblue) !important;
+}/*# sourceMappingURL=WHMenuItem.css.map */

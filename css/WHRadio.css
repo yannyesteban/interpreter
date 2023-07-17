@@ -1,0 +1,94 @@
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+:host(wh-radio) {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(240, 240, 240, 0.699);
+  border: 0.1em solid rgb(252, 252, 252);
+  padding: 0.2em;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
+:host(wh-check) {
+  display: flex;
+  flex-direction: column;
+  background-color: rgba(240, 240, 240, 0.699);
+  border: 0.1em solid rgb(252, 252, 252);
+  padding: 0.2em;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+
+::slotted(wh-radio-option) {
+  font-size: 0.8em;
+  height: 2em !important;
+}
+
+::slotted(wh-radio-option:hover) {
+  background-color: rgba(255, 255, 255, 0.664);
+  cursor: pointer;
+}
+
+::slotted(wh-check-option) {
+  font-size: 0.8em;
+  height: 2em !important;
+}
+
+::slotted(wh-check-option:hover) {
+  background-color: rgba(255, 255, 255, 0.664);
+  cursor: pointer;
+}
+
+:host(:focus) {
+  outline: 1px dashed rgb(173, 173, 173);
+}
+
+:host(wh-tab) {
+  display: flex;
+  flex-wrap: wrap;
+}
+
+:host(wh-tab) ::slotted(wh-tab-panel) {
+  flex-basis: 100%;
+  border-top: 1px solid rgb(233, 233, 233);
+}
+
+:host(wh-tab) > ::slotted(wh-tab-menu) {
+  display: inline-block;
+  background-color: rgb(233, 233, 233);
+  text-decoration: none;
+  color: rgb(100, 100, 100);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis "...";
+  max-width: 90px;
+  min-width: 70px;
+  box-sizing: padding-box;
+  border-radius: 4px 12px 0px 0px;
+  margin: 0px 2px 0px 0px;
+  padding: 4px 10px 4px 10px;
+  cursor: pointer;
+  -webkit-user-select: none;
+     -moz-user-select: none;
+          user-select: none;
+}
+:host(wh-tab) > ::slotted(wh-tab-menu)[selected] {
+  color: red;
+}
+
+:host(wh-tab) > ::slotted(wh-tab-menu[selected]) {
+  color: rgb(255, 255, 255);
+  background-color: rgb(126, 126, 126);
+}
+
+:host(wh-tab) > ::slotted(wh-tab-menu:hover) {
+  color: rgb(255, 255, 255);
+  background-color: rgba(0, 0, 0, 0.212);
+}/*# sourceMappingURL=WHRadio.css.map */

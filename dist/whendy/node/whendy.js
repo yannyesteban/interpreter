@@ -184,10 +184,10 @@ export class Server {
                res.setHeader(key, value);
           }*/
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
-            const appName = wh.store.getHeader("Application-Name").toString() || null;
+            const appName = wh.store.getHeader("Application-Name") || null;
             const mode = null;
             if (appName) {
-                wh.setApp(this.apps[appName]);
+                wh.setApp(this.apps[appName.toString()]);
                 wh.setMode(AppMode.START);
             }
             res.write(yield wh.render());
@@ -212,15 +212,16 @@ export class Socket {
             machineType: "memory",
             maxLifeTime: 36000,
         });
-        const wss = new WebSocketServer({ port: +this.websocket.port });
+        const wss = new WebSocketServer({ port: +this.websocket.port || this.port });
         wss.on("connection", (ws, req) => __awaiter(this, void 0, void 0, function* () {
             const wh = new Whendy();
             ws.on("message", (data) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b;
                 const { body, mode, token, applicationName } = JSON.parse(data.toString());
-                if (mode === "auth" || this.websocket.roles.length == 0) {
+                if (mode === "auth" || ((_a = this.websocket.roles) === null || _a === void 0 ? void 0 : _a.length) == 0) {
                     const auth = new Authorization();
                     auth.verify(token);
-                    if (this.websocket.roles.length > 0 && !auth.validRoles(this.websocket.roles)) {
+                    if (((_b = this.websocket.roles) === null || _b === void 0 ? void 0 : _b.length) > 0 && !auth.validRoles(this.websocket.roles)) {
                         ws.send("user don't authorized");
                         ws.close();
                     }
@@ -236,8 +237,6 @@ export class Socket {
                     wh.store = store;
                     console.log("token", token);
                 }
-                console.log("received: %s", data);
-                console.log("body: ", body || {});
                 wh.store.setVReq(body || {});
                 if (applicationName) {
                     wh.setApp(this.apps[applicationName]);
@@ -246,7 +245,6 @@ export class Socket {
                 const result = yield wh.render();
                 console.log(result);
                 ws.send(result);
-                //ws.close();
             }));
             ws.on("close", (params) => __awaiter(this, void 0, void 0, function* () {
                 console.log("cerrando");
@@ -254,13 +252,6 @@ export class Socket {
             ws.on("error", (err) => {
                 console.log("error", err);
             });
-            //console.log(ws);
-            ws.send("whendy 2023..");
-            console.log("END OF FILE...");
-            /*for (const [key, value] of Object.entries(this.header)) {
-               res.setHeader(key, value);
-            }*/
-            //console.log("USER INFO", wh.authorization.getUserInfo());
         }));
     }
 }

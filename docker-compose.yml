@@ -1,0 +1,13 @@
+version: "3.8"
+services:
+  apache57:
+    image: httpd:2.4.57
+    container_name: "Apache-2.4.57"
+    volumes:
+      - "C:/source/www:/usr/local/apache2/htdocs/"
+    ports:
+      - 8020:80
+  
+    
+
+

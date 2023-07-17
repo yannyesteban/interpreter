@@ -8,9 +8,7 @@ import { Logic } from "./../../core/Logic.js";
 import { loadFile, loadJsonFile } from "./tool.js";
 import { DBAdmin } from "./db/dbAdmin.js";
 
-
 export class Store {
-
     public vexp: { [id: string]: any } = {};
     public vreq: { [id: string]: any } = {};
     public vses: { [id: string]: any } = {};
@@ -19,75 +17,72 @@ export class Store {
     header;
     cookie;
     session: ISession;
-    db:DBAdmin;
+    db: DBAdmin;
 
     request: http.IncomingMessage;
     response: http.ServerResponse;
 
     outer: Outer = new Outer();
 
-    setSessionAdmin(session){
+    setSessionAdmin(session) {
         this.session = session;
     }
 
-    setDBAdmin(db){
+    setDBAdmin(db) {
         this.db = db;
     }
 
-    async start(req: http.IncomingMessage, res: http.ServerResponse) {
-
+    start(req: http.IncomingMessage, res: http.ServerResponse) {
         this.request = req;
         this.response = res;
         //this.outer = new Outer();
 
         return new Promise((resolve, reject) => {
+            try {
+                this.cookie = cookieParse(req.headers?.cookie);
 
-            this.cookie = cookieParse(req.headers?.cookie);
+                const method = req.method.toUpperCase();
+                const contentType = req.headers["content-type"] || "";
 
-            const method = req.method.toUpperCase();
-            const contentType = req.headers["content-type"] || "";
+                let [, param] = req.url.split("?");
+                this.queryParams(new URLSearchParams(param));
 
-            let [, param] = req.url.split("?");
-            this.queryParams(new URLSearchParams(param));
+                if (method == "POST") {
+                    const chunks = [];
 
-            if (method == "POST") {
-                const chunks = [];
+                    req.on("data", (chunk) => {
+                        chunks.push(chunk);
+                    });
 
-                req.on("data", (chunk) => {
-                    chunks.push(chunk);
-                });
+                    req.on("end", () => {
+                        const postData = Buffer.concat(chunks).toString();
 
-                req.on("end", () => {
+                        if (contentType == "application/json") {
+                            this.vreq = { ...this.vreq, ...JSON.parse(postData) };
+                            
+                        } else if (contentType == "application/x-www-form-urlencoded") {
+                            this.queryParams(new URLSearchParams(postData));
 
-                    const postData = Buffer.concat(chunks).toString();
+                            this.vreq = { ...this.vreq, ...this.qpar };
+                        } else if (contentType.includes("multipart/form-data")) {
+                            throw "multipart/form-data";
+                        }
 
-                    if (contentType == "application/json") {
-
-                        this.vreq = { ...this.vreq, ...JSON.parse(postData) };
-                        console.log(this.vreq)
-
-                    } else if (contentType == "application/x-www-form-urlencoded") {
-
-                        this.queryParams(new URLSearchParams(postData));
-
-                        this.vreq = { ...this.vreq, ...this.qpar };
-                    } else if (contentType.includes("multipart/form-data")) {
-                        throw "multipart/form-data";
-                    }
-
-                    resolve(true)
-                });
-            } else if (req.method.toUpperCase() == "GET") {
-                this.vreq = { ...this.vreq, ...this.qpar }
-                resolve(true);
-            } else {
-                resolve(true);
+                        resolve(true);
+                    });
+                } else if (req.method.toUpperCase() == "GET") {
+                    this.vreq = { ...this.vreq, ...this.qpar };
+                    resolve(true);
+                } else {
+                    resolve(true);
+                }
+            } catch (e) {
+                reject(e);
             }
-        })
+        });
     }
 
     queryParams(data) {
-
         for (const [key, value] of data) {
             this.qpar[key] = value;
         }
@@ -132,7 +127,6 @@ export class Store {
     }
 
     loadFile(name: string) {
-
         let file = loadFile(name);
         this.outer.resetData();
         this.outer.setMap("@", this.session.getData(), "");
@@ -143,7 +137,7 @@ export class Store {
     }
 
     loadJsonFile(name: string) {
-        if(!name){
+        if (!name) {
             return null;
         }
 

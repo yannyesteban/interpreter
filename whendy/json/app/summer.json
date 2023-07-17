@@ -1,9 +1,33 @@
 {
     "id": "gtcomm",
     "name": "home",
-    "templateFile": "whendy/templates/home.html",
+    "templateFile": "whendy/templates/index.html",
     "elements": [
-        
+        {
+            "id": "form-login",
+            "setPanel": "#panel_02",
+            "element": "form",
+            "source": "whendy/json/forms/login.json",
+            "method": "request",
+            "eparams": {}
+        },
+        {
+            "id": "banner1",
+            "setPanel": "#panel_01",
+            "element": "fragment",
+            "source": "whendy/json/fragments/one.json",
+            "name": "{@JSON_PATH}fragments/webcar-banner.json",
+            "method": "load",
+            "eparams": {}
+        },
+        {
+            "id": "banner2",
+            "setPanel": "#panel_03",
+            "element": "menu",
+            "source": "whendy/json/menus/main.json",
+            "method": "load",
+            "eparams": {}
+        }
     ],
     "className": [
         "home"

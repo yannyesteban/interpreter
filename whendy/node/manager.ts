@@ -10,7 +10,7 @@ export interface ISession {
     get(key: string): any;
     delete(key: string): void;
     getSessionId(): string;
-    loadSession(data: { [key: string]: any });
+    loadSession(data: { [key: string]: any }):void;
     getData():{ [key: string]: any };
 }
 

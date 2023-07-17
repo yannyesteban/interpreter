@@ -29,7 +29,7 @@
     ],
     "header": {
         "Access-Control-Allow-Origin": "*",
-        "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Application-Mode, authorization, sid,  Application-Id",
+        "Access-Control-Allow-Headers": "X-API-KEY, Origin, X-Requested-With, Content-Type, Accept, Access-Control-Request-Method, Application-Mode, authorization, sid, Application-Name, Application-Id",
         "Access-Control-Allow-Methods": "GET, POST, OPTIONS, PUT, DELETE",
         "Access-Control-Request-methods": "GET, POST, OPTIONS, PUT, DELETE",
         
@@ -63,6 +63,17 @@
             "name1": "{@APP_PATH}/webcar-app.json",
             "method": "load",
             "id": "MyAppId",
+            "eparams": {
+                "cedula": 12474737
+            }
+        },
+        "home":{
+            "type": "element",
+            "element": "app",
+            "source": "whendy/json/app/home.json",
+            "name1": "{@APP_PATH}/webcar-app.json",
+            "method": "load",
+            "id": "home",
             "eparams": {
                 "cedula": 12474737
             }

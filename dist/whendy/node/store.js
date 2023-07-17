@@ -1,12 +1,3 @@
-var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
-    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
-    return new (P || (P = Promise))(function (resolve, reject) {
-        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
-        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
-        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
-        step((generator = generator.apply(thisArg, _arguments || [])).next());
-    });
-};
 import { cookieParse } from "./CookieHandler.js";
 import { Outer } from "./../../core/outer/Outer.js";
 import { loadFile } from "./tool.js";
@@ -25,12 +16,12 @@ export class Store {
         this.db = db;
     }
     start(req, res) {
-        return __awaiter(this, void 0, void 0, function* () {
-            this.request = req;
-            this.response = res;
-            //this.outer = new Outer();
-            return new Promise((resolve, reject) => {
-                var _a;
+        this.request = req;
+        this.response = res;
+        //this.outer = new Outer();
+        return new Promise((resolve, reject) => {
+            var _a;
+            try {
                 this.cookie = cookieParse((_a = req.headers) === null || _a === void 0 ? void 0 : _a.cookie);
                 const method = req.method.toUpperCase();
                 const contentType = req.headers["content-type"] || "";
@@ -45,7 +36,6 @@ export class Store {
                         const postData = Buffer.concat(chunks).toString();
                         if (contentType == "application/json") {
                             this.vreq = Object.assign(Object.assign({}, this.vreq), JSON.parse(postData));
-                            console.log(this.vreq);
                         }
                         else if (contentType == "application/x-www-form-urlencoded") {
                             this.queryParams(new URLSearchParams(postData));
@@ -64,7 +54,10 @@ export class Store {
                 else {
                     resolve(true);
                 }
-            });
+            }
+            catch (e) {
+                reject(e);
+            }
         });
     }
     queryParams(data) {
