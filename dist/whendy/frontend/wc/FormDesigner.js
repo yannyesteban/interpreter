@@ -117,7 +117,7 @@ class FieldDesigner extends HTMLElement {
         template.innerHTML = `
 			<style>
 			:host {
-				display:inline-block;
+				display:block;
 				
 				
 			}
@@ -131,11 +131,20 @@ class FieldDesigner extends HTMLElement {
 				width:1rem;
 				height:1rem;
 			}
+            input{
+                
+            }
+            
+            input[type=text]{
+                
+                max-width:80px;
+            }
 			</style><slot></slot>
 			<div class="field">
-				<div class="holder">...</div><input class="name" placeholder="name"
-				/><input class="caption" placeholder="caption"
-				/><select class="input" placeholder="input"
+				<div class="holder">...</div><input class="select" type="checkbox"/><input class="name" placeholder="name" type="text"
+				/><input class="caption" placeholder="caption" type="text"
+				/><input class="default" placeholder="...Default" type="text"
+				/><select class="input" placeholder="input" 
 				/><option value="input">input</option></select><select class="type" placeholder="type"><option value="text">text</option><
 				/select><input class="required" type="checkbox">*
 			</div>
@@ -209,6 +218,7 @@ class FormDesigner extends HTMLElement {
 			}
 			</style>
 			<div class="header">Designer: <span class="title"></span></div>
+            <div><button class="add">+</button><button class="del">-</button><button class="section">G</button><button class="tab">T</button></div>
 			<div class="fields"><slot></slot></div>
 			<div class="table-menu"><slot name="table-menu"></slot></div>`;
         this.attachShadow({ mode: "open" });
