@@ -10,7 +10,7 @@ wh-app {
 .main {
   display: grid;
   color: white;
-  grid-template-columns: minmax(20%, 160px) 1fr 1fr 1fr;
+  grid-template-columns: minmax(30%, 220px) 1fr 1fr 1fr;
   grid-template-rows: 60px 40px 1fr 1.5rem;
   height: 100%;
   overflow: auto;
