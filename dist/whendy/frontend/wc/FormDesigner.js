@@ -438,16 +438,38 @@ class FormDesigner extends HTMLElement {
 				display:none;
 				
 			}
+            nav{
+                display:inline-flex;
+            }
 			.table-menu{
 				border:1px solid red;
 			}
             .fields{
                 margin:20px;
             }
+
+            button{
+                display:inline-block;
+                margin:0px;
+            }
+
+            [contenteditable=true]{
+                background-color:black;
+            }
+
+            wh-tab-menu {
+                max-width: 120px;
+            }
 			</style>
 			<div class="header">Designer: <span class="caption"></span></div>
-            <div><button class="add">+</button><button class="del">-</button><button class="section">G</button><button class="tab">T</button></div>
-			<div class="fields"><slot></slot></div>
+            <nav>
+                <button class="add">+</button>
+                <button class="del">-</button>
+                <button class="section">G</button>
+                <button class="tab">T</button>
+            </nav>
+			<div class="fields"><slott></slott></div>
+            <div class="container"></div>
 			<div class="table-menu"><slot name="table-menu"></slot></div>`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
@@ -456,11 +478,48 @@ class FormDesigner extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
         this.iCaption = this.shadowRoot.querySelector(".caption");
+        this.iSection = this.shadowRoot.querySelector(".section");
+        this.iTab = this.shadowRoot.querySelector(".tab");
     }
     static get observedAttributes() {
         return ["caption"];
     }
     connectedCallback() {
+        $(this.iTab).on("click", event => {
+            const tab = $(this.shadowRoot.querySelector(".container")).create("wh-tab").get();
+            tab.addEventListener("tab-open", event => {
+                if (event.detail.index == tab.length - 1) {
+                    const page = tab.querySelector(`wh-tab-menu[index="${event.detail.index}"]`);
+                    page.innerHTML = "tab " + (+event.detail.index + 1);
+                    $(page).on("dblclick", event => {
+                        page.setAttribute("contenteditable", "true");
+                    });
+                    $(page).on("blur", event => {
+                        page.setAttribute("contenteditable", "false");
+                    });
+                    tab.addPage({
+                        menu: "+",
+                        panel: ""
+                    });
+                }
+            });
+            tab.addPage({
+                menu: "Page",
+                panel: "<slot></slot>"
+            });
+            tab.addPage({
+                menu: "+",
+                panel: ""
+            });
+            Array.from(tab.querySelectorAll(`wh-tab-menu`)).forEach((e) => {
+                $(e).on("dblclick", event => {
+                    e.setAttribute("contenteditable", "true");
+                });
+                $(e).on("blur", event => {
+                    e.setAttribute("contenteditable", "false");
+                });
+            });
+        });
         this.load();
     }
     disconnectedCallback() {

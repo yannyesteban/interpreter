@@ -160,6 +160,10 @@ export class WHTab extends HTMLElement {
 
 	}
 
+    get length() {
+        return this._allMenus().length;
+    }
+
 	_linkPanels() {
 
 		const menus = this._allMenus() as WHTabMenu[];

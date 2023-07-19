@@ -131,6 +131,9 @@ export class WHTab extends HTMLElement {
     attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
     }
+    get length() {
+        return this._allMenus().length;
+    }
     _linkPanels() {
         const menus = this._allMenus();
         const panels = this._allPanels();
