@@ -151,6 +151,74 @@ const Menu1 = {
         },
     ],
 };
+
+class TabDesigner extends HTMLElement {
+    static get observedAttributes() {
+        return [""];
+    }
+    constructor() {
+        super();
+
+        const template = document.createElement("template");
+
+        template.innerHTML = `
+            <style>
+            :host {
+                display:inline-block;
+             }
+
+            :host:not(:defined) {
+                display:none;
+                
+            }
+            </style>
+            TabDesigner
+            <button class="plus">+</button>
+            <slot></slot>
+
+            `;
+
+        this.attachShadow({ mode: "open" });
+
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+        const slot = this.shadowRoot.querySelector("slot");
+
+        slot.addEventListener("slotchange", (e) => {
+            //const nodes = slot.assignedNodes();
+        });
+
+        this.shadowRoot.querySelector(".plus").addEventListener("click", (event) => {
+            $.fire(this, "add-tab", {});
+        });
+    }
+
+    public connectedCallback() {
+        this.slot = "container";
+    }
+
+    public disconnectedCallback() {
+        console.log("disconnectedCallback");
+    }
+
+    public attributeChangedCallback(name, oldVal, newVal) {}
+
+    public addPage(info) {
+        const page = $(this).create("div").addClass("tab-page");
+        const head = page.create("div").addClass("head");
+        const body = page.create("div");
+
+        head.append(info.caption);
+        body.append(info.body);
+    }
+
+    get length() {
+        return Array.from(this.querySelectorAll(":scope > .tab-page")).length;
+    }
+}
+
+customElements.define("tab-designer", TabDesigner);
+
 class ItemData extends HTMLElement {
     constructor() {
         super();
@@ -201,6 +269,200 @@ class ItemData extends HTMLElement {
 }
 
 customElements.define("item-data", ItemData);
+
+class FieldContainer extends HTMLElement {
+    defaultName = "field_";
+    _index: number = 0;
+    _last: FieldDesigner = null;
+
+    static get observedAttributes() {
+        return [""];
+    }
+
+    constructor() {
+        super();
+
+        const template = document.createElement("template");
+
+        template.innerHTML = `
+            <style>
+            :host {
+                display:block;
+                border:6px solid green;
+                
+            }
+
+            :host:not(:defined) {
+                display:none;
+                
+            }
+            </style>
+            <button class="add">+</button>
+            <button class="delete">-</button>
+            <slot name="field-designer"></slot>
+
+            `;
+
+        this.attachShadow({ mode: "open" });
+
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+
+        const slot = this.shadowRoot.querySelector("slot");
+
+        slot.addEventListener("slotchange", (e) => {
+            //const nodes = slot.assignedNodes();
+        });
+
+        this.shadowRoot.querySelector(".add").addEventListener("click", (event) => {
+            this.appendChild(this.createField({input:"input", type:"text"}));
+        });
+
+        this.shadowRoot.querySelector(".delete").addEventListener("click", (event) => {
+            this.delete(this.getSelected());
+        });
+    }
+
+    public connectedCallback() {
+        this.setAttribute("role", "field-container");
+        this.slot = "container";
+        this.load();
+    }
+
+    public disconnectedCallback() {
+        console.log("disconnectedCallback");
+    }
+
+    public attributeChangedCallback(name, oldVal, newVal) {
+        console.log("attributeChangedCallback");
+    }
+
+    getItems() {
+        const form = $(this).parentElement("form-designer") as FormDesigner;
+        if (form) {
+            return form.getItems();
+        }
+    }
+
+    setItems(items: FieldDesigner[]) {
+        const form = $(this).parentElement("form-designer") as FormDesigner;
+        if (form) {
+            form.setItems(items);
+        }
+    }
+
+    load() {
+        const item = this.getItems();
+        const fields = form1.fields;
+        for (const info of fields) {
+            this.appendChild(this.createField(info));
+        }
+
+        $(this).on("dragover", (event) => {
+            event.preventDefault();
+        });
+        $(this /*.shadowRoot.querySelector(".fields")*/).on("drop", (event) => {
+            const items = this.getItems();
+            event.preventDefault();
+
+            console.log(event.dataTransfer.getData("text/plain"), event.dataTransfer.types);
+            //var data = event.dataTransfer.getData("text");
+
+            /*field.attr("name", info.name);
+            field.attr("caption", info.caption);
+            field.attr("input", info.input);
+            field.attr("type", info.type);*/
+
+            console.log(event.dataTransfer);
+            console.log(event, event.target.tagName);
+
+            let beforeOf = null;
+            if (/*this.contains(event.target) &&*/ event.target.tagName === "FIELD-DESIGNER") {
+                console.log("ADENTRO.....");
+                const rect = event.target.getBoundingClientRect();
+                const diff = event.clientY - rect.top;
+                if (diff > rect.height / 2) {
+                    beforeOf = event.target.nextSibling;
+                } else {
+                    beforeOf = event.target;
+                }
+            }
+
+            console.log(items);
+            if (items) {
+                console.log("correct--------");
+                items.forEach((item) => {
+                    this.addField(item, event.target.parentNode, beforeOf);
+                });
+            } else {
+                if (event.dataTransfer.getData("text")) {
+                    try {
+                        const data = JSON.parse(event.dataTransfer.getData("text"));
+                        data.forEach((info) => {
+                            const field = this.createField(info);
+
+                            this.addField(field, event.target.parentNode, beforeOf);
+                        });
+                    } catch (e) {
+                        console.log(e);
+                    }
+                }
+            }
+
+            this.setItems(null);
+        });
+    }
+    addField(field, parentNode, beforeOf) {
+        if (beforeOf) {
+            parentNode.insertBefore(field, beforeOf);
+        } else {
+            this.appendChild(field);
+        }
+    }
+
+    createField(info) {
+        const field = $.create("field-designer");
+
+        if (!info.name) {
+            this._index++;
+            info.name = this.defaultName + this._index.toString();
+        }
+        if (!info.caption) {
+            info.caption = info.name;
+        }
+        field.prop("info", info);
+
+        field.on("dragstart", (event) => {
+            //this._last = field.get() as FieldDesigner;
+            const container = field.get<HTMLElement>().closest("field-container") as FieldContainer;
+            if(field.prop("selected")){
+                container.style.border = "4px solid red"
+                container.setItems(container.getSelected());
+               
+            }else{
+                container.setItems([field.get()]);
+            }
+            
+            console.log(container.getItems());
+            //event.dataTransfer.setData("text/plain", null);
+        });
+        console.log("ok");
+        return field.get<FieldDesigner>();
+    }
+    get length() {
+        return Array.from(this.querySelectorAll(":scope > [role=field-designer]")).length;
+    }
+
+    delete(items){
+        items.forEach(item=>{
+            item.remove();
+        });
+
+    }
+    getSelected():FieldDesigner[] {
+		return Array.from(this.querySelectorAll(":scope > [role=field-designer][selected]"));
+	}
+}
+customElements.define("field-container", FieldContainer);
 
 class TableMenu extends HTMLElement {
     iName: HTMLInputElement;
@@ -337,7 +599,7 @@ class FieldDesigner extends HTMLElement {
     _info: IFieldInfo;
 
     static get observedAttributes() {
-        return ["name", "caption", "input", "type", "default"];
+        return ["name", "caption", "input", "type", "default","selected"];
     }
 
     constructor() {
@@ -370,15 +632,27 @@ class FieldDesigner extends HTMLElement {
                 
                 max-width:80px;
             }
+            .field{
+                display:flex;
+            }
 			</style><slot></slot>
 			<div class="field">
-				<div class="holder">...</div><input class="select" type="checkbox"/><input class="name" placeholder="name" type="text"
-				/><input class="caption" placeholder="caption" type="text"
-				/><input class="default" placeholder="...Default" type="text"
-				/><select class="input" placeholder="input" 
-				/><option value="input">input</option></select><select class="type" placeholder="type"><option value="text">text</option><
-				/select><input class="required" type="checkbox">*<button>C</button><button>R</button><button>H
-                </button><button>X</button>
+				<div class="holder">...</div>
+                <input class="select" type="checkbox"/>
+                <input class="name" placeholder="name" type="text"/>
+                <input class="caption" placeholder="caption" type="text"/>
+                <input class="default" placeholder="...Default" type="text"/>
+                <select class="input" placeholder="input"/>
+                    <option value="input">input</option>
+                </select>
+                <select class="type" placeholder="type">
+                    <option value="text">text</option>
+                </select>
+                <input class="required" type="checkbox">*
+                <button>C</button>
+                <button>R</button>
+                <button>H</button>
+                <button>X</button>
 			</div>
 			
 			`;
@@ -411,9 +685,20 @@ class FieldDesigner extends HTMLElement {
             
         })
         */
+
+        this.shadowRoot.querySelector(".select").addEventListener("change",(event:any)=>{
+            
+            if(event.target.checked){
+                this.selected = "true";
+            }else{
+                this.selected = "";
+            }
+        });
     }
 
     public connectedCallback() {
+        this.setAttribute("role", "field-designer");
+        this.slot = "field-designer";
         this.shadowRoot.querySelector(".holder").setAttribute("draggable", "true");
     }
 
@@ -422,6 +707,7 @@ class FieldDesigner extends HTMLElement {
     }
 
     public attributeChangedCallback(name, oldValue, newValue) {
+        console.log(name, oldValue, newValue)
         switch (name) {
             case "caption":
                 this.iCaption.value = newValue;
@@ -460,6 +746,18 @@ class FieldDesigner extends HTMLElement {
 
     get name() {
         return this.getAttribute("name");
+    }
+
+    set selected(value) {
+        if (Boolean(value)) {
+            this.setAttribute("selected", value);
+        } else {
+            this.removeAttribute("selected");
+        }
+    }
+
+    get selected() {
+        return this.getAttribute("selected");
     }
 
     set input(value) {
@@ -510,6 +808,8 @@ class FieldDesigner extends HTMLElement {
     get info() {
         return this._info;
     }
+
+    
 }
 
 customElements.define("field-designer", FieldDesigner);
@@ -521,6 +821,7 @@ class FormDesigner extends HTMLElement {
     defaultName = "field_";
     _index: number = 0;
     _last: FieldDesigner = null;
+    _items: FieldDesigner[];
     constructor() {
         super();
 
@@ -529,8 +830,9 @@ class FormDesigner extends HTMLElement {
         template.innerHTML = `
 			<style>
 			:host {
-				display:inline-block;
+				display:block;
                 padding:10px;
+                height:300px;
 				
 				
 			}
@@ -571,7 +873,9 @@ class FormDesigner extends HTMLElement {
             </nav>
 			<div class="fields"><slott></slott></div>
             <div class="container"></div>
-			<div class="table-menu"><slot name="table-menu"></slot></div>`;
+			<div class="table-menu">
+            <slot name="container"></slot>
+            <slot name="table-menu"></slot></div>`;
 
         this.attachShadow({ mode: "open" });
 
@@ -593,55 +897,55 @@ class FormDesigner extends HTMLElement {
     }
 
     public connectedCallback() {
-        
-        $(this.iTab).on("click", event=>{
+        $(this.iTab).on("click", (event) => {
+            const tab1 = $(this).create("tab-designer").get() as TabDesigner;
+            tab1.addPage({ caption: "uno", body: $.create("field-container").get() });
+            tab1.addEventListener("add-tab", (event) => {
+                tab1.addPage({
+                    caption: "Tab page " + (1 + tab1.length).toString(),
+                    body: $.create("field-container").get(),
+                });
+            });
+            return;
+
             const tab = $(this.shadowRoot.querySelector(".container")).create("wh-tab").get() as any;
 
-            tab.addEventListener("tab-open", event=>{
-
-                
-                if(event.detail.index == tab.length-1){
-
+            tab.addEventListener("tab-open", (event) => {
+                if (event.detail.index == tab.length - 1) {
                     const page = tab.querySelector(`wh-tab-menu[index="${event.detail.index}"]`);
-                    page.innerHTML = "tab "+(+event.detail.index+1);
-                    $(page).on("dblclick", event=>{
-                        page.setAttribute("contenteditable", "true")
+                    page.innerHTML = "tab " + (+event.detail.index + 1);
+                    $(page).on("dblclick", (event) => {
+                        page.setAttribute("contenteditable", "true");
                     });
 
-                    $(page).on("blur", event=>{
-                        page.setAttribute("contenteditable", "false")
+                    $(page).on("blur", (event) => {
+                        page.setAttribute("contenteditable", "false");
                     });
 
-                    
-                    
                     tab.addPage({
-                        menu:"+",
-                        panel:""
+                        menu: "+",
+                        panel: "",
                     });
-                    
                 }
             });
             tab.addPage({
-                menu:"Page",
-                panel:"<slot></slot>"
+                menu: "Page",
+                panel: "<slot></slot>",
             });
             tab.addPage({
-                menu:"+",
-                panel:""
+                menu: "+",
+                panel: "",
             });
 
-            Array.from(tab.querySelectorAll(`wh-tab-menu`)).forEach((e:HTMLElement)=>{
-                $(e).on("dblclick", event=>{
-                    e.setAttribute("contenteditable", "true")
+            Array.from(tab.querySelectorAll(`wh-tab-menu`)).forEach((e: HTMLElement) => {
+                $(e).on("dblclick", (event) => {
+                    e.setAttribute("contenteditable", "true");
                 });
 
-                $(e).on("blur", event=>{
-                    e.setAttribute("contenteditable", "false")
+                $(e).on("blur", (event) => {
+                    e.setAttribute("contenteditable", "false");
                 });
             });
-
-
-
         });
         this.load();
     }
@@ -672,6 +976,12 @@ class FormDesigner extends HTMLElement {
 
     load() {
         this.caption = form1.caption;
+
+        $(this).create("field-container");
+
+        const tableMenu = $(this).create("table-menu").get() as TableMenu;
+        tableMenu.dataSource = Menu1;
+        return;
         const fields = form1.fields;
 
         for (const info of fields) {
@@ -732,9 +1042,6 @@ class FormDesigner extends HTMLElement {
 
             this._last = null;
         });
-
-        const tableMenu = $(this).create("table-menu").get() as TableMenu;
-        tableMenu.dataSource = Menu1;
     }
 
     addField(field, parentNode, beforeOf) {
@@ -761,7 +1068,15 @@ class FormDesigner extends HTMLElement {
             console.log(event);
             //event.dataTransfer.setData("text/plain", null);
         });
-        return field.get();
+        return field.get<HTMLElement>();
+    }
+
+    setItems(items) {
+        this._items = items;
+    }
+
+    getItems() {
+        return this._items;
     }
 }
 

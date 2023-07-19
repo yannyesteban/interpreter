@@ -1,4 +1,7 @@
 class Html extends HTMLElement {
+    static get observedAttributes() {
+        return [""];
+    }
     constructor() {
         super();
         const template = document.createElement("template");
@@ -23,9 +26,6 @@ class Html extends HTMLElement {
         slot.addEventListener("slotchange", (e) => {
             //const nodes = slot.assignedNodes();
         });
-    }
-    static get observedAttributes() {
-        return ["f", "latitude", "longitude"];
     }
     connectedCallback() {
     }

@@ -1,5 +1,8 @@
 class Html extends HTMLElement {
 
+	static get observedAttributes() {
+		return [""];
+	}
 	constructor() {
 		super();
 
@@ -33,9 +36,7 @@ class Html extends HTMLElement {
 
 	}
 
-	static get observedAttributes() {
-		return ["f", "latitude", "longitude"];
-	}
+	
 
 	public connectedCallback() {
 

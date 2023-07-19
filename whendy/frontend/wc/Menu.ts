@@ -225,7 +225,7 @@ class WHMenuItem extends HTMLElement {
 
 			const link = $(this).query(`wh-menu-link`);
 
-			link.get().addEventListener("click", (event) => {
+			link.get<HTMLElement>().addEventListener("click", (event) => {
 
 
 				if (event.target && event.target["type"] === "checkbox") {

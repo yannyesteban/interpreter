@@ -1,9 +1,6 @@
-const utils = {
-
-}
+const utils = {};
 
 const setProp = (obj, attrs, value?) => {
-
     if (typeof attrs === "object") {
         for (let key in attrs) {
             obj[key] = attrs[key];
@@ -14,58 +11,50 @@ const setProp = (obj, attrs, value?) => {
 };
 
 export class QElement {
-
     public e: HTMLElement = null;
 
     constructor(element) {
-
         this.e = element;
     }
 
-    get() {
-
-        return this.e;
+    get<T>():T {
+        return this.e as T;
     }
 
     on(event, fn) {
-
         this.e.addEventListener(event, fn, true);
         return this;
     }
 
     off(event, fn) {
-
         this.e.removeEventListener(event, fn, true);
         return this;
     }
 
     id(id?) {
-
         if (id === undefined) {
             return this.e.id;
         }
-        
-        if(id){
+
+        if (id) {
             this.e.id = id;
         }
-        
+
         return this;
     }
 
-    append(element) {
-
-        if (element === undefined || element === null || element === false) {
+    append(element:QElement | HTMLElement ) {
+        if (element === undefined || element === null) {
             return this;
         }
 
-        let e = null;
-
+        
         if (element instanceof HTMLElement) {
             this.e.appendChild(element);
         }
 
         if (element instanceof QElement) {
-            this.e.appendChild(element.get());
+            this.e.appendChild(element.get() as HTMLElement);
         }
 
         if (typeof element === "string") {
@@ -76,27 +65,23 @@ export class QElement {
     }
 
     add(config) {
-
         const element = Q.create(config);
         this.append(element);
         return this;
     }
 
     create(config) {
-
         const element = Q.create(config);
         this.append(element);
         return element;
     }
 
     appendText(text) {
-
         this.e.innerHTML += text;
         return this;
     }
 
     text(text?) {
-
         if (text === undefined) {
             return this.e.textContent;
         }
@@ -105,7 +90,6 @@ export class QElement {
     }
 
     html(html?): QElement | any {
-
         if (html === undefined) {
             return this.e.innerHTML;
         }
@@ -114,8 +98,6 @@ export class QElement {
     }
 
     attr(attrs, value?): QElement | any {
-
-
         if (typeof attrs === "string" && value === undefined) {
             return this.e.getAttribute(attrs);
         }
@@ -140,30 +122,27 @@ export class QElement {
     }
 
     prop(attrs, value?) {
-
         if (typeof attrs === "string" && value === undefined) {
             return this.e[attrs];
         }
-        if(attrs){
+        if (attrs) {
             setProp(this.e, attrs, value);
         }
-        
+
         return this;
     }
 
-    value(data?){
-        
-        if(data === undefined){
+    value(data?) {
+        if (data === undefined) {
             return this.e["value"];
         }
-        
+
         this.e["value"] = data;
-        
+
         return this;
     }
 
     style(attrs, value?) {
-
         if (typeof attrs === "string" && value === undefined) {
             return this.e.style[attrs];
         }
@@ -173,7 +152,6 @@ export class QElement {
     }
 
     ds(attrs, value?) {
-
         if (typeof attrs === "string" && value === undefined) {
             return this.e.dataset[attrs];
         }
@@ -183,10 +161,8 @@ export class QElement {
     }
 
     addClass(classes) {
-
         if (Array.isArray(classes)) {
-            classes.forEach(item => this.e.classList.add(item));
-
+            classes.forEach((item) => this.e.classList.add(item));
         } else if (typeof classes === "string" && classes !== "") {
             this.e.classList.add(classes);
         }
@@ -195,10 +171,8 @@ export class QElement {
     }
 
     removeClass(classes) {
-
         if (Array.isArray(classes)) {
-            classes.forEach(item => this.e.classList.remove(item));
-
+            classes.forEach((item) => this.e.classList.remove(item));
         } else if (typeof classes === "string" && classes !== "") {
             this.e.classList.remove(classes);
         }
@@ -207,10 +181,8 @@ export class QElement {
     }
 
     toggleClass(classes) {
-
         if (Array.isArray(classes)) {
-            classes.forEach(item => this.e.classList.toggle(item));
-
+            classes.forEach((item) => this.e.classList.toggle(item));
         } else if (typeof classes === "string" && classes !== "") {
             this.e.classList.toggle(classes);
         }
@@ -219,27 +191,22 @@ export class QElement {
     }
 
     hasClass(className) {
-
         return this.e.classList.contains(className);
     }
 
     children() {
-
-        return Array.from(this.e.children).map(child => Q(child));
+        return Array.from(this.e.children).map((child) => Q(child));
     }
 
     query(selector) {
-
         return Q(this.e.querySelector(selector));
     }
 
     queryAll(selector) {
-
-        return Array.from(this.e.querySelectorAll(selector)).map(child => Q(child));
+        return Array.from(this.e.querySelectorAll(selector)).map((child) => Q(child));
     }
 
     appendTo(target) {
-
         if (target instanceof HTMLElement) {
             target.appendChild(this.e);
         } else if (target instanceof QElement) {
@@ -249,8 +216,8 @@ export class QElement {
         return this;
     }
 
-    remove(){
-        if(this.e){
+    remove() {
+        if (this.e) {
             this.e.remove();
         }
     }
@@ -258,20 +225,23 @@ export class QElement {
         const event = new CustomEvent(name, {
             detail,
             cancelable: true,
-            bubbles: true
+            bubbles: true,
         });
 
         return this.e.dispatchEvent(event);
     }
 
-    define(prop, descriptor){
+    define(prop, descriptor) {
         Object.defineProperty(this.e, prop, descriptor);
         return this;
+    }
+
+    parentElement(tagName: string) {
+        return getParentElement(this.e, tagName);
     }
 }
 
 export const Q = (query) => {
-
     if (query instanceof QElement) {
         return query;
     }
@@ -280,9 +250,7 @@ export const Q = (query) => {
 
     if (query === undefined || query === "") {
         e = document.body;
-    } else if (query instanceof HTMLElement 
-        || query instanceof Document 
-        || query instanceof DocumentFragment) {
+    } else if (query instanceof HTMLElement || query instanceof Document || query instanceof DocumentFragment) {
         e = query;
     } else {
         e = document.querySelector(query);
@@ -293,23 +261,20 @@ export const Q = (query) => {
     }
 
     return Object.assign(new QElement(e), utils);
-}
+};
 Q.id = (id) => {
     return Q(document.getElementById(id));
-}
+};
 Q.create = (config) => {
-
     let e;
 
-    if (typeof (config) === "object") {
+    if (typeof config === "object") {
         e = document.createElement(config.tagName);
-
 
         for (let att in config) {
             if (config.hasOwnProperty(att) && config[att] !== false && config[att] !== null) {
                 e.setAttribute(att, config[att]);
             }
-
         }
     } else if (typeof config === "string") {
         e = document.createElement(config);
@@ -321,27 +286,44 @@ Q.create = (config) => {
 };
 
 Q.query = (selector) => {
-
     return Q(document.body.querySelector(selector));
-}
+};
 
 Q.queryAll = (selector) => {
-
-    return Array.from(document.body.querySelectorAll(selector)).map(child => Q(child));
-}
+    return Array.from(document.body.querySelectorAll(selector)).map((child) => Q(child));
+};
 
 Q.bind = (fn, context, arg?) => {
-
-    if (typeof (fn) === "function") {
-       
+    if (typeof fn === "function") {
         return fn.bind(context);
-    } else if (typeof (fn) === "string") {
-
+    } else if (typeof fn === "string") {
         if (arg) {
-
             return Function(arg, fn).bind(context);
         }
 
         return Function(fn).bind(context);
     }
 };
+
+Q.fire = (element, eventName, detail) => {
+	const event = new CustomEvent(eventName, {
+		detail,
+		cancelable: true,
+		bubbles: true
+	});
+
+	element.dispatchEvent(event);
+}
+
+export function getParentElement(child: HTMLElement, parentTag: string) {
+    let parent: HTMLElement = child.parentNode as HTMLElement;
+
+    while (parent !== null) {
+        if (parent.tagName === parentTag.toLocaleUpperCase()) {
+            return parent;
+        }
+        parent = parent.parentNode as HTMLElement;
+    }
+
+    return null;
+}

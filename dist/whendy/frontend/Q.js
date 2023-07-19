@@ -35,10 +35,9 @@ export class QElement {
         return this;
     }
     append(element) {
-        if (element === undefined || element === null || element === false) {
+        if (element === undefined || element === null) {
             return this;
         }
-        let e = null;
         if (element instanceof HTMLElement) {
             this.e.appendChild(element);
         }
@@ -134,7 +133,7 @@ export class QElement {
     }
     addClass(classes) {
         if (Array.isArray(classes)) {
-            classes.forEach(item => this.e.classList.add(item));
+            classes.forEach((item) => this.e.classList.add(item));
         }
         else if (typeof classes === "string" && classes !== "") {
             this.e.classList.add(classes);
@@ -143,7 +142,7 @@ export class QElement {
     }
     removeClass(classes) {
         if (Array.isArray(classes)) {
-            classes.forEach(item => this.e.classList.remove(item));
+            classes.forEach((item) => this.e.classList.remove(item));
         }
         else if (typeof classes === "string" && classes !== "") {
             this.e.classList.remove(classes);
@@ -152,7 +151,7 @@ export class QElement {
     }
     toggleClass(classes) {
         if (Array.isArray(classes)) {
-            classes.forEach(item => this.e.classList.toggle(item));
+            classes.forEach((item) => this.e.classList.toggle(item));
         }
         else if (typeof classes === "string" && classes !== "") {
             this.e.classList.toggle(classes);
@@ -163,13 +162,13 @@ export class QElement {
         return this.e.classList.contains(className);
     }
     children() {
-        return Array.from(this.e.children).map(child => Q(child));
+        return Array.from(this.e.children).map((child) => Q(child));
     }
     query(selector) {
         return Q(this.e.querySelector(selector));
     }
     queryAll(selector) {
-        return Array.from(this.e.querySelectorAll(selector)).map(child => Q(child));
+        return Array.from(this.e.querySelectorAll(selector)).map((child) => Q(child));
     }
     appendTo(target) {
         if (target instanceof HTMLElement) {
@@ -189,13 +188,16 @@ export class QElement {
         const event = new CustomEvent(name, {
             detail,
             cancelable: true,
-            bubbles: true
+            bubbles: true,
         });
         return this.e.dispatchEvent(event);
     }
     define(prop, descriptor) {
         Object.defineProperty(this.e, prop, descriptor);
         return this;
+    }
+    parentElement(tagName) {
+        return getParentElement(this.e, tagName);
     }
 }
 export const Q = (query) => {
@@ -206,9 +208,7 @@ export const Q = (query) => {
     if (query === undefined || query === "") {
         e = document.body;
     }
-    else if (query instanceof HTMLElement
-        || query instanceof Document
-        || query instanceof DocumentFragment) {
+    else if (query instanceof HTMLElement || query instanceof Document || query instanceof DocumentFragment) {
         e = query;
     }
     else {
@@ -224,7 +224,7 @@ Q.id = (id) => {
 };
 Q.create = (config) => {
     let e;
-    if (typeof (config) === "object") {
+    if (typeof config === "object") {
         e = document.createElement(config.tagName);
         for (let att in config) {
             if (config.hasOwnProperty(att) && config[att] !== false && config[att] !== null) {
@@ -244,17 +244,35 @@ Q.query = (selector) => {
     return Q(document.body.querySelector(selector));
 };
 Q.queryAll = (selector) => {
-    return Array.from(document.body.querySelectorAll(selector)).map(child => Q(child));
+    return Array.from(document.body.querySelectorAll(selector)).map((child) => Q(child));
 };
 Q.bind = (fn, context, arg) => {
-    if (typeof (fn) === "function") {
+    if (typeof fn === "function") {
         return fn.bind(context);
     }
-    else if (typeof (fn) === "string") {
+    else if (typeof fn === "string") {
         if (arg) {
             return Function(arg, fn).bind(context);
         }
         return Function(fn).bind(context);
     }
 };
+Q.fire = (element, eventName, detail) => {
+    const event = new CustomEvent(eventName, {
+        detail,
+        cancelable: true,
+        bubbles: true
+    });
+    element.dispatchEvent(event);
+};
+export function getParentElement(child, parentTag) {
+    let parent = child.parentNode;
+    while (parent !== null) {
+        if (parent.tagName === parentTag.toLocaleUpperCase()) {
+            return parent;
+        }
+        parent = parent.parentNode;
+    }
+    return null;
+}
 //# sourceMappingURL=Q.js.map
