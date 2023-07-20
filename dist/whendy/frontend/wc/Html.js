@@ -6,20 +6,12 @@ class Html extends HTMLElement {
         super();
         const template = document.createElement("template");
         template.innerHTML = `
-<style>
-  :host {
-    display:inline-block;
-    
-    
-  }
+			<style>
+			:host {
+				display:inline-block;
 
-  :host:not(:defined) {
-    display:none;
-    
-  }
-</style><slot></slot>
-
-`;
+			}
+			</style><slot></slot>`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         const slot = this.shadowRoot.querySelector("slot");
@@ -27,8 +19,7 @@ class Html extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
     }
-    connectedCallback() {
-    }
+    connectedCallback() { }
     disconnectedCallback() {
         console.log("disconnectedCallback");
     }
