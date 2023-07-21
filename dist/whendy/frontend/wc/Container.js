@@ -28,12 +28,6 @@ class Container extends HTMLElement {
                     return;
                 }
                 node.draggable = true;
-                $(node).on("dragstart", event => {
-                    event.stopPropagation();
-                    console.log("START....", node);
-                    event.dataTransfer.dropEffect = "move";
-                    this.setItems([node]);
-                });
             });
         });
         this.addEventListener("focus", (event) => {
@@ -79,6 +73,12 @@ class Container extends HTMLElement {
             }
             this.setItems(null);
         });
+        this.addEventListener("dragstart", (event) => {
+            event.stopPropagation();
+            console.log("START....", event.target);
+            event.dataTransfer.dropEffect = "copy";
+            this.setItems([event.target]);
+        });
     }
     connectedCallback() {
         //this.slot = "container";
@@ -108,7 +108,6 @@ class Container extends HTMLElement {
         }
         return null;
     }
-    ;
     setItems(items) {
         const parent = this.closest("[role=designer]");
         if ("setItems" in parent) {
@@ -116,7 +115,6 @@ class Container extends HTMLElement {
         }
         return null;
     }
-    ;
 }
 customElements.define("item-container", Container);
 class ToolItem extends HTMLElement {
@@ -230,6 +228,13 @@ class FormDesigner extends HTMLElement {
             wh-tab-menu {
                 max-width: 120px;
             }
+            .trash{
+                display:inline-block;
+                width:60px;
+                height:1rem;
+                border:1px dotted red;
+                
+            }
 			</style>
 			<div class="header">Designer: <span class="caption"></span></div>
             <nav>
@@ -237,6 +242,7 @@ class FormDesigner extends HTMLElement {
                 <button class="del">-</button>
                 <button class="section">G</button>
                 <button class="tab">T</button>
+                <div class="trash"></div>
             </nav>
 			<div class="fields"><slott></slott></div>
             <div class="container"></div>
@@ -253,6 +259,14 @@ class FormDesigner extends HTMLElement {
         this.iCaption = this.shadowRoot.querySelector(".caption");
         this.iSection = this.shadowRoot.querySelector(".section");
         this.iTab = this.shadowRoot.querySelector(".tab");
+        this.shadowRoot.querySelector(".trash").addEventListener("drag", (event) => {
+            event.preventDefault();
+        });
+        this.shadowRoot.querySelector(".trash").addEventListener("drop", (event) => {
+            event.preventDefault();
+            event.stopImmediatePropagation();
+            event.target.remove();
+        });
     }
     static get observedAttributes() {
         return ["caption"];
@@ -283,11 +297,19 @@ class FormDesigner extends HTMLElement {
         return this.getAttribute("caption");
     }
     load() {
+        const trash = $(this).create("div");
+        trash.text("xxxxxxx");
+        trash.on("drag", (event) => {
+            event.preventDefault();
+        });
+        trash.on("drop", (event) => {
+            event.target.remove();
+        });
         $(this).create("item-container");
         const tool = $(this).create("tool-box");
         const tabButton = $(tool).create("tool-item");
         tabButton.text("Tab");
-        tabButton.on("dragstart", event => {
+        tabButton.on("dragstart", (event) => {
             event.stopPropagation();
             event.dataTransfer.dropEffect = "copy";
             console.log("hello");
@@ -298,7 +320,7 @@ class FormDesigner extends HTMLElement {
         const sectionBtn = $(tool).create("tool-item");
         sectionBtn.text("SEC");
         let i = 1;
-        sectionBtn.on("dragstart", event => {
+        sectionBtn.on("dragstart", (event) => {
             event.stopImmediatePropagation();
             event.dataTransfer.dropEffect = "move";
             console.log("hello");
@@ -308,8 +330,34 @@ class FormDesigner extends HTMLElement {
             this.setItems([ele.get()]);
             ele.create("item-container");
         });
+        const fieldBtn = $(tool).create("tool-item");
+        fieldBtn.text("F");
+        let j = 1;
+        fieldBtn.on("dragstart", (event) => {
+            event.stopImmediatePropagation();
+            event.dataTransfer.dropEffect = "move";
+            console.log("hello");
+            const ele = $.create("field-designer");
+            //ele.attr("index", j)
+            //ele.text("Page "+j++)
+            this.setItems([ele.get()]);
+            //ele.create("item-container");
+        });
+        const separatorBtn = $(tool).create("tool-item");
+        separatorBtn.text("S");
+        separatorBtn.on("dragstart", (event) => {
+            event.stopImmediatePropagation();
+            event.dataTransfer.dropEffect = "move";
+            const ele = $.create("hr");
+            this.setItems([ele.get()]);
+            //ele.create("item-container");
+        });
     }
     setItems(items) {
+        if (items && items[0].selected) {
+            this._items = Array.from(this.querySelectorAll("[selected]"));
+            return;
+        }
         this._items = items;
     }
     getItems() {
@@ -440,4 +488,195 @@ class SectionDesigner extends HTMLElement {
     }
 }
 customElements.define("section-designer", SectionDesigner);
+class FieldDesigner2 extends HTMLElement {
+    static get observedAttributes() {
+        return ["name", "caption", "input", "type", "default", "selected"];
+    }
+    constructor() {
+        super();
+        const template = document.createElement("template");
+        template.innerHTML = `
+			<style>
+			:host {
+				display:block;
+				
+				
+			}
+
+			:host:not(:defined) {
+				display:none;
+				
+			}
+			.holder{
+				display:inline-block;
+				width:1rem;
+				height:1rem;
+			}
+            input{
+                
+            }
+            
+            input[type=text]{
+                
+                max-width:80px;
+            }
+            .field{
+                display:flex;
+            }
+			</style><slot></slot>
+			<div class="field">
+				<div class="holder">...</div>
+                <input class="select" type="checkbox"/>
+                <input class="name" placeholder="name" type="text"/>
+                <input class="caption" placeholder="caption" type="text"/>
+                <input class="default" placeholder="...Default" type="text"/>
+                <select class="input" placeholder="input"/>
+                    <option value="input">input</option>
+                </select>
+                <select class="type" placeholder="type">
+                    <option value="text">text</option>
+                </select>
+                <input class="required" type="checkbox">*
+                <button>C</button>
+                <button>R</button>
+                <button>H</button>
+                <button>X</button>
+			</div>
+			
+			`;
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        const slot = this.shadowRoot.querySelector("slot");
+        slot.addEventListener("slotchange", (e) => {
+            //const nodes = slot.assignedNodes();
+        });
+        this.iName = this.shadowRoot.querySelector(`.name`);
+        this.iCaption = this.shadowRoot.querySelector(`.caption`);
+        this.iInput = this.shadowRoot.querySelector(`.input`);
+        this.iType = this.shadowRoot.querySelector(`.type`);
+        /*
+        this.iCaption.addEventListener("dragstart",event=>{
+            event.preventDefault()
+            event.stopImmediatePropagation();
+            console.log("---------------")
+        });
+        this.iCaption.addEventListener("drop",event=>{
+            event.preventDefault()
+            event.stopImmediatePropagation();
+            console.log("***---------------")
+            this.iCaption.value = event.dataTransfer.getData("text/plain")
+            
+        })
+        */
+        this.shadowRoot.querySelector(".select").addEventListener("change", (event) => {
+            if (event.target.checked) {
+                this.selected = true;
+            }
+            else {
+                this.selected = false;
+            }
+        });
+    }
+    connectedCallback() {
+        this.setAttribute("role", "field-designer");
+    }
+    disconnectedCallback() {
+        console.log("disconnectedCallback");
+    }
+    attributeChangedCallback(name, oldValue, newValue) {
+        console.log(name, oldValue, newValue);
+        switch (name) {
+            case "caption":
+                this.iCaption.value = newValue;
+                break;
+            case "input":
+                this.iInput.value = newValue;
+                break;
+            case "type":
+                this.iType.value = newValue;
+                break;
+            case "name":
+                this.iName.value = newValue;
+                break;
+        }
+    }
+    set caption(value) {
+        if (Boolean(value)) {
+            this.setAttribute("caption", value);
+        }
+        else {
+            this.removeAttribute("caption");
+        }
+    }
+    get caption() {
+        return this.getAttribute("caption");
+    }
+    set name(value) {
+        if (Boolean(value)) {
+            this.setAttribute("name", value);
+        }
+        else {
+            this.removeAttribute("name");
+        }
+    }
+    get name() {
+        return this.getAttribute("name");
+    }
+    set selected(value) {
+        if (Boolean(value)) {
+            this.setAttribute("selected", "");
+        }
+        else {
+            this.removeAttribute("selected");
+        }
+    }
+    get selected() {
+        return this.hasAttribute("selected");
+    }
+    set input(value) {
+        if (Boolean(value)) {
+            this.setAttribute("input", value);
+        }
+        else {
+            this.removeAttribute("input");
+        }
+    }
+    get input() {
+        return this.getAttribute("input");
+    }
+    set type(value) {
+        if (Boolean(value)) {
+            this.setAttribute("type", value);
+        }
+        else {
+            this.removeAttribute("type");
+        }
+    }
+    get type() {
+        return this.getAttribute("type");
+    }
+    set default(value) {
+        if (Boolean(value)) {
+            this.setAttribute("default", value);
+        }
+        else {
+            this.removeAttribute("default");
+        }
+    }
+    get default() {
+        return this.getAttribute("default");
+    }
+    set info(info) {
+        this._info = info;
+        this.name = info.name;
+        this.caption = info.caption;
+        this.input = info.input;
+        this.type = info.type;
+        this.default = info.default;
+    }
+    get info() {
+        return this._info;
+    }
+}
+customElements.define("field-designer", FieldDesigner2);
 //# sourceMappingURL=Container.js.map
