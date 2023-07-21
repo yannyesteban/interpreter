@@ -5,7 +5,6 @@ class Container extends HTMLElement {
     }
     constructor() {
         super();
-        this.setItems = (value) => null;
         const template = document.createElement("template");
         template.innerHTML = `
 		<style>
@@ -44,6 +43,11 @@ class Container extends HTMLElement {
             this.selected = false;
         });
         this.addEventListener("dragover", (event) => {
+            this.style.border = "2px solid orange";
+            event.preventDefault();
+        });
+        this.addEventListener("dragleave", (event) => {
+            this.style.border = "";
             event.preventDefault();
         });
         this.addEventListener("drop", (event) => {
@@ -66,6 +70,7 @@ class Container extends HTMLElement {
                 }
             }
             console.log(items);
+            this.style.border = "4px solid purple";
             if (beforeOf) {
                 items.forEach((item) => event.target.parentNode.insertBefore(item, beforeOf));
             }
@@ -100,6 +105,14 @@ class Container extends HTMLElement {
         if ("getItems" in parent) {
             console.log(parent.getItems());
             return parent.getItems();
+        }
+        return null;
+    }
+    ;
+    setItems(items) {
+        const parent = this.closest("[role=designer]");
+        if ("setItems" in parent) {
+            return parent.setItems(items);
         }
         return null;
     }
@@ -168,7 +181,6 @@ class ToolBox extends HTMLElement {
     }
     attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
-        this[name] = newVal;
     }
 }
 customElements.define("tool-box", ToolBox);

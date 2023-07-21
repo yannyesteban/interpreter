@@ -7,7 +7,7 @@ interface Designer{
 
 class Container extends HTMLElement {
     
-    setItems: (value) => void = (value) => null;
+    
 
     static get observedAttributes() {
         return ["selected"];
@@ -64,6 +64,12 @@ class Container extends HTMLElement {
         });
 
 		this.addEventListener("dragover", (event) => {
+            this.style.border = "2px solid orange"
+            event.preventDefault();
+        });
+
+        this.addEventListener("dragleave", (event) => {
+            this.style.border = ""
             event.preventDefault();
         });
 
@@ -92,7 +98,8 @@ class Container extends HTMLElement {
             }
 
 			console.log(items)
-
+            
+            this.style.border = "4px solid purple"
             if (beforeOf) {
                 items.forEach((item) => event.target.parentNode.insertBefore(item, beforeOf));
             } else {
@@ -100,6 +107,7 @@ class Container extends HTMLElement {
             }
 
             this.setItems(null);
+            
         });
     }
 
@@ -132,6 +140,16 @@ class Container extends HTMLElement {
 		if("getItems" in parent){
 			console.log(parent.getItems())
 			return parent.getItems();
+		}
+
+		return null;
+	};
+
+    setItems (items) {
+		const parent:Designer = this.closest("[role=designer]") as any;
+		if("setItems" in parent){
+			
+			return parent.setItems(items);
 		}
 
 		return null;
@@ -223,7 +241,7 @@ class ToolBox extends HTMLElement {
 
     public attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
-        this[name] = newVal;
+      
     }
 }
 
