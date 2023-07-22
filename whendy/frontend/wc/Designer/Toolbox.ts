@@ -1,6 +1,19 @@
+import { Q as $ } from "./../../Q.js";
+
+interface ToolItemInfo {
+    caption?: string;
+    items: {
+        title?: string;
+        element?: string;
+        text?: string;
+        className?: string;
+    }[];
+}
+
 class ToolItem extends HTMLElement {
+    private _info;
     static get observedAttributes() {
-        return [""];
+        return ["element"];
     }
     constructor() {
         super();
@@ -37,7 +50,28 @@ class ToolItem extends HTMLElement {
     public attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
     }
+
+    set element(value) {
+        if (Boolean(value)) {
+            this.setAttribute("element", value);
+        } else {
+            this.removeAttribute("element");
+        }
+    }
+
+    get element() {
+        return this.getAttribute("element");
+    }
+
+    public set dataSource(data) {
+        this._info = data;
+        this.element = data.element;
+        this.title = data.title;
+        this.innerHTML = data.text;
+        //$(this).create("div").text(data.text);
+    }
 }
+
 customElements.define("tool-item", ToolItem);
 
 class ToolBox extends HTMLElement {
@@ -66,6 +100,33 @@ class ToolBox extends HTMLElement {
         slot.addEventListener("slotchange", (e) => {
             //const nodes = slot.assignedNodes();
         });
+
+        $(this).on("click", (event) => {
+            console.log(event.target);
+            if (event.target.tagName !== "TOOL-ITEM") {
+                return;
+            }
+
+            console.log(event.target);
+            const ele = $.create(event.target.element);
+
+            //ele.attr("index", j)
+            //ele.text("Page "+j++)
+            const container = this.getDesigner().getActive();
+            container.appendChild(ele.get<HTMLElement>());
+        });
+        $(this).on("dragstart", (event) => {
+            event.stopPropagation();
+            event.dataTransfer.dropEffect = "move";
+            console.log("hello");
+            const ele = $.create(event.target.element);
+
+            //ele.attr("index", j)
+            //ele.text("Page "+j++)
+
+            this.getDesigner().setItems([ele.get<HTMLElement>()]);
+            //ele.create("item-container");
+        });
     }
 
     public connectedCallback() {
@@ -79,6 +140,16 @@ class ToolBox extends HTMLElement {
 
     public attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
+    }
+
+    set dataSource(data: ToolItemInfo) {
+        data.items.forEach((item) => {
+            $(this).create("tool-item").prop("dataSource", item);
+        });
+    }
+
+    getDesigner(): any {
+        return this.closest("[role=designer]");
     }
 }
 customElements.define("tool-box", ToolBox);

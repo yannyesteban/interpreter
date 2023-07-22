@@ -125,6 +125,17 @@ const Menu1 = {
         },
     ],
 };
+const tool1 = {
+    caption: "tool",
+    items: [
+        {
+            title: "Tab Container",
+            element: "tab-designer",
+            text: "Tab",
+            className: "",
+        },
+    ],
+};
 /*
 const tableMenu = $(this).create("table-menu").get() as TableMenu;
         tableMenu.dataSource = Menu1;

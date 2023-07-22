@@ -89,6 +89,14 @@ class FieldDesigner extends HTMLElement {
     }
     connectedCallback() {
         this.setAttribute("role", "field-designer");
+        if (!this.name) {
+            const designer = this.closest("[role=designer]");
+            this.name = "field_" + Array.from(designer.querySelectorAll("[role=field-designer]")).length;
+        }
+        if (!this.caption) {
+            const designer = this.closest("[role=designer]");
+            this.caption = this.name;
+        }
     }
     disconnectedCallback() {
         console.log("disconnectedCallback");

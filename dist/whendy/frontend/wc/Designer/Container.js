@@ -80,6 +80,7 @@ class Container extends HTMLElement {
         });
     }
     connectedCallback() {
+        console.log(this);
         //this.slot = "container";
         this.setAttribute("role", "container");
         const ele = document.createElement("last-active-ext");

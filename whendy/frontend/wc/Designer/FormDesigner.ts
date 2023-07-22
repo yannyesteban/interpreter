@@ -88,20 +88,18 @@ class FormDesigner extends HTMLElement {
         this.iSection = this.shadowRoot.querySelector(".section");
         this.iTab = this.shadowRoot.querySelector(".tab");
 
-        this.shadowRoot.querySelector(".trash").addEventListener("drag", (event:any)=>{
+        this.shadowRoot.querySelector(".trash").addEventListener("drag", (event: any) => {
             event.preventDefault();
         });
-        this.shadowRoot.querySelector(".trash").addEventListener("drop", (event:any)=>{
+        this.shadowRoot.querySelector(".trash").addEventListener("drop", (event: any) => {
             event.preventDefault();
             event.stopPropagation();
-            const items = this.getItems()
-            if(items){
-                items.forEach((item:any)=>{
+            const items = this.getItems();
+            if (items) {
+                items.forEach((item: any) => {
                     item.remove();
-                })
+                });
             }
-            
-            
         });
 
         this.shadowRoot.querySelector(".trash").addEventListener("dragover", (event) => {
@@ -144,20 +142,51 @@ class FormDesigner extends HTMLElement {
     }
 
     load() {
+        const tool1 = {
+            caption: "tool",
+            items: [
+                {
+                    title: "Tab Container",
+                    element: "tab-designer",
+                    text: "Tab",
+                    className: "",
+                },
+                {
+                    title: "Section",
+                    element: "section-designer",
+                    text: "Section",
+                    className: "",
+                },
+                {
+                    title: "Field",
+                    element: "field-designer",
+                    text: "Field",
+                    className: "",
+                },
+                {
+                    title: "Separator",
+                    element: "hr",
+                    text: "Separator",
+                    className: "",
+                },
+            ],
+        };
+
         let caption = $(this).create("caption-ext");
         caption.attr("slot", "caption");
-        
+
         const trash = $(this).create("div");
         trash.text("xxxxxxx");
-        trash.on("drag", (event:any)=>{
+        trash.on("drag", (event: any) => {
             event.preventDefault();
         });
-        trash.on("drop", (event)=>{
-            event.target.remove()
-        })
+        trash.on("drop", (event) => {
+            event.target.remove();
+        });
         const container = $(this).create("item-container").get<HTMLElement>();
-        const tool = $(this).create("tool-box");
-        const tabButton = $(tool).create("tool-item");
+        const tool = $(this).create("tool-box").get<any>();
+        tool.dataSource = tool1;
+        /*const tabButton = $(tool).create("tool-item");
         tabButton.text("Tab");
         tabButton.on("dragstart", (event) => {
             event.stopPropagation();
@@ -226,6 +255,7 @@ class FormDesigner extends HTMLElement {
             this.setItems([ele.get<HTMLElement>()]);
             //ele.create("item-container");
         });
+        */
     }
 
     setItems(items) {
@@ -241,14 +271,20 @@ class FormDesigner extends HTMLElement {
         return this._items;
     }
 
-    setActive(container){
-        console.log("ACTIVE", container)
+    setActive(container) {
+        console.log("ACTIVE", container);
         this._active = container;
     }
-    getActive(){
-        console.log("get ACTIVE")
-        return this._active;
+    getActive() {
+        console.log("get ACTIVE");
+        return this._active || $(this).query("item-container").get();
     }
+
+    get fields() {
+        return Array.from(this.querySelectorAll("field-designer"));
+    }
+
+    
 }
 
 customElements.define("form-designer", FormDesigner);

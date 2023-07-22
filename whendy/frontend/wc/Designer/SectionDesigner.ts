@@ -43,6 +43,10 @@ class SectionDesigner extends HTMLElement {
         caption.attr("slot", "caption");
         //this.load()
         //this.slot = "container";
+
+        if (!this.querySelector("item-container")) {
+            this.appendChild(document.createElement("item-container"));
+        }
     }
 
     public disconnectedCallback() {
@@ -53,7 +57,7 @@ class SectionDesigner extends HTMLElement {
         console.log("name", name);
         switch (name) {
             case "caption":
-                this.shadowRoot.querySelector("head").innerHTML = newVal;
+                //this.shadowRoot.querySelector("head").innerHTML = newVal;
                 break;
         }
     }

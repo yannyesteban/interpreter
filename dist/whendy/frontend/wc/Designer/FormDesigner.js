@@ -124,6 +124,35 @@ class FormDesigner extends HTMLElement {
         return this.getAttribute("caption");
     }
     load() {
+        const tool1 = {
+            caption: "tool",
+            items: [
+                {
+                    title: "Tab Container",
+                    element: "tab-designer",
+                    text: "Tab",
+                    className: "",
+                },
+                {
+                    title: "Section",
+                    element: "section-designer",
+                    text: "Section",
+                    className: "",
+                },
+                {
+                    title: "Field",
+                    element: "field-designer",
+                    text: "Field",
+                    className: "",
+                },
+                {
+                    title: "Separator",
+                    element: "hr",
+                    text: "Separator",
+                    className: "",
+                },
+            ],
+        };
         let caption = $(this).create("caption-ext");
         caption.attr("slot", "caption");
         const trash = $(this).create("div");
@@ -135,17 +164,19 @@ class FormDesigner extends HTMLElement {
             event.target.remove();
         });
         const container = $(this).create("item-container").get();
-        const tool = $(this).create("tool-box");
-        const tabButton = $(tool).create("tool-item");
+        const tool = $(this).create("tool-box").get();
+        tool.dataSource = tool1;
+        /*const tabButton = $(tool).create("tool-item");
         tabButton.text("Tab");
         tabButton.on("dragstart", (event) => {
             event.stopPropagation();
             event.dataTransfer.dropEffect = "copy";
             console.log("hello");
-            const ele = $.create("tab-designer").get();
+            const ele = $.create("tab-designer").get<any>();
             ele.addPage({});
             this.setItems([ele]);
         });
+
         const sectionBtn = $(tool).create("tool-item");
         sectionBtn.text("SEC");
         let i = 1;
@@ -154,25 +185,28 @@ class FormDesigner extends HTMLElement {
             event.dataTransfer.dropEffect = "move";
             console.log("hello");
             const ele = $.create("section-designer");
+
             ele.attr("index", i);
             ele.text("Page " + i++);
-            this.setItems([ele.get()]);
+            this.setItems([ele.get<HTMLElement>()]);
             ele.create("item-container");
         });
+
         const fieldBtn = $(tool).create("tool-item");
         fieldBtn.text("F");
         let j = 1;
         fieldBtn.on("click", (event) => {
+            
             const ele = $.create("field-designer");
+
             //ele.attr("index", j)
             //ele.text("Page "+j++)
             const active = this.getActive();
-            if (active) {
-                console.log("si", active);
-                active.appendChild(ele.get());
-            }
-            else {
-                container.appendChild(ele.get());
+            if(active){
+                console.log("si", active)
+                active.appendChild(ele.get<HTMLElement>());
+            }else{
+                container.appendChild(ele.get<HTMLElement>());
             }
             //ele.create("item-container");
         });
@@ -181,20 +215,27 @@ class FormDesigner extends HTMLElement {
             event.dataTransfer.dropEffect = "move";
             console.log("hello");
             const ele = $.create("field-designer");
+
             //ele.attr("index", j)
             //ele.text("Page "+j++)
-            this.setItems([ele.get()]);
+            
+            this.setItems([ele.get<HTMLElement>()]);
             //ele.create("item-container");
         });
+
         const separatorBtn = $(tool).create("tool-item");
         separatorBtn.text("S");
+
         separatorBtn.on("dragstart", (event) => {
             event.stopImmediatePropagation();
             event.dataTransfer.dropEffect = "move";
+
             const ele = $.create("hr");
-            this.setItems([ele.get()]);
+
+            this.setItems([ele.get<HTMLElement>()]);
             //ele.create("item-container");
         });
+        */
     }
     setItems(items) {
         if (items && items[0].selected) {
@@ -212,7 +253,10 @@ class FormDesigner extends HTMLElement {
     }
     getActive() {
         console.log("get ACTIVE");
-        return this._active;
+        return this._active || $(this).query("item-container").get();
+    }
+    get fields() {
+        return Array.from(this.querySelectorAll("field-designer"));
     }
 }
 customElements.define("form-designer", FormDesigner);

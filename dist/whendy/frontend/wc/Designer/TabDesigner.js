@@ -29,12 +29,15 @@ class TabDesigner extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
         this.shadowRoot.querySelector(".plus").addEventListener("click", (event) => {
-            this.addPage({});
+            this.addPage();
             //$.fire(this, "add-tab", {});
         });
     }
     connectedCallback() {
         this.setAttribute("role", "tab");
+        if (!this.querySelector("item-container")) {
+            this.addPage({});
+        }
         //this.slot = "container";
     }
     disconnectedCallback() {
@@ -45,8 +48,8 @@ class TabDesigner extends HTMLElement {
         const page = $(this).create("div").addClass("tab-page");
         const head = page.create("div").addClass("head");
         const body = page.create("item-container");
-        head.append(info.caption || "Tab Page " + (this._index++).toString());
-        if (info.body) {
+        head.append((info === null || info === void 0 ? void 0 : info.caption) || "Tab Page " + (this._index++).toString());
+        if (info === null || info === void 0 ? void 0 : info.body) {
             body.append(info.body);
         }
     }

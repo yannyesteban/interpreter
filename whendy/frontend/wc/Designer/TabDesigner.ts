@@ -37,13 +37,18 @@ class TabDesigner extends HTMLElement {
         });
 
         this.shadowRoot.querySelector(".plus").addEventListener("click", (event) => {
-            this.addPage({});
+            this.addPage();
             //$.fire(this, "add-tab", {});
         });
     }
 
     public connectedCallback() {
         this.setAttribute("role", "tab");
+
+        if(!this.querySelector("item-container")){
+            this.addPage({})
+            
+        }
         //this.slot = "container";
     }
 
@@ -53,13 +58,13 @@ class TabDesigner extends HTMLElement {
 
     public attributeChangedCallback(name, oldVal, newVal) {}
 
-    public addPage(info) {
+    public addPage(info?:any) {
         const page = $(this).create("div").addClass("tab-page");
         const head = page.create("div").addClass("head");
         const body = page.create("item-container");
 
-        head.append(info.caption || "Tab Page " + (this._index++).toString());
-        if (info.body) {
+        head.append(info?.caption || "Tab Page " + (this._index++).toString());
+        if (info?.body) {
             body.append(info.body);
         }
     }
