@@ -1,30 +1,3 @@
-class GTField extends HTMLElement {
-    constructor() {
-        super();
-        //this.slot = "caption";
-        const template = document.createElement("template");
-        template.innerHTML = `
-			
-		<style>
-            :host {
-                display:block;
-				border:4px solid red;
-				
-             }
-
-            
-            </style>
-		<slot></slot>	
-	
-		`;
-        this.attachShadow({ mode: "open" });
-        this.shadowRoot.appendChild(template.content.cloneNode(true));
-    }
-    connectedCallback() {
-        //this.slot = "field";
-    }
-}
-customElements.define("gt-field", GTField);
 class GTLabel extends HTMLElement {
     constructor() {
         super();

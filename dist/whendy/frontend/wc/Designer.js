@@ -10,6 +10,7 @@ import "./Designer/CaptionDesigner.js";
 import "./Designer/ButtonDesigner.js";
 import "./Designer/ToolExt.js";
 import "./Window.js";
+import "./Field.js";
 import "./GTForm.js";
 class FieldInfo {
     constructor(info) {

@@ -20,13 +20,8 @@ class Html extends HTMLElement {
         });
     }
     connectedCallback() { }
-    disconnectedCallback() {
-        console.log("disconnectedCallback");
-    }
-    attributeChangedCallback(name, oldVal, newVal) {
-        console.log("attributeChangedCallback");
-        this[name] = newVal;
-    }
+    disconnectedCallback() { }
+    attributeChangedCallback(name, oldVal, newVal) { }
     set type(value) {
         if (Boolean(value)) {
             this.setAttribute("type", value);
