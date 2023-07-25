@@ -1,4 +1,4 @@
-class Extensor extends HTMLElement {
+class ToolExt extends HTMLElement {
     static get observedAttributes() {
         return [""];
     }
@@ -10,10 +10,18 @@ class Extensor extends HTMLElement {
         template.innerHTML = `
 			<style>
 			:host {
-				display:inline-block;
+				display:block;
+                position:absolute;
+                right:2px;
+                top:2px;
+                
+                
 
 			}
-			</style><slot></slot>`;
+            :host(:hover){
+                color:red;
+            }
+			</style><button class="config">s</button><button>x</button><slot></slot>`;
 
         this.attachShadow({ mode: "open" });
 
@@ -26,11 +34,19 @@ class Extensor extends HTMLElement {
         });
     }
 
-    public connectedCallback() {}
+    public connectedCallback() {
+
+        this.parentElement.style.position = "relative";
+        this.shadowRoot.querySelector(".config").addEventListener("click", (event)=>{
+            this.parentElement["showConfig"]();
+        })
+
+        
+    }
 
     public disconnectedCallback() {}
 
     public attributeChangedCallback(name, oldVal, newVal) {}
 }
 
-customElements.define("extensor-func", Extensor);
+customElements.define("tool-ext", ToolExt);

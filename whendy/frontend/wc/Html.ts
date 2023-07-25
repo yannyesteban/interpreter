@@ -1,6 +1,6 @@
 class Html extends HTMLElement {
     static get observedAttributes() {
-        return [""];
+        return ["type"];
     }
     constructor() {
         super();
@@ -35,6 +35,18 @@ class Html extends HTMLElement {
     public attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
         this[name] = newVal;
+    }
+
+    set type(value) {
+        if (Boolean(value)) {
+            this.setAttribute("type", value);
+        } else {
+            this.removeAttribute("type");
+        }
+    }
+
+    get type() {
+        return this.getAttribute("type");
     }
 }
 

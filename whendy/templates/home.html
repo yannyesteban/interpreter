@@ -2,6 +2,20 @@
     <div class="panel header" data-panel="1">header</div>
     <div class="panel menu" data-panel="2">menu</div>
     <div class="panel left-menu" data-panel="3"><json-designer></json-designer></div>
-    <div class="panel body" data-panel="4"><form-designer caption="designer v1.0"></form-designer></div>
+    <div class="panel body" data-panel="4"><form-designer caption="designer v1.0"></form-designer>
+        
+        <gt-form>
+            <gt-caption>Hello</gt-caption>
+
+            <gt-field aria-required="true" >
+                <gt-label>Uno</gt-label>
+                <gt-input></gt-input>
+            </gt-field>
+            <gt-field>
+                <gt-label>Dos</gt-label>
+                <input type="checkbox"></input>
+            </gt-field>
+        </gt-form>
+    </div>
     <div class="panel footer" data-panel="5">footer</div>
 </div>

@@ -1,0 +1,23 @@
+{
+    "element": "form",
+    "title": "Form User",
+    "elements": [
+        {
+            "element": "tab",
+            "caption": "datos extras",
+            "elements": [
+                {
+                    "caption": "Page ONE",
+                    "elements": [
+                        {
+                            "element": "field"
+                        },
+                        {
+                            "element": "field"
+                        }
+                    ]
+                }
+            ]
+        }
+    ]
+}

@@ -5,6 +5,7 @@ class FieldDesigner extends HTMLElement {
     iType: HTMLSelectElement;
 
     _info: any; // IFieldInfo;
+    private _data: any = {};
 
     static get observedAttributes() {
         return ["name", "caption", "input", "type", "default", "selected"];
@@ -19,7 +20,7 @@ class FieldDesigner extends HTMLElement {
 			<style>
 			:host {
 				display:block;
-				
+				padding:10px;
 				
 			}
 
@@ -104,6 +105,7 @@ class FieldDesigner extends HTMLElement {
     }
 
     public connectedCallback() {
+        this.setAttribute("designer-type", "field");
         this.setAttribute("role", "field-designer");
         if(!this.name){
             const designer = this.closest("[role=designer]") as any;
@@ -113,6 +115,8 @@ class FieldDesigner extends HTMLElement {
             const designer = this.closest("[role=designer]") as any;
             this.caption = this.name;
         }
+
+        
     }
 
     public disconnectedCallback() {
@@ -220,6 +224,27 @@ class FieldDesigner extends HTMLElement {
 
     get info() {
         return this._info;
+    }
+
+    get designerType() {
+        return this.hasAttribute("designer-type");
+    }
+
+    set dataSource(data){
+        this._data = data;
+    }
+
+    get dataSource(){
+
+        this._data.element = "field";
+        this._data.name = this.name;
+        this._data.caption = this.caption;
+        this._data.input = this.input;
+        this._data.type = this.type;
+        this._data.default = this.default;
+
+        
+        return this._data;
     }
 }
 

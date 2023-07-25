@@ -27,18 +27,19 @@ class LastActive extends HTMLElement {
     }
 
     public connectedCallback() {
-        this.closest(this.container).parentElement.addEventListener("click", (event) => {
-            //console.log(event.target);
-            if (event.target === this.closest(this.container).parentElement || event.target === this.parentElement) {
-                console.log(event.target);
+        this.closest(this.designer).addEventListener("click", (event:any) => {
+            const active = event.target.closest(this.container)
+            
+            if (active) {
+                
                 const p = this.closest(this.designer) as any;
-                p.setActive(this.parentNode);
+                p.setActive(active);
             }
         });
     }
 
     public disconnectedCallback() {
-        console.log("disconnectedCallback");
+        
     }
 
     public attributeChangedCallback(name, oldVal, newVal) {

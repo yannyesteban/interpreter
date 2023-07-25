@@ -20,9 +20,7 @@ class Container extends HTMLElement {
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         const slot = this.shadowRoot.querySelector("slot");
         slot.addEventListener("slotchange", (e) => {
-            console.log("assignedNodes", slot.assignedNodes());
             slot.assignedNodes().forEach((node) => {
-                console.log("**************", node);
                 if (node.draggable) {
                     return;
                 }
@@ -44,7 +42,6 @@ class Container extends HTMLElement {
             event.preventDefault();
         });
         this.addEventListener("drop", (event) => {
-            console.log(event, event.target.tagName);
             event.preventDefault();
             event.stopImmediatePropagation();
             const items = this.getItems(event.dataTransfer);
@@ -62,7 +59,6 @@ class Container extends HTMLElement {
                     beforeOf = event.target;
                 }
             }
-            console.log(items);
             this.style.border = "4px solid purple";
             if (beforeOf) {
                 items.forEach((item) => event.target.parentNode.insertBefore(item, beforeOf));
@@ -74,23 +70,20 @@ class Container extends HTMLElement {
         });
         this.addEventListener("dragstart", (event) => {
             event.stopPropagation();
-            console.log("START....", event.target);
             event.dataTransfer.dropEffect = "copy";
             this.setItems([event.target]);
         });
     }
     connectedCallback() {
-        console.log(this);
+        this.setAttribute("designer-type", "container");
         //this.slot = "container";
         this.setAttribute("role", "container");
-        const ele = document.createElement("last-active-ext");
-        ele.setAttribute("container", "[role=container]");
-        ele.setAttribute("designer", "[role=designer]");
-        this.appendChild(ele);
+        /*const ele = document.createElement("last-active-ext");
+        ele.setAttribute("container","[role=container]");
+        ele.setAttribute("designer","[role=designer]");
+        this.appendChild(ele)*/
     }
-    disconnectedCallback() {
-        console.log("disconnectedCallback");
-    }
+    disconnectedCallback() { }
     attributeChangedCallback(name, oldVal, newVal) { }
     set selected(value) {
         value = Boolean(value);
@@ -104,10 +97,12 @@ class Container extends HTMLElement {
     get selected() {
         return this.hasAttribute("selected");
     }
+    get designerType() {
+        return this.hasAttribute("designer-type");
+    }
     getItems(data) {
         const parent = this.closest("[role=designer]");
         if ("getItems" in parent) {
-            console.log(parent.getItems());
             return parent.getItems();
         }
         return null;

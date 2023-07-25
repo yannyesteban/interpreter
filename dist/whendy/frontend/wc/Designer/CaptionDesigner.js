@@ -1,6 +1,6 @@
 class CaptionDesigner extends HTMLElement {
     static get observedAttributes() {
-        return ["parent", "property"];
+        return ["parent", "property", "target"];
     }
     constructor() {
         super();
@@ -9,11 +9,13 @@ class CaptionDesigner extends HTMLElement {
 			<style>
 			:host {
 				display:inline-block;
+                min-width:10px;
+                border:solid red 2px;
 
 			}
 			</style><div>CAPTION</div>`;
         this.addEventListener("input", (event) => {
-            this.closest("[role=designer]").setAttribute("caption", this.innerText);
+            this.closest(this.target).setAttribute("caption", this.innerText);
         });
         return;
         this.attachShadow({ mode: "open" });
@@ -29,12 +31,24 @@ class CaptionDesigner extends HTMLElement {
     }
     connectedCallback() {
         this.setAttribute("contenteditable", "true");
-        this.innerHTML = this.closest("[role=designer]").getAttribute("caption");
     }
     disconnectedCallback() {
         console.log("disconnectedCallback");
     }
     attributeChangedCallback(name, oldVal, newVal) {
+        console.log(name, oldVal, newVal, this.closest(this.target));
+        this.innerHTML = "---" + this.closest(this.target).getAttribute("caption");
+    }
+    set target(value) {
+        if (Boolean(value)) {
+            this.setAttribute("target", value);
+        }
+        else {
+            this.removeAttribute("target");
+        }
+    }
+    get target() {
+        return this.getAttribute("target");
     }
 }
 customElements.define("caption-ext", CaptionDesigner);

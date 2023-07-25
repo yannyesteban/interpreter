@@ -1,4 +1,23 @@
 import { Q as $ } from "./../../Q.js";
+
+class JsonImport {
+    toJson(conatiner: HTMLElement) {
+        const obj:any = {};
+
+        if (conatiner.children.length > 0) {
+            const elems = conatiner.children;
+
+            obj.children = [];
+            for (const childNode of conatiner.children) {
+
+                const type = childNode.getAttribute("designer-type");
+                obj.children.push(childNode["info"])
+                
+            }
+        }
+    }
+}
+
 class FieldDesigner {}
 class FormDesigner extends HTMLElement {
     iCaption;
@@ -9,6 +28,7 @@ class FormDesigner extends HTMLElement {
     _last: FieldDesigner = null;
     _items: FieldDesigner[];
     _active = null;
+    private _data: any = {};
     constructor() {
         super();
 
@@ -61,6 +81,8 @@ class FormDesigner extends HTMLElement {
 			</style>
 			<div class="header">Designer: <slot name="caption"></slot></div>
             <nav>
+                
+                <button class="download">Download</button>
                 <button class="add">+</button>
                 <button class="del">-</button>
                 <button class="section">G</button>
@@ -106,6 +128,10 @@ class FormDesigner extends HTMLElement {
             this.style.border = "2px solid orange";
             event.preventDefault();
         });
+
+        this.shadowRoot.querySelector(".download").addEventListener("click", (event) => {
+            console.log(this.dataSource)
+        });
     }
 
     static get observedAttributes() {
@@ -114,6 +140,12 @@ class FormDesigner extends HTMLElement {
 
     public connectedCallback() {
         this.setAttribute("role", "designer");
+
+        const ele = document.createElement("last-active-ext");
+        ele.setAttribute("container", "[role=container]");
+        ele.setAttribute("designer", "[role=designer]");
+        this.appendChild(ele);
+
         this.load();
     }
 
@@ -169,10 +201,35 @@ class FormDesigner extends HTMLElement {
                     text: "Separator",
                     className: "",
                 },
+                {
+                    title: "Button",
+                    element: "button-designer",
+                    text: "Button",
+                    className: "",
+                    attr: {
+                        role: "button",
+                    },
+                    prop: {
+                        innerHTML: "BUTTON",
+                    },
+                },
+                {
+                    title: "Request",
+                    element: "button-designer",
+                    text: "Request",
+                    className: "",
+                    attr: {
+                        role: "button-request",
+                    },
+                    prop: {
+                        innerHTML: "Request",
+                    },
+                },
             ],
         };
 
         let caption = $(this).create("caption-ext");
+        caption.attr("target", this.tagName);
         caption.attr("slot", "caption");
 
         const trash = $(this).create("div");
@@ -284,7 +341,25 @@ class FormDesigner extends HTMLElement {
         return Array.from(this.querySelectorAll("field-designer"));
     }
 
-    
+    get designerType() {
+        return this.hasAttribute("designer-type");
+    }
+
+    set dataSource(data){
+        this._data = data;
+    }
+
+    get dataSource(){
+        this._data.elements = [];
+        const container = $(this).query("item-container").get<HTMLElement>();
+        
+        if(container.children.length>0){
+            for(const node of container.children){
+                this._data.elements.push(node["dataSource"]);
+            }
+        }
+        return this._data;
+    }
 }
 
 customElements.define("form-designer", FormDesigner);

@@ -1,4 +1,4 @@
-class Extensor extends HTMLElement {
+class ToolExt extends HTMLElement {
     static get observedAttributes() {
         return [""];
     }
@@ -23,5 +23,5 @@ class Extensor extends HTMLElement {
     disconnectedCallback() { }
     attributeChangedCallback(name, oldVal, newVal) { }
 }
-customElements.define("extensor-func", Extensor);
-//# sourceMappingURL=Extensor.js.map
+customElements.define("tool-ext", ToolExt);
+//# sourceMappingURL=ToolExt.js.map

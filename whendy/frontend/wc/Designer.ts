@@ -8,6 +8,10 @@ import "./Designer/TableMenu.js";
 import "./Designer/Toolbox.js";
 import "./Designer/LastActiveExt.js";
 import "./Designer/CaptionDesigner.js";
+import "./Designer/ButtonDesigner.js";
+import "./Designer/ToolExt.js";
+import "./Window.js";
+import "./GTForm.js";
 
 type IFieldInfo = {
     id?: string;

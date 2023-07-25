@@ -43,13 +43,9 @@ class ToolItem extends HTMLElement {
         this.draggable = true;
     }
 
-    public disconnectedCallback() {
-        console.log("disconnectedCallback");
-    }
+    public disconnectedCallback() {}
 
-    public attributeChangedCallback(name, oldVal, newVal) {
-        console.log("attributeChangedCallback");
-    }
+    public attributeChangedCallback(name, oldVal, newVal) {}
 
     set element(value) {
         if (Boolean(value)) {
@@ -70,8 +66,11 @@ class ToolItem extends HTMLElement {
         this.innerHTML = data.text;
         //$(this).create("div").text(data.text);
     }
-}
 
+    get info() {
+        return this._info;
+    }
+}
 customElements.define("tool-item", ToolItem);
 
 class ToolBox extends HTMLElement {
@@ -107,25 +106,14 @@ class ToolBox extends HTMLElement {
                 return;
             }
 
-            console.log(event.target);
-            const ele = $.create(event.target.element);
-
-            //ele.attr("index", j)
-            //ele.text("Page "+j++)
             const container = this.getDesigner().getActive();
-            container.appendChild(ele.get<HTMLElement>());
+            container.appendChild(this.createElement(event.target));
         });
         $(this).on("dragstart", (event) => {
             event.stopPropagation();
             event.dataTransfer.dropEffect = "move";
-            console.log("hello");
-            const ele = $.create(event.target.element);
 
-            //ele.attr("index", j)
-            //ele.text("Page "+j++)
-
-            this.getDesigner().setItems([ele.get<HTMLElement>()]);
-            //ele.create("item-container");
+            this.getDesigner().setItems([this.createElement(event.target)]);
         });
     }
 
@@ -134,13 +122,9 @@ class ToolBox extends HTMLElement {
         this.setAttribute("role", "toolbox");
     }
 
-    public disconnectedCallback() {
-        console.log("disconnectedCallback");
-    }
+    public disconnectedCallback() {}
 
-    public attributeChangedCallback(name, oldVal, newVal) {
-        console.log("attributeChangedCallback");
-    }
+    public attributeChangedCallback(name, oldVal, newVal) {}
 
     set dataSource(data: ToolItemInfo) {
         data.items.forEach((item) => {
@@ -150,6 +134,23 @@ class ToolBox extends HTMLElement {
 
     getDesigner(): any {
         return this.closest("[role=designer]");
+    }
+
+    createElement(item: ToolItem) {
+        const ele = $.create(item.element).get<HTMLElement>();
+
+        if (item.info.attr) {
+            for (const [key, value] of Object.entries(item.info.attr)) {
+                ele.setAttribute(key, value.toString());
+            }
+        }
+        if (item.info.prop) {
+            for (const [key, value] of Object.entries(item.info.prop)) {
+                ele[key] = value;
+            }
+        }
+
+        return ele;
     }
 }
 customElements.define("tool-box", ToolBox);

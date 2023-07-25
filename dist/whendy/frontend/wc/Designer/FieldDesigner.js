@@ -4,12 +4,13 @@ class FieldDesigner extends HTMLElement {
     }
     constructor() {
         super();
+        this._data = {};
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
 			:host {
 				display:block;
-				
+				padding:10px;
 				
 			}
 
@@ -88,6 +89,7 @@ class FieldDesigner extends HTMLElement {
         });
     }
     connectedCallback() {
+        this.setAttribute("designer-type", "field");
         this.setAttribute("role", "field-designer");
         if (!this.name) {
             const designer = this.closest("[role=designer]");
@@ -194,6 +196,21 @@ class FieldDesigner extends HTMLElement {
     }
     get info() {
         return this._info;
+    }
+    get designerType() {
+        return this.hasAttribute("designer-type");
+    }
+    set dataSource(data) {
+        this._data = data;
+    }
+    get dataSource() {
+        this._data.element = "field";
+        this._data.name = this.name;
+        this._data.caption = this.caption;
+        this._data.input = this.input;
+        this._data.type = this.type;
+        this._data.default = this.default;
+        return this._data;
     }
 }
 customElements.define("field-designer", FieldDesigner);

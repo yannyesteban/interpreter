@@ -20,17 +20,15 @@ class LastActive extends HTMLElement {
         });
     }
     connectedCallback() {
-        this.closest(this.container).parentElement.addEventListener("click", (event) => {
-            //console.log(event.target);
-            if (event.target === this.closest(this.container).parentElement || event.target === this.parentElement) {
-                console.log(event.target);
+        this.closest(this.designer).addEventListener("click", (event) => {
+            const active = event.target.closest(this.container);
+            if (active) {
                 const p = this.closest(this.designer);
-                p.setActive(this.parentNode);
+                p.setActive(active);
             }
         });
     }
     disconnectedCallback() {
-        console.log("disconnectedCallback");
     }
     attributeChangedCallback(name, oldVal, newVal) {
         switch (name) {
