@@ -89,7 +89,19 @@ class GTForm extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
     }
-    connectedCallback() { }
+    connectedCallback() {
+        const selects = this.querySelectorAll("select[data-filter]");
+        selects.forEach(select => {
+            const options = JSON.parse(select.innerHTML);
+            options.forEach(option => {
+                const opt = document.createElement("option");
+                opt.value = String(option.value); // the index
+                opt.innerHTML = String(option.text);
+                select.append(opt);
+            });
+        });
+        console.log(selects);
+    }
     disconnectedCallback() {
         console.log("disconnectedCallback");
     }

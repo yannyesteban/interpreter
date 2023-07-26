@@ -4,30 +4,43 @@
     <div class="panel left-menu" data-panel="3"><json-designer></json-designer></div>
     <div class="panel body" data-panel="4">
         <form-designer caption="designer v1.0"></form-designer>
+        <form action="">
+            <gt-form>
+                <gt-caption>Hello</gt-caption>
 
-        <gt-form>
-            <gt-caption>Hello</gt-caption>
+                <gt-field aria-required="true" label="Cédula" name="y" value="12474737"></gt-field>
+                <gt-field label="Secure?" name="tres2" value="x" input="input" type="checkbox" rlabel
+                    required></gt-field>
 
-            <gt-field aria-required="true" label="Cédula" name="y" value="12474737"></gt-field>
-            <gt-field label="Secure?" name="tres2" value="x" input="input" type="checkbox" rlabel required></gt-field>
+                <gt-field label="tres" hidden name="tres" value="x" input="textarea" value="mi text"></gt-field>
 
-            <gt-field label="tres" hidden name="tres" value="x" input="textarea" value="mi text"></gt-field>
+                <gt-field label="tres" name="tres4" input="select" value="14">
 
-            <gt-field label="tres" name="tres4" input="select" value="14">
 
-                
-                <data-option value="11" level="tree">Texto 0</data-option>
-                <data-option value="10" level="tree">Texto 1</data-option>
-                <data-option value="12" level="tree">Texto 2</data-option>
-                <data-option value="13" level="one">Texto 3</data-option>
-                <data-option value="14" level="one">Texto 4</data-option>
-                <data-option value="15" level="one" selected>Texto 5</data-option>
-                <data-option value="16" level="one">Texto 6</data-option>
-                <data-option value="17" level="two">Texto 7</data-option>
-                <data-option value="18" level="two">Texto 8</data-option>
-                <data-event name="click">alert(9)</data-event>
-            </gt-field>
-        </gt-form>
+                    <data-option value="11" level="tree">Texto 0</data-option>
+                    <data-option value="10" level="tree">Texto 1</data-option>
+                    <data-option value="12" level="tree">Texto 2</data-option>
+                    <data-option value="13" level="one">Texto 3</data-option>
+                    <data-option value="14" level="one">Texto 4</data-option>
+                    <data-option value="15" level="one" selected>Texto 5</data-option>
+                    <data-option value="16" level="one">Texto 6</data-option>
+                    <data-option value="17" level="two">Texto 7</data-option>
+                    <data-option value="18" level="two">Texto 8</data-option>
+                    <data-event name="change">alert(this.form)</data-event>
+                </gt-field>
+                <select data-filter="">
+                   [
+                    {
+                        "value":"","text":"select...","level":""
+                    },
+                    {
+                        "value":"1","text":"uno","level":"one"
+                    }
+                   ]
+
+                </select>
+            </gt-form>
+        </form>
     </div>
     <div class="panel footer" data-panel="5">footer</div>
 </div>

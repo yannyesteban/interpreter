@@ -1,3 +1,5 @@
+import { Q as $ } from "../Q.js";
+
 class DataOption extends HTMLElement {
     static get observedAttributes() {
         return ["selected", "value", "level"];
@@ -95,20 +97,19 @@ class DataEvent extends HTMLElement {
     get value() {
         return this.getAttribute("value");
     }
-
-    
 }
 customElements.define("data-event", DataEvent);
 
-
 class Field extends HTMLElement {
+    private _internals;
+    static formAssociated = true;
+
     static get observedAttributes() {
-        return ["required", "label", "input", "type", "options", "rules", "placeholder", "rlabel",
-         "value", "filter"];
+        return ["required", "label", "input", "type", "options", "rules", "placeholder", "rlabel", "value", "filter"];
     }
     constructor() {
         super();
-
+        this._internals = this.attachInternals();
         const template = document.createElement("template");
 
         template.innerHTML = `
@@ -148,9 +149,8 @@ class Field extends HTMLElement {
         const slot2 = <HTMLSlotElement>this.shadowRoot.querySelector("slot.data-event");
         slot2.addEventListener("slotchange", (e) => {
             //this.setDataOption();
-            console.log(this.innerHTML)
+            console.log(this.innerHTML);
             const nodes = slot.assignedNodes();
-
         });
     }
 
@@ -181,13 +181,16 @@ class Field extends HTMLElement {
         }
 
         input.id = id;
+        input.addEventListener("change", (event) => {
+            this.value = event.target["value"];
+        });
         input.setAttribute("data-form-type", "field");
         this.appendChild(input);
         this.setDataOption();
-        
 
         input["value"] = this.value;
-        
+
+        this.setDataEvent();
     }
 
     public disconnectedCallback() {}
@@ -196,6 +199,7 @@ class Field extends HTMLElement {
         //console.log("attributeChangedCallback", name, oldVal, newVal);
         switch (name) {
             case "value":
+                this._internals.setFormValue(newVal);
                 const input = this.querySelector("[data-form-type=field]");
 
                 if (input) {
@@ -204,7 +208,6 @@ class Field extends HTMLElement {
 
                 break;
             case "filter":
-                
                 this.setDataOption();
         }
     }
@@ -314,34 +317,40 @@ class Field extends HTMLElement {
             options = this.querySelectorAll("data-option");
         }
 
-
         if (this.input?.toLowerCase() === "select") {
             input.innerHTML = "";
-
-            
-            
 
             options.forEach((option) => {
                 const opt = document.createElement("option");
                 opt.value = option.getAttribute("value"); // the index
                 opt.innerHTML = option.innerHTML;
-                if(option.getAttribute("selected")){
+                if (option.getAttribute("selected")) {
                     opt.setAttribute("selected", "");
                 }
-
-
-                
 
                 input.append(opt);
             });
             input["value"] = this.value;
-        }else{
+        } else {
             input.innerHTML = "";
 
             options.forEach((option) => {
                 input.appendChild(option);
-            })
+            });
         }
+    }
+
+    setDataEvent() {
+        const input = this.querySelector("[data-form-type=field]");
+        let events = this.querySelectorAll("data-event");
+        events.forEach((item) => {
+            this.addEventListener(item.getAttribute("name"), $.bind(item.textContent, this, "event"));
+        });
+    }
+
+    get form() {
+        console.log(this._internals.form)
+        return this._internals.form;
     }
 }
 

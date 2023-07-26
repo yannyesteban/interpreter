@@ -1,3 +1,4 @@
+import { Q as $ } from "../Q.js";
 class DataOption extends HTMLElement {
     static get observedAttributes() {
         return ["selected", "value", "level"];
@@ -87,11 +88,11 @@ class DataEvent extends HTMLElement {
 customElements.define("data-event", DataEvent);
 class Field extends HTMLElement {
     static get observedAttributes() {
-        return ["required", "label", "input", "type", "options", "rules", "placeholder", "rlabel",
-            "value", "filter"];
+        return ["required", "label", "input", "type", "options", "rules", "placeholder", "rlabel", "value", "filter"];
     }
     constructor() {
         super();
+        this._internals = this.attachInternals();
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
@@ -156,16 +157,21 @@ class Field extends HTMLElement {
             this.appendChild(ind);
         }
         input.id = id;
+        input.addEventListener("change", (event) => {
+            this.value = event.target["value"];
+        });
         input.setAttribute("data-form-type", "field");
         this.appendChild(input);
         this.setDataOption();
         input["value"] = this.value;
+        this.setDataEvent();
     }
     disconnectedCallback() { }
     attributeChangedCallback(name, oldVal, newVal) {
         //console.log("attributeChangedCallback", name, oldVal, newVal);
         switch (name) {
             case "value":
+                this._internals.setFormValue(newVal);
                 const input = this.querySelector("[data-form-type=field]");
                 if (input) {
                     input["value"] = this.value;
@@ -293,6 +299,18 @@ class Field extends HTMLElement {
             });
         }
     }
+    setDataEvent() {
+        const input = this.querySelector("[data-form-type=field]");
+        let events = this.querySelectorAll("data-event");
+        events.forEach((item) => {
+            this.addEventListener(item.getAttribute("name"), $.bind(item.textContent, this, "event"));
+        });
+    }
+    get form() {
+        console.log(this._internals.form);
+        return this._internals.form;
+    }
 }
+Field.formAssociated = true;
 customElements.define("gt-field", Field);
 //# sourceMappingURL=Field.js.map
