@@ -74,14 +74,14 @@ class TabDesigner extends HTMLElement {
         this._data = data;
     }
     get dataSource() {
-        this._data.element = "tab",
+        this._data.component = "tab",
             this._data.elements = [];
         this._data.caption = this.caption;
         const pages = $(this).queryAll(":scope > .tab-page");
         pages.forEach((page) => {
             const container = page.query(":scope > item-container").get();
             const obj = {
-                element: "tabpage",
+                component: "tabpage",
                 caption: page.query(":scope > .caption").text(),
                 elements: [],
             };

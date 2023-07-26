@@ -112,6 +112,8 @@ class FormDesigner extends HTMLElement {
         });
         this.shadowRoot.querySelector(".download").addEventListener("click", (event) => {
             console.log(this.dataSource);
+            const f = document.getElementById("f1");
+            f.dataSource = this.dataSource;
         });
     }
     static get observedAttributes() {

@@ -12,6 +12,7 @@ import "./Designer/ButtonDesigner.js";
 import "./Designer/ToolExt.js";
 import "./Window.js";
 import "./Field.js";
+import "./Section.js";
 import "./GTForm.js";
 
 type IFieldInfo = {

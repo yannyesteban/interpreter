@@ -106,8 +106,9 @@ class SectionDesigner extends HTMLElement {
     }
 
     get dataSource() {
+        this._data.component = "section";
+        this._data.label = this.caption+"Mañana";
         this._data.elements = [];
-        this._data.caption = this.caption;
         const container = $(this).query(":scope > item-container").get<HTMLElement>();
 
         if (container.children.length > 0) {

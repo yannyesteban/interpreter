@@ -1,5 +1,22 @@
 import { Q as $ } from "../Q.js";
 
+class RequiredInd extends HTMLElement {
+    static get observedAttributes() {
+        return [];
+    }
+    constructor() {
+        super();
+    }
+
+    public connectedCallback() {}
+
+    public disconnectedCallback() {}
+
+    public attributeChangedCallback(name, oldVal, newVal) {}
+}
+
+customElements.define("required-ind", RequiredInd);
+
 class DataOption extends HTMLElement {
     static get observedAttributes() {
         return ["selected", "value", "level"];
@@ -101,15 +118,12 @@ class DataEvent extends HTMLElement {
 customElements.define("data-event", DataEvent);
 
 class Field extends HTMLElement {
-    private _internals;
-    static formAssociated = true;
-
     static get observedAttributes() {
-        return ["required", "label", "input", "type", "options", "rules", "placeholder", "rlabel", "value", "filter"];
+        return ["rlabel"];
     }
     constructor() {
         super();
-        this._internals = this.attachInternals();
+
         const template = document.createElement("template");
 
         template.innerHTML = `
@@ -122,9 +136,7 @@ class Field extends HTMLElement {
             :host([hidden]){
                 display:none;
             }
-            .data-option, .data-event{
-                display:none;
-            }
+            
 			</style>
             <slot name="label"></slot>
             <slot name="ind"></slot>
@@ -132,83 +144,44 @@ class Field extends HTMLElement {
             <slot></slot>
             <slot name="rlabel"></slot>
             <slot name="rind"></slot>
-            <slot class="data-option" name="data-option"></slot>
-            <slot class="data-event" name="data-event"></slot>
+            
             `;
 
         this.attachShadow({ mode: "open" });
 
         this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-        const slot = <HTMLSlotElement>this.shadowRoot.querySelector("slot.data-option");
+        const slot = <HTMLSlotElement>this.shadowRoot.querySelector("slot");
 
         slot.addEventListener("slotchange", (e) => {
-            this.setDataOption();
-            //const nodes = slot.assignedNodes();
-        });
-        const slot2 = <HTMLSlotElement>this.shadowRoot.querySelector("slot.data-event");
-        slot2.addEventListener("slotchange", (e) => {
-            //this.setDataOption();
-            console.log(this.innerHTML);
-            const nodes = slot.assignedNodes();
+            //this._load();
         });
     }
 
     public connectedCallback() {
-        console.log("connectedCallback");
-        let input: HTMLElement;
-        let id = "field-element-" + (this.id || this.name);
-        const label = document.createElement("label");
-        label.setAttribute("for", id);
-        label.slot = this.rlabel ? "rlabel" : "label";
-        label.innerHTML = this.label;
-        this.appendChild(label);
-        if (this.input) {
-            input = document.createElement(this.input);
-            if (this.type) {
-                input.setAttribute("type", this.type);
+        this._load();
+    }
+
+    _load() {
+        const label = <HTMLElement>this.querySelector("label");
+        if (label) {
+            label.slot = this.rlabel ? "rlabel" : "label";
+            const ind = <HTMLElement>this.querySelector("required-ind");
+            if (ind) {
+                ind.slot = this.rlabel ? "rind" : "ind";
             }
-        } else {
-            input = document.createElement("input");
-            input.setAttribute("type", "text");
         }
-
-        if (this.required) {
-            const ind = document.createElement("span");
-            ind.slot = label.slot = this.rlabel ? "rind" : "ind";
-            ind.innerHTML = "*";
-            this.appendChild(ind);
-        }
-
-        input.id = id;
-        input.addEventListener("change", (event) => {
-            this.value = event.target["value"];
-        });
-        input.setAttribute("data-form-type", "field");
-        this.appendChild(input);
-        this.setDataOption();
-
-        input["value"] = this.value;
-
-        this.setDataEvent();
+        
     }
 
     public disconnectedCallback() {}
 
     public attributeChangedCallback(name, oldVal, newVal) {
-        //console.log("attributeChangedCallback", name, oldVal, newVal);
+        console.log(name, oldVal, newVal);
         switch (name) {
-            case "value":
-                this._internals.setFormValue(newVal);
-                const input = this.querySelector("[data-form-type=field]");
-
-                if (input) {
-                    input["value"] = this.value;
-                }
-
+            case "rlabel":
+                this._load();
                 break;
-            case "filter":
-                this.setDataOption();
         }
     }
 
@@ -284,16 +257,16 @@ class Field extends HTMLElement {
         return this.getAttribute("filter");
     }
 
-    set required(value) {
+    set hidden(value) {
         if (Boolean(value)) {
-            this.setAttribute("required", "");
+            this.setAttribute("hidden", "");
         } else {
-            this.removeAttribute("required");
+            this.removeAttribute("hidden");
         }
     }
 
-    get required() {
-        return this.hasAttribute("required");
+    get hidden() {
+        return this.hasAttribute("hidden");
     }
 
     set rlabel(value) {
@@ -346,11 +319,6 @@ class Field extends HTMLElement {
         events.forEach((item) => {
             this.addEventListener(item.getAttribute("name"), $.bind(item.textContent, this, "event"));
         });
-    }
-
-    get form() {
-        console.log(this._internals.form)
-        return this._internals.form;
     }
 }
 

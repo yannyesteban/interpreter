@@ -131,6 +131,9 @@ class FormDesigner extends HTMLElement {
 
         this.shadowRoot.querySelector(".download").addEventListener("click", (event) => {
             console.log(this.dataSource)
+
+            const f = <any>document.getElementById("f1");
+            f.dataSource = this.dataSource;
         });
     }
 

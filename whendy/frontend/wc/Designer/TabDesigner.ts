@@ -93,7 +93,7 @@ class TabDesigner extends HTMLElement {
     }
 
     get dataSource() {
-        this._data.element = "tab",
+        this._data.component = "tab",
         this._data.elements = [];
         this._data.caption = this.caption;
 
@@ -103,7 +103,7 @@ class TabDesigner extends HTMLElement {
             const container = page.query(":scope > item-container").get<HTMLElement>();
 
             const obj = {
-                element: "tabpage",
+                component: "tabpage",
                 caption: page.query(":scope > .caption").text(),
                 elements: [],
             };

@@ -1,23 +1,157 @@
 <!DOCTYPE html>
 <html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HOME V1.0</title>
+        <link rel="icon" type="image/png" href="images/favicon.ico" sizes="16x16" />
+        <link rel="stylesheet" href="sass/reset.css" />
+        <link rel="stylesheet" href="sass/main.css" />
+        <link rel="stylesheet" href="css/home.css" />
+        <style>
+            .sep{
+                border-bottom: 2px dotted rgb(171, 150, 204);
+                width:100%;
+                padding: 4px;
+                margin:10px;
+            }
+        </style>
+    </head>
 
-<head>
-    <meta charset="UTF-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>HOME V1.0</title>
-    <link rel="icon" type="image/png" href="images/favicon.ico" sizes="16x16">
-    <link rel="stylesheet" href="sass/reset.css">
-    <link rel="stylesheet" href="sass/main.css">
-    <link rel="stylesheet" href="css/home.css">
-</head>
-
-<body><wh-app id="gtcomm" name="home" server="http://127.0.0.1:8080"></wh-app>
-    <script type="module" src="dist/whendy/frontend/wc/App.js"></script>
-    <script type="module" src="dist/whendy/frontend/wc/Tab.js"></script>
-    <script type="module" src="dist/whendy/frontend/wc/Menu.js"></script>
-    <script type="module" src="dist/whendy/frontend/wc/Designer.js"></script>
-    <script type="module" src="dist/whendy/frontend/wc/JsonDesigner.js"></script>
-</body>
-
+    <body>
+        <wh-app id="gtcomm" name="home" server="http://127.0.0.1:8080"></wh-app>
+        <script type="module" src="dist/whendy/frontend/wc/App.js"></script>
+        <script type="module" src="dist/whendy/frontend/wc/Tab.js"></script>
+        <script type="module" src="dist/whendy/frontend/wc/Menu.js"></script>
+        <script type="module" src="dist/whendy/frontend/wc/Designer.js"></script>
+        <script type="module" src="dist/whendy/frontend/wc/JsonDesigner.js"></script>
+    </body>
+    <script>
+        let band = 0;
+        window.addEventListener("click", () => {
+            if (band != 0) return;
+            band++;
+            document.getElementById("f1").dataSource = {
+                caption:"Welcome",
+                className: "whendy",
+                elements: [
+                    {
+                        component: "field",
+                        input: "input",
+                        type: "text",
+                        name: "cedula",
+                        label: "Cédula",
+                        required: true,
+                    },
+                    {
+                        component: "section",
+                        label: "xxx",
+                        elements: [
+                            {
+                                component: "field",
+                                input: "input",
+                                type: "text",
+                                name: "k",
+                                label: "Cédula",
+                                required: true,
+                            },
+                            {
+                                component: "field",
+                                input: "input",
+                                type: "text",
+                                name: "h",
+                                label: "Name",
+                                required: true,
+                            },
+                            {
+                                component: "button",
+                                input: "input",
+                                type: "text",
+                                name: "h",
+                                label: "GO",
+                                required: true,
+                            },
+                            {
+                                component: "button",
+                                input: "input",
+                                type: "text",
+                                name: "h",
+                                label: "RESET",
+                                required: true,
+                            },
+                        ],
+                    },
+                    {
+                        component: "tab",
+                        elements: [
+                            {
+                                label: "page 1",
+                                elements: [
+                                    {
+                                        component: "field",
+                                        input: "input",
+                                        type: "text",
+                                        name: "k",
+                                        label: "Cédula",
+                                        required: true,
+                                    },
+                                    {
+                                        component: "field",
+                                        input: "input",
+                                        type: "text",
+                                        name: "h",
+                                        label: "Name",
+                                        required: true,
+                                    },
+                                ],
+                            },
+                            {
+                                label: "page 2",
+                                elements: [
+                                    {
+                                        component: "field",
+                                        input: "input",
+                                        type: "checkbox",
+                                        name: "q",
+                                        label: "Edad",
+                                        required: true,
+                                        rlabel: true,
+                                    },
+                                    {
+                                        component: "field",
+                                        input: "input",
+                                        type: "radio",
+                                        name: "w",
+                                        label: "Name",
+                                        required: true,
+                                    },
+                                ],
+                            },
+                        ],
+                    },
+                    {
+                        component:"separator",
+                        tag:"div",
+                        className: "sep",
+                        
+                       
+                    },
+                    {
+                        component:"nav",
+                        elements:[
+                            {
+                                component:"button",
+                                label:"save"
+                            },
+                            {
+                                component:"button",
+                                label:"delete"
+                            }
+                        ]
+                    }
+                ],
+            };
+        });
+    </script>
 </html>

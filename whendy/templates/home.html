@@ -8,15 +8,15 @@
             <gt-form>
                 <gt-caption>Hello</gt-caption>
 
-                <gt-field aria-required="true" label="Cédula" name="y" value="12474737"></gt-field>
-                <gt-field label="Secure?" name="tres2" value="x" input="input" type="checkbox" rlabel
-                    required></gt-field>
+                <gt-field rlabel>
+                    <label for="cedula">Cédula</label>
+                    <required-ind>*</required-ind>
+                    <input id="cedula" type="text" value="12474737" required>
+                </gt-field>
+               
+               
 
-                <gt-field label="tres" hidden name="tres" value="x" input="textarea" value="mi text"></gt-field>
-
-                <gt-field label="tres" name="tres4" input="select" value="14">
-
-
+                <data-list name="person">
                     <data-option value="11" level="tree">Texto 0</data-option>
                     <data-option value="10" level="tree">Texto 1</data-option>
                     <data-option value="12" level="tree">Texto 2</data-option>
@@ -27,20 +27,18 @@
                     <data-option value="17" level="two">Texto 7</data-option>
                     <data-option value="18" level="two">Texto 8</data-option>
                     <data-event name="change">alert(this.form)</data-event>
-                </gt-field>
-                <select data-filter="">
-                   [
-                    {
-                        "value":"","text":"select...","level":""
-                    },
-                    {
-                        "value":"1","text":"uno","level":"one"
-                    }
-                   ]
-
-                </select>
+                </data-list>
             </gt-form>
         </form>
+
+        <hr>
+
+        <gt-form id="f1">
+
+        </gt-form>
+
     </div>
     <div class="panel footer" data-panel="5">footer</div>
 </div>
+
+

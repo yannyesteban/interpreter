@@ -53,9 +53,22 @@ class FieldDesigner extends HTMLElement {
                 <input class="default" placeholder="...Default" type="text"/>
                 <select class="input" placeholder="input"/>
                     <option value="input">input</option>
+                    <option value="select">select</option>
+                    <option value="textarea">textarea</option>
                 </select>
                 <select class="type" placeholder="type">
                     <option value="text">text</option>
+                    <option value="password">password</option>
+                    <option value="radio">radio</option>
+                    <option value="checkbox">checkbox</option>
+                    <option value="time">time</option>
+                    <option value="hidden">hidden</option>
+                    <option value="color">color</option>
+                    <option value="date">date</option>
+                    <option value="email">email</option>
+                    <option value="range">range</option>
+                    <option value="time">time</option>
+                    <option value="datetime-local">datetime-local</option>
                 </select>
                 <input class="required" type="checkbox">*
                 <button>C</button>
@@ -236,11 +249,11 @@ class FieldDesigner extends HTMLElement {
 
     get dataSource(){
 
-        this._data.element = "field";
-        this._data.name = this.name;
-        this._data.caption = this.caption;
-        this._data.input = this.input;
-        this._data.type = this.type;
+        this._data.component = "field";
+        this._data.name = this.iName.value;
+        this._data.label = this.iCaption.value;
+        this._data.input = this.iInput.value;
+        this._data.type = this.iType.value;
         this._data.default = this.default;
 
         
