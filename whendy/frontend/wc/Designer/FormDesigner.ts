@@ -2,17 +2,15 @@ import { Q as $ } from "./../../Q.js";
 
 class JsonImport {
     toJson(conatiner: HTMLElement) {
-        const obj:any = {};
+        const obj: any = {};
 
         if (conatiner.children.length > 0) {
             const elems = conatiner.children;
 
             obj.children = [];
             for (const childNode of conatiner.children) {
-
                 const type = childNode.getAttribute("designer-type");
-                obj.children.push(childNode["info"])
-                
+                obj.children.push(childNode["info"]);
             }
         }
     }
@@ -73,13 +71,13 @@ class FormDesigner extends HTMLElement {
             }
             .trash{
                 display:inline-block;
-                width:60px;
-                height:1rem;
+                min-width:60px;
+                height:100%;
                 border:1px dotted red;
                 
             }
 			</style>
-			<div class="header">Designer: <slot name="caption"></slot></div>
+			<div class="header">Designer. <slot name="caption"></slot></div>
             <nav>
                 
                 <button class="download">Download</button>
@@ -87,7 +85,7 @@ class FormDesigner extends HTMLElement {
                 <button class="del">-</button>
                 <button class="section">G</button>
                 <button class="tab">T</button>
-                <div class="trash caption"></div>
+                <div class="trash">TRASH HERE</div>
             </nav>
 			<div class="fields"><slott></slott></div>
             <div class="container"></div>
@@ -130,7 +128,7 @@ class FormDesigner extends HTMLElement {
         });
 
         this.shadowRoot.querySelector(".download").addEventListener("click", (event) => {
-            console.log(this.dataSource)
+            console.log(this.dataSource);
 
             const f = <any>document.getElementById("f1");
             f.dataSource = this.dataSource;
@@ -144,12 +142,13 @@ class FormDesigner extends HTMLElement {
     public connectedCallback() {
         this.setAttribute("role", "designer");
 
-        const ele = document.createElement("last-active-ext");
-        ele.setAttribute("container", "[role=container]");
-        ele.setAttribute("designer", "[role=designer]");
-        this.appendChild(ele);
+        //this.load();
 
-        this.load();
+        Promise.all([
+            customElements.whenDefined("last-active-ext"),
+            customElements.whenDefined("tool-box"),
+            customElements.whenDefined("caption-ext"),
+        ]).then(() => this.load());
     }
 
     public disconnectedCallback() {
@@ -177,6 +176,11 @@ class FormDesigner extends HTMLElement {
     }
 
     load() {
+        const ele = document.createElement("last-active-ext");
+        ele.setAttribute("container", "[role=container]");
+        ele.setAttribute("designer", "[role=designer]");
+        this.appendChild(ele);
+
         const tool1 = {
             caption: "tool",
             items: [
@@ -202,6 +206,14 @@ class FormDesigner extends HTMLElement {
                     title: "Separator",
                     element: "hr",
                     text: "Separator",
+                    className: "",
+                },
+                {
+                    title: "Separator",
+                    element: "separator-designer",
+                    text: "R",
+                    tag: "hr",
+                    html: "",
                     className: "",
                 },
                 {
@@ -234,18 +246,12 @@ class FormDesigner extends HTMLElement {
         let caption = $(this).create("caption-ext");
         caption.attr("target", this.tagName);
         caption.attr("slot", "caption");
+        caption.html(this.caption);
 
-        const trash = $(this).create("div");
-        trash.text("xxxxxxx");
-        trash.on("drag", (event: any) => {
-            event.preventDefault();
-        });
-        trash.on("drop", (event) => {
-            event.target.remove();
-        });
         const container = $(this).create("item-container").get<HTMLElement>();
         const tool = $(this).create("tool-box").get<any>();
         tool.dataSource = tool1;
+
         /*const tabButton = $(tool).create("tool-item");
         tabButton.text("Tab");
         tabButton.on("dragstart", (event) => {
@@ -348,16 +354,17 @@ class FormDesigner extends HTMLElement {
         return this.hasAttribute("designer-type");
     }
 
-    set dataSource(data){
+    set dataSource(data) {
         this._data = data;
     }
 
-    get dataSource(){
+    get dataSource() {
         this._data.elements = [];
+        this._data.caption = $(this).query("caption-ext").html();
         const container = $(this).query("item-container").get<HTMLElement>();
-        
-        if(container.children.length>0){
-            for(const node of container.children){
+
+        if (container.children.length > 0) {
+            for (const node of container.children) {
                 this._data.elements.push(node["dataSource"]);
             }
         }

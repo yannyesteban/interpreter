@@ -93,20 +93,24 @@ class FieldDesigner extends HTMLElement {
         this.iCaption = this.shadowRoot.querySelector(`.caption`);
         this.iInput = this.shadowRoot.querySelector(`.input`);
         this.iType = this.shadowRoot.querySelector(`.type`);
-        /*
-        this.iCaption.addEventListener("dragstart",event=>{
-            event.preventDefault()
-            event.stopImmediatePropagation();
-            console.log("---------------")
-        });
-        this.iCaption.addEventListener("drop",event=>{
-            event.preventDefault()
-            event.stopImmediatePropagation();
-            console.log("***---------------")
-            this.iCaption.value = event.dataTransfer.getData("text/plain")
-            
-        })
-        */
+
+        if (navigator.userAgent.includes("Firefox")) {
+            this.shadowRoot.querySelectorAll("input[type=text]").forEach((input) => {
+                input.addEventListener("focus", (event) => {
+                    document.querySelectorAll("[draggable]").forEach((d:HTMLElement)=>{
+                        d.draggable = false;
+                        //d.dataset["draggable"] = "true"
+                    })
+                    //this.draggable = false;
+                });
+                input.addEventListener("blur", (event) => {
+                    document.querySelectorAll("[draggable]").forEach((d:HTMLElement)=>{
+                      d.draggable = true;
+                    })
+                    //this.draggable = true;
+                });
+            });
+        }
 
         this.shadowRoot.querySelector(".select").addEventListener("change", (event: any) => {
             if (event.target.checked) {
@@ -118,18 +122,27 @@ class FieldDesigner extends HTMLElement {
     }
 
     public connectedCallback() {
+        /*let input = document.createElement("input")
+        input.draggable = true;
+        input.value ="AYNNY ESTEBAN"
+        input.classList.add("XX")
+        input.addEventListener("dragstart",event=>{
+            //event.preventDefault()
+            event.stopImmediatePropagation();
+            console.log("***************", event)
+        });
+        this.appendChild(input)
+        */
         this.setAttribute("designer-type", "field");
         this.setAttribute("role", "field-designer");
-        if(!this.name){
+        if (!this.name) {
             const designer = this.closest("[role=designer]") as any;
             this.name = "field_" + Array.from(designer.querySelectorAll("[role=field-designer]")).length;
         }
-        if(!this.caption){
+        if (!this.caption) {
             const designer = this.closest("[role=designer]") as any;
             this.caption = this.name;
         }
-
-        
     }
 
     public disconnectedCallback() {
@@ -243,12 +256,11 @@ class FieldDesigner extends HTMLElement {
         return this.hasAttribute("designer-type");
     }
 
-    set dataSource(data){
+    set dataSource(data) {
         this._data = data;
     }
 
-    get dataSource(){
-
+    get dataSource() {
         this._data.component = "field";
         this._data.name = this.iName.value;
         this._data.label = this.iCaption.value;
@@ -256,7 +268,6 @@ class FieldDesigner extends HTMLElement {
         this._data.type = this.iType.value;
         this._data.default = this.default;
 
-        
         return this._data;
     }
 }

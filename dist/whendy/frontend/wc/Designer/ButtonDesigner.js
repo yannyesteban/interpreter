@@ -71,9 +71,9 @@ class ButtonDesigner extends HTMLElement {
         this._data = data;
     }
     get dataSource() {
-        this._data.element = "button";
+        this._data.component = "button";
         this._data.name = this.name;
-        this._data.caption = this.innerHTML;
+        this._data.label = this.innerHTML;
         this._data.type = this.type;
         return this._data;
     }

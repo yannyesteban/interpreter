@@ -50,9 +50,13 @@ class SectionDesigner extends HTMLElement {
     public connectedCallback() {
         this.setAttribute("designer-type", "section");
         this.setAttribute("role", "tab");
+        
+
+
         let caption = $(this).create("caption-ext");
         caption.attr("target", this.tagName);
         caption.attr("slot", "caption");
+        caption.html(this.caption);
         //this.load()
         //this.slot = "container";
 
@@ -107,7 +111,7 @@ class SectionDesigner extends HTMLElement {
 
     get dataSource() {
         this._data.component = "section";
-        this._data.label = this.caption+"Mañana";
+        this._data.label = $(this).query("caption-ext").html();
         this._data.elements = [];
         const container = $(this).query(":scope > item-container").get<HTMLElement>();
 

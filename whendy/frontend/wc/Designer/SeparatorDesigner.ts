@@ -1,4 +1,4 @@
-class ButtonDesigner extends HTMLElement {
+class SeparatorDesigner extends HTMLElement {
     private _data: any = {};
     static get observedAttributes() {
         return [""];
@@ -11,10 +11,12 @@ class ButtonDesigner extends HTMLElement {
         template.innerHTML = `
 			<style>
 			:host {
-				display:inline-block;
+				display:block;
+                height:10px;
+                background-colorr:white;
 
 			}
-			</style><button><slot>AA</slot></button>`;
+			</style><div><slot><hr></slot></div>`;
 
         this.attachShadow({ mode: "open" });
 
@@ -69,16 +71,16 @@ class ButtonDesigner extends HTMLElement {
 
     
 
-    set type(value) {
+    set tag(value) {
         if (Boolean(value)) {
-            this.setAttribute("type", value);
+            this.setAttribute("tag", value);
         } else {
-            this.removeAttribute("type");
+            this.removeAttribute("tag");
         }
     }
 
-    get type() {
-        return this.getAttribute("type");
+    get tag() {
+        return this.getAttribute("tag");
     }
 
 
@@ -87,23 +89,25 @@ class ButtonDesigner extends HTMLElement {
     }
 
     set dataSource(data){
+        
         this._data = data;
+        this.tag = data.tag;
     }
 
 
 
     get dataSource(){
 
-        this._data.component = "button";
-        this._data.name = this.name;
-        this._data.label = this.innerHTML;
+        this._data.component = "separator";
+        this._data.tag = this.tag;
+        this._data.html = this.innerHTML;
         
-        this._data.type = this.type;
         
+      
 
         
         return this._data;
     }
 }
 
-customElements.define("button-designer", ButtonDesigner);
+customElements.define("separator-designer", SeparatorDesigner);

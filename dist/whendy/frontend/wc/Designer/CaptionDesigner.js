@@ -9,25 +9,19 @@ class CaptionDesigner extends HTMLElement {
 			<style>
 			:host {
 				display:inline-block;
-                min-width:10px;
-                border:solid red 2px;
+                
+                
+                
+                height:1.6rem;
+                line-height:1.6rem;
 
 			}
-			</style><div>CAPTION</div>`;
-        this.addEventListener("input", (event) => {
-            this.closest(this.target).setAttribute("caption", this.innerText);
-        });
-        return;
+            :host(:focus){
+                background-color:gray;
+            }
+			</style>[ <slot></slot> ]`;
         this.attachShadow({ mode: "open" });
-        //this.shadowRoot.appendChild(template.content.cloneNode(true));
-        const ele = this.shadowRoot.querySelector("div");
-        ele.addEventListener("click", event => {
-            ele.setAttribute("contenteditable", "true");
-            console.log("xxx", this.parentElement, this.closest("[role=designer]"));
-        });
-        ele.addEventListener("input", (event) => {
-            this.closest("[role=designer]").setAttribute("caption", ele.innerText);
-        });
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
     }
     connectedCallback() {
         this.setAttribute("contenteditable", "true");
@@ -36,8 +30,6 @@ class CaptionDesigner extends HTMLElement {
         console.log("disconnectedCallback");
     }
     attributeChangedCallback(name, oldVal, newVal) {
-        console.log(name, oldVal, newVal, this.closest(this.target));
-        this.innerHTML = "---" + this.closest(this.target).getAttribute("caption");
     }
     set target(value) {
         if (Boolean(value)) {

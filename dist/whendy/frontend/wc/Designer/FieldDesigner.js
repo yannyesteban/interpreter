@@ -78,20 +78,23 @@ class FieldDesigner extends HTMLElement {
         this.iCaption = this.shadowRoot.querySelector(`.caption`);
         this.iInput = this.shadowRoot.querySelector(`.input`);
         this.iType = this.shadowRoot.querySelector(`.type`);
-        /*
-        this.iCaption.addEventListener("dragstart",event=>{
-            event.preventDefault()
-            event.stopImmediatePropagation();
-            console.log("---------------")
-        });
-        this.iCaption.addEventListener("drop",event=>{
-            event.preventDefault()
-            event.stopImmediatePropagation();
-            console.log("***---------------")
-            this.iCaption.value = event.dataTransfer.getData("text/plain")
-            
-        })
-        */
+        if (navigator.userAgent.includes("Firefox")) {
+            this.shadowRoot.querySelectorAll("input[type=text]").forEach((input) => {
+                input.addEventListener("focus", (event) => {
+                    document.querySelectorAll("[draggable]").forEach((d) => {
+                        d.draggable = false;
+                        //d.dataset["draggable"] = "true"
+                    });
+                    //this.draggable = false;
+                });
+                input.addEventListener("blur", (event) => {
+                    document.querySelectorAll("[draggable]").forEach((d) => {
+                        d.draggable = true;
+                    });
+                    //this.draggable = true;
+                });
+            });
+        }
         this.shadowRoot.querySelector(".select").addEventListener("change", (event) => {
             if (event.target.checked) {
                 this.selected = true;
@@ -102,6 +105,17 @@ class FieldDesigner extends HTMLElement {
         });
     }
     connectedCallback() {
+        /*let input = document.createElement("input")
+        input.draggable = true;
+        input.value ="AYNNY ESTEBAN"
+        input.classList.add("XX")
+        input.addEventListener("dragstart",event=>{
+            //event.preventDefault()
+            event.stopImmediatePropagation();
+            console.log("***************", event)
+        });
+        this.appendChild(input)
+        */
         this.setAttribute("designer-type", "field");
         this.setAttribute("role", "field-designer");
         if (!this.name) {

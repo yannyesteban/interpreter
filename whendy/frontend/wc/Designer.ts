@@ -9,6 +9,7 @@ import "./Designer/Toolbox.js";
 import "./Designer/LastActiveExt.js";
 import "./Designer/CaptionDesigner.js";
 import "./Designer/ButtonDesigner.js";
+import "./Designer/SeparatorDesigner.js";
 import "./Designer/ToolExt.js";
 import "./Window.js";
 import "./Field.js";

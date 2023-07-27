@@ -62,13 +62,13 @@ class FormDesigner extends HTMLElement {
             }
             .trash{
                 display:inline-block;
-                width:60px;
-                height:1rem;
+                min-width:60px;
+                height:100%;
                 border:1px dotted red;
                 
             }
 			</style>
-			<div class="header">Designer: <slot name="caption"></slot></div>
+			<div class="header">Designer. <slot name="caption"></slot></div>
             <nav>
                 
                 <button class="download">Download</button>
@@ -76,7 +76,7 @@ class FormDesigner extends HTMLElement {
                 <button class="del">-</button>
                 <button class="section">G</button>
                 <button class="tab">T</button>
-                <div class="trash caption"></div>
+                <div class="trash">TRASH HERE</div>
             </nav>
 			<div class="fields"><slott></slott></div>
             <div class="container"></div>
@@ -121,11 +121,12 @@ class FormDesigner extends HTMLElement {
     }
     connectedCallback() {
         this.setAttribute("role", "designer");
-        const ele = document.createElement("last-active-ext");
-        ele.setAttribute("container", "[role=container]");
-        ele.setAttribute("designer", "[role=designer]");
-        this.appendChild(ele);
-        this.load();
+        //this.load();
+        Promise.all([
+            customElements.whenDefined("last-active-ext"),
+            customElements.whenDefined("tool-box"),
+            customElements.whenDefined("caption-ext"),
+        ]).then(() => this.load());
     }
     disconnectedCallback() {
         console.log("disconnectedCallback");
@@ -149,6 +150,10 @@ class FormDesigner extends HTMLElement {
         return this.getAttribute("caption");
     }
     load() {
+        const ele = document.createElement("last-active-ext");
+        ele.setAttribute("container", "[role=container]");
+        ele.setAttribute("designer", "[role=designer]");
+        this.appendChild(ele);
         const tool1 = {
             caption: "tool",
             items: [
@@ -174,6 +179,14 @@ class FormDesigner extends HTMLElement {
                     title: "Separator",
                     element: "hr",
                     text: "Separator",
+                    className: "",
+                },
+                {
+                    title: "Separator",
+                    element: "separator-designer",
+                    text: "R",
+                    tag: "hr",
+                    html: "",
                     className: "",
                 },
                 {
@@ -205,14 +218,7 @@ class FormDesigner extends HTMLElement {
         let caption = $(this).create("caption-ext");
         caption.attr("target", this.tagName);
         caption.attr("slot", "caption");
-        const trash = $(this).create("div");
-        trash.text("xxxxxxx");
-        trash.on("drag", (event) => {
-            event.preventDefault();
-        });
-        trash.on("drop", (event) => {
-            event.target.remove();
-        });
+        caption.html(this.caption);
         const container = $(this).create("item-container").get();
         const tool = $(this).create("tool-box").get();
         tool.dataSource = tool1;
@@ -316,6 +322,7 @@ class FormDesigner extends HTMLElement {
     }
     get dataSource() {
         this._data.elements = [];
+        this._data.caption = $(this).query("caption-ext").html();
         const container = $(this).query("item-container").get();
         if (container.children.length > 0) {
             for (const node of container.children) {
