@@ -90,9 +90,6 @@ class FormDesigner extends HTMLElement {
         slot.addEventListener("slotchange", (e) => {
             //const nodes = slot.assignedNodes();
         });
-        this.iCaption = this.shadowRoot.querySelector(".caption");
-        this.iSection = this.shadowRoot.querySelector(".section");
-        this.iTab = this.shadowRoot.querySelector(".tab");
         this.shadowRoot.querySelector(".trash").addEventListener("drag", (event) => {
             event.preventDefault();
         });
@@ -134,7 +131,6 @@ class FormDesigner extends HTMLElement {
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
             case "caption":
-                this.iCaption.innerHTML = newValue;
                 break;
         }
     }
@@ -215,7 +211,7 @@ class FormDesigner extends HTMLElement {
                 },
             ],
         };
-        let caption = $(this).create("caption-ext");
+        const caption = $(this).create("caption-ext");
         caption.attr("target", this.tagName);
         caption.attr("slot", "caption");
         caption.html(this.caption);

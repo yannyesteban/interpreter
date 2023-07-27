@@ -3,10 +3,6 @@
   --pane-padding: 5px 42px;
 }
 
-label {
-  color: red;
-}
-
 * {
   box-sizing: border-box;
   font-family: Arial, Helvetica, sans-serif, tahoma;
@@ -14,7 +10,7 @@ label {
 
 html,
 body {
-  --device_mode:400;
+  --device_mode: 400;
   margin: 0px;
   height: 100%;
   padding: 0px;
@@ -32,7 +28,8 @@ nav {
   flex-direction: row;
 }
 
-#button, #evaluate {
+#button,
+#evaluate {
   flex: 1 1;
   height: 2em;
 }

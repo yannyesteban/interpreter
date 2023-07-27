@@ -41,7 +41,7 @@ class SectionDesigner extends HTMLElement {
     connectedCallback() {
         this.setAttribute("designer-type", "section");
         this.setAttribute("role", "tab");
-        let caption = $(this).create("caption-ext");
+        const caption = $(this).create("caption-ext");
         caption.attr("target", this.tagName);
         caption.attr("slot", "caption");
         caption.html(this.caption);

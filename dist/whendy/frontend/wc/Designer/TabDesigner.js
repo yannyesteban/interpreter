@@ -18,7 +18,7 @@ class TabDesigner extends HTMLElement {
 
             
             </style>
-            TabDesigner
+            Tab Section<head><slot name="caption"></slot></head>
             <button class="plus">+</button>
             <slot></slot>
 
@@ -37,6 +37,10 @@ class TabDesigner extends HTMLElement {
     connectedCallback() {
         this.setAttribute("designer-type", "tab");
         this.setAttribute("role", "tab");
+        const caption = $(this).create("caption-ext");
+        caption.attr("target", this.tagName);
+        caption.attr("slot", "caption");
+        caption.html(this.caption);
         if (!this.querySelector("item-container")) {
             this.addPage({});
         }
@@ -46,9 +50,13 @@ class TabDesigner extends HTMLElement {
     attributeChangedCallback(name, oldVal, newVal) { }
     addPage(info) {
         const page = $(this).create("div").addClass("tab-page");
-        const head = page.create("div").addClass("caption");
+        const caption = page.create("caption-ext");
+        caption.attr("target", this.tagName);
+        caption.attr("slot", "caption");
+        //caption.html(this.caption);
+        //const head = page.create("div").addClass("caption");
         const body = page.create("item-container");
-        head.append((info === null || info === void 0 ? void 0 : info.caption) || "Tab Page " + (this._index++).toString());
+        caption.html((info === null || info === void 0 ? void 0 : info.caption) || "Tab Page " + (this._index++).toString());
         if (info === null || info === void 0 ? void 0 : info.body) {
             body.append(info.body);
         }
@@ -76,13 +84,13 @@ class TabDesigner extends HTMLElement {
     get dataSource() {
         this._data.component = "tab",
             this._data.elements = [];
-        this._data.caption = this.caption;
+        this._data.caption = $(this).query(":scope > caption-ext").html();
         const pages = $(this).queryAll(":scope > .tab-page");
         pages.forEach((page) => {
             const container = page.query(":scope > item-container").get();
             const obj = {
                 component: "tabpage",
-                caption: page.query(":scope > .caption").text(),
+                label: page.query(":scope > caption-ext").text(),
                 elements: [],
             };
             if (container.children.length > 0) {

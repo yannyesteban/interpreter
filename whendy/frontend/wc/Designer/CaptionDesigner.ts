@@ -23,23 +23,35 @@ class CaptionDesigner extends HTMLElement {
             }
 			</style>[ <slot></slot> ]`;
 
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-            this.attachShadow({ mode: "open" });
-            this.shadowRoot.appendChild(template.content.cloneNode(true));
+        if (navigator.userAgent.includes("Firefox")) {
+            this.addEventListener("focus", (event) => {
+                document.querySelectorAll("[draggable]").forEach((d: HTMLElement) => {
+                    d.draggable = false;
+                    //d.dataset["draggable"] = "true"
+                });
+                //this.draggable = false;
+            });
+            this.addEventListener("blur", (event) => {
+                document.querySelectorAll("[draggable]").forEach((d: HTMLElement) => {
+                    d.draggable = true;
+                });
+                //this.draggable = true;
+            });
+        }
     }
 
     public connectedCallback() {
-        this.setAttribute("contenteditable", "true")
-        
+        this.setAttribute("contenteditable", "true");
     }
 
     public disconnectedCallback() {
         console.log("disconnectedCallback");
     }
 
-    public attributeChangedCallback(name, oldVal, newVal) {
-        
-    }
+    public attributeChangedCallback(name, oldVal, newVal) {}
 
     set target(value) {
         if (Boolean(value)) {

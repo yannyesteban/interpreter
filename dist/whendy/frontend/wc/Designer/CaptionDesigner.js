@@ -22,6 +22,21 @@ class CaptionDesigner extends HTMLElement {
 			</style>[ <slot></slot> ]`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
+        if (navigator.userAgent.includes("Firefox")) {
+            this.addEventListener("focus", (event) => {
+                document.querySelectorAll("[draggable]").forEach((d) => {
+                    d.draggable = false;
+                    //d.dataset["draggable"] = "true"
+                });
+                //this.draggable = false;
+            });
+            this.addEventListener("blur", (event) => {
+                document.querySelectorAll("[draggable]").forEach((d) => {
+                    d.draggable = true;
+                });
+                //this.draggable = true;
+            });
+        }
     }
     connectedCallback() {
         this.setAttribute("contenteditable", "true");
@@ -29,8 +44,7 @@ class CaptionDesigner extends HTMLElement {
     disconnectedCallback() {
         console.log("disconnectedCallback");
     }
-    attributeChangedCallback(name, oldVal, newVal) {
-    }
+    attributeChangedCallback(name, oldVal, newVal) { }
     set target(value) {
         if (Boolean(value)) {
             this.setAttribute("target", value);

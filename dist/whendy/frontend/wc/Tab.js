@@ -37,7 +37,7 @@ class WHTabMenu extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../sass/WHTab.css">
+		<link rel="stylesheet" href="./../css/WHTab.css">
 		<slot></slot>	
 	
 		`;
@@ -80,7 +80,7 @@ class WHTabPanel extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../sass/WHTab.css">
+		<link rel="stylesheet" href="./../css/WHTab.css">
 		<slot></slot>	
 	
 		`;
@@ -104,7 +104,7 @@ export class WHTab extends HTMLElement {
         _WHTab_lastIndex.set(this, -1);
         const template = document.createElement("template");
         template.innerHTML = `
-			<link rel="stylesheet" href="./../sass/WHTab.css">
+			<link rel="stylesheet" href="./../css/WHTab.css">
 			<slot name="menu"></slot>
 			<slot name="panel"></slot>
 

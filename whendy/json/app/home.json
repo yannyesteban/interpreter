@@ -12,8 +12,8 @@
         "** public **"
     ],
     "cssSheets": [
-        "sass/reset.css",
-        "sass/main.css"
+        "css/reset.css",
+        "css/main.css"
     ],
     "jsModules": [
         "dist/whendy/frontend/wc/Select.js"

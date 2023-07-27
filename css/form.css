@@ -1,0 +1,43 @@
+gt-form {
+  background-color: rgb(245, 245, 245);
+  border: 1px solid rgb(132, 130, 130);
+  color: rgb(95, 95, 95);
+}
+gt-form > * {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid rgb(209, 209, 209);
+}
+gt-form gt-caption {
+  text-align: center;
+  background-color: rgba(137, 137, 137, 0.229);
+}
+gt-form gt-field {
+  grid-template-columns: auto auto;
+  flex-direction: column;
+  padding: 4px;
+  margin-bottom: 4px;
+  border-radius: 4px;
+  border: 1px solid rgb(209, 209, 209);
+}
+gt-form gt-field [data-form-element=field] {
+  display: block;
+}
+gt-form wh-tab {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+gt-form wh-section {
+  background-color: rgba(0, 0, 0, 0.05);
+}
+gt-form wh-section section-caption {
+  text-align: center;
+  padding-left: 2rem;
+  font-size: 1rem;
+}
+gt-form wh-section > * {
+  margin: 10px;
+  padding: 10px;
+  border-radius: 4px;
+  border: 1px solid rgb(209, 209, 209);
+}/*# sourceMappingURL=form.css.map */

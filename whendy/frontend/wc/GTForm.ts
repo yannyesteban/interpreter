@@ -70,7 +70,7 @@ class GTCaption extends HTMLElement {
 		<style>
             :host {
                 display:block;
-				border:4px solid red;
+				
 				
              }
 
@@ -113,7 +113,7 @@ class GTForm extends HTMLElement {
         template.innerHTML = `
 			<style>
 			:host {
-				display:inline-block;
+				display:block;
 
 			}
 			</style>
