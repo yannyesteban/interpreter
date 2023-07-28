@@ -1,0 +1,61 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>HOME V1.0</title>
+        <link rel="icon" type="image/png" href="../images/favicon.ico" sizes="16x16" />
+        <link rel="stylesheet" href="../css/reset.css" />
+        <link rel="stylesheet" href="../css/main.css" />
+        <link rel="stylesheet" href="../css/home.css" />
+        <link rel="stylesheet" href="../css/form.css" />
+        <style>
+            .sep {
+                border-bottom: 2px dotted rgb(171, 150, 204);
+                width: 100%;
+                padding: 4px;
+                margin: 10px;
+            }
+        </style>
+    </head>
+
+    <body>
+        <gt-form>
+            <gt-caption> Persons </gt-caption>
+            <gt-field><label for="x">Cedula</label> <input type="text" id="x" /></gt-field>
+            <gt-field>
+                
+                <label for="u">Country</label>
+                <select name="country" id="u">
+                    <option value="">Argentina</option>
+                    <option value="">Colombia</option>
+                    
+                    <option value="">Venezuela</option>
+                </select>
+            </gt-field>
+            <gt-field>
+                
+                <label for="city">City</label>
+                <select name="city" id="city" list="cities">
+                   
+                </select>
+            </gt-field>
+            <gt-field>Tres</gt-field>
+            <gt-field>Cuatro</gt-field>
+
+            <datalist id="cities">
+                <option value="new york">New York</option>
+                <option value="atlanta">Atlanta</option>
+                <option value="caracas">Caracas</option>
+                <option value="valencia">Valencia</option>
+                <option value="bogota">Bogotá</option>
+                <option value="cartagena">Cartagena</option>
+              </datalist>
+        </gt-form>
+
+        <script type="module" src="../dist/whendy/frontend/wc/GTForm.js"></script>
+        <script type="module" src="../dist/whendy/frontend/wc/Field.js"></script>
+    </body>
+    <script></script>
+</html>

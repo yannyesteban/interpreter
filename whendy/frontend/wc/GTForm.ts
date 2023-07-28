@@ -149,6 +149,24 @@ class GTForm extends HTMLElement {
         });
 
         console.log(selects);
+        this.initList();
+    }
+
+    initList(){
+        const sel = this.querySelectorAll("select[list]");
+        sel.forEach(select=>{
+            const listName = select.getAttribute("list");
+            const list = this.querySelector(`datalist[id=${listName}]`);
+            const options = list.querySelectorAll("option");
+            options.forEach((option) => {
+                const opt = document.createElement("option");
+                opt.value = String(option.value); // the index
+                opt.innerHTML = String(option.text);
+
+                select.append(opt);
+            });
+
+        })
     }
 
     public disconnectedCallback() {
