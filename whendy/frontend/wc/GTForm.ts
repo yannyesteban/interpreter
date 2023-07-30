@@ -1,5 +1,41 @@
 import { Q as $ } from "../Q.js";
 
+interface RequestAction{
+    id:string;
+    panelId:string;
+    type:string;
+    element:string;
+    name:string;
+    source:string;
+    method:string;
+    eparams:object;
+    resToken:string
+}
+interface Request{
+    mode:string;//elements,simple
+    valid:boolean;
+    confirm:string;
+    form:string;
+    body:object;
+    actions:RequestAction[]
+}
+
+interface ComponentResponse{
+    element:string;
+    name:string;
+    mode:string;
+    prop:string;
+}
+
+interface HtmlResponse{
+    element:string;
+    id:string;
+    mode:string;
+    html:string;
+    prop:string;
+    attr:string;
+}
+
 class FormContainer extends HTMLElement {
     constructor() {
         super();

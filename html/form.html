@@ -35,9 +35,9 @@
             </gt-field>
             <gt-field>
                 <label for="city">City</label>
-                <select name="city" id="city" list="cities"  data-parent="country" data-childs="true"></select>
-                <select name="city2" id="city2" list="cities2"  data-parent="country"></select>
-                <select name="county" id="county" list="county"  data-parent="city"></select>
+                <select name="city" id="city" list="cities" data-parent="country" data-childs="true"></select>
+                <select name="city2" id="city2" list="cities2" data-parent="country"></select>
+                <select name="county" id="county" list="county" data-parent="city"></select>
             </gt-field>
             <gt-field>Tres</gt-field>
             <gt-field>Cuatro</gt-field>
@@ -73,19 +73,29 @@
         <script type="module" src="../dist/whendy/frontend/wc/GTForm.js"></script>
         <script type="module" src="../dist/whendy/frontend/wc/Field.js"></script>
 
+        <store store="t1" bind-to="country" target="#city" action="updatedata"> </store>
+        <store></store>
 
-
-        <store
-        store="t1"
-        bind-to="country"
-        target="#city"
-        action="updatedata"
-
-    >
-
-
-    </store>
-    <store></store><!--
+        <app-watch>
+            
+        </app-watch>
+        <app-fetch store="form1" watch="cedula person" valid="true" confirm="secure?" form="#form">
+            <fecth-body name="name" value="x"></fecth-body>
+            <fecth-body name="last" value="y"></fecth-body>
+            <app-action
+                when="cedula"
+                id="person"
+                panel-id="4"
+                type="siple"
+                element="form"
+                name="person"
+                method="load"
+                res-token=""
+            >
+                <action-param name="cedula" bind-value="cedula"></action-param>
+            </app-action>
+        </app-fetch>
+        <!--
     <div aria-busy="true" aria-describedby="progress-bar">
        
       </div>
@@ -93,11 +103,6 @@
        ...
       
       <progress id="progress-bar" aria-label="Content loading…"></progress> -->
-      <script src="./proxy.js"></script>
+        <script src="./proxy.js"></script>
     </body>
-    
-    
-
-    
-
 </html>
