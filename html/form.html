@@ -26,7 +26,7 @@
             <gt-field><label for="x">Cedula</label> <input type="text" id="x" /></gt-field>
             <gt-field>
                 <label for="u">Country</label>
-                <select name="country" id="u" data-childs="true" value="ve" onclick="">
+                <select name="country" id="country" data-childs="true" value="ve" onclick="">
                     <option value="us">Estados Unidos</option>
                     <option value="co" selected>Colombia</option>
 
@@ -72,8 +72,10 @@
 
         <script type="module" src="../dist/whendy/frontend/wc/GTForm.js"></script>
         <script type="module" src="../dist/whendy/frontend/wc/Field.js"></script>
-    </body>
-    <store
+
+
+
+        <store
         store="t1"
         bind-to="country"
         target="#city"
@@ -83,8 +85,18 @@
 
 
     </store>
-    <store></store>
-    <script></script>
+    <store></store><!--
+    <div aria-busy="true" aria-describedby="progress-bar">
+       
+      </div>
+      
+       ...
+      
+      <progress id="progress-bar" aria-label="Content loading…"></progress> -->
+      <script src="./proxy.js"></script>
+    </body>
+    
+    
 
     
 
