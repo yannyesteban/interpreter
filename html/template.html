@@ -1,0 +1,60 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Document</title>
+</head>
+<body>
+    <input type="text" id="tx">
+
+    <div id="here"></div>
+
+    <template id="t">
+        <tr>
+          <td class="record"></td>
+          <td> hola mundo {=user}</td>
+        </tr>
+        <span>ONE</span>
+      </template>
+
+
+      <script>
+        let temp = document.getElementById("t")
+        
+        
+        let html = temp.innerHTML
+
+        html = html.replace(/{=user}/ig, "<span data-template-name='user'>NOTHING</span>")
+
+        let template2 = document.createElement("template")
+
+
+        template2.innerHTML = html
+
+        let here = document.getElementById("here")
+
+        let text = document.createTextNode("basilic");
+
+        
+
+        const clone = template2.content.cloneNode(true);
+
+        console.log(clone)
+        let span = clone.querySelector("span") 
+
+        console.log(span)
+        span.innerHTML = "yess"
+
+        span.replaceWith(text)
+
+        console.log(clone.innerHTML)
+        here.append(clone)
+
+        document.getElementById("tx").addEventListener("input", (event)=>{
+            text.textContent = event.target.value
+        })
+
+      </script>
+</body>
+</html>
