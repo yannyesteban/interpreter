@@ -1,0 +1,75 @@
+{
+    "name":"user",
+    "interface":{
+        "request":{
+            "sqlData":"select * from units",
+            "filter":[{"id":4}],
+            "layout":"form1"
+            
+        }
+    },
+    "dataField":[
+        {
+            "name":"countryId",
+            "data":[
+                ["","select a country...", "*"],
+                "select id, name from country"
+            ]
+        },
+        {
+            "name":"stateId",
+            "filterBy":"countryId",
+            "data":[
+                ["","select a state...","*"],
+                "select id, name, country_id from state"
+            ]
+        }
+    ],
+    "layout":[{
+        "name":"form1",
+        "label":"Units Sold",
+        "elements": [
+            {
+                "element": "input",
+                "type": "text",
+                "title": "Id",
+                "noFieldset": false,
+                "className": "x",
+                "id": "id",
+                "name": "id",
+                "tooltip": "",
+                "attr": {
+                    "multiple": true
+                },
+                "events": {},
+                "rules": {}
+            },
+            {
+                "element":"select",
+                "label":"Country",
+                "name":"countryId",
+                "dataSet":"countryId"
+            },
+            {
+                "element":"state",
+                "label":"State",
+                "name":"stateId",
+                "dataSet":"stateId"
+            }
+        ]
+
+    }]
+
+
+
+
+
+
+
+
+
+
+
+
+                               
+}

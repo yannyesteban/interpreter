@@ -15,6 +15,7 @@ const _handler = (element) => {
                 mode = "changed";
             }
             fire(element, `${String(key)}-changed`, { key, value, mode });
+            fire(element, "change", { key, value, mode });
             console.log(key, value);
             return true;
         },
