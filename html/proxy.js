@@ -1,3 +1,4 @@
+()=>{
 let x = document.getElementById("country");
 let view = new Proxy(x, {
     set: function (obj, prop, newval) {
@@ -11,3 +12,4 @@ let view = new Proxy(x, {
 });
 
 view.value = "";
+}

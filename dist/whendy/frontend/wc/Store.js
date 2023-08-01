@@ -12,9 +12,9 @@ const _handler = (element) => {
             target[key] = value;
             let mode = "set";
             if (oldValue !== value) {
-                mode = "changed";
+                mode = "change";
             }
-            fire(element, `${String(key)}-changed`, { key, value, mode });
+            fire(element, `${String(key)}-change`, { key, value, mode });
             fire(element, "change", { key, value, mode });
             console.log(key, value);
             return true;

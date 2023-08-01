@@ -1,75 +1,119 @@
 {
-    "name":"user",
-    "interface":{
-        "request":{
-            "sqlData":"select * from units",
-            "filter":[{"id":4}],
-            "layout":"form1"
-            
-        }
+  "name": "user",
+  "dbname": "whendy",
+  "interface": {
+    "request": {
+      "mode": "request",
+      "dataForm": "unit",
+      "layout": "form1"
     },
-    "dataField":[
+    "load-state": {
+      "mode": "field-data",
+      "data": "state"
+    }
+  },
+  "dataForm": [
+    {
+      "name": "unit",
+      "sqlData": "select * from units",
+      "filter": [
         {
-            "name":"countryId",
-            "data":[
-                ["","select a country...", "*"],
-                "select id, name from country"
-            ]
+          "id": 4
+        }
+      ]
+    },
+    {
+      "name": "states",
+      "sqlData": "select id, state, country_id from state",
+      "filter": [
+        {
+          "id": "#countryId"
+        }
+      ]
+    }
+  ],
+  "fields": [
+    {
+      "element": "select",
+      "label": "Country",
+      "name": "countryId",
+      "dataSet": "countryId"
+    },
+    {
+      "element": "state",
+      "label": "State",
+      "name": "stateId",
+      "dataSet": "stateId"
+    }
+  ],
+  "layout": [
+    {
+      "element": "gt-form",
+      "name": "form1",
+      "label": "Units Sold",
+      "dataField": [
+        {
+          "name": "countryId",
+          "data": [
+            ["", "select a country...", "*"],
+            "select id, name from country"
+          ]
         },
         {
-            "name":"stateId",
-            "filterBy":"countryId",
-            "data":[
-                ["","select a state...","*"],
-                "select id, name, country_id from state"
-            ]
+          "name": "stateId",
+          "filterBy": "countryId",
+          "data": [
+            ["", "select a state...", "*"],
+            "select id, name, country_id from state"
+          ]
         }
-    ],
-    "layout":[{
-        "name":"form1",
-        "label":"Units Sold",
-        "elements": [
-            {
-                "element": "input",
-                "type": "text",
-                "title": "Id",
-                "noFieldset": false,
-                "className": "x",
-                "id": "id",
-                "name": "id",
-                "tooltip": "",
-                "attr": {
-                    "multiple": true
-                },
-                "events": {},
-                "rules": {}
-            },
-            {
-                "element":"select",
-                "label":"Country",
-                "name":"countryId",
-                "dataSet":"countryId"
-            },
-            {
-                "element":"state",
-                "label":"State",
-                "name":"stateId",
-                "dataSet":"stateId"
-            }
-        ]
-
-    }]
-
-
-
-
-
-
-
-
-
-
-
-
-                               
+      ],
+      "elements": [
+        {
+          "element": "input",
+          "type": "text",
+          "title": "Id",
+          "noFieldset": false,
+          "className": "x",
+          "id": "id",
+          "name": "id",
+          "tooltip": "",
+          "attr": {
+            "multiple": true
+          },
+          "events": {},
+          "rules": {}
+        },
+        {
+          "element": "select",
+          "label": "Country",
+          "name": "countryId",
+          "dataSet": "countryId"
+        },
+        {
+          "element": "state",
+          "label": "State",
+          "name": "stateId",
+          "dataSet": "stateId"
+        }
+      ]
+    },
+    {
+      "element": "wh-grid",
+      "name": "list",
+      "pageRecords": 10,
+      "maxPages": 6,
+      "paginator": true,
+      "editMode": ["none", "inside", "popup"],
+      "selectMode": ["none", "simple", "multiple"],
+      "requestPage": {
+        "element": "form",
+        "name": "&name",
+        "method": "load-page",
+        "eparam": {
+          "page": "{page}"
+        }
+      }
+    }
+  ]
 }

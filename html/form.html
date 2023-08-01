@@ -1,106 +1,176 @@
 <!DOCTYPE html>
 <html lang="en">
-    <head>
-        <meta charset="UTF-8" />
-        <meta http-equiv="X-UA-Compatible" content="IE=edge" />
-        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-        <title>HOME V1.0</title>
-        <link rel="icon" type="image/png" href="../images/favicon.ico" sizes="16x16" />
-        <link rel="stylesheet" href="../css/reset.css" />
-        <link rel="stylesheet" href="../css/main.css" />
-        <link rel="stylesheet" href="../css/home.css" />
-        <link rel="stylesheet" href="../css/form.css" />
-        <style>
-            .sep {
-                border-bottom: 2px dotted rgb(171, 150, 204);
-                width: 100%;
-                padding: 4px;
-                margin: 10px;
-            }
-        </style>
-    </head>
+  <head>
+    <meta charset="UTF-8" />
+    <meta http-equiv="X-UA-Compatible" content="IE=edge" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>HOME V1.0</title>
+    <link
+      rel="icon"
+      type="image/png"
+      href="../images/favicon.ico"
+      sizes="16x16"
+    />
+    <link rel="stylesheet" href="../css/reset.css" />
+    <link rel="stylesheet" href="../css/main.css" />
+    <link rel="stylesheet" href="../css/home.css" />
+    <link rel="stylesheet" href="../css/form.css" />
+    <style>
+      .sep {
+        border-bottom: 2px dotted rgb(171, 150, 204);
+        width: 100%;
+        padding: 4px;
+        margin: 10px;
+      }
+    </style>
+  </head>
 
-    <body>
-        <data-store id="store" ></data-store>
-        <gt-form>
-            <data-store id="store1" onChange="alert(8)"></data-store>
-            <gt-caption> Persons </gt-caption>
-            <gt-field><label for="x">Cedula</label> <input type="text" id="x" name="cedula" /></gt-field>
-            <gt-field>
-                <label for="u">Country</label>
-                <select name="country" id="country" data-childs="true" value="ve" onclick="">
-                    <option value="us">Estados Unidos</option>
-                    <option value="co" selected>Colombia</option>
+  <body>
+    <data-store id="store"></data-store>
+    <form id="gt2">
+      <gt-form id="gt">
+        <data-store id="store1"></data-store>
+        <gt-caption> Persons </gt-caption>
+        <gt-field
+          ><label for="x">Cedula</label>
+          <input type="text" id="x" name="cedula" value="1247"
+        /></gt-field>
+        <gt-field>
+          <label for="u">Country</label>
+          <select
+            name="country"
+            iid="country"
+            data-childs="true"
+            value="ve"
+            onclick=""
+          >
+            <option value="us">Estados Unidos</option>
+            <option value="co" selected>Colombia</option>
 
-                    <option value="ve">Venezuela</option>
-                </select>
-            </gt-field>
-            <gt-field>
-                <label for="city">City</label>
-                <select name="city" id="city" list="cities" data-parent="country" data-childs="true"></select>
-                <select name="city2" id="city2" list="cities2" data-parent="country"></select>
-                <select name="county" id="county" list="county" data-parent="city"></select>
-            </gt-field>
-            <gt-field>Tres</gt-field>
-            <gt-field>Cuatro</gt-field>
+            <option value="ve">Venezuela</option>
+          </select>
+        </gt-field>
+        <gt-field>
+          <label for="city">City</label>
+          <select
+            name="city"
+            id="city"
+            list="cities"
+            data-parent="country"
+            data-childs="true"
+          ></select>
+          <select
+            name="city2"
+            id="city2"
+            list="cities2"
+            data-parent="country"
+          ></select>
+          <select
+            name="county"
+            id="county"
+            list="county"
+            data-parent="city"
+          ></select>
+        </gt-field>
+        <gt-field>Tres</gt-field>
+        <gt-field
+          >Cuatro
 
-            <datalist id="cities" data-filter="" value="atlanta">
-                <option value="new york" data-level="us">New York</option>
-                <option value="atlanta" data-level="us">Atlanta</option>
-                <option value="caracas" data-level="ve">Caracas</option>
-                <option value="valencia" data-level="ve">Valencia</option>
-                <option value="bogota" data-level="co">Bogotá</option>
-                <option value="cartagena" data-level="co">Cartagena</option>
-            </datalist>
+          <select name="forty" list="listforty" id="forty" value="3"></select>
+        </gt-field>
 
-            <datalist id="cities2" data-filter="">
-                <option value="new york" data-level="us">New York2</option>
-                <option value="atlanta" data-level="us">Atlanta2</option>
-                <option value="caracas" data-level="ve">Caracas2</option>
-                <option value="valencia" data-level="ve">Valencia2</option>
-                <option value="bogota" data-level="co">Bogotá2</option>
-                <option value="cartagena" data-level="co">Cartagena2</option>
-            </datalist>
+        <datalist id="cities" data-filter="" value="atlanta">
+          <option value="new york" data-level="us">New York</option>
+          <option value="atlanta" data-level="us">Atlanta</option>
+          <option value="caracas" data-level="ve">Caracas</option>
+          <option value="valencia" data-level="ve">Valencia</option>
+          <option value="bogota" data-level="co">Bogotá</option>
+          <option value="cartagena" data-level="co">Cartagena</option>
+        </datalist>
 
-            <datalist id="county" data-filter="">
-                <option value="new york A" data-level="new york">New York2</option>
-                <option value="atlanta A" data-level="new york">Atlanta2</option>
-                <option value="caracas A " data-level="atlanta">Caracas2</option>
-                <option value="valencia A" data-level="atlanta">Valencia2</option>
-                <option value="bogota A" data-level="atlanta">Bogotá2</option>
-                <option value="cartagena A" data-level="atlanta">Cartagena2</option>
-            </datalist>
-        </gt-form>
-        
-        
-        <script type="module" src="../dist/whendy/frontend/wc/Store.js"></script>
-        <script type="module" src="../dist/whendy/frontend/wc/GTForm.js"></script>
-        <script type="module" src="../dist/whendy/frontend/wc/Field.js"></script>
-        <script type="module" src="../dist/whendy/frontend/wc/AppWatch.js"></script>
+        <datalist id="cities2" data-filter="">
+          <option value="new york" data-level="us">New York2</option>
+          <option value="atlanta" data-level="us">Atlanta2</option>
+          <option value="caracas" data-level="ve">Caracas2</option>
+          <option value="valencia" data-level="ve">Valencia2</option>
+          <option value="bogota" data-level="co">Bogotá2</option>
+          <option value="cartagena" data-level="co">Cartagena2</option>
+        </datalist>
 
+        <datalist id="county" data-filter="">
+          <option value="new york A" data-level="new york">New York2</option>
+          <option value="atlanta A" data-level="new york">Atlanta2</option>
+          <option value="caracas A " data-level="atlanta">Caracas2</option>
+          <option value="valencia A" data-level="atlanta">Valencia2</option>
+          <option value="bogota A" data-level="atlanta">Bogotá2</option>
+          <option value="cartagena A" data-level="atlanta">Cartagena2</option>
+        </datalist>
 
-        <store store="t1" bind-to="country" target="#city" action="updatedata"> </store>
-        <store></store>
-        
-        <app-watch></app-watch>
-        
-        <app-fetch store="form1" watch="cedula person" valid="true" confirm="secure?" form="#form">
-            <fecth-body name="name" value="x"></fecth-body>
-            <fecth-body name="last" value="y"></fecth-body>
-            <app-action
-                when="cedula"
-                id="person"
-                panel-id="4"
-                type="siple"
-                element="form"
-                name="person"
-                method="load"
-                res-token=""
-            >
-                <action-param name="cedula" bind-value="cedula"></action-param>
-            </app-action>
-        </app-fetch>
-        <!--
+        <datalist id="listforty" data-filter="">
+          <option value="new york" data-level="us">New York2</option>
+          <option value="atlanta" data-level="us">Atlanta2</option>
+          <option value="caracas" data-level="ve">Caracas2</option>
+          <option value="valencia" data-level="ve">Valencia2</option>
+          <option value="bogota" data-level="co">Bogotá2</option>
+          <option value="cartagena" data-level="co">Cartagena2</option>
+        </datalist>
+        <form-request> </form-request>
+        <form-request
+          watch="country"
+          formmm="gt-form"
+          name="send"
+          host=""
+          params=""
+          element="form"
+          name="form1"
+          method="data-field"
+          mode="data"
+        >
+          data = [ { value:1, text:"yanny" }, { value:2, text:"esteban" }, {
+          value:3, text:"nuñez" }, { value:4, text:"jimenez" } ]; this.dataField
+          = {field: "forty", data: data, value: this.getField("forty").getAttribute("value")}
+        </form-request>
+      </gt-form>
+    </form>
+
+    <script type="module" src="../dist/whendy/frontend/wc/Store.js"></script>
+    <script type="module" src="../dist/whendy/frontend/wc/GTForm.js"></script>
+    <script type="module" src="../dist/whendy/frontend/wc/Field.js"></script>
+    <script type="module" src="../dist/whendy/frontend/wc/AppWatch.js"></script>
+    <script
+      type="module"
+      src="../dist/whendy/frontend/wc/FormRequest.js"
+    ></script>
+
+    <store store="t1" bind-to="country" target="#city" action="updatedata">
+    </store>
+    <store></store>
+
+    <app-watch></app-watch>
+
+    <app-fetch
+      store="form1"
+      watch="cedula person"
+      valid="true"
+      confirm="secure?"
+      form="#form"
+    >
+      <fecth-body name="name" value="x"></fecth-body>
+      <fecth-body name="last" value="y"></fecth-body>
+      <app-action
+        when="cedula"
+        id="person"
+        panel-id="4"
+        type="siple"
+        element="form"
+        name="person"
+        method="load"
+        res-token=""
+      >
+        <action-param name="cedula" bind-value="cedula"></action-param>
+      </app-action>
+    </app-fetch>
+    <!--
     <div aria-busy="true" aria-describedby="progress-bar">
        
       </div>
@@ -108,11 +178,8 @@
        ...
       
       <progress id="progress-bar" aria-label="Content loading…"></progress> -->
-        <script src="./proxy.js"></script>
+    <script src="./proxy.js"></script>
 
-        <script>
-           
-            
-        </script>
-    </body>
+    <script></script>
+  </body>
 </html>

@@ -246,13 +246,13 @@ Q.query = (selector) => {
 Q.queryAll = (selector) => {
     return Array.from(document.body.querySelectorAll(selector)).map((child) => Q(child));
 };
-Q.bind = (fn, context, arg) => {
+Q.bind = (fn, context, ...arg) => {
     if (typeof fn === "function") {
         return fn.bind(context);
     }
     else if (typeof fn === "string") {
         if (arg) {
-            return Function(arg, fn).bind(context);
+            return Function(...arg, fn).bind(context);
         }
         return Function(fn).bind(context);
     }

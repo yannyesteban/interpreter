@@ -168,7 +168,7 @@ export class App extends HTMLElement {
             body: {},
             //requestFunction : null,
             requestFunctionss: {
-                getEven: (json) => {},
+                getEven: (json) => { },
             },
             request: [
                 {
@@ -290,7 +290,7 @@ export class App extends HTMLElement {
         if (module) {
             console.log("initElement", element);
             this.whenComponent(module)
-                .then((component) => {})
+                .then((component) => { })
                 .catch((error) => {
                     console.log(error);
                 });

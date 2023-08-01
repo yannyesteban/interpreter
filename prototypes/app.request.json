@@ -1,0 +1,52 @@
+{
+  "request": [
+    {
+      "mode": ["set", "update", "data"],
+      "setPanel": "p4",
+      "sendTo": ".form",
+      "element": "form",
+      "name": "unit",
+      "method": "request",
+      "params": {},
+      "sendData": {
+        "target": "#x",
+        "action": "dataSource"
+      }
+    }
+  ],
+
+  "response": [
+    {
+      "mode": ["set", "update", "data"],
+
+      "setTo": ["#id"],
+      "setPanel": "p4",
+      "sendTo": ".form",
+      "element": "",
+      "id": "xx",
+      "type": "element",
+
+      "props": []
+    },
+    {
+      "mode": "update",
+      "id": "#form1",
+      "props": {
+        "dataField": {
+          "field": "city",
+          "data": {},
+          "value": "1"
+        }
+      }
+    },
+    {
+        "mode":"update",
+        "id":"#form1",
+        "props":{
+            "dataForm":{
+                
+            }
+        }
+    }
+  ]
+}
