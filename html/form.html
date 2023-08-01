@@ -21,9 +21,11 @@
     </head>
 
     <body>
+        <data-store id="store"></data-store>
         <gt-form>
+            <data-store id="store1"></data-store>
             <gt-caption> Persons </gt-caption>
-            <gt-field><label for="x">Cedula</label> <input type="text" id="x" /></gt-field>
+            <gt-field><label for="x">Cedula</label> <input type="text" id="x" name="cedula" /></gt-field>
             <gt-field>
                 <label for="u">Country</label>
                 <select name="country" id="country" data-childs="true" value="ve" onclick="">
@@ -69,16 +71,19 @@
                 <option value="cartagena A" data-level="atlanta">Cartagena2</option>
             </datalist>
         </gt-form>
-
+        
+        <script type="module" src="../dist/whendy/frontend/wc/Store.js"></script>
+        <script type="module" src="../dist/whendy/frontend/wc/Store.js"></script>
         <script type="module" src="../dist/whendy/frontend/wc/GTForm.js"></script>
         <script type="module" src="../dist/whendy/frontend/wc/Field.js"></script>
+        <script type="module" src="../dist/whendy/frontend/wc/AppWatch.js"></script>
+
 
         <store store="t1" bind-to="country" target="#city" action="updatedata"> </store>
         <store></store>
-
-        <app-watch>
-            
-        </app-watch>
+        
+        <app-watch></app-watch>
+        
         <app-fetch store="form1" watch="cedula person" valid="true" confirm="secure?" form="#form">
             <fecth-body name="name" value="x"></fecth-body>
             <fecth-body name="last" value="y"></fecth-body>
@@ -104,5 +109,10 @@
       
       <progress id="progress-bar" aria-label="Content loading…"></progress> -->
         <script src="./proxy.js"></script>
+
+        <script>
+           
+            
+        </script>
     </body>
 </html>

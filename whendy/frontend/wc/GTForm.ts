@@ -1,39 +1,47 @@
 import { Q as $ } from "../Q.js";
 
-interface RequestAction{
-    id:string;
-    panelId:string;
-    type:string;
-    element:string;
-    name:string;
-    source:string;
-    method:string;
-    eparams:object;
-    resToken:string
+interface RequestAction {
+    id: string;
+    panelId: string;
+    type: string;
+    element: string;
+    name: string;
+    source: string;
+    method: string;
+    eparams: object;
+    resToken: string;
 }
-interface Request{
-    mode:string;//elements,simple
-    valid:boolean;
-    confirm:string;
-    form:string;
-    body:object;
-    actions:RequestAction[]
-}
-
-interface ComponentResponse{
-    element:string;
-    name:string;
-    mode:string;
-    prop:string;
+interface Request {
+    mode: string; //elements,simple
+    valid: boolean;
+    confirm: string;
+    form: string;
+    body: object;
+    actions: RequestAction[];
 }
 
-interface HtmlResponse{
-    element:string;
-    id:string;
-    mode:string;
-    html:string;
-    prop:string;
-    attr:string;
+interface ComponentResponse {
+    element: string;
+    name: string;
+    mode: string;
+    prop: string;
+}
+
+interface HtmlResponse {
+    element: string;
+    id: string;
+    mode: string;
+    html: string;
+    prop: string;
+    attr: string;
+}
+
+interface TaskResponse {
+    mode: string;
+    element: string;
+    name: string;
+    panel: string;
+    props: [];
 }
 
 class FormContainer extends HTMLElement {
@@ -138,6 +146,7 @@ class GTCaption extends HTMLElement {
 customElements.define("gt-caption", GTCaption);
 
 class GTForm extends HTMLElement {
+    store;
     static get observedAttributes() {
         return ["type"];
     }
@@ -171,8 +180,23 @@ class GTForm extends HTMLElement {
 
     public connectedCallback() {
         this.initList();
+        this._setStore();
     }
 
+    _setStore() {
+        customElements.whenDefined("data-store").then(() => {
+            const store = <any>this.querySelector("data-store");
+
+            if (store) {
+                this.addEventListener("change", (event) => {
+                    if (event.target["name"]) {
+                        store.add(event.target["name"], event.target["value"]);
+                        console.log(event.target["value"]);
+                    }
+                });
+            }
+        });
+    }
     getField(name) {
         return this.querySelector(`[name="${name}"]`);
     }
@@ -180,7 +204,7 @@ class GTForm extends HTMLElement {
     _setDataList(parentName, value) {
         console.log(parentName, value);
         const lists = $(this).queryAll(`[data-parent="${parentName}"]`);
-        console.log(lists)
+        console.log(lists);
         lists.forEach((list) => {
             if (list.get<HTMLElement>().tagName === "SELECT") {
                 this._updateSelect(list.get<HTMLElement>(), value);
@@ -216,7 +240,7 @@ class GTForm extends HTMLElement {
 
             select.appendChild(opt);
         });
-        console.log(_value)
+        console.log(_value);
         select.value = _value;
         if (value != _value) {
             $(select).fire("change", []);
@@ -237,7 +261,7 @@ class GTForm extends HTMLElement {
             const parentName = select.getAttribute("data-parent");
             if (parentName) {
                 const parentField = <HTMLSelectElement>this.getField(parentName);
-                console.log(parentField, parentField.value)
+                console.log(parentField, parentField.value);
                 if (parentField) {
                     parentValue = parentField.value;
                 }

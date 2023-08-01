@@ -51,10 +51,20 @@
         console.log(clone.innerHTML)
         here.append(clone)
 
-        document.getElementById("tx").addEventListener("input", (event)=>{
-            text.textContent = event.target.value
+        let input = new Proxy(document.getElementById("tx"),{
+          set(target, p, newValue){
+            console.log(target)
+            target[p] = newValue.toString().toUpperCase()
+            return true;
+          }
         })
 
+        document.getElementById("tx").addEventListener("input", (event)=>{
+            text.textContent = event.target.value
+            input.value = event.target.value+"a"
+        })
+
+        
       </script>
 </body>
 </html>

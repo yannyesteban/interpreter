@@ -106,6 +106,20 @@ class GTForm extends HTMLElement {
     }
     connectedCallback() {
         this.initList();
+        this._setStore();
+    }
+    _setStore() {
+        customElements.whenDefined("data-store").then(() => {
+            const store = this.querySelector("data-store");
+            if (store) {
+                this.addEventListener("change", (event) => {
+                    if (event.target["name"]) {
+                        store.add(event.target["name"], event.target["value"]);
+                        console.log(event.target["value"]);
+                    }
+                });
+            }
+        });
     }
     getField(name) {
         return this.querySelector(`[name="${name}"]`);
