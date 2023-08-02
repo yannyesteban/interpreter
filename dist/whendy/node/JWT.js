@@ -38,4 +38,4 @@ function sha256(key) {
 function base64Encode(msg) {
     return Buffer.from(msg).toString("base64url");
 }
-//# sourceMappingURL=jwt.js.map
+//# sourceMappingURL=JWT.js.map

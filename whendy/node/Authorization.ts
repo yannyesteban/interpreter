@@ -1,5 +1,5 @@
 import { IncomingMessage, ServerResponse } from "http";
-import { JWT } from "./jwt.js";
+import { JWT } from "./JWT.js";
 import { log } from "console";
 import { UserInfo } from "./element.js";
 
