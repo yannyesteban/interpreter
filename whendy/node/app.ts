@@ -21,6 +21,8 @@ export class App extends AppElement {
 
     init(info: InfoElement) {
 
+
+        console.log(this.store.eval(" hola {{ @TEMPLATES_PATH }} "))
         const config = loadJsonFile(info.source);
 
         if (config) {

@@ -144,4 +144,15 @@ export class Store {
         let file = this.loadFile(name);
         return JSON.parse(this.outer.execute(file));
     }
+
+
+    eval(template: string) {
+        
+        this.outer.resetData();
+        this.outer.setMap("@", this.session.getData(), "");
+        this.outer.setMap("&", this.vexp, "");
+        this.outer.setMap("#", this.vreq, "");
+
+        return this.outer.execute(template);
+    }
 }
