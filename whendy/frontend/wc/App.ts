@@ -5,6 +5,59 @@ import { Q as $ } from "./../Q.js";
 import { log } from "console";
 
 export type selector = string;
+
+interface PanelInfo{
+    panel:string;
+    id:string;
+    element:string;
+    method:string;
+    mode:string;
+    eparams:any;
+
+}
+interface AppAction{
+    id?: string;
+    setPanel?: string;
+    type?: string;
+    element?: string;
+    name?: string;
+    source?: string;
+    method?: string;
+    eparams?: object;
+    resToken?: string;
+}
+interface AppRequest {
+    type?:string;
+    panel?:selector;
+    confirm?:string;
+    valid?:boolean;
+    form?:selector;
+    body?:object;
+    header?:{[key:string]:string};
+    actions:AppAction[];
+}
+
+interface HtmlFragment{
+    
+}
+
+interface ElementResponse{
+    setPanel?:string;
+    setTo?:selector;
+    appendTo?:selector;
+    type?:string;
+    id?:string;
+    mode?:string;
+    element:string;
+    props:any;
+    attrs:any;
+    html:string;
+    text:string;
+    css:string;
+    script:string;
+}
+
+
 export interface IForm {
     getValues(): any;
     isValid(arg?: any): boolean;
@@ -168,7 +221,7 @@ export class App extends HTMLElement {
             body: {},
             //requestFunction : null,
             requestFunctionss: {
-                getEven: (json) => { },
+                getEven: (json) => {},
             },
             request: [
                 {
@@ -290,7 +343,7 @@ export class App extends HTMLElement {
         if (module) {
             console.log("initElement", element);
             this.whenComponent(module)
-                .then((component) => { })
+                .then((component) => {})
                 .catch((error) => {
                     console.log(error);
                 });

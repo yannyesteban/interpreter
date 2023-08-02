@@ -1,0 +1,13 @@
+{
+    "dataList": {
+        "mode":"request",
+        "name": "cities",
+        "data": [
+            ["", "select", "*"],
+            {
+                "sql": "select * from cities where country=?",
+                "params": ["{#country}"]
+            }
+        ]
+    }
+}

@@ -185,7 +185,6 @@ export class Server {
           }*/
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
             const appName = wh.store.getHeader("Application-Name") || null;
-            const mode = null;
             if (appName) {
                 wh.setApp(this.apps[appName.toString()]);
                 wh.setMode(AppMode.START);

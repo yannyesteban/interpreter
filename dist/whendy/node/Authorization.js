@@ -51,7 +51,7 @@ export class Authorization {
         return this.roles;
     }
     validRoles(roles) {
-        const intersection = this.roles.filter(x => roles.indexOf(x) !== -1);
+        const intersection = this.roles.filter((x) => roles.indexOf(x) !== -1);
         return intersection.length > 0;
     }
 }

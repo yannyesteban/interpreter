@@ -25,8 +25,6 @@ interface InfoClass {
 }
 
 export class Whendy {
-    
-
     public store: Store;
     public authorization: Authorization;
     private output: OutputInfo[] = [];
@@ -195,7 +193,6 @@ export class Server {
 
         http.createServer(async (req: http.IncomingMessage, res: http.ServerResponse) => {
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
-                
                 res.writeHead(204, this.header);
                 res.end();
                 return;
@@ -228,14 +225,12 @@ export class Server {
 
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
             const appName = wh.store.getHeader("Application-Name") || null;
-            const mode: string = null;
-            
+
             if (appName) {
-                
                 wh.setApp(this.apps[appName.toString()]);
                 wh.setMode(AppMode.START);
             }
-            
+
             res.write(await wh.render());
 
             res.end();
@@ -269,7 +264,7 @@ export class Socket {
             maxLifeTime: 36000,
         });
 
-        const wss = new WebSocketServer({ port: +this.websocket.port || this.port});
+        const wss = new WebSocketServer({ port: +this.websocket.port || this.port });
 
         wss.on("connection", async (ws, req) => {
             const wh = new Whendy();
@@ -302,7 +297,7 @@ export class Socket {
 
                     console.log("token", token);
                 }
-            
+
                 wh.store.setVReq(body || {});
 
                 if (applicationName) {
@@ -313,7 +308,6 @@ export class Socket {
                 const result = await wh.render();
                 console.log(result);
                 ws.send(result);
-               
             });
 
             ws.on("close", async (params) => {
@@ -323,7 +317,6 @@ export class Socket {
             ws.on("error", (err) => {
                 console.log("error", err);
             });
-
         });
     }
 }

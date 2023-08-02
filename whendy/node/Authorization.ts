@@ -31,8 +31,6 @@ export class Authorization {
         return false;
     }
 
-    
-
     verify(token) {
         const payload = this.jwt.verify(token);
 
@@ -42,8 +40,7 @@ export class Authorization {
             this.user = payload.user;
             this.roles = payload.roles;
             return true;
-        }
-        else false;
+        } else false;
     }
 
     setAuth(info: UserInfo) {
@@ -73,8 +70,8 @@ export class Authorization {
         return this.roles;
     }
 
-    validRoles(roles:string[]) {
-        const intersection = this.roles.filter(x => roles.indexOf(x) !== -1);
+    validRoles(roles: string[]) {
+        const intersection = this.roles.filter((x) => roles.indexOf(x) !== -1);
         return intersection.length > 0;
     }
 }

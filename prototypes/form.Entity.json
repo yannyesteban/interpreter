@@ -37,7 +37,8 @@
       "element": "select",
       "label": "Country",
       "name": "countryId",
-      "dataSet": "countryId"
+      "dataSet": "countryId",
+      "cellType":["hidden", "text", "image", "link", "list", "html", "password"]
     },
     {
       "element": "state",
@@ -115,5 +116,11 @@
         }
       }
     }
-  ]
+  ],
+
+  "appRequest":{
+    "save":{
+      
+    }
+  }
 }
