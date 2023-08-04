@@ -13,6 +13,7 @@ import { Authorization } from "./Authorization.js";
 import { DBAdmin } from "./db/dbAdmin.js";
 import * as path from "path";
 import * as url from "url";
+import { Tool } from "./tool.js";
 
 enum AppMode {
     START = 1,
@@ -33,13 +34,13 @@ export class Whendy {
     private restData: any;
     private mode: AppMode;
     private appInfo: InfoElement;
+    private start: InfoElement;
 
     async render() {
         this.output = [];
 
-        if (this.mode === AppMode.START) {
-            console.log("START");
-            await this.setElement(this.appInfo);
+        if (this.start) {
+            await this.setElement(this.start);
         }
 
         let request = this.store.getReq("__app_request");
@@ -59,8 +60,8 @@ export class Whendy {
         return JSON.stringify(this.output);
     }
 
-    setApp(info: InfoElement) {
-        this.appInfo = info;
+    setStart(info: InfoElement) {
+        this.start = info;
     }
     setMode(mode: AppMode) {
         this.mode = mode;
@@ -82,7 +83,6 @@ export class Whendy {
                 break;
 
             case "element":
-                console.log(command);
                 await this.setElement(command);
                 break;
             case "update":
@@ -91,13 +91,12 @@ export class Whendy {
         }
     }
 
-    getElementConfig(element, name){
+    getElementConfig(element, name) {
         let template = classManager.template(element);
-       
-        template = "modules/admin/"+ template.replace("{name}", name);
-        console.log("------->>>", template, name)
-        return this.store.loadJsonFile( template);
 
+        template = "modules/admin/" + template.replace("{name}", name);
+
+        return this.store.loadJsonFile(template);
     }
 
     async setElement(info: InfoElement) {
@@ -106,7 +105,6 @@ export class Whendy {
         //this.store.LoadExp(info.eparams)
 
         const cls = await classManager.getClass(info.element);
-        console.log("template :", classManager.template(info.element))
 
         if (!cls) {
             console.log("error, clas not found");
@@ -117,15 +115,10 @@ export class Whendy {
 
         ele.setStore(this.store);
         let config = info;
-        if(classManager.useFileConfig(info.element)){
-
-            console.log("--***----", config)
-            config = {...this.getElementConfig(info.element, info.name), eparam:info.eparams}
+        if (classManager.useFileConfig(info.element)) {
+            config = { ...this.getElementConfig(info.element, info.name), ... info };
         }
 
-        console.log("------", config)
-
-        
         ele.init(config);
         await ele.evalMethod(info.method);
 
@@ -157,8 +150,6 @@ export class Whendy {
             const info = ele.getUserInfo();
 
             if (info.auth) {
-                console.log(`********\nWelcome ${info.user}\n**`);
-
                 const token = this.authorization.setAuth(info);
 
                 this.addResponse([
@@ -170,8 +161,6 @@ export class Whendy {
 
                 //token := whendy.Store.User.Set(info)
                 //whendy.w.Header().Set("Authorization", token)
-            } else {
-                console.log("====\nError\n==");
             }
         }
     }
@@ -199,6 +188,8 @@ export class Server {
     private apps: { [name: string]: InfoElement };
     //private authorization:authorization;
 
+    useModule: boolean = true;
+    init: any;
     constructor(opt) {
         for (const [key, value] of Object.entries(opt)) {
             this[key] = value;
@@ -220,48 +211,52 @@ export class Server {
                 return;
             }
 
-            console.log("-> ", req.url, path.dirname(req.url) );
-            console.log(url.parse(req.url));
-            const wh = new Whendy();
-
-            wh.authorization = new Authorization();
-
-            wh.authorization.evalHeader(req, res);
-
             const session = manager.start(req, res);
             session.loadSession(this.constants);
 
+            let infoDB = this.db;
+            let init = this.init;
+
+            if (this.useModule) {
+                const moduleInfo = Tool.loadJsonFile(`./modules${req.url}/config.json`);
+
+                session.loadSession(moduleInfo.constants || {});
+
+                infoDB = moduleInfo.db || [];
+                init = moduleInfo.init;
+                //console.log("-> ", req.url, path.dirname(req.url));
+                //console.log(url.parse(req.url));
+            }
+
             const db = new DBAdmin();
-            db.init(this.db);
+            db.init(infoDB);
+
+            const wh = new Whendy();
+            wh.authorization = new Authorization();
+            wh.authorization.evalHeader(req, res);
 
             const store = new Store();
             store.setSessionAdmin(session);
             store.setDBAdmin(db);
-
             await store.start(req, res);
 
             wh.store = store;
 
-            /*
-          for (const [key, value] of Object.entries(this.header)) {
-               res.setHeader(key, value);
-          }*/
+            const start = wh.store.getHeader("Application-Name").toString();
+            console.log("init", start, init);
+            if (start && init[start]) {
+                console.log("START");
+                wh.setStart(init[start]);
+            }
 
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
-            const appName = wh.store.getHeader("Application-Name") || null;
-
-            if (appName) {
-                wh.setApp(this.apps[appName.toString()]);
-                wh.setMode(AppMode.START);
-            }
 
             res.write(await wh.render());
 
             res.end();
-
-            console.log("USER INFO", wh.authorization.getUserInfo());
         }).listen(this.port);
     }
+    private getModuleName(url) {}
 }
 
 export class Socket {
@@ -274,6 +269,8 @@ export class Socket {
     private db: IConnectInfo[];
     private apps: { [name: string]: InfoElement };
 
+    useModule: boolean = true;
+    init: any;
     constructor(opt) {
         for (const [key, value] of Object.entries(opt)) {
             this[key] = value;
@@ -292,7 +289,8 @@ export class Socket {
 
         wss.on("connection", async (ws, req) => {
             const wh = new Whendy();
-
+            let infoDB = this.db;
+            let start = this.init;
             ws.on("message", async (data) => {
                 const { body, mode, token, applicationName } = JSON.parse(data.toString());
 
@@ -303,13 +301,24 @@ export class Socket {
                         ws.send("user don't authorized");
                         ws.close();
                     }
-
                     const store = new Store();
                     const session = manager.create("sessionId");
+
+                    if (this.useModule) {
+                        const moduleInfo = Tool.loadJsonFile(`./modules${req.url}/config.json`);
+
+                        session.loadSession(moduleInfo.constants || {});
+
+                        infoDB = moduleInfo.db || [];
+                        start = moduleInfo.start;
+                        //console.log("-> ", req.url, path.dirname(req.url));
+                        //console.log(url.parse(req.url));
+                    }
+
                     session.loadSession(this.constants);
 
                     const db = new DBAdmin();
-                    db.init(this.db);
+                    db.init(infoDB);
 
                     store.setSessionAdmin(session);
                     store.setDBAdmin(db);
@@ -318,19 +327,17 @@ export class Socket {
 
                     wh.authorization = auth;
                     wh.store = store;
-
-                    console.log("token", token);
                 }
 
                 wh.store.setVReq(body || {});
 
                 if (applicationName) {
-                    wh.setApp(this.apps[applicationName]);
-                    wh.setMode(AppMode.START);
+                    console.log("START");
+                    wh.setStart(start);
                 }
 
                 const result = await wh.render();
-                console.log(result);
+
                 ws.send(result);
             });
 
@@ -417,8 +424,6 @@ export class Server1 extends http.Server {
             res.write(await this.render());
 
             res.end();
-
-            console.log("USER INFO", this.authorization.getUserInfo());
         });
     }
 
@@ -432,7 +437,6 @@ export class Server1 extends http.Server {
         this.output = [];
         this.mode = this.store.getHeader("Application-Mode").toString();
         if (this.mode === "start") {
-            console.log("START");
             await this.setElement(this.setApp);
         }
 
@@ -468,7 +472,6 @@ export class Server1 extends http.Server {
                 await this.setElement(command);
 
             case "element":
-                console.log(command);
                 await this.setElement(command);
 
             case "update":
@@ -523,8 +526,6 @@ export class Server1 extends http.Server {
             const info = ele.getUserInfo();
 
             if (info.auth) {
-                console.log(`********\nWelcome ${info.user}\n**`);
-
                 const token = this.authorization.setAuth(info);
 
                 this.addResponse([
@@ -536,8 +537,6 @@ export class Server1 extends http.Server {
 
                 //token := whendy.Store.User.Set(info)
                 //whendy.w.Header().Set("Authorization", token)
-            } else {
-                console.log("====\nError\n==");
             }
         }
     }

@@ -1,0 +1,38 @@
+{
+    "id": "gtcomm",
+    "name": "home",
+    "templateFile": "whendy/templates/form.html",
+    "elements": [
+        {
+            "id":"form1",
+            "element":"form",
+            "name":"one",
+            "method":"request",
+            "appendTo":"#main"
+        }
+        
+    ],
+    "className": [
+        "home"
+    ],
+    "acceptedRoles": [
+        "** public **"
+    ],
+    "cssSheets": [
+        "{{ @CSS_PATH }}reset.css",
+        "{{ @CSS_PATH }}main.css"
+    ],
+    "jsModules": [
+        "{{ @WC_PATH }}Select.js",
+        "{{ @WC_PATH }}GTForm.js",
+        "{{ @WC_PATH }}Field.js"
+    ],
+    "modules": [
+        {
+            "src": "./GTForm.js",
+            "name": "GTForm",
+            "alias": "GTForm",
+            "component": "gt-form"
+        }
+    ]
+}

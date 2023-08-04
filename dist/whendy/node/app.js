@@ -1,5 +1,5 @@
 import { AppElement } from "./element.js";
-import { loadFile, loadJsonFile } from "./tool.js";
+import { loadFile } from "./tool.js";
 export const externConfig = true;
 export class App extends AppElement {
     constructor() {
@@ -13,10 +13,9 @@ export class App extends AppElement {
         this.store = store;
     }
     init(info) {
-        console.log(this.store.eval(" hola {{ @TEMPLATES_PATH }} "));
-        const config = loadJsonFile(info.source);
-        if (config) {
-            for (const [key, value] of Object.entries(config)) {
+        //const config = loadJsonFile(info.source);
+        if (info) {
+            for (const [key, value] of Object.entries(info)) {
                 this[key] = value;
             }
         }

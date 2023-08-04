@@ -1,0 +1,25 @@
+{
+    "name":"one",
+    "className":"sevian",
+    "sql":"SELECT * FROM person",
+
+    "fields":[
+        {
+            "name":"cedula",
+            "input":"input",
+            "type":"text",
+            "default":""
+        }
+    ],
+    "layout":{
+        "caption":"caption  2023",
+        "elements":[{
+            "component":"field",
+            "label":"yes",
+            "name":"name",
+            "input":"input",
+            "type":"text",
+            "value":"hello"
+        }]
+    }
+}

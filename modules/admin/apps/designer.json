@@ -1,6 +1,6 @@
 {
     "id": "gtcomm",
-    "name": "{{@APP_NAME}}",
+    "name": "home",
     "templateFile": "whendy/templates/home.html",
     "elements": [
         
@@ -12,39 +12,39 @@
         "** public **"
     ],
     "cssSheets": [
-        "css/reset.css",
-        "css/main.css"
+        "{{ @CSS_PATH }}reset.css",
+        "{{ @CSS_PATH }}main.css"
     ],
     "jsModules": [
-        "dist/whendy/frontend/wc/Select.js"
+        "{{ @WC_PATH }}Select.js"
     ],
     "modules": [
         {
-            "src": "./Html.js",
+            "src": "{{ @WC_PATH }}Html.js",
             "name": "Html",
             "alias": "Html",
             "component": "wh-html"
         },
         {
-            "src": "./Menu.js",
+            "src": "{{ @WC_PATH }}Menu.js",
             "name": "WHMenu",
             "alias": "WHMenu",
             "component": "wh-menu"
         },
         {
-            "src": "./Form.js",
+            "src": "{{ @WC_PATH }}Form.js",
             "name": "WHForm",
             "alias": "WHForm",
             "component": "wh-form"
         },
         {
-            "src": "./Map.js",
+            "src": "{{ @WC_PATH }}Map.js",
             "name": "WHMap",
             "alias": "WHMap",
             "component": "wh-map"
         },
         {
-            "src": "./GTMap.js",
+            "src": "{{ @WC_PATH }}GTMap.js",
             "name": "GTMap",
             "alias": "GTMap",
             "component": "gt-map"

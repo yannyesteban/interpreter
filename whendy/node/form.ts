@@ -22,14 +22,17 @@ export class Form extends Element {
     private connection: string = "mysql";
     private _info: any;
     private fields;
+    private layout:any;
     setStore(store: Store) {
         this.store = store;
     }
 
     init(info: InfoElement) {
-        this._info = this.store.loadJsonFile(info.source) || {};
+        //this._info = this.store.loadJsonFile(info.source) || {};
 
-        for (const [key, value] of Object.entries({ ...this._info, ...info })) {
+        console.log("...",info)
+
+        for (const [key, value] of Object.entries( info )) {
             this[key] = value;
         }
     }
@@ -63,10 +66,10 @@ export class Form extends Element {
         const data = {
             mode: "init",
             type: "element",
-            wc: "wh-form",
+            wc: "gt-form",
             id: this.id,
             props: {
-                dataSource: this._info,
+                dataSource: this.layout,
             },
             //replayToken => $this->replayToken,
             appendTo: this.appendTo,

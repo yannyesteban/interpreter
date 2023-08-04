@@ -55,7 +55,7 @@
             "cedula": "setApp"
         }
     },
-    "apps":{
+    "init":{
         "summer":{
             "type": "element",
             "element": "app",

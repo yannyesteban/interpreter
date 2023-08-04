@@ -243,7 +243,7 @@ export class App extends HTMLElement {
             confirm: "?",
             valid: true,
             headers: {
-                "Application-Name": "summer",
+                "Application-Name": this.name,
             },
             data: {
                 id: this.id,
@@ -279,13 +279,14 @@ export class App extends HTMLElement {
 
                 resolve(customElements.get(module.component));
             }
-
+            
             import(module.src)
                 .then((MyModule) => {
                     console.log("   B   ", MyModule);
                     resolve(customElements.get(module.component));
                 })
                 .catch((error) => {
+                    console.log(error)
                     reject(error);
                 });
         });
@@ -312,7 +313,7 @@ export class App extends HTMLElement {
             e.attr(element.attrs);
             let panel = null;
             if (element.setPanel) {
-                alert(999);
+                
                 panel = $.id(element.setPanel);
                 if (panel) {
                     panel.text("");
@@ -388,13 +389,7 @@ export class App extends HTMLElement {
         $(this).addClass(classes);
     }
 
-    set name(value) {
-        this.setAttribute("name", value);
-    }
-
-    get value() {
-        return this.getAttribute("name");
-    }
+    
 
     set server(value) {
         this.setAttribute("server", value);
@@ -402,6 +397,18 @@ export class App extends HTMLElement {
 
     get server() {
         return this.getAttribute("server");
+    }
+
+    set name(value) {
+        if (Boolean(value)) {
+            this.setAttribute("name", value);
+        } else {
+            this.removeAttribute("name");
+        }
+    }
+
+    get name() {
+        return this.getAttribute("name");
     }
 
     send(info: FetchInfo) {
@@ -414,7 +421,7 @@ export class App extends HTMLElement {
                 "Application-Mode": info.mode,
             };
 
-            fetch(this.server + "/home2", {
+            fetch(this.server, {
                 method: info.method || "post",
                 headers: { ...headers, ...info.headers },
                 body: info.body,

@@ -20,8 +20,9 @@ export class Form extends Element {
         this.store = store;
     }
     init(info) {
-        this._info = this.store.loadJsonFile(info.source) || {};
-        for (const [key, value] of Object.entries(Object.assign(Object.assign({}, this._info), info))) {
+        //this._info = this.store.loadJsonFile(info.source) || {};
+        console.log("...", info);
+        for (const [key, value] of Object.entries(info)) {
             this[key] = value;
         }
     }
@@ -55,10 +56,10 @@ export class Form extends Element {
             const data = {
                 mode: "init",
                 type: "element",
-                wc: "wh-form",
+                wc: "gt-form",
                 id: this.id,
                 props: {
-                    dataSource: this._info,
+                    dataSource: this.layout,
                 },
                 //replayToken => $this->replayToken,
                 appendTo: this.appendTo,

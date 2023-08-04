@@ -15,8 +15,7 @@ import { Memory } from "./memory.js";
 import * as classManager from "./classManager.js";
 import { Authorization } from "./Authorization.js";
 import { DBAdmin } from "./db/dbAdmin.js";
-import * as path from "path";
-import * as url from "url";
+import { Tool } from "./tool.js";
 var AppMode;
 (function (AppMode) {
     AppMode[AppMode["START"] = 1] = "START";
@@ -29,9 +28,8 @@ export class Whendy {
     render() {
         return __awaiter(this, void 0, void 0, function* () {
             this.output = [];
-            if (this.mode === AppMode.START) {
-                console.log("START");
-                yield this.setElement(this.appInfo);
+            if (this.start) {
+                yield this.setElement(this.start);
             }
             let request = this.store.getReq("__app_request");
             if (request) {
@@ -46,8 +44,8 @@ export class Whendy {
             return JSON.stringify(this.output);
         });
     }
-    setApp(info) {
-        this.appInfo = info;
+    setStart(info) {
+        this.start = info;
     }
     setMode(mode) {
         this.mode = mode;
@@ -69,7 +67,6 @@ export class Whendy {
                     yield this.setElement(command);
                     break;
                 case "element":
-                    console.log(command);
                     yield this.setElement(command);
                     break;
                 case "update":
@@ -80,7 +77,6 @@ export class Whendy {
     getElementConfig(element, name) {
         let template = classManager.template(element);
         template = "modules/admin/" + template.replace("{name}", name);
-        console.log("------->>>", template, name);
         return this.store.loadJsonFile(template);
     }
     setElement(info) {
@@ -89,7 +85,6 @@ export class Whendy {
             this.store.setExp("ELEMENT_", info.element);
             //this.store.LoadExp(info.eparams)
             const cls = yield classManager.getClass(info.element);
-            console.log("template :", classManager.template(info.element));
             if (!cls) {
                 console.log("error, clas not found");
                 return;
@@ -98,10 +93,8 @@ export class Whendy {
             ele.setStore(this.store);
             let config = info;
             if (classManager.useFileConfig(info.element)) {
-                console.log("--***----", config);
-                config = Object.assign(Object.assign({}, this.getElementConfig(info.element, info.name)), { eparam: info.eparams });
+                config = Object.assign(Object.assign({}, this.getElementConfig(info.element, info.name)), info);
             }
-            console.log("------", config);
             ele.init(config);
             yield ele.evalMethod(info.method);
             if (this.mode == AppMode.RESTAPI) {
@@ -132,7 +125,6 @@ export class Whendy {
             if ("getUserInfo" in ele) {
                 const info = ele.getUserInfo();
                 if (info.auth) {
-                    console.log(`********\nWelcome ${info.user}\n**`);
                     const token = this.authorization.setAuth(info);
                     this.addResponse([
                         {
@@ -142,9 +134,6 @@ export class Whendy {
                     ]);
                     //token := whendy.Store.User.Set(info)
                     //whendy.w.Header().Set("Authorization", token)
-                }
-                else {
-                    console.log("====\nError\n==");
                 }
             }
         });
@@ -160,12 +149,13 @@ export class Whendy {
 }
 /**************************** */
 export class Server {
-    //private authorization:authorization;
     constructor(opt) {
         this.port = 8080;
         this.classElement = [];
         this.constants = {};
         this.header = {};
+        //private authorization:authorization;
+        this.useModule = true;
         for (const [key, value] of Object.entries(opt)) {
             this[key] = value;
         }
@@ -182,35 +172,40 @@ export class Server {
                 res.end();
                 return;
             }
-            console.log("-> ", req.url, path.dirname(req.url));
-            console.log(url.parse(req.url));
+            const session = manager.start(req, res);
+            session.loadSession(this.constants);
+            let infoDB = this.db;
+            let init = this.init;
+            if (this.useModule) {
+                const moduleInfo = Tool.loadJsonFile(`./modules${req.url}/config.json`);
+                session.loadSession(moduleInfo.constants || {});
+                infoDB = moduleInfo.db || [];
+                init = moduleInfo.init;
+                //console.log("-> ", req.url, path.dirname(req.url));
+                //console.log(url.parse(req.url));
+            }
+            const db = new DBAdmin();
+            db.init(infoDB);
             const wh = new Whendy();
             wh.authorization = new Authorization();
             wh.authorization.evalHeader(req, res);
-            const session = manager.start(req, res);
-            session.loadSession(this.constants);
-            const db = new DBAdmin();
-            db.init(this.db);
             const store = new Store();
             store.setSessionAdmin(session);
             store.setDBAdmin(db);
             yield store.start(req, res);
             wh.store = store;
-            /*
-          for (const [key, value] of Object.entries(this.header)) {
-               res.setHeader(key, value);
-          }*/
-            res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
-            const appName = wh.store.getHeader("Application-Name") || null;
-            if (appName) {
-                wh.setApp(this.apps[appName.toString()]);
-                wh.setMode(AppMode.START);
+            const start = wh.store.getHeader("Application-Name").toString();
+            console.log("init", start, init);
+            if (start && init[start]) {
+                console.log("START");
+                wh.setStart(init[start]);
             }
+            res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
             res.write(yield wh.render());
             res.end();
-            console.log("USER INFO", wh.authorization.getUserInfo());
         })).listen(this.port);
     }
+    getModuleName(url) { }
 }
 export class Socket {
     constructor(opt) {
@@ -218,6 +213,7 @@ export class Socket {
         this.classElement = [];
         this.constants = {};
         this.header = {};
+        this.useModule = true;
         for (const [key, value] of Object.entries(opt)) {
             this[key] = value;
         }
@@ -231,6 +227,8 @@ export class Socket {
         const wss = new WebSocketServer({ port: +this.websocket.port || this.port });
         wss.on("connection", (ws, req) => __awaiter(this, void 0, void 0, function* () {
             const wh = new Whendy();
+            let infoDB = this.db;
+            let start = this.init;
             ws.on("message", (data) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
                 const { body, mode, token, applicationName } = JSON.parse(data.toString());
@@ -243,23 +241,29 @@ export class Socket {
                     }
                     const store = new Store();
                     const session = manager.create("sessionId");
+                    if (this.useModule) {
+                        const moduleInfo = Tool.loadJsonFile(`./modules${req.url}/config.json`);
+                        session.loadSession(moduleInfo.constants || {});
+                        infoDB = moduleInfo.db || [];
+                        start = moduleInfo.start;
+                        //console.log("-> ", req.url, path.dirname(req.url));
+                        //console.log(url.parse(req.url));
+                    }
                     session.loadSession(this.constants);
                     const db = new DBAdmin();
-                    db.init(this.db);
+                    db.init(infoDB);
                     store.setSessionAdmin(session);
                     store.setDBAdmin(db);
                     //await store.start(null, null);
                     wh.authorization = auth;
                     wh.store = store;
-                    console.log("token", token);
                 }
                 wh.store.setVReq(body || {});
                 if (applicationName) {
-                    wh.setApp(this.apps[applicationName]);
-                    wh.setMode(AppMode.START);
+                    console.log("START");
+                    wh.setStart(start);
                 }
                 const result = yield wh.render();
-                console.log(result);
                 ws.send(result);
             }));
             ws.on("close", (params) => __awaiter(this, void 0, void 0, function* () {
@@ -312,7 +316,6 @@ export class Server1 extends http.Server {
             res.writeHead(200, this.header); //{ 'Content-Type': 'application/json' }
             res.write(yield this.render());
             res.end();
-            console.log("USER INFO", this.authorization.getUserInfo());
         }));
     }
     //https://developer.mozilla.org/en-US/docs/Learn/Server-side/Node_server_without_framework
@@ -324,7 +327,6 @@ export class Server1 extends http.Server {
             this.output = [];
             this.mode = this.store.getHeader("Application-Mode").toString();
             if (this.mode === "start") {
-                console.log("START");
                 yield this.setElement(this.setApp);
             }
             let request = this.store.getReq("__app_request");
@@ -356,7 +358,6 @@ export class Server1 extends http.Server {
                 case "init":
                     yield this.setElement(command);
                 case "element":
-                    console.log(command);
                     yield this.setElement(command);
                 case "update":
                 default:
@@ -405,7 +406,6 @@ export class Server1 extends http.Server {
             if ("getUserInfo" in ele) {
                 const info = ele.getUserInfo();
                 if (info.auth) {
-                    console.log(`********\nWelcome ${info.user}\n**`);
                     const token = this.authorization.setAuth(info);
                     this.addResponse([
                         {
@@ -415,9 +415,6 @@ export class Server1 extends http.Server {
                     ]);
                     //token := whendy.Store.User.Set(info)
                     //whendy.w.Header().Set("Authorization", token)
-                }
-                else {
-                    console.log("====\nError\n==");
                 }
             }
         });

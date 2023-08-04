@@ -16,22 +16,25 @@ export class App extends AppElement {
     response: object[] = [];
     elements: InfoElement[] = [];
     store: Store = null;
+    
 
+    eparams:any;
     setStore(store: Store) {
         this.store = store;
     }
 
     init(info: InfoElement) {
-        console.log(this.store.eval(" hola {{ @TEMPLATES_PATH }} "));
-        const config = loadJsonFile(info.source);
+        
+        //const config = loadJsonFile(info.source);
 
-        if (config) {
-            for (const [key, value] of Object.entries(config)) {
+        if (info) {
+            for (const [key, value] of Object.entries(info)) {
                 this[key] = value;
             }
         }
+        
     }
-
+    
     evalMethod(method: string) {
         switch (method) {
             case "load":

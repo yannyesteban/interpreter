@@ -1,0 +1,100 @@
+{
+    "init": {
+        "home": {
+            "type": "element",
+            "element": "app",
+            "name": "home",
+            "method": "load",
+            "eparams": {}
+        }
+    },
+
+    "constants": {
+        "FRONT": "html/",
+        "IMAGES_PATH": "images/",
+        "CSS_PATH": "../css/",
+        "WC_PATH": "../dist/whendy/frontend/wc/",
+
+        "MAIN_PATH": "../",
+        "MODULE_PATH": "",
+        "JSON_PATH": "whendy/json/",
+        "CONFIG_PATH": "../config/",
+        "TEMPLATES_PATH": "templates/",
+
+        "PATH_IMAGES": "images/",
+        "SEVIAN_PATH": "../php/",
+        "SIGEFOR_PATH": "",
+        "PATH": "../../",
+        "BUILD": "../../build/",
+        "APP_NAME": "Yanny Esteban",
+        "APP_PATH": "json/apps/"
+    },
+
+    "bd": [
+        {
+            "name": "mysql",
+            "driver": "mysql",
+            "host": "127.0.0.1",
+            "port": "3306",
+            "user": "root",
+            "pass": "123456",
+            "dbase": "whendy",
+            "charset": "utf-8"
+        },
+        {
+            "name": "sqlite",
+            "driver": "sqlite",
+            "host": "",
+            "port": "",
+            "user": "",
+            "pass": "",
+            "dbase": "./whendy.db",
+            "charset": ""
+        },
+        {
+            "name": "postgres",
+            "driver": "postgres",
+            "host": "localhost",
+            "user": "postgres",
+            "pass": "12345678",
+            "dbase": "whendy"
+        }
+    ],
+
+    "elements": [
+        {
+            "name": "app",
+            "enable": true,
+            "file": "./app.js",
+            "class": "App",
+            "fileConfig": true,
+            "template": "apps/{name}.json"
+        },
+        {
+            "name": "fragment",
+            "enable": true,
+            "file": "./fragment.js",
+            "class": "Fragment"
+        },
+        {
+            "name": "form",
+            "enable": true,
+            "file": "./form.js",
+            "class": "Form",
+            "fileConfig": true,
+            "template": "forms/{name}.json"
+        },
+        {
+            "name": "user",
+            "enable": true,
+            "file": "./user.js",
+            "class": "User"
+        },
+        {
+            "name": "menu",
+            "enable": true,
+            "file": "./menu.js",
+            "class": "Menu"
+        }
+    ]
+}
