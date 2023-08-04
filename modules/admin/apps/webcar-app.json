@@ -1,0 +1,53 @@
+{
+    "id": "gtcomm",
+    "name": "home",
+    "templateFile": "whendy/templates/home.html",
+    "elements": [
+        
+    ],
+    "className": [
+        "home"
+    ],
+    "acceptedRoles": [
+        "** public **"
+    ],
+    "cssSheets": [
+        "css/reset.css",
+        "css/main.css"
+    ],
+    "jsModules": [
+        "dist/whendy/frontend/wc/Select.js"
+    ],
+    "modules": [
+        {
+            "src": "./Html.js",
+            "name": "Html",
+            "alias": "Html",
+            "component": "wh-html"
+        },
+        {
+            "src": "./Menu.js",
+            "name": "WHMenu",
+            "alias": "WHMenu",
+            "component": "wh-menu"
+        },
+        {
+            "src": "./Form.js",
+            "name": "WHForm",
+            "alias": "WHForm",
+            "component": "wh-form"
+        },
+        {
+            "src": "./Map.js",
+            "name": "WHMap",
+            "alias": "WHMap",
+            "component": "wh-map"
+        },
+        {
+            "src": "./GTMap.js",
+            "name": "GTMap",
+            "alias": "GTMap",
+            "component": "gt-map"
+        }
+    ]
+}

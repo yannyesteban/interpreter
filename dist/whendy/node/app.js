@@ -1,5 +1,6 @@
 import { AppElement } from "./element.js";
 import { loadFile, loadJsonFile } from "./tool.js";
+export const externConfig = true;
 export class App extends AppElement {
     constructor() {
         super(...arguments);
@@ -36,18 +37,18 @@ export class App extends AppElement {
     load() {
         let template = loadFile(this.templateFile);
         const data = {
-            "mode": "update",
-            "element": "wh-app",
-            "id": this.id,
-            "props": {
-                "cssSheets": this.cssSheets,
-                "name": this.name,
-                "element": "wh-app",
-                "className": this.className,
-                "modules": this.modules,
-                "jsModules": this.jsModules,
-                "innerHTML": template,
-            }
+            mode: "update",
+            element: "wh-app",
+            id: this.id,
+            props: {
+                cssSheets: this.cssSheets,
+                name: this.name,
+                element: "wh-app",
+                className: this.className,
+                modules: this.modules,
+                jsModules: this.jsModules,
+                innerHTML: template,
+            },
         };
         this.addResponse(data);
     }

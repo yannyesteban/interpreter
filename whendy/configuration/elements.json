@@ -3,7 +3,9 @@
         "name": "app",
         "enable": true,
         "file": "./app.js",
-        "class": "App"
+        "class": "App",
+        "fileConfig": true,
+        "template": "apps/{name}.json"
     },
     {
         "name": "fragment",

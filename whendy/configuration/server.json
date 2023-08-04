@@ -48,11 +48,11 @@
         "type": "element",
         "element": "app",
         "source": "whendy/json/app/home.json",
-        "name1": "{@APP_PATH}/webcar-app.json",
+        "name": "home",
         "method": "load",
         "id": "MyAppId",
         "eparams": {
-            "cedula": 12474737
+            "cedula": "setApp"
         }
     },
     "apps":{
@@ -60,22 +60,22 @@
             "type": "element",
             "element": "app",
             "source": "whendy/json/app/home.json",
-            "name1": "{@APP_PATH}/webcar-app.json",
+            "name": "webcar-app",
             "method": "load",
             "id": "MyAppId",
             "eparams": {
-                "cedula": 12474737
+                "cedula": "home2"
             }
         },
         "home":{
             "type": "element",
             "element": "app",
             "source": "whendy/json/app/home.json",
-            "name1": "{@APP_PATH}/webcar-app.json",
+            "name": "webcar-app",
             "method": "load",
             "id": "home",
             "eparams": {
-                "cedula": 12474737
+                "cedula": "home1"
             }
         }
     }

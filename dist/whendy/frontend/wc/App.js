@@ -270,7 +270,7 @@ export class App extends HTMLElement {
                 "Application-Id": this.id,
                 "Application-Mode": info.mode,
             };
-            fetch(this.server, {
+            fetch(this.server + "/home2", {
                 method: info.method || "post",
                 headers: Object.assign(Object.assign({}, headers), info.headers),
                 body: info.body,

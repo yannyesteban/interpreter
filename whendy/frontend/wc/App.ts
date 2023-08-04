@@ -6,16 +6,15 @@ import { log } from "console";
 
 export type selector = string;
 
-interface PanelInfo{
-    panel:string;
-    id:string;
-    element:string;
-    method:string;
-    mode:string;
-    eparams:any;
-
+interface PanelInfo {
+    panel: string;
+    id: string;
+    element: string;
+    method: string;
+    mode: string;
+    eparams: any;
 }
-interface AppAction{
+interface AppAction {
     id?: string;
     setPanel?: string;
     type?: string;
@@ -27,36 +26,33 @@ interface AppAction{
     resToken?: string;
 }
 interface AppRequest {
-    type?:string;
-    panel?:selector;
-    confirm?:string;
-    valid?:boolean;
-    form?:selector;
-    body?:object;
-    header?:{[key:string]:string};
-    actions:AppAction[];
+    type?: string;
+    panel?: selector;
+    confirm?: string;
+    valid?: boolean;
+    form?: selector;
+    body?: object;
+    header?: { [key: string]: string };
+    actions: AppAction[];
 }
 
-interface HtmlFragment{
-    
-}
+interface HtmlFragment {}
 
-interface ElementResponse{
-    setPanel?:string;
-    setTo?:selector;
-    appendTo?:selector;
-    type?:string;
-    id?:string;
-    mode?:string;
-    element:string;
-    props:any;
-    attrs:any;
-    html:string;
-    text:string;
-    css:string;
-    script:string;
+interface ElementResponse {
+    setPanel?: string;
+    setTo?: selector;
+    appendTo?: selector;
+    type?: string;
+    id?: string;
+    mode?: string;
+    element: string;
+    props: any;
+    attrs: any;
+    html: string;
+    text: string;
+    css: string;
+    script: string;
 }
-
 
 export interface IForm {
     getValues(): any;
@@ -418,7 +414,7 @@ export class App extends HTMLElement {
                 "Application-Mode": info.mode,
             };
 
-            fetch(this.server, {
+            fetch(this.server + "/home2", {
                 method: info.method || "post",
                 headers: { ...headers, ...info.headers },
                 body: info.body,

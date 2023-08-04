@@ -1,8 +1,10 @@
 import { InfoElement, Element, IElementAdmin, AppElement } from "./element.js";
 import { Store } from "./store.js";
 import { loadFile, loadJsonFile } from "./tool.js";
-export class App extends AppElement {
 
+export const externConfig = true;
+
+export class App extends AppElement {
     id: string;
     name: string;
     element: string = "wh-app";
@@ -20,9 +22,7 @@ export class App extends AppElement {
     }
 
     init(info: InfoElement) {
-
-
-        console.log(this.store.eval(" hola {{ @TEMPLATES_PATH }} "))
+        console.log(this.store.eval(" hola {{ @TEMPLATES_PATH }} "));
         const config = loadJsonFile(info.source);
 
         if (config) {
@@ -33,7 +33,6 @@ export class App extends AppElement {
     }
 
     evalMethod(method: string) {
-
         switch (method) {
             case "load":
                 this.load();
@@ -50,24 +49,22 @@ export class App extends AppElement {
     }
 
     load() {
-
         let template = loadFile(this.templateFile);
 
         const data = {
-            "mode": "update",
-            "element": "wh-app",
-            "id": this.id,
-            "props": {
-                "cssSheets": this.cssSheets,
-                "name": this.name,
-                "element": "wh-app",
-                "className": this.className,
-                "modules": this.modules,
-                "jsModules": this.jsModules,
-                "innerHTML": template,
-
-            }
-        }
+            mode: "update",
+            element: "wh-app",
+            id: this.id,
+            props: {
+                cssSheets: this.cssSheets,
+                name: this.name,
+                element: "wh-app",
+                className: this.className,
+                modules: this.modules,
+                jsModules: this.jsModules,
+                innerHTML: template,
+            },
+        };
 
         this.addResponse(data);
     }

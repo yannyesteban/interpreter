@@ -15,6 +15,8 @@ import { Memory } from "./memory.js";
 import * as classManager from "./classManager.js";
 import { Authorization } from "./Authorization.js";
 import { DBAdmin } from "./db/dbAdmin.js";
+import * as path from "path";
+import * as url from "url";
 var AppMode;
 (function (AppMode) {
     AppMode[AppMode["START"] = 1] = "START";
@@ -75,19 +77,32 @@ export class Whendy {
             }
         });
     }
+    getElementConfig(element, name) {
+        let template = classManager.template(element);
+        template = "modules/admin/" + template.replace("{name}", name);
+        console.log("------->>>", template, name);
+        return this.store.loadJsonFile(template);
+    }
     setElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
             this.store.setExp("ID_", info.id);
             this.store.setExp("ELEMENT_", info.element);
             //this.store.LoadExp(info.eparams)
             const cls = yield classManager.getClass(info.element);
+            console.log("template :", classManager.template(info.element));
             if (!cls) {
                 console.log("error, clas not found");
                 return;
             }
             const ele = new cls();
             ele.setStore(this.store);
-            ele.init(info);
+            let config = info;
+            if (classManager.useFileConfig(info.element)) {
+                console.log("--***----", config);
+                config = Object.assign(Object.assign({}, this.getElementConfig(info.element, info.name)), { eparam: info.eparams });
+            }
+            console.log("------", config);
+            ele.init(config);
             yield ele.evalMethod(info.method);
             if (this.mode == AppMode.RESTAPI) {
                 this.doRestData(ele);
@@ -167,6 +182,8 @@ export class Server {
                 res.end();
                 return;
             }
+            console.log("-> ", req.url, path.dirname(req.url));
+            console.log(url.parse(req.url));
             const wh = new Whendy();
             wh.authorization = new Authorization();
             wh.authorization.evalHeader(req, res);
