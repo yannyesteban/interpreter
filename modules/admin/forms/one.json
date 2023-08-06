@@ -1,25 +1,79 @@
 {
-    "name":"one",
-    "className":"sevian",
-    "sql":"SELECT * FROM person",
+    "name": "one",
+    "className": "sevian",
+    "db": "whendy",
+    "data": {
+        "sql": "select * from users ",
+        "record": {
+            "id": "$id"
+        },
+        "filter": {
+            "id:>": 0
+        },
+        "pageSize": 10,
+        "page": "#__page_"
+    },
 
-    "fields":[
+    "schemes": [
         {
-            "name":"cedula",
-            "input":"input",
-            "type":"text",
-            "default":""
+            "name":"main",
+            "table":"users",
+            "keys": ["id", "key2"],
+            "fields": [
+                {
+                    "name": "id",
+                    "type": "I",
+                    "key": true,
+                    "serial": true,
+                    "notNull": true,
+                    "default": ""
+                }
+            ]
         }
     ],
-    "layout":{
-        "caption":"caption  2023",
-        "elements":[{
-            "component":"field",
-            "label":"yes",
-            "name":"name",
-            "input":"input",
-            "type":"text",
-            "value":"hello"
-        }]
-    }
+
+    "modes":[
+        {
+            "name":"request",
+            "form":"form01"
+        },
+        {
+
+            "name":"list",
+            "grid":"form2",
+            "scheme":"test1 "
+        }
+    ],
+
+    "dataField":[],
+    
+    "layout": {
+        "caption": "caption  2023",
+        "elements": [
+            {
+                "component": "field",
+                "label": "yes",
+                "name": "name",
+                "input": "input",
+                "type": "text",
+                "value": "hello"
+            }
+        ]
+    },
+
+    "appRequest":[
+        {
+            "name":"save",
+            "valid":true,
+            "confirm":"secure",
+            "actions":[
+                {
+                    "type":"element",
+                    "name":"form1",
+                    "mode":"save",
+                    "body":{}
+                }
+            ]
+        }
+    ]
 }
