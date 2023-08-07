@@ -42,7 +42,7 @@ export class Store {
                             this.vreq = Object.assign(Object.assign({}, this.vreq), this.qpar);
                         }
                         else if (contentType.includes("multipart/form-data")) {
-                            throw "multipart/form-data";
+                            //throw "multipart/form-data";
                         }
                         resolve(true);
                     });

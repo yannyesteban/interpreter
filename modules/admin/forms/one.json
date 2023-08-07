@@ -67,23 +67,42 @@
             "data":[
                 ["","select","*"],
                 {
-                    "sql":"select * from city where id=?",
-                    "params":["#id"]
+                    "sql":"select * from city where appId=?@appId and id=?&country",
+                    "params":["{{@appId}}", "{{&country}}"]
                 }
             ]
         }
     ],
     
     "layout": {
-        "caption": "caption  2023",
+        "caption": "Users Admin",
         "elements": [
             {
                 "component": "field",
-                "label": "yes",
+                "label": "id",
+                "name": "id",
+                "input": "input",
+                "type": "text",
+                "value": "5"
+            },
+            {
+                "component": "field",
+                "label": "Name",
                 "name": "name",
                 "input": "input",
                 "type": "text",
-                "value": "hello"
+                "value": "Yanny"
+            },
+            {
+                "component":"button",
+                "label":"OK",
+                "attr":{
+                    "class":"save",
+                    "type":"button"
+                },
+                "events":{
+                    "click":"this.closest('wh-app').sendForm({form:this.closest('form')})"
+                }
             }
         ]
     },

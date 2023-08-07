@@ -26,11 +26,13 @@ interface AppAction {
     resToken?: string;
 }
 interface AppRequest {
+    method?:string;
+    headers?:{};
     type?: string;
     panel?: selector;
     confirm?: string;
     valid?: boolean;
-    form?: selector;
+    form?: selector | HTMLFormElement;
     body?: object;
     header?: { [key: string]: string };
     actions: AppAction[];
@@ -134,9 +136,6 @@ export class App extends HTMLElement {
     }
 
     decodeResponse(data: IResponse[], requestFunctions?: (config) => void[]) {
-        console.log(data);
-
-        console.log(data);
         if (!Array.isArray(data)) {
             return;
         }
@@ -279,14 +278,14 @@ export class App extends HTMLElement {
 
                 resolve(customElements.get(module.component));
             }
-            
+
             import(module.src)
                 .then((MyModule) => {
                     console.log("   B   ", MyModule);
                     resolve(customElements.get(module.component));
                 })
                 .catch((error) => {
-                    console.log(error)
+                    console.log(error);
                     reject(error);
                 });
         });
@@ -313,7 +312,6 @@ export class App extends HTMLElement {
             e.attr(element.attrs);
             let panel = null;
             if (element.setPanel) {
-                
                 panel = $.id(element.setPanel);
                 if (panel) {
                     panel.text("");
@@ -389,8 +387,6 @@ export class App extends HTMLElement {
         $(this).addClass(classes);
     }
 
-    
-
     set server(value) {
         this.setAttribute("server", value);
     }
@@ -413,10 +409,9 @@ export class App extends HTMLElement {
 
     send(info: FetchInfo) {
         const store = {
-            unit:4032
+            unit: 4032,
         };
 
-        
         return new Promise((resolve, reject) => {
             const headers = {
                 "Content-Type": "application/json",
@@ -429,7 +424,7 @@ export class App extends HTMLElement {
             fetch(this.server, {
                 method: info.method || "post",
                 headers: { ...headers, ...info.headers },
-                body: JSON.stringify({...info.body, __app_store_: store}),
+                body: JSON.stringify({ ...info.body, __app_store_: store }),
             })
                 .then((response) => {
                     return response.json();
@@ -455,6 +450,58 @@ export class App extends HTMLElement {
             this.decodeResponse(json, info.requestFunctions || null);
         });
     }
+
+    sendForm(info: AppRequest) {
+
+        const request = {
+            confirm: "",
+            valid:false,
+            form:"#form1",
+            request:[
+                {
+                    element:"form",
+                    name:"f1",
+                    method:"request"
+                }
+            ]
+        }
+        console.log(info.form);
+        const formData = new FormData(<HTMLFormElement>info.form);
+
+        formData.append("__app_request", JSON.stringify(request.request))
+
+        const headers = {
+           // "Content-Type": "application/json",
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            SID: this.sid,
+            "Application-Id": this.id,
+            
+        };
+
+
+        var data = new URLSearchParams();
+        data.append('userName', 'test@gmail.com');
+        data.append('password', 'Password');
+        data.append('grant_type', 'password');
+        fetch(this.server, {
+            method: info.method || "post",
+            headers: { ...headers, ...info.headers },
+            
+            //body:'{"a":1}'
+            body: data//"a=5&c=2"//formData
+        })
+            .then((response) => {
+                return response.json();
+            })
+            .catch((error) => {
+                
+            })
+            .then((json) => {
+                console.log(json);
+            });
+    };
+    
 }
 
 customElements.define("wh-app", App);

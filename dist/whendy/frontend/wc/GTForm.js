@@ -289,6 +289,7 @@ class GTForm extends HTMLElement {
         const input = field.create(info.input);
         input.attr("data-form-element", "field");
         input.attr("id", id);
+        input.attr("name", info.name || id);
         if (info.type) {
             input.attr("type", info.type);
         }
@@ -329,6 +330,10 @@ class GTForm extends HTMLElement {
     }
     _createButton(info) {
         const button = $.create("button");
+        for (const [key, value] of Object.entries(info.events || {})) {
+            button.on(key, $.bind(value, this));
+        }
+        button.attr(info.attr || {});
         button.html(info.label);
         return button.get();
     }

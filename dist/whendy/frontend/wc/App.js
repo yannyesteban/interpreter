@@ -23,8 +23,6 @@ export class App extends HTMLElement {
         this.initApp();
     }
     decodeResponse(data, requestFunctions) {
-        console.log(data);
-        console.log(data);
         if (!Array.isArray(data)) {
             return;
         }
@@ -268,7 +266,7 @@ export class App extends HTMLElement {
     }
     send(info) {
         const store = {
-            unit: 4032
+            unit: 4032,
         };
         return new Promise((resolve, reject) => {
             const headers = {
@@ -306,6 +304,49 @@ export class App extends HTMLElement {
             this.decodeResponse(json, info.requestFunctions || null);
         });
     }
+    sendForm(info) {
+        const request = {
+            confirm: "",
+            valid: false,
+            form: "#form1",
+            request: [
+                {
+                    element: "form",
+                    name: "f1",
+                    method: "request"
+                }
+            ]
+        };
+        console.log(info.form);
+        const formData = new FormData(info.form);
+        formData.append("__app_request", JSON.stringify(request.request));
+        const headers = {
+            // "Content-Type": "application/json",
+            Authorization: `Bearer ${this.token}`,
+            'Content-Type': 'application/x-www-form-urlencoded',
+            SID: this.sid,
+            "Application-Id": this.id,
+        };
+        var data = new URLSearchParams();
+        data.append('userName', 'test@gmail.com');
+        data.append('password', 'Password');
+        data.append('grant_type', 'password');
+        fetch(this.server, {
+            method: info.method || "post",
+            headers: Object.assign(Object.assign({}, headers), info.headers),
+            //body:'{"a":1}'
+            body: data //"a=5&c=2"//formData
+        })
+            .then((response) => {
+            return response.json();
+        })
+            .catch((error) => {
+        })
+            .then((json) => {
+            console.log(json);
+        });
+    }
+    ;
 }
 customElements.define("wh-app", App);
 //# sourceMappingURL=App.js.map

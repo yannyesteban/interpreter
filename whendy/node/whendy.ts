@@ -248,7 +248,7 @@ export class Server {
                 session.loadSession(store.getReq("__app_store"));
             }
 
-            const start = wh.store.getHeader("Application-Name").toString();
+            const start = wh.store.getHeader("Application-Name")?.toString();
             console.log("init", start, init);
             if (start && init[start]) {
                 console.log("START");

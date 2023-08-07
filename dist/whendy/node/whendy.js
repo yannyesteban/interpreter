@@ -167,6 +167,7 @@ export class Server {
             maxLifeTime: 36000,
         });
         http.createServer((req, res) => __awaiter(this, void 0, void 0, function* () {
+            var _a;
             if (req.method.toLocaleUpperCase() == "OPTIONS") {
                 res.writeHead(204, this.header);
                 res.end();
@@ -197,7 +198,7 @@ export class Server {
             if (store.getReq("__app_store")) {
                 session.loadSession(store.getReq("__app_store"));
             }
-            const start = wh.store.getHeader("Application-Name").toString();
+            const start = (_a = wh.store.getHeader("Application-Name")) === null || _a === void 0 ? void 0 : _a.toString();
             console.log("init", start, init);
             if (start && init[start]) {
                 console.log("START");
