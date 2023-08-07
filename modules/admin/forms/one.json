@@ -1,6 +1,14 @@
 {
+    "test":{
+        "data":{
+            "sql":"select * from city",
+            "record":[{"id":"#id"}],
+            "filter":[{"idcountry":"@country"}]
+        }
+    },
+    
     "name": "one",
-    "className": "sevian",
+    
     "db": "whendy",
     "data": {
         "sql": "select * from users ",
@@ -35,17 +43,36 @@
     "modes":[
         {
             "name":"request",
-            "form":"form01"
+            "form":"form01",
+            "method":"init"
         },
         {
 
             "name":"list",
             "grid":"form2",
-            "scheme":"test1 "
+            "scheme":"test1",
+            "method":"form"
+        },
+        {
+            "name":"save",
+            "scheme":"main",
+            "method":"save"
         }
     ],
 
-    "dataField":[],
+    "layoutData":[
+        {
+            "name":"city",
+            "parent":"country",
+            "data":[
+                ["","select","*"],
+                {
+                    "sql":"select * from city where id=?",
+                    "params":["#id"]
+                }
+            ]
+        }
+    ],
     
     "layout": {
         "caption": "caption  2023",
@@ -61,7 +88,7 @@
         ]
     },
 
-    "appRequest":[
+    "layoutRequests":[
         {
             "name":"save",
             "valid":true,
