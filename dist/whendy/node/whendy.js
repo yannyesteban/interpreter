@@ -194,6 +194,9 @@ export class Server {
             store.setDBAdmin(db);
             yield store.start(req, res);
             wh.store = store;
+            if (store.getReq("__app_store")) {
+                session.loadSession(store.getReq("__app_store"));
+            }
             const start = wh.store.getHeader("Application-Name").toString();
             console.log("init", start, init);
             if (start && init[start]) {

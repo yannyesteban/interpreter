@@ -214,6 +214,8 @@ export class Server {
             const session = manager.start(req, res);
             session.loadSession(this.constants);
 
+            
+
             let infoDB = this.db;
             let init = this.init;
 
@@ -241,6 +243,10 @@ export class Server {
             await store.start(req, res);
 
             wh.store = store;
+
+            if(store.getReq("__app_store")){
+                session.loadSession(store.getReq("__app_store"));
+            }
 
             const start = wh.store.getHeader("Application-Name").toString();
             console.log("init", start, init);

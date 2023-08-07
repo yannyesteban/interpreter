@@ -267,6 +267,9 @@ export class App extends HTMLElement {
         return this.getAttribute("name");
     }
     send(info) {
+        const store = {
+            unit: 4032
+        };
         return new Promise((resolve, reject) => {
             const headers = {
                 "Content-Type": "application/json",
@@ -278,7 +281,7 @@ export class App extends HTMLElement {
             fetch(this.server, {
                 method: info.method || "post",
                 headers: Object.assign(Object.assign({}, headers), info.headers),
-                body: info.body,
+                body: JSON.stringify(Object.assign(Object.assign({}, info.body), { __app_store_: store })),
             })
                 .then((response) => {
                 return response.json();
@@ -292,7 +295,7 @@ export class App extends HTMLElement {
         });
     }
     go(info) {
-        info.body = JSON.stringify(Object.assign(Object.assign({}, (info.body || {})), { __app_request: info.request, __app_id: this.id }));
+        info.body = Object.assign(Object.assign({}, (info.body || {})), { __app_request: info.request, __app_id: this.id });
         this.send(info).then((json) => {
             if (info.requestFunction) {
                 console.log(json);
