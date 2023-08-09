@@ -1,0 +1,75 @@
+{
+    "items": [
+        {
+            "caption": "get data",
+            "request": {
+                "type": "getData",
+                "target": ".x > .y",
+                "property": "dataSource",
+                "store": ["countryId"],
+                "actions": [
+                    {
+                        "element": "form",
+                        "name": "city",
+                        "params": {
+                            "contryId": 8 
+                        }
+                    },
+                    {
+                        "type":"property",
+                        "element": "form",
+                        "name": "city",
+                        "mode":"property",
+                        "id":"x",
+                        "property":"dataSource"
+                        
+                    }
+                ]
+            }
+        },
+        {
+            "request": {
+                "type": "store",
+                "setStore": "units",
+                "actions": [
+                    {
+                        "element": "units",
+                        "mode": "all",
+                        "setStore": "units"
+                    }
+                ]
+            }
+        },
+        {
+            "caption": "hello",
+            "request": {
+                "valid": true,
+                "form": "p4",
+                "confirm": "Sure?",
+                "actions": [
+                    {
+                        "panel": "P4",
+                        "element": "form",
+                        "name": "user",
+                        "mode": "request",
+                        "params": {
+                            "record": [{ "id": 4 }]
+                        }
+                    },
+                    {
+                        "element": "form",
+                        "name": "user",
+                        "mode": "save"
+                    },
+                    {
+                        "type": "element",
+                        "appendTo": ".cata .child",
+                        "element": "fragment",
+                        "name": "dataUser",
+                        "mode": "load"
+                    }
+                ]
+            }
+        }
+    ]
+}

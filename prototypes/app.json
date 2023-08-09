@@ -1,0 +1,37 @@
+{
+    "type": "app",
+    "name": "app",
+    "mode": "load",
+    "caption": "App V1",
+
+    "templateFile": "whendy/templates/index.html",
+    "className": ["home"],
+    "acceptedRoles": ["** public **"],
+    "cssSheets": ["sass/reset.css", "sass/main.css"],
+    "modules": [
+        {
+            "src": "./Html.js",
+            "name": "Html",
+            "alias": "Html",
+            "component": "wh-html"
+        },
+        {
+            "src": "./Form.js",
+            "name": "WHForm",
+            "alias": "WHForm",
+            "component": "wh-form"
+        }
+    ],
+    "elements": [
+        {
+            "panel": "4",
+            "type": "form",
+            "id": "user",
+            "name": "user",
+            "mode": "loadRecord",
+            "params": {
+                "record": [{ "id": 5 }]
+            }
+        }
+    ]
+}

@@ -1,5 +1,5 @@
 import { Tool } from "./tool.js";
-import { /*Socket as*/ Server } from "./whendy.js";
+import { /*Socket as*/ Server } from "./server.js";
 
 const config = Tool.loadJsonFile("whendy/configuration/server.json");
 const constants = Tool.loadJsonFile("whendy/configuration/constants.json");
