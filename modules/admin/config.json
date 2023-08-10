@@ -1,12 +1,25 @@
 {
     "init": {
-        "home": {
-            "type": "element",
-            "element": "app",
-            "name": "home",
-            "method": "load",
-            "eparams": {}
-        }
+        "home": [
+            {
+                "id":"f",
+                "setPanel":"sevian-app",
+                "type": "set",
+                "element": "fragment",
+                "name": "one",
+                "method": "load",
+                "eparams": {}
+            },
+            {
+                "id":"f",
+                "setPanel":"sevian-app",
+                "type": "element",
+                "element": "fragment",
+                "name": "one",
+                "method": "get",
+                "eparams": {}
+            }
+        ]
     },
 
     "constants": {

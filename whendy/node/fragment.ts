@@ -12,7 +12,7 @@ export class Fragment extends Element{
     
     templateFile: string;
     
-    response:object[] = [];
+    response:object = {};
 
     store:Store = null;
 
@@ -33,38 +33,37 @@ export class Fragment extends Element{
         
         switch(method){
             case "load":
-                this.load();
+                return this.load(" A");
                 break;
+            case "get":
+                return this.load(" B");
+                    break;    
         }
     }
 
-    load(){
+    load(str){
 
         let template = this.store.loadFile(this.templateFile);
-        
-        const data = {
-            
-            mode: "init",
-            type: "element",
-            wc:"wh-html",
-            id: this.id,
-            props: {
-
-                innerHTML: template
-            },
-            //replayToken => $this->replayToken,
-            appendTo:this.appendTo,
-            setPanel: this.setPanel,
+        console.log(template)
+        this.response = {
+           
+            element:"div",
+            propertys : {
+                innerHTML: template + str
+            }
         };
+
         
-        this.addResponse(data);
+        
+        
+        
     }
     
-    getResponse():object[]{
+    getResponse():any{
         return this.response;
     }
 
     addResponse(response){
-        this.response.push(response);
+        //this.response.push(response);
     }
 }

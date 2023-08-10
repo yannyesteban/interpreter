@@ -1,6 +1,6 @@
 import { Store } from "./store.js";
 import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin, OutputInfo } from "./element.js";
-import * as classManager from "./classManager.js";
+import { ClassManager } from "./classManager.js";
 import { Authorization } from "./Authorization.js";
 
 enum AppMode {
@@ -24,22 +24,11 @@ export class Whendy {
     private appInfo: InfoElement;
     private start: InfoElement;
 
-    async render() {
+    public classes: ClassManager;
+    async render(request) {
         this.output = [];
 
-        if (this.start) {
-            await this.setElement(this.start);
-        }
-
-        let request = this.store.getReq("__app_request");
-
-        if (request) {
-            if (typeof request === "string") {
-                request = JSON.parse(request);
-            }
-
-            await this.evalRequest(request);
-        }
+        await this.evalRequest(request);
 
         if (this.mode === AppMode.RESTAPI) {
             return JSON.stringify(this.restData);
@@ -60,27 +49,12 @@ export class Whendy {
 
     async evalRequest(requests: []) {
         for (let request of requests) {
-            await this.evalCommand(request);
-        }
-    }
-
-    async evalCommand(command) {
-        switch (command.type) {
-            case "init":
-                await this.setElement(command);
-                break;
-
-            case "element":
-                await this.setElement(command);
-                break;
-            case "update":
-
-            default:
+            await this.setElement(request);
         }
     }
 
     getElementConfig(element, name) {
-        let template = classManager.template(element);
+        let template = this.classes.template(element);
 
         template = "modules/admin/" + template.replace("{name}", name);
 
@@ -92,7 +66,7 @@ export class Whendy {
         this.store.setExp("ELEMENT_", info.element);
         //this.store.LoadExp(info.eparams)
 
-        const cls = await classManager.getClass(info.element);
+        const cls = await this.classes.getClass(info.element);
 
         if (!cls) {
             console.log("error, clas not found");
@@ -103,17 +77,42 @@ export class Whendy {
 
         ele.setStore(this.store);
         let config = info;
-        if (classManager.useFileConfig(info.element)) {
-            config = { ...this.getElementConfig(info.element, info.name), ... info };
+        if (this.classes.useFileConfig(info.element)) {
+            config = { ...this.getElementConfig(info.element, info.name), ...info };
         }
 
         ele.init(config);
-        await ele.evalMethod(info.method);
+        const data = await ele.evalMethod(info.method);
 
         if (this.mode == AppMode.RESTAPI) {
             this.doRestData(ele);
         } else {
-            this.addResponse(ele.getResponse());
+            const data = ele.getResponse();
+
+            let response: OutputInfo = null;
+
+            switch (info.type) {
+                case "set":
+                    this.addResponse( [{
+                        type: info.type,
+                        setPanel: info.setPanel,
+                        appendTo: info.appendTo,
+                        id: info.id,
+                        data,
+                    }]);
+                    break;
+                case "element":
+                    this.addResponse( [{
+                        type: info.type,
+                        //setPanel: info.setPanel,
+                        //appendTo: info.appendTo,
+                        id: info.id,
+                        data,
+                    }]);
+                    break;
+            }
+
+            //this.addResponse([response]);
         }
 
         this.doUserAdmin(ele);
@@ -142,8 +141,8 @@ export class Whendy {
 
                 this.addResponse([
                     {
-                        mode: "auth",
-                        props: { token },
+                        type: "token",
+                        data: token,
                     },
                 ]);
 

@@ -1,5 +1,3 @@
-import { Element } from "./element";
-
 export interface InfoClass {
     name?: string;
     enable?: boolean;
@@ -9,34 +7,43 @@ export interface InfoClass {
     template?: string;
 }
 
-var _class: { [name: string]: InfoClass } = {};
+export class ClassManager {
+    private classes: { [name: string]: InfoClass } = {};
 
-export function register(info: InfoClass[]) {
-    info.forEach((i) => {
-        _class[i.name] = i;
-    });
-}
-
-export async function getClass(name: string) {
-    const info = _class[name];
-
-    if (!info?.file) {
-        return null;
+    constructor(info: InfoClass[]) {
+        info.forEach((i) => {
+            this.classes[i.name] = i;
+        });
     }
 
-    let module = await import(info.file);
+    register(name, info: InfoClass) {
+        this.classes[name] = info;
+    }
 
-    if (module[info.class]) {
-        return module[info.class];
-    } else {
-        throw new Error("module don't exits");
+    async getClass(name: string) {
+        const info = this.classes[name];
+    
+        if (!info?.file) {
+            return null;
+        }
+    
+        let module = await import(info.file);
+    
+        if (module[info.class]) {
+            return module[info.class];
+        } else {
+            throw new Error("module don't exits");
+        }
+    }
+    
+    template(name: string) {
+        return this.classes[name].template;
+    }
+    
+    useFileConfig(name) {
+        return this.classes[name]?.fileConfig ? true : false;
     }
 }
 
-export function template(name: string) {
-    return _class[name].template;
-}
 
-export function useFileConfig(name){
-    return _class[name]?.fileConfig ? true: false;
-}
+

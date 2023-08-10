@@ -3,7 +3,7 @@ export class Fragment extends Element {
     constructor() {
         super(...arguments);
         this.element = "wh-html";
-        this.response = [];
+        this.response = {};
         this.store = null;
     }
     setStore(store) {
@@ -18,31 +18,28 @@ export class Fragment extends Element {
     evalMethod(method) {
         switch (method) {
             case "load":
-                this.load();
+                return this.load(" A");
+                break;
+            case "get":
+                return this.load(" B");
                 break;
         }
     }
-    load() {
+    load(str) {
         let template = this.store.loadFile(this.templateFile);
-        const data = {
-            mode: "init",
-            type: "element",
-            wc: "wh-html",
-            id: this.id,
-            props: {
-                innerHTML: template
-            },
-            //replayToken => $this->replayToken,
-            appendTo: this.appendTo,
-            setPanel: this.setPanel,
+        console.log(template);
+        this.response = {
+            element: "div",
+            propertys: {
+                innerHTML: template + str
+            }
         };
-        this.addResponse(data);
     }
     getResponse() {
         return this.response;
     }
     addResponse(response) {
-        this.response.push(response);
+        //this.response.push(response);
     }
 }
 //# sourceMappingURL=fragment.js.map

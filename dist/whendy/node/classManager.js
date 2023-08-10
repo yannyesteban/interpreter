@@ -7,32 +7,37 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-var _class = {};
-export function register(info) {
-    info.forEach((i) => {
-        _class[i.name] = i;
-    });
-}
-export function getClass(name) {
-    return __awaiter(this, void 0, void 0, function* () {
-        const info = _class[name];
-        if (!(info === null || info === void 0 ? void 0 : info.file)) {
-            return null;
-        }
-        let module = yield import(info.file);
-        if (module[info.class]) {
-            return module[info.class];
-        }
-        else {
-            throw new Error("module don't exits");
-        }
-    });
-}
-export function template(name) {
-    return _class[name].template;
-}
-export function useFileConfig(name) {
-    var _a;
-    return ((_a = _class[name]) === null || _a === void 0 ? void 0 : _a.fileConfig) ? true : false;
+export class ClassManager {
+    constructor(info) {
+        this.classes = {};
+        info.forEach((i) => {
+            this.classes[i.name] = i;
+        });
+    }
+    register(name, info) {
+        this.classes[name] = info;
+    }
+    getClass(name) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const info = this.classes[name];
+            if (!(info === null || info === void 0 ? void 0 : info.file)) {
+                return null;
+            }
+            let module = yield import(info.file);
+            if (module[info.class]) {
+                return module[info.class];
+            }
+            else {
+                throw new Error("module don't exits");
+            }
+        });
+    }
+    template(name) {
+        return this.classes[name].template;
+    }
+    useFileConfig(name) {
+        var _a;
+        return ((_a = this.classes[name]) === null || _a === void 0 ? void 0 : _a.fileConfig) ? true : false;
+    }
 }
 //# sourceMappingURL=classManager.js.map

@@ -1,36 +1,10 @@
 [
     {
-        "name": "app",
-        "enable": true,
-        "file": "./app.js",
-        "class": "App",
-        "fileConfig": true,
-        "template": "apps/{name}.json"
-    },
-    {
         "name": "fragment",
         "enable": true,
         "file": "./fragment.js",
-        "class": "Fragment"
-    },
-    {
-        "name": "form",
-        "enable": true,
-        "file": "./form.js",
-        "class": "Form",
+        "class": "Fragment",
         "fileConfig": true,
-        "template": "forms/{name}.json"
-    },
-    {
-        "name": "user",
-        "enable": true,
-        "file": "./user.js",
-        "class": "User"
-    },
-    {
-        "name":"menu",
-        "enable":true,
-        "file":"./menu.js",
-        "class":"Menu"
+        "template": "fragments/{name}.json"
     }
 ]

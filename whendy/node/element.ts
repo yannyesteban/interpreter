@@ -7,6 +7,8 @@ export class UserInfo {
 }
 
 export class OutputInfo {
+  type?:string;
+  data?:any;
   id?: string;
   mode?:string;
   appendTo?: string;
@@ -60,7 +62,7 @@ export abstract class Element {
   abstract setStore(store: Store): void;
   abstract init(store: InfoElement): void;
   abstract evalMethod(method: string): void;
-  abstract getResponse(): object[];
+  abstract getResponse(): any;
 
 
 }

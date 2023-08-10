@@ -14,10 +14,12 @@ export class JWT {
     }
     verify(token) {
         const parts = token.split(".");
-        const signature = Buffer.from(parts[2]);
-        const expected = Buffer.from(this.getSignature(parts[0] + "." + parts[1]));
-        if (Buffer.byteLength(signature) == Buffer.byteLength(expected) && timingSafeEqual(signature, expected)) {
-            return JSON.parse(Buffer.from(parts[1], "base64url").toString());
+        if (parts[2]) {
+            const signature = Buffer.from(parts[2]);
+            const expected = Buffer.from(this.getSignature(parts[0] + "." + parts[1]));
+            if (Buffer.byteLength(signature) == Buffer.byteLength(expected) && timingSafeEqual(signature, expected)) {
+                return JSON.parse(Buffer.from(parts[1], "base64url").toString());
+            }
         }
         return null;
     }
