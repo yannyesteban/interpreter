@@ -21,7 +21,7 @@ export const loadScript = (url, options) => {
                 });
             });
 
-            document.body.appendChild(myScript);
+            document.head.appendChild(myScript);
         } catch (error) {
             reject({
                 status: false,

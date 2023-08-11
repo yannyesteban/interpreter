@@ -73,22 +73,15 @@ export class Whendy {
                 let response = null;
                 switch (info.type) {
                     case "set":
-                        this.addResponse([{
-                                type: info.type,
-                                setPanel: info.setPanel,
-                                appendTo: info.appendTo,
-                                id: info.id,
-                                data,
-                            }]);
+                        this.addResponse([Object.assign(Object.assign({ dinamic: false }, info), { data })]);
                         break;
                     case "element":
-                        this.addResponse([{
-                                type: info.type,
+                        this.addResponse([Object.assign(Object.assign({ dinamic: false }, info), { 
+                                //type: info.type,
                                 //setPanel: info.setPanel,
                                 //appendTo: info.appendTo,
-                                id: info.id,
-                                data,
-                            }]);
+                                //id: info.id,
+                                data })]);
                         break;
                 }
                 //this.addResponse([response]);

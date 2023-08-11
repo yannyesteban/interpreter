@@ -1,18 +1,15 @@
+import { loadScript } from "./../LoadScript.js";
+import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
+import * as wc from "./../WC.js";
 class Sevian extends HTMLElement {
     static get observedAttributes() {
         return ["server"];
     }
     constructor() {
         super();
-        this.modules = [
-            {
-                "src": "./Html.js",
-                "name": "Html",
-                "alias": "Html",
-                "component": "wh-html"
-            }
-        ];
+        this.panels = {};
+        this._modules = [];
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
@@ -70,25 +67,20 @@ class Sevian extends HTMLElement {
     get token() {
         return this.getAttribute("token");
     }
-    isValidElement(element) {
+    whenValid(name) {
+        var _a, _b;
+        const element = ((_b = (_a = this.modules) === null || _a === void 0 ? void 0 : _a.find((e) => e.name.toUpperCase() === name.toUpperCase())) === null || _b === void 0 ? void 0 : _b.wc) || name;
         return new Promise((resolve, reject) => {
-            customElements.whenDefined(element).then(() => {
-                resolve(true);
-            }).catch(error => {
-                resolve(true);
-            });
-        });
-    }
-    whenComponent(module) {
-        return new Promise((resolve, reject) => {
-            if (customElements.get(module.component)) {
-                console.log("   A   ", module.component);
-                resolve(customElements.get(module.component));
+            console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
+            if (element.indexOf("-") < 0 || !element) {
+                resolve(element);
+                return;
             }
-            import(module.src)
-                .then((MyModule) => {
-                console.log("   B   ", MyModule);
-                resolve(customElements.get(module.component));
+            customElements
+                .whenDefined(element)
+                .then((what) => {
+                console.log(what);
+                resolve(element);
             })
                 .catch((error) => {
                 console.log(error);
@@ -97,80 +89,57 @@ class Sevian extends HTMLElement {
         });
     }
     setElement(info) {
-        console.log("initElement", info, this.modules);
-        const module = this.modules.find((e) => e.component == info.data.element);
-        if (module) {
-            console.log("initElement", info);
-            this.whenComponent(module)
-                .then((component) => { })
-                .catch((error) => {
-                console.log(error);
-            });
-        }
-        const e = document.getElementById(info.id);
-        if (e) {
-            e.remove();
-        }
-        customElements.whenDefined(info.data.element).then(() => {
-            const e = $.create(info.data.element);
-            console.log(info);
+        console.log("initElement", info);
+        this.whenValid(info.data.element).then((element) => {
+            let e = $.id(info.id);
+            if (e) {
+                e.remove();
+            }
+            e = $.create(element);
             e.id(info.id);
             e.prop(info.data.propertys);
-            //e.attr(info.attrs);
-            let panel = null;
-            if (info.setPanel) {
-                panel = $(info.setPanel);
-                if (panel) {
-                    panel.text("");
-                    panel.append(e);
-                    return;
-                }
+            const panel = $(`#${info.setPanel}` || info.setTo || info.appendTo);
+            if (!panel) {
+                return;
             }
-            else if (info.appendTo) {
-                panel = $(info.appendTo);
-                if (panel) {
-                    panel.append(e);
-                    return;
-                }
+            if (info.setPanel || info.setTo) {
+                panel.text("");
             }
-        }).catch(error => {
-            console.log(error);
+            panel.append(e);
         });
     }
     updateElement(info) {
         console.log("updateElement", info, document.getElementById(info.id));
-        const e = $.id(info.id);
-        if (e) {
-            if (info.data.propertys) {
-                e.prop(info.data.propertys);
+        this.whenValid(info.data.element).then(() => {
+            const e = $.id(info.id);
+            if (e) {
+                if (info.data.propertys) {
+                    e.prop(info.data.propertys);
+                }
             }
-        }
+        });
     }
     evalResponse(response) {
         console.log(response);
-        response.forEach(r => {
+        response.forEach((r) => {
             switch (r.type) {
                 case "set":
                     console.log(r);
                     this.setElement(r);
+                    if (r.setPanel) {
+                        this.panels[r.setPanel] = r;
+                    }
                     break;
                 case "element":
-                    if (r.data.element) {
-                        customElements.whenDefined(r.data.element).then(() => {
-                            this.updateElement(r);
-                        }).catch(error => {
-                            this.updateElement(r);
-                        });
-                    }
-                    else {
-                        this.updateElement(r);
-                    }
+                    this.updateElement(r);
                     break;
             }
         });
         return true;
     }
     initApp() {
+        window.history.pushState({ a: 2 }, "yanny", "?page=2");
+        console.log(window.history.state);
         const request = {
             confirm: "?",
             valid: true,
@@ -182,17 +151,17 @@ class Sevian extends HTMLElement {
             },
             actions: [
                 {
-                    "type": "property",
-                    "element": "form",
-                    "name": "city",
-                    "mode": "property",
-                    "id": "x",
-                    "property": "dataSource"
+                    type: "property",
+                    element: "form",
+                    name: "city",
+                    mode: "property",
+                    id: "x",
+                    property: "dataSource",
                 },
             ],
         };
         const info = {}, store = {
-            myName: "Yanny"
+            myName: "Yanny",
         };
         const headers = {
             "Content-Type": "application/json",
@@ -214,6 +183,51 @@ class Sevian extends HTMLElement {
         })
             .then((json) => {
             this.evalResponse(json);
+        });
+    }
+    set cssSheets(data) {
+        console.log(data);
+        data.forEach((sheet) => {
+            loadCss(sheet, true);
+        });
+    }
+    set jsModules(files) {
+        files.forEach((src) => {
+            loadScript(src, { async: true, type: "module" });
+        });
+    }
+    set modules(info) {
+        this._modules = info;
+        wc.LoadModules(info);
+    }
+    get modules() {
+        return this._modules;
+    }
+    send(info) {
+        const store = {
+            unit: 4032,
+        };
+        return new Promise((resolve, reject) => {
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${this.token}`,
+                "Application-Id": this.id,
+                "Application-Mode": info.mode,
+            };
+            fetch(this.server, {
+                method: info.method || "post",
+                headers: Object.assign(Object.assign({}, headers), info.headers),
+                body: JSON.stringify(Object.assign(Object.assign({}, info.body), { __app_store_: store })),
+            })
+                .then((response) => {
+                return response.json();
+            })
+                .catch((error) => {
+                reject(error);
+            })
+                .then((json) => {
+                resolve(json);
+            });
         });
     }
 }

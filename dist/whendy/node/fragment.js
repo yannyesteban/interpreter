@@ -29,7 +29,7 @@ export class Fragment extends Element {
         let template = this.store.loadFile(this.templateFile);
         console.log(template);
         this.response = {
-            element: "div",
+            element: "fragment",
             propertys: {
                 innerHTML: template + str
             }

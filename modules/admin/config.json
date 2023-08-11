@@ -2,8 +2,15 @@
     "init": {
         "home": [
             {
+                "id":"gtcomm",
+                "type":"element",
+                "element":"app",
+                "name":"os2",
+                "method":"load"
+            },
+            {
                 "id":"f",
-                "setPanel":"sevian-app",
+                "setPanel":"p3",
                 "type": "set",
                 "element": "fragment",
                 "name": "one",
@@ -12,7 +19,7 @@
             },
             {
                 "id":"f",
-                "setPanel":"sevian-app",
+                "setPanel.":"sevian-app",
                 "type": "element",
                 "element": "fragment",
                 "name": "one",

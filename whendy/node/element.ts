@@ -7,10 +7,14 @@ export class UserInfo {
 }
 
 export class OutputInfo {
+  info?:any;
+  dinamic?:boolean;
   type?:string;
   data?:any;
   id?: string;
+  name?:string;
   mode?:string;
+  method?:string;
   appendTo?: string;
   setPanel?: string;
   element?: string;

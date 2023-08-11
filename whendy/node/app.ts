@@ -13,18 +13,19 @@ export class App extends AppElement {
     jsModules: object[];
     templateFile: string;
     cssSheets: string[];
-    response: object[] = [];
+    //response: object[] = [];
     elements: InfoElement[] = [];
     store: Store = null;
     
 
     eparams:any;
+    private response:object = {};
     setStore(store: Store) {
         this.store = store;
     }
 
     init(info: InfoElement) {
-        
+        console.log("xxxxxxxxxxxxxxxxxxxxxxx", info)
         //const config = loadJsonFile(info.source);
 
         if (info) {
@@ -36,6 +37,7 @@ export class App extends AppElement {
     }
     
     evalMethod(method: string) {
+        
         switch (method) {
             case "load":
                 this.load();
@@ -43,17 +45,27 @@ export class App extends AppElement {
         }
     }
 
-    getResponse(): object[] {
-        return this.response;
-    }
-
-    addResponse(response) {
-        this.response.push(response);
-    }
+    
 
     load() {
         let template = loadFile(this.templateFile);
 
+
+        this.response = {
+           
+            mode:"update",
+            element:"app",
+            propertys : {
+                cssSheets: this.cssSheets,
+                name: this.name,
+                
+                className: this.className,
+                modules: this.modules,
+                jsModules: this.jsModules,
+                innerHTML: template,
+            }
+        };
+        /*
         const data = {
             mode: "update",
             element: "wh-app",
@@ -70,9 +82,18 @@ export class App extends AppElement {
         };
 
         this.addResponse(data);
+        */
     }
 
     getElements(): InfoElement[] {
         return this.elements;
+    }
+
+    getResponse():any{
+        return this.response;
+    }
+
+    addResponse(response){
+        //this.response.push(response);
     }
 }

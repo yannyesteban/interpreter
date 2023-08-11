@@ -18,7 +18,7 @@ export const loadScript = (url, options) => {
                     msg: "error"
                 });
             });
-            document.body.appendChild(myScript);
+            document.head.appendChild(myScript);
         }
         catch (error) {
             reject({

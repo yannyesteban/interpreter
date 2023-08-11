@@ -2,121 +2,12 @@ import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 
 import { Q as $ } from "./../Q.js";
-
-
-export type selector = string;
-
-interface PanelInfo {
-    panel: string;
-    id: string;
-    element: string;
-    method: string;
-    mode: string;
-    eparams: any;
-}
-interface AppAction {
-    id?: string;
-    setPanel?: string;
-    type?: string;
-    element?: string;
-    name?: string;
-    source?: string;
-    method?: string;
-    eparams?: object;
-    resToken?: string;
-}
-interface AppRequest {
-    method?:string;
-    headers?:{};
-    type?: string;
-    panel?: selector;
-    confirm?: string;
-    valid?: boolean;
-    form?: selector | HTMLFormElement;
-    body?: object;
-    header?: { [key: string]: string };
-    actions: AppAction[];
-}
-
-interface HtmlFragment {}
-
-interface ElementResponse {
-    setPanel?: string;
-    setTo?: selector;
-    appendTo?: selector;
-    type?: string;
-    id?: string;
-    mode?: string;
-    element: string;
-    props: any;
-    attrs: any;
-    html: string;
-    text: string;
-    css: string;
-    script: string;
-}
-
-export interface IForm {
-    getValues(): any;
-    isValid(arg?: any): boolean;
-}
-
-interface FetchInfo {
-    method?: string;
-    mode?: string;
-    headers?;
-    body?;
-}
-interface RequestInfo {
-    method?: string;
-    mode?: string;
-    sendTo?: selector;
-    dataForm?;
-    request?;
-    headers?;
-    body?;
-    requestFunctions?;
-    requestFunction?;
-    blockWhile?: selector[];
-    confirm?: string;
-    valid: any;
-}
-
-export interface IResponse {
-    id: string;
-    type: string;
-    data: any;
-    reply?: string;
-    [key: string]: any;
-}
-
-interface IElement {
-    id: string;
-    element: string;
-    iClass: string;
-    component: string;
-    title: string;
-    html: string;
-    script: string;
-    css: string;
-    config: any;
-    attrs: any;
-    props: any;
-    propertys:any,
-    data: any;
-    setPanel: string;
-    appendTo: string;
-}
+import * as wc from "./../WC.js";
+import { ElementResponse, FetchInfo, IElement, IResponse } from "../IApp.js";
 
 class Sevian extends HTMLElement {
-
-    modules = [
-        {
-            "src": "./Html.js",
-            "name": "Html",
-            "alias": "Html",
-            "component": "wh-html"
-        }];
+    private panels: any = {};
+    private _modules: wc.WCModule[] = [];
 
     static get observedAttributes() {
         return ["server"];
@@ -145,9 +36,9 @@ class Sevian extends HTMLElement {
         });
     }
 
-    public connectedCallback() { }
+    public connectedCallback() {}
 
-    public disconnectedCallback() { }
+    public disconnectedCallback() {}
 
     public attributeChangedCallback(name, old, value) {
         switch (name) {
@@ -193,29 +84,21 @@ class Sevian extends HTMLElement {
         return this.getAttribute("token");
     }
 
-    isValidElement(element){
-        return new Promise((resolve, reject)=>{
+    private whenValid(name: string) {
+        const element = this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase())?.wc || name;
 
-            customElements.whenDefined(element).then(() => {
-                resolve(true)
-            }).catch(error=>{
-                resolve(true)
-            })
-        });
-    }
-
-    whenComponent(module) {
         return new Promise((resolve, reject) => {
-            if (customElements.get(module.component)) {
-                console.log("   A   ", module.component);
-
-                resolve(customElements.get(module.component));
+            console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
+            if (element.indexOf("-") < 0 || !element) {
+                resolve(element);
+                return;
             }
 
-            import(module.src)
-                .then((MyModule) => {
-                    console.log("   B   ", MyModule);
-                    resolve(customElements.get(module.component));
+            customElements
+                .whenDefined(element)
+                .then((what) => {
+                    console.log(what);
+                    resolve(element);
                 })
                 .catch((error) => {
                     console.log(error);
@@ -224,98 +107,68 @@ class Sevian extends HTMLElement {
         });
     }
 
-    setElement(info: IElement | IResponse) {
-        console.log("initElement", info, this.modules);
+    setElement(info: IElement | ElementResponse) {
+        console.log("initElement", info);
 
-        const module = this.modules.find((e) => e.component == info.data.element);
+        this.whenValid(info.data.element).then((element) => {
+            let e = $.id(info.id);
+            if (e) {
+                e.remove();
+            }
 
-        if (module) {
-            console.log("initElement", info);
-            this.whenComponent(module)
-                .then((component) => {})
-                .catch((error) => {
-                    console.log(error);
-                });
-        }
-
-        const e = document.getElementById(info.id);
-        if (e) {
-            e.remove();
-        }
-
-        customElements.whenDefined(info.data.element).then(() => {
-            const e = $.create(info.data.element);
-            console.log(info)
+            e = $.create(element);
             e.id(info.id);
             e.prop(info.data.propertys);
-            //e.attr(info.attrs);
 
-            let panel = null;
-            if (info.setPanel) {
-                panel = $(info.setPanel);
+            const panel = $(`#${info.setPanel}` || info.setTo || info.appendTo);
 
-                if (panel) {
-                    panel.text("");
-                    panel.append(e);
-
-                    return;
-                }
-            } else if (info.appendTo) {
-                panel = $(info.appendTo);
-
-                if (panel) {
-                    panel.append(e);
-                    return;
-                }
+            if (!panel) {
+                return;
             }
-        }).catch(error=>{
-            console.log(error)
+
+            if (info.setPanel || info.setTo) {
+                panel.text("");
+            }
+            panel.append(e);
         });
     }
 
     updateElement(info) {
-
         console.log("updateElement", info, document.getElementById(info.id));
-        const e = $.id(info.id);
-        
-        if (e) {
-            
-            if (info.data.propertys) {
-                e.prop(info.data.propertys);
-            }
-        }
-    }
-    evalResponse(response:any[]){
+        this.whenValid(info.data.element).then(() => {
+            const e = $.id(info.id);
 
-        console.log(response)
-        response.forEach(r=>{
-            switch(r.type){
+            if (e) {
+                if (info.data.propertys) {
+                    e.prop(info.data.propertys);
+                }
+            }
+        });
+    }
+
+    evalResponse(response: ElementResponse[]) {
+        console.log(response);
+        response.forEach((r) => {
+            switch (r.type) {
                 case "set":
-                    console.log(r)
+                    console.log(r);
                     this.setElement(r);
+
+                    if (r.setPanel) {
+                        this.panels[r.setPanel] = r;
+                    }
                     break;
                 case "element":
-                    
-
-                    if(r.data.element){
-                        customElements.whenDefined(r.data.element).then(() => {
-                            this.updateElement(r);
-                        }).catch(error=>{
-                            this.updateElement(r);
-                        })
-                    }else{
-                        this.updateElement(r);
-                    }
-                    
-                    
+                    this.updateElement(r);
                     break;
             }
-        })
+        });
 
         return true;
-
     }
     initApp() {
+        window.history.pushState({ a: 2 }, "yanny", "?page=2");
+        console.log(window.history.state);
         const request = {
             confirm: "?",
             valid: true,
@@ -326,24 +179,22 @@ class Sevian extends HTMLElement {
                 id: this.id,
             },
 
-            
             actions: [
                 {
-                    "type":"property",
-                    
-                    "element": "form",
-                    "name": "city",
-                    "mode":"property",
-                    "id":"x",
-                    "property":"dataSource"
-                    
+                    type: "property",
+
+                    element: "form",
+                    name: "city",
+                    mode: "property",
+                    id: "x",
+                    property: "dataSource",
                 },
             ],
         };
 
         const info: any = {},
             store: any = {
-                myName:"Yanny"
+                myName: "Yanny",
             };
         const headers = {
             "Content-Type": "application/json",
@@ -356,7 +207,7 @@ class Sevian extends HTMLElement {
         fetch(this.server, {
             method: info.method || "post",
             headers: { ...headers, ...info.headers },
-            body: JSON.stringify({ __app_request: request.actions,  __app_store: store }),
+            body: JSON.stringify({ __app_request: request.actions, __app_store: store }),
         })
             .then((response) => {
                 return response.json();
@@ -368,7 +219,58 @@ class Sevian extends HTMLElement {
                 this.evalResponse(json);
             });
     }
+
+    set cssSheets(data) {
+        console.log(data);
+        data.forEach((sheet) => {
+            loadCss(sheet, true);
+        });
+    }
+
+    set jsModules(files) {
+        files.forEach((src) => {
+            loadScript(src, { async: true, type: "module" });
+        });
+    }
+
+    set modules(info) {
+        this._modules = info;
+        wc.LoadModules(info);
+    }
+
+    get modules() {
+        return this._modules;
+    }
+
+    send(info: FetchInfo) {
+        const store = {
+            unit: 4032,
+        };
+
+        return new Promise((resolve, reject) => {
+            const headers = {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${this.token}`,
+                "Application-Id": this.id,
+                "Application-Mode": info.mode,
+            };
+
+            fetch(this.server, {
+                method: info.method || "post",
+                headers: { ...headers, ...info.headers },
+                body: JSON.stringify({ ...info.body, __app_store_: store }),
+            })
+                .then((response) => {
+                    return response.json();
+                })
+                .catch((error) => {
+                    reject(error);
+                })
+                .then((json) => {
+                    resolve(json);
+                });
+        });
+    }
 }
 
 customElements.define("sevian-app", Sevian);
-

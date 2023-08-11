@@ -1,0 +1,36 @@
+{
+    "id": "gtcomm",
+    "name": "home",
+    "templateFile": "whendy/templates/form.html",
+    "elements": [
+        
+        
+    ],
+    "className": [
+        "home"
+    ],
+    "acceptedRoles": [
+        "** public **"
+    ],
+    "cssSheets": [
+        "{{ @CSS_PATH }}reset.css",
+        "{{ @CSS_PATH }}main.css"
+    ],
+    "jsModules": [
+        "{{ @WC_PATH }}Select.js",
+        "{{ @WC_PATH }}GTForm.js",
+        "{{ @WC_PATH }}Field.js"
+    ],
+    "modules": [
+        {
+            "src": "./wc/Sevian.js",
+            "name": "App",
+            "wc": "sevian-app"
+        },
+        {
+            "src": "./wc/Html.js",
+            "name": "fragment",
+            "wc": "wh-html"
+        }
+    ]
+}

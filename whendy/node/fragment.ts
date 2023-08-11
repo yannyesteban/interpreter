@@ -47,7 +47,7 @@ export class Fragment extends Element{
         console.log(template)
         this.response = {
            
-            element:"div",
+            element:"fragment",
             propertys : {
                 innerHTML: template + str
             }

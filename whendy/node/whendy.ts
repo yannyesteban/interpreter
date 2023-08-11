@@ -94,19 +94,19 @@ export class Whendy {
             switch (info.type) {
                 case "set":
                     this.addResponse( [{
-                        type: info.type,
-                        setPanel: info.setPanel,
-                        appendTo: info.appendTo,
-                        id: info.id,
+                        dinamic:false, 
+                        ...info,
                         data,
                     }]);
                     break;
                 case "element":
                     this.addResponse( [{
-                        type: info.type,
+                        dinamic:false,
+                        ...info,
+                        //type: info.type,
                         //setPanel: info.setPanel,
                         //appendTo: info.appendTo,
-                        id: info.id,
+                        //id: info.id,
                         data,
                     }]);
                     break;

@@ -1,23 +1,23 @@
 export const loadCss = (url, async) => {
     return new Promise((resolve, reject) => {
         try {
-            const myScript = document.createElement("link");
-            myScript.setAttribute("href", url);
-            myScript.setAttribute("rel", "stylesheet");
-            myScript.setAttribute("type", "text/css");
-            //myScript.setAttribute("async", async);
-            myScript.addEventListener("load", (event) => {
+            const sheet = document.createElement("link");
+            sheet.setAttribute("href", url);
+            sheet.setAttribute("rel", "stylesheet");
+            sheet.setAttribute("type", "text/css");
+            //sheet.setAttribute("async", async);
+            sheet.addEventListener("load", (event) => {
                 resolve({
                     status: true,
                 });
             });
-            myScript.addEventListener("error", (event) => {
+            sheet.addEventListener("error", (event) => {
                 reject({
                     status: false,
                     msg: "error",
                 });
             });
-            document.body.appendChild(myScript);
+            document.head.appendChild(sheet);
         }
         catch (error) {
             reject({
