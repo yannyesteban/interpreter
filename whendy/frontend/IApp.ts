@@ -1,5 +1,9 @@
 export type selector = string;
 
+export interface AppComponent {
+    valid?: () => boolean;
+}
+
 export interface PanelInfo {
     panel: string;
     id: string;
@@ -21,15 +25,20 @@ export interface AppAction {
 }
 export interface AppRequest {
     method?: string;
-    headers?: {};
+    contentType?: string;
+    mode?: string;
     type?: string;
     panel?: selector;
     confirm?: string;
-    valid?: boolean;
-    form?: selector | HTMLFormElement;
+    validate?: AppComponent | selector | HTMLElement | (() => boolean);
+    form?: selector | HTMLElement | HTMLFormElement;
     body?: object;
-    header?: { [key: string]: string };
-    actions: AppAction[];
+    headers?: { [key: string]: string };
+    actions?: AppAction[];
+    store?: true | { [key: string]: any };
+    reportValidity?: boolean;
+    blockLayers?: selector[];
+    blockForm?:boolean;
 }
 
 export interface HtmlFragment {}
@@ -48,7 +57,7 @@ export interface ElementResponse {
     text: string;
     css: string;
     script: string;
-    data?:any;
+    data?: any;
 }
 
 export interface IForm {

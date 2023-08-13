@@ -138,6 +138,17 @@ class Sevian extends HTMLElement {
         return true;
     }
     initApp() {
+        const btn = $("#x");
+        btn.on("click", (e) => {
+            this.sendForm({
+                form: "#p1",
+                store: ["a", "c"],
+                blockLayers: ["#p3", "#p2", "#x"],
+                blockForm: true,
+                reportValidity: true
+                //confirm:"hello"
+            });
+        });
         window.history.pushState({ a: 2 }, "yanny", "?page=2");
         console.log(window.history.state);
         const request = {
@@ -203,30 +214,129 @@ class Sevian extends HTMLElement {
     get modules() {
         return this._modules;
     }
-    send(info) {
-        const store = {
-            unit: 4032,
+    getStore() {
+        return {
+            a: "one",
+            b: "two",
+            c: "three",
         };
-        return new Promise((resolve, reject) => {
-            const headers = {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${this.token}`,
-                "Application-Id": this.id,
-                "Application-Mode": info.mode,
-            };
-            fetch(this.server, {
-                method: info.method || "post",
-                headers: Object.assign(Object.assign({}, headers), info.headers),
-                body: JSON.stringify(Object.assign(Object.assign({}, info.body), { __app_store_: store })),
-            })
-                .then((response) => {
-                return response.json();
-            })
-                .catch((error) => {
-                reject(error);
-            })
-                .then((json) => {
-                resolve(json);
+    }
+    sendFormData(request) {
+        request.contentType = "multipart/form-data";
+        this.send(request);
+    }
+    sendForm(request) {
+        request.contentType = "application/x-www-form-urlencoded";
+        this.send(request);
+    }
+    sendJson(request) {
+        request.contentType = "application/json";
+        this.send(request);
+    }
+    send(request) {
+        var _a;
+        if (request.validate && typeof request.validate === "function" && !request.validate()) {
+            return;
+        }
+        else if (request.validate && typeof request.validate === "string") {
+            const element = $(request.validate).get();
+            if (typeof element.valid === "function" && !element.valid()) {
+                return;
+            }
+        }
+        else if (typeof request.validate === "object" && "valid" in request.validate && !((_a = request.validate) === null || _a === void 0 ? void 0 : _a.valid())) {
+            return;
+        }
+        if (request.confirm && !window.confirm(request.confirm)) {
+            return;
+        }
+        let form = null;
+        if (typeof request.form === "string") {
+            form = $(request.form).get();
+        }
+        else if (request.form instanceof HTMLFormElement) {
+            form = request.form;
+        }
+        else if (request.form instanceof HTMLElement) {
+            form = request.form.closest("form");
+        }
+        if (form && request.reportValidity && !form.reportValidity()) {
+            return;
+        }
+        let body;
+        let actions = request.actions || [];
+        let store = {};
+        const _store = this.getStore();
+        if (form) {
+            body = new FormData(form);
+        }
+        else {
+            body = new FormData();
+        }
+        if (request.store === true) {
+            store = _store;
+        }
+        else if (Array.isArray(request.store)) {
+            store = request.store.reduce((store, e) => ((store[e] = _store[e]), store), {});
+        }
+        else if (typeof request.store === "object") {
+            store = typeof request.store;
+        }
+        let contentType = request.contentType === undefined ? "application/json" : request.contentType;
+        if (contentType === "application/json") {
+            body = JSON.stringify(Object.assign(Object.assign({}, Object.fromEntries(body.entries())), { __app_request: actions, __app_store: store }));
+        }
+        else {
+            body.append("__app_request", JSON.stringify(actions));
+            if (store) {
+                body.append("__app_store", JSON.stringify(store));
+            }
+            if (contentType === "application/x-www-form-urlencoded") {
+                body = new URLSearchParams(body);
+            }
+            else {
+                contentType = null;
+            }
+        }
+        const layers = [];
+        if (request.blockForm !== false && form) {
+            const layer = $.create("wait-layer");
+            form.appendChild(layer.get());
+            layers.push(layer);
+        }
+        if (request.blockLayers) {
+            request.blockLayers.forEach((target) => {
+                const _layer = $.create("wait-layer");
+                $(target).append(_layer);
+                layers.push(_layer);
+            });
+        }
+        const headers = {
+            Authorization: `Bearer ${this.token}`,
+            //SID: request.sid,
+            "Application-Id": this.id,
+            "Application-Mode": request.mode,
+        };
+        if (contentType) {
+            headers["Content-Type"] = contentType;
+        }
+        fetch("http://localhost/phpserver/", {
+            method: "post",
+            headers,
+            body,
+        })
+            .then((response) => {
+            return response.text();
+        })
+            .catch((error) => {
+            console.log(error);
+        })
+            .then((json) => {
+            console.log(json);
+        })
+            .finally(() => {
+            layers.forEach((layer) => {
+                layer.remove();
             });
         });
     }
