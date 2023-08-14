@@ -1,0 +1,40 @@
+{
+    "fields":[],
+    "data":"select * from units",
+    "datafields":{
+        "country":"select * from countries",
+        "city":["select * from cities where country=#country "]
+    },
+    "layout": {
+        "caption": "Users Admin",
+        "elements": [
+            {
+                "component": "field",
+                "label": "id",
+                "name": "id",
+                "input": "input",
+                "type": "text",
+                "value": "5"
+            },
+            {
+                "component": "field",
+                "label": "Name",
+                "name": "name",
+                "input": "input",
+                "type": "text",
+                "value": "Yanny"
+            },
+            {
+                "component":"button",
+                "label":"OK",
+                "attr":{
+                    "class":"save",
+                    "type":"button"
+                },
+                "events":{
+                    "click":"this.closest('wh-app').sendForm({form:this.closest('form')})"
+                }
+            }
+        ]
+    }
+}

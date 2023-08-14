@@ -18,12 +18,12 @@
                 "eparams": {}
             },
             {
-                "id":"f",
-                "setPanel.":"sevian-app",
-                "type": "element",
-                "element": "fragment",
-                "name": "one",
-                "method": "get",
+                "id":"unit",
+                "setPanel":"p2",
+                "type": "set",
+                "element": "form",
+                "name": "two",
+                "method": "request",
                 "eparams": {}
             }
         ]
@@ -33,7 +33,7 @@
         "FRONT": "html/",
         "IMAGES_PATH": "../html/images/",
         "CSS_PATH": "../html/css/",
-        "WC_PATH": "../dist/whendy/frontend/wc/",
+        "WC_PATH": "../dist/sevian/wc/",
 
         "MAIN_PATH": "../",
         "MODULE_PATH": "",

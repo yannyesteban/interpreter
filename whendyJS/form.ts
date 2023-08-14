@@ -12,7 +12,7 @@ export class Form extends Element {
 
     templateFile: string;
 
-    response: object[] = [];
+    response:object = {};
 
     store: Store = null;
 
@@ -23,6 +23,8 @@ export class Form extends Element {
     private _info: any;
     private fields;
     private layout:any;
+
+    
     setStore(store: Store) {
         this.store = store;
     }
@@ -76,15 +78,22 @@ export class Form extends Element {
             setPanel: this.setPanel,
         };
 
-        this.addResponse(data);
+        //this.addResponse(data);
+        this.response = {
+           
+            element:"form",
+            propertys : {
+                dataSource: this.layout
+            }
+        };
     }
 
-    getResponse(): object[] {
+    getResponse():any{
         return this.response;
     }
 
-    addResponse(response) {
-        this.response.push(response);
+    addResponse(response){
+        //this.response.push(response);
     }
 
     private async evalFields() {

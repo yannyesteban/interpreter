@@ -14,5 +14,13 @@
         "class": "Fragment",
         "fileConfig": true,
         "template": "fragments/{name}.json"
+    },
+    {
+        "name": "form",
+        "enable": true,
+        "file": "./form.js",
+        "class": "Form",
+        "fileConfig": true,
+        "template": "forms/{name}.json"
     }
 ]

@@ -84,17 +84,27 @@ class Sevian extends HTMLElement {
         return this.getAttribute("token");
     }
 
-    private whenValid(name: string) {
-        const element = this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase())?.wc || name;
+    private async whenValid(name: string) {
+        
 
-        return new Promise((resolve, reject) => {
+        return new Promise(async (resolve, reject) => {
+            
+            
+            
+            console.log(
+                this._modules,
+                this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase()),
+            );
+            const element = this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase())?.wc || name;
+
             console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
             if (element.indexOf("-") < 0 || !element) {
                 resolve(element);
                 return;
             }
 
-            customElements
+           
+            await customElements
                 .whenDefined(element)
                 .then((what) => {
                     console.log(what);
@@ -107,10 +117,12 @@ class Sevian extends HTMLElement {
         });
     }
 
-    setElement(info: IElement | ElementResponse) {
-        console.log("initElement", info);
+    async setElement(info: IElement | ElementResponse) {
+        
 
-        this.whenValid(info.data.element).then((element) => {
+        await this.whenValid(info.data.element).then((element) => {
+            
+
             let e = $.id(info.id);
             if (e) {
                 e.remove();
@@ -133,9 +145,12 @@ class Sevian extends HTMLElement {
         });
     }
 
-    updateElement(info) {
+    async updateElement(info) {
         console.log("updateElement", info, document.getElementById(info.id));
-        this.whenValid(info.data.element).then(() => {
+        
+        
+        await this.whenValid(info.data.element).then(() => {
+            
             const e = $.id(info.id);
 
             if (e) {
@@ -143,26 +158,34 @@ class Sevian extends HTMLElement {
                     e.prop(info.data.propertys);
                 }
             }
+            
+            
         });
     }
 
-    evalResponse(response: ElementResponse[]) {
+    async evalResponse(response: ElementResponse[]) {
+
+
         console.log(response);
-        response.forEach((r) => {
+
+        for(const r of response){
+        
+            console.log(r);
             switch (r.type) {
                 case "set":
-                    console.log(r);
-                    this.setElement(r);
+                    
+                    await this.setElement(r);
 
                     if (r.setPanel) {
                         this.panels[r.setPanel] = r;
                     }
                     break;
                 case "element":
-                    this.updateElement(r);
+                    
+                    await this.updateElement(r);
                     break;
             }
-        });
+        };
 
         return true;
     }
@@ -174,7 +197,7 @@ class Sevian extends HTMLElement {
                 store: ["a", "c"],
                 blockLayers: ["#p3", "#p2", "#x"],
                 blockForm: true,
-                reportValidity:true
+                reportValidity: true,
 
                 //confirm:"hello"
             });
@@ -200,8 +223,6 @@ class Sevian extends HTMLElement {
         };
 
         this.send(request);
-
-        
     }
 
     set cssSheets(data) {
@@ -218,6 +239,7 @@ class Sevian extends HTMLElement {
     }
 
     set modules(info) {
+        console.log("%c%s", "color:yellow", info);
         this._modules = info;
         wc.LoadModules(info);
     }
@@ -320,7 +342,7 @@ class Sevian extends HTMLElement {
         }
 
         const layers = [];
-        
+
         if (request.blockForm !== false && form) {
             const layer = $.create("wait-layer");
 
@@ -340,13 +362,13 @@ class Sevian extends HTMLElement {
             Authorization: `Bearer ${this.token}`,
             "Application-Id": this.id,
             "Application-Mode": request.mode,
-            ...request.headers
+            ...request.headers,
         };
 
         if (contentType) {
             headers["Content-Type"] = contentType;
         }
-        
+
         fetch(this.server /*"http://localhost/phpserver/"*/, {
             method: "post",
             headers,
@@ -362,7 +384,6 @@ class Sevian extends HTMLElement {
                 this.evalResponse(json);
             })
             .finally(() => {
-                
                 layers.forEach((layer) => {
                     layer.remove();
                 });

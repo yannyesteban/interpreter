@@ -1,3 +1,12 @@
+var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, generator) {
+    function adopt(value) { return value instanceof P ? value : new P(function (resolve) { resolve(value); }); }
+    return new (P || (P = Promise))(function (resolve, reject) {
+        function fulfilled(value) { try { step(generator.next(value)); } catch (e) { reject(e); } }
+        function rejected(value) { try { step(generator["throw"](value)); } catch (e) { reject(e); } }
+        function step(result) { result.done ? resolve(result.value) : adopt(result.value).then(fulfilled, rejected); }
+        step((generator = generator.apply(thisArg, _arguments || [])).next());
+    });
+};
 import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
@@ -68,74 +77,83 @@ class Sevian extends HTMLElement {
         return this.getAttribute("token");
     }
     whenValid(name) {
-        var _a, _b;
-        const element = ((_b = (_a = this.modules) === null || _a === void 0 ? void 0 : _a.find((e) => e.name.toUpperCase() === name.toUpperCase())) === null || _b === void 0 ? void 0 : _b.wc) || name;
-        return new Promise((resolve, reject) => {
-            console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
-            if (element.indexOf("-") < 0 || !element) {
-                resolve(element);
-                return;
-            }
-            customElements
-                .whenDefined(element)
-                .then((what) => {
-                console.log(what);
-                resolve(element);
-            })
-                .catch((error) => {
-                console.log(error);
-                reject(error);
-            });
+        return __awaiter(this, void 0, void 0, function* () {
+            return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+                var _a, _b, _c;
+                console.log(this._modules, (_a = this.modules) === null || _a === void 0 ? void 0 : _a.find((e) => e.name.toUpperCase() === name.toUpperCase()));
+                const element = ((_c = (_b = this.modules) === null || _b === void 0 ? void 0 : _b.find((e) => e.name.toUpperCase() === name.toUpperCase())) === null || _c === void 0 ? void 0 : _c.wc) || name;
+                console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
+                if (element.indexOf("-") < 0 || !element) {
+                    resolve(element);
+                    return;
+                }
+                yield customElements
+                    .whenDefined(element)
+                    .then((what) => {
+                    console.log(what);
+                    resolve(element);
+                })
+                    .catch((error) => {
+                    console.log(error);
+                    reject(error);
+                });
+            }));
         });
     }
     setElement(info) {
-        console.log("initElement", info);
-        this.whenValid(info.data.element).then((element) => {
-            let e = $.id(info.id);
-            if (e) {
-                e.remove();
-            }
-            e = $.create(element);
-            e.id(info.id);
-            e.prop(info.data.propertys);
-            const panel = $(`#${info.setPanel}` || info.setTo || info.appendTo);
-            if (!panel) {
-                return;
-            }
-            if (info.setPanel || info.setTo) {
-                panel.text("");
-            }
-            panel.append(e);
+        return __awaiter(this, void 0, void 0, function* () {
+            yield this.whenValid(info.data.element).then((element) => {
+                let e = $.id(info.id);
+                if (e) {
+                    e.remove();
+                }
+                e = $.create(element);
+                e.id(info.id);
+                e.prop(info.data.propertys);
+                const panel = $(`#${info.setPanel}` || info.setTo || info.appendTo);
+                if (!panel) {
+                    return;
+                }
+                if (info.setPanel || info.setTo) {
+                    panel.text("");
+                }
+                panel.append(e);
+            });
         });
     }
     updateElement(info) {
-        console.log("updateElement", info, document.getElementById(info.id));
-        this.whenValid(info.data.element).then(() => {
-            const e = $.id(info.id);
-            if (e) {
-                if (info.data.propertys) {
-                    e.prop(info.data.propertys);
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("updateElement", info, document.getElementById(info.id));
+            yield this.whenValid(info.data.element).then(() => {
+                const e = $.id(info.id);
+                if (e) {
+                    if (info.data.propertys) {
+                        e.prop(info.data.propertys);
+                    }
                 }
-            }
+            });
         });
     }
     evalResponse(response) {
-        console.log(response);
-        response.forEach((r) => {
-            switch (r.type) {
-                case "set":
-                    console.log(r);
-                    this.setElement(r);
-                    if (r.setPanel) {
-                        this.panels[r.setPanel] = r;
-                    }
-                    break;
-                case "element":
-                    this.updateElement(r);
-                    break;
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(response);
+            for (const r of response) {
+                console.log(r);
+                switch (r.type) {
+                    case "set":
+                        yield this.setElement(r);
+                        if (r.setPanel) {
+                            this.panels[r.setPanel] = r;
+                        }
+                        break;
+                    case "element":
+                        yield this.updateElement(r);
+                        break;
+                }
             }
+            ;
+            return true;
         });
-        return true;
     }
     initApp() {
         const btn = $("#x");
@@ -145,7 +163,7 @@ class Sevian extends HTMLElement {
                 store: ["a", "c"],
                 blockLayers: ["#p3", "#p2", "#x"],
                 blockForm: true,
-                reportValidity: true
+                reportValidity: true,
                 //confirm:"hello"
             });
         });
@@ -180,6 +198,7 @@ class Sevian extends HTMLElement {
         });
     }
     set modules(info) {
+        console.log("%c%s", "color:yellow", info);
         this._modules = info;
         wc.LoadModules(info);
     }

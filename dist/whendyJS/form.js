@@ -12,7 +12,7 @@ export class Form extends Element {
     constructor() {
         super(...arguments);
         this.element = "wh-html";
-        this.response = [];
+        this.response = {};
         this.store = null;
         this.connection = "mysql";
     }
@@ -65,14 +65,20 @@ export class Form extends Element {
                 appendTo: this.appendTo,
                 setPanel: this.setPanel,
             };
-            this.addResponse(data);
+            //this.addResponse(data);
+            this.response = {
+                element: "form",
+                propertys: {
+                    dataSource: this.layout
+                }
+            };
         });
     }
     getResponse() {
         return this.response;
     }
     addResponse(response) {
-        this.response.push(response);
+        //this.response.push(response);
     }
     evalFields() {
         return __awaiter(this, void 0, void 0, function* () {
