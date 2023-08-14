@@ -1,4 +1,4 @@
-import { Class } from "../../core/Statement";
+import { Class } from "../core/Statement";
 import { randomBytes, randomUUID } from "node:crypto";
 import { IncomingMessage, ServerResponse } from "node:http"
 import { cookieParse, CookieVar } from "./CookieHandler.js";

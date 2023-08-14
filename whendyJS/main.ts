@@ -4,10 +4,10 @@ import { /*Socket as*/ Server } from "./server.js";
 
 console.log("Welcome to Whendy V1.0");
 
-const config = Tool.loadJsonFile("whendy/configuration/server.json");
-const constants = Tool.loadJsonFile("whendy/configuration/constants.json");
-const classElement = Tool.loadJsonFile("whendy/configuration/elements.json");
-const db = Tool.loadJsonFile("whendy/configuration/bd.json");
+const config = Tool.loadJsonFile("./app/configuration/server.json");
+const constants = Tool.loadJsonFile("./app/configuration/constants.json");
+const classElement = Tool.loadJsonFile("./app/configuration/elements.json");
+const db = Tool.loadJsonFile("./app/configuration/bd.json");
 
 const whendy = new Server({ ...config, constants, classElement, db });
 

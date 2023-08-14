@@ -7,13 +7,13 @@ http.createServer(function (req, res) {
 import  pg from "pg"
 import * as my from "mysql"
 
-import { DateUtil } from "./whendy/frontend/DateUtil.js";
-import { DBUpdate } from "./whendy/node/db/DBUpdate.js";
+import { DateUtil } from "../sevian/DateUtil.js";
+import { DBUpdate } from "../whendyJS/db/DBUpdate.js";
 
 const result = DateUtil.date("24/10/1975 10:22:05pm", "%d/%m/%y %h:%i:%s%p");
 
-import { valid } from "./whendy/frontend/Valid.js";
-import { Tool } from "./whendy/node/tool.js";
+import { valid } from "../sevian/Valid.js";
+import { Tool } from "../whendyJS/tool.js";
 
 let value = "-198";
 let result2 = valid({

@@ -1,4 +1,4 @@
 {
     "test":"1",
-    "templateFile":"./modules/admin/templates/one.html"
+    "templateFile":"./app/modules/admin/templates/one.html"
 }

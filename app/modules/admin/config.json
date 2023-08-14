@@ -31,8 +31,8 @@
 
     "constants": {
         "FRONT": "html/",
-        "IMAGES_PATH": "images/",
-        "CSS_PATH": "../css/",
+        "IMAGES_PATH": "../html/images/",
+        "CSS_PATH": "../html/css/",
         "WC_PATH": "../dist/whendy/frontend/wc/",
 
         "MAIN_PATH": "../",

@@ -3,8 +3,8 @@ import * as queryString from "node:querystring";
 import { cookieParse } from "./CookieHandler.js";
 import { ISession } from "./manager.js";
 
-import { Outer } from "./../../core/outer/Outer.js";
-import { Logic } from "./../../core/Logic.js";
+import { Outer } from "./../core/outer/Outer.js";
+import { Logic } from "./../core/Logic.js";
 import { loadFile, loadJsonFile } from "./tool.js";
 import { DBAdmin } from "./db/dbAdmin.js";
 

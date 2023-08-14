@@ -1,7 +1,7 @@
 {
     "id": "gtcomm",
     "name": "home",
-    "templateFile": "whendy/templates/form.html",
+    "templateFile": "app/templates/form.html",
     "elements": [
         
         

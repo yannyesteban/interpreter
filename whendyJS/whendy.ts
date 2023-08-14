@@ -56,7 +56,7 @@ export class Whendy {
     getElementConfig(element, name) {
         let template = this.classes.template(element);
 
-        template = "modules/admin/" + template.replace("{name}", name);
+        template = "./app/modules/admin/" + template.replace("{name}", name);
 
         return this.store.loadJsonFile(template);
     }

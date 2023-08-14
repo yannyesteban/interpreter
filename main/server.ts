@@ -1,11 +1,11 @@
-import { Lexer } from "./core/Lexer.js";
-import { Parser } from "./core/Parser.js";
+import { Lexer } from "../core/Lexer.js";
+import { Parser } from "../core/Parser.js";
 
 import   "./core/Resolver.js";
 import   "./core/Interpreter.js";
 
 
-import { Interpreter } from "./core/Interpreter.js";
+import { Interpreter } from "../core/Interpreter.js";
 
 
 import * as fs from "fs";

@@ -51,7 +51,7 @@ export class Server {
             let init = this.init;
 
             if (this.useModule) {
-                const moduleInfo = Tool.loadJsonFile(`./modules${req.url}/config.json`);
+                const moduleInfo = Tool.loadJsonFile(`./app/modules${req.url}/config.json`);
 
                 session.loadSession(moduleInfo.constants || {});
 
