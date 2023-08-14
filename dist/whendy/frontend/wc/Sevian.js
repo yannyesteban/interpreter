@@ -152,13 +152,8 @@ class Sevian extends HTMLElement {
         window.history.pushState({ a: 2 }, "yanny", "?page=2");
         console.log(window.history.state);
         const request = {
-            confirm: "?",
-            valid: true,
             headers: {
                 "Application-Name": this.name,
-            },
-            data: {
-                id: this.id,
             },
             actions: [
                 {
@@ -171,30 +166,7 @@ class Sevian extends HTMLElement {
                 },
             ],
         };
-        const info = {}, store = {
-            myName: "Yanny",
-        };
-        const headers = {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${this.token}`,
-            //SID: "this.sid",
-            "Application-Name": this.name,
-            "Application-Mode": info.mode,
-        };
-        fetch(this.server, {
-            method: info.method || "post",
-            headers: Object.assign(Object.assign({}, headers), info.headers),
-            body: JSON.stringify({ __app_request: request.actions, __app_store: store }),
-        })
-            .then((response) => {
-            return response.json();
-        })
-            .catch((error) => {
-            console.log(error);
-        })
-            .then((json) => {
-            this.evalResponse(json);
-        });
+        this.send(request);
     }
     set cssSheets(data) {
         console.log(data);
@@ -311,28 +283,23 @@ class Sevian extends HTMLElement {
                 layers.push(_layer);
             });
         }
-        const headers = {
-            Authorization: `Bearer ${this.token}`,
-            //SID: request.sid,
-            "Application-Id": this.id,
-            "Application-Mode": request.mode,
-        };
+        const headers = Object.assign({ Authorization: `Bearer ${this.token}`, "Application-Id": this.id, "Application-Mode": request.mode }, request.headers);
         if (contentType) {
             headers["Content-Type"] = contentType;
         }
-        fetch("http://localhost/phpserver/", {
+        fetch(this.server /*"http://localhost/phpserver/"*/, {
             method: "post",
             headers,
             body,
         })
             .then((response) => {
-            return response.text();
+            return response.json();
         })
             .catch((error) => {
             console.log(error);
         })
             .then((json) => {
-            console.log(json);
+            this.evalResponse(json);
         })
             .finally(() => {
             layers.forEach((layer) => {

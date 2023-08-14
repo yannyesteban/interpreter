@@ -182,13 +182,8 @@ class Sevian extends HTMLElement {
         window.history.pushState({ a: 2 }, "yanny", "?page=2");
         console.log(window.history.state);
         const request = {
-            confirm: "?",
-            valid: true,
             headers: {
                 "Application-Name": this.name,
-            },
-            data: {
-                id: this.id,
             },
 
             actions: [
@@ -204,32 +199,9 @@ class Sevian extends HTMLElement {
             ],
         };
 
-        const info: any = {},
-            store: any = {
-                myName: "Yanny",
-            };
-        const headers = {
-            "Content-Type": "application/json",
-            Authorization: `Bearer ${this.token}`,
-            //SID: "this.sid",
-            "Application-Name": this.name,
-            "Application-Mode": info.mode,
-        };
+        this.send(request);
 
-        fetch(this.server, {
-            method: info.method || "post",
-            headers: { ...headers, ...info.headers },
-            body: JSON.stringify({ __app_request: request.actions, __app_store: store }),
-        })
-            .then((response) => {
-                return response.json();
-            })
-            .catch((error) => {
-                console.log(error);
-            })
-            .then((json) => {
-                this.evalResponse(json);
-            });
+        
     }
 
     set cssSheets(data) {
@@ -366,28 +338,28 @@ class Sevian extends HTMLElement {
 
         const headers = {
             Authorization: `Bearer ${this.token}`,
-            //SID: request.sid,
             "Application-Id": this.id,
             "Application-Mode": request.mode,
+            ...request.headers
         };
 
         if (contentType) {
             headers["Content-Type"] = contentType;
         }
         
-        fetch("http://localhost/phpserver/", {
+        fetch(this.server /*"http://localhost/phpserver/"*/, {
             method: "post",
             headers,
             body,
         })
             .then((response) => {
-                return response.text();
+                return response.json();
             })
             .catch((error) => {
                 console.log(error);
             })
             .then((json) => {
-                console.log(json);
+                this.evalResponse(json);
             })
             .finally(() => {
                 
