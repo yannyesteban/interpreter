@@ -6,7 +6,7 @@
 		"port": "3306",
 		"user": "root",
 		"pass": "123456",
-		"dbase": "whendy",
+		"dbase": "classicmodels",
 		"charset": "utf-8"
 	},
 	{

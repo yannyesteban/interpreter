@@ -85,16 +85,7 @@ class Sevian extends HTMLElement {
     }
 
     private async whenValid(name: string) {
-        
-
         return new Promise(async (resolve, reject) => {
-            
-            
-            
-            console.log(
-                this._modules,
-                this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase()),
-            );
             const element = this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase())?.wc || name;
 
             console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
@@ -103,11 +94,9 @@ class Sevian extends HTMLElement {
                 return;
             }
 
-           
             await customElements
                 .whenDefined(element)
                 .then((what) => {
-                    console.log(what);
                     resolve(element);
                 })
                 .catch((error) => {
@@ -118,11 +107,7 @@ class Sevian extends HTMLElement {
     }
 
     async setElement(info: IElement | ElementResponse) {
-        
-
         await this.whenValid(info.data.element).then((element) => {
-            
-
             let e = $.id(info.id);
             if (e) {
                 e.remove();
@@ -146,11 +131,7 @@ class Sevian extends HTMLElement {
     }
 
     async updateElement(info) {
-        console.log("updateElement", info, document.getElementById(info.id));
-        
-        
         await this.whenValid(info.data.element).then(() => {
-            
             const e = $.id(info.id);
 
             if (e) {
@@ -158,22 +139,14 @@ class Sevian extends HTMLElement {
                     e.prop(info.data.propertys);
                 }
             }
-            
-            
         });
     }
 
     async evalResponse(response: ElementResponse[]) {
-
-
-        console.log(response);
-
-        for(const r of response){
-        
-            console.log(r);
+        console.log(response)
+        for (const r of response) {
             switch (r.type) {
                 case "set":
-                    
                     await this.setElement(r);
 
                     if (r.setPanel) {
@@ -181,11 +154,10 @@ class Sevian extends HTMLElement {
                     }
                     break;
                 case "element":
-                    
                     await this.updateElement(r);
                     break;
             }
-        };
+        }
 
         return true;
     }
@@ -226,7 +198,6 @@ class Sevian extends HTMLElement {
     }
 
     set cssSheets(data) {
-        console.log(data);
         data.forEach((sheet) => {
             loadCss(sheet, true);
         });
@@ -239,7 +210,6 @@ class Sevian extends HTMLElement {
     }
 
     set modules(info) {
-        console.log("%c%s", "color:yellow", info);
         this._modules = info;
         wc.LoadModules(info);
     }

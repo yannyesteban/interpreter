@@ -63,7 +63,7 @@ class FormContainer extends HTMLElement {
 
         this.shadowRoot.appendChild(template.content.cloneNode(true));
     }
-    public connectedCallback() { }
+    public connectedCallback() {}
 }
 customElements.define("form-container", FormContainer);
 
@@ -133,21 +133,22 @@ class GTCaption extends HTMLElement {
 
         const slot = this.shadowRoot.querySelector("slot");
 
-        slot.addEventListener("slotchange", (e) => { });
+        slot.addEventListener("slotchange", (e) => {});
     }
 
     public connectedCallback() {
         this.slot = "caption";
     }
 
-    public disconnectedCallback() { }
+    public disconnectedCallback() {}
 
-    public attributeChangedCallback(name, oldVal, newVal) { }
+    public attributeChangedCallback(name, oldVal, newVal) {}
 }
 customElements.define("gt-caption", GTCaption);
 
 class GTForm extends HTMLElement {
     store;
+    private _data: any = {};
     static get observedAttributes() {
         return ["type"];
     }
@@ -202,11 +203,17 @@ class GTForm extends HTMLElement {
         return this.querySelector(`[name="${name}"]`);
     }
 
+    getFields(): HTMLInputElement[] {
+        return Array.from(this.querySelectorAll(`[data-form-element="field"]`));
+    }
+
     getValues() {
-        return Array.from(this.querySelectorAll(`[name]`)).filter(e=>e["name"]).reduce((a, element: HTMLInputElement) => {
-            a[element.name] = element.value;
-            return a;
-        }, {});
+        return Array.from(this.querySelectorAll(`[name]`))
+            .filter((e) => e["name"])
+            .reduce((a, element: HTMLInputElement) => {
+                a[element.name] = element.value;
+                return a;
+            }, {});
     }
 
     _setDataList(parentName, value) {
@@ -256,16 +263,14 @@ class GTForm extends HTMLElement {
     }
 
     set dataField(info) {
-        const field = <HTMLInputElement>this.querySelector(`[name="${info.field}"]`)
+        const field = <HTMLInputElement>this.querySelector(`[name="${info.field}"]`);
 
-        
         field.innerHTML = "";
         let value = field.value;
         let _value = null;
         if (info.data.length > 0) {
             _value = info.data[0].value;
         }
-
 
         info.data.forEach((option) => {
             if (option.value == info.value) {
@@ -278,8 +283,7 @@ class GTForm extends HTMLElement {
             field.appendChild(opt);
         });
 
-        field.value = _value
-        
+        field.value = _value;
     }
     initList() {
         const fields = $(this).queryAll("[data-childs=true]");
@@ -331,6 +335,10 @@ class GTForm extends HTMLElement {
         this.innerHTML = "";
         console.log(source);
 
+        if (source.dataLists) {
+            this._createDataLists(source.dataLists);
+        }
+
         if (source.caption) {
             this._createCaption(source.caption);
         }
@@ -339,7 +347,55 @@ class GTForm extends HTMLElement {
             $(this).addClass(source.className);
         }
 
+        //this._data = source.data || {};
+        //console.log(this._data);
+
         this.setElements(this, source.elements);
+
+        const dataLists: HTMLElement[] = Array.from(this.querySelectorAll(`datalist[data-name]`));
+
+        for (const list of dataLists) {
+            const name = list.dataset.name;
+            const element = this.querySelector(`[data-form-element="field"][name="${name}"]`);
+            this._setDataOptions(list, element);
+        }
+
+        this.values = source.data || {}
+    }
+
+    set values(data) {
+        this.getFields().forEach((field) => {
+            if (data[field.name]) {
+                field.value = data[field.name];
+            }
+        });
+    }
+
+    _setDataOptions(dataList, element) {
+        const options: HTMLOptionElement[] = Array.from(dataList.querySelectorAll("option"));
+
+        element.innerHTML = "";
+        options.forEach((option) => {
+            const opt = document.createElement("option");
+            opt.value = String(option.value); // the index
+            opt.innerHTML = String(option.text);
+
+            element.appendChild(opt);
+        });
+    }
+    _createDataLists(dataLists) {
+        for (const [name, info] of Object.entries(dataLists) as any[]) {
+            const dataList = $(this).create("datalist");
+            dataList.ds("name", name);
+            dataList.ds("filter", info.level || "");
+            info.data.forEach((item) => {
+                //alert(item.value)
+                const option = dataList.create("option");
+                option.prop("value", item.value);
+                option.ds("level", info.level || "");
+                option.html(item.text);
+            });
+        }
     }
 
     _createCaption(value) {
@@ -377,7 +433,8 @@ class GTForm extends HTMLElement {
         return null;
     }
     _createField(info): HTMLElement {
-        const id = info.id || info.name;
+        const id = info.id || undefined;
+        const name = info.name || "";
         const field = $.create("gt-field");
         if (info.rlabel) {
             field.attr("rlabel", "rlabel");
@@ -389,9 +446,13 @@ class GTForm extends HTMLElement {
         const input = field.create(info.input);
         input.attr("data-form-element", "field");
         input.attr("id", id);
-        input.attr("name", info.name || id);
+        input.attr("name", name);
         if (info.type) {
             input.attr("type", info.type);
+        }
+
+        if (name in this._data) {
+            input.value(this._data[name]);
         }
 
         if (info.required) {
@@ -438,9 +499,8 @@ class GTForm extends HTMLElement {
 
     _createButton(info): HTMLElement {
         const button = $.create("button");
-        for(const [key, value] of Object.entries(info.events || {})){
-           
-            button.on(key, $.bind(value, this))
+        for (const [key, value] of Object.entries(info.events || {})) {
+            button.on(key, $.bind(value, this));
         }
         button.attr(info.attr || {});
         button.html(info.label);
@@ -482,7 +542,7 @@ class GTForm extends HTMLElement {
     }
 
     test(h, i) {
-        console.log(h, i)
+        console.log(h, i);
     }
 }
 

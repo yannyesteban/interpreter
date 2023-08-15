@@ -79,9 +79,8 @@ class Sevian extends HTMLElement {
     whenValid(name) {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
-                var _a, _b, _c;
-                console.log(this._modules, (_a = this.modules) === null || _a === void 0 ? void 0 : _a.find((e) => e.name.toUpperCase() === name.toUpperCase()));
-                const element = ((_c = (_b = this.modules) === null || _b === void 0 ? void 0 : _b.find((e) => e.name.toUpperCase() === name.toUpperCase())) === null || _c === void 0 ? void 0 : _c.wc) || name;
+                var _a, _b;
+                const element = ((_b = (_a = this.modules) === null || _a === void 0 ? void 0 : _a.find((e) => e.name.toUpperCase() === name.toUpperCase())) === null || _b === void 0 ? void 0 : _b.wc) || name;
                 console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
                 if (element.indexOf("-") < 0 || !element) {
                     resolve(element);
@@ -90,7 +89,6 @@ class Sevian extends HTMLElement {
                 yield customElements
                     .whenDefined(element)
                     .then((what) => {
-                    console.log(what);
                     resolve(element);
                 })
                     .catch((error) => {
@@ -123,7 +121,6 @@ class Sevian extends HTMLElement {
     }
     updateElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("updateElement", info, document.getElementById(info.id));
             yield this.whenValid(info.data.element).then(() => {
                 const e = $.id(info.id);
                 if (e) {
@@ -138,7 +135,6 @@ class Sevian extends HTMLElement {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(response);
             for (const r of response) {
-                console.log(r);
                 switch (r.type) {
                     case "set":
                         yield this.setElement(r);
@@ -151,7 +147,6 @@ class Sevian extends HTMLElement {
                         break;
                 }
             }
-            ;
             return true;
         });
     }
@@ -187,7 +182,6 @@ class Sevian extends HTMLElement {
         this.send(request);
     }
     set cssSheets(data) {
-        console.log(data);
         data.forEach((sheet) => {
             loadCss(sheet, true);
         });
@@ -198,7 +192,6 @@ class Sevian extends HTMLElement {
         });
     }
     set modules(info) {
-        console.log("%c%s", "color:yellow", info);
         this._modules = info;
         wc.LoadModules(info);
     }

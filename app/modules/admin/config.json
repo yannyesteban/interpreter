@@ -50,7 +50,7 @@
         "APP_PATH": "json/apps/"
     },
 
-    "bd": [
+    "db": [
         {
             "name": "mysql",
             "driver": "mysql",
@@ -58,7 +58,7 @@
             "port": "3306",
             "user": "root",
             "pass": "123456",
-            "dbase": "whendy",
+            "dbase": "classicmodels",
             "charset": "utf-8"
         },
         {

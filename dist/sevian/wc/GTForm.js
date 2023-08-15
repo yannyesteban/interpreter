@@ -86,6 +86,7 @@ class GTForm extends HTMLElement {
     }
     constructor() {
         super();
+        this._data = {};
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
@@ -125,8 +126,13 @@ class GTForm extends HTMLElement {
     getField(name) {
         return this.querySelector(`[name="${name}"]`);
     }
+    getFields() {
+        return Array.from(this.querySelectorAll(`[data-form-element="field"]`));
+    }
     getValues() {
-        return Array.from(this.querySelectorAll(`[name]`)).filter(e => e["name"]).reduce((a, element) => {
+        return Array.from(this.querySelectorAll(`[name]`))
+            .filter((e) => e["name"])
+            .reduce((a, element) => {
             a[element.name] = element.value;
             return a;
         }, {});
@@ -236,13 +242,56 @@ class GTForm extends HTMLElement {
     set dataSource(source) {
         this.innerHTML = "";
         console.log(source);
+        if (source.dataLists) {
+            this._createDataLists(source.dataLists);
+        }
         if (source.caption) {
             this._createCaption(source.caption);
         }
         if (source.className) {
             $(this).addClass(source.className);
         }
+        //this._data = source.data || {};
+        //console.log(this._data);
         this.setElements(this, source.elements);
+        const dataLists = Array.from(this.querySelectorAll(`datalist[data-name]`));
+        for (const list of dataLists) {
+            const name = list.dataset.name;
+            const element = this.querySelector(`[data-form-element="field"][name="${name}"]`);
+            this._setDataOptions(list, element);
+        }
+        this.values = source.data || {};
+    }
+    set values(data) {
+        this.getFields().forEach((field) => {
+            if (data[field.name]) {
+                field.value = data[field.name];
+            }
+        });
+    }
+    _setDataOptions(dataList, element) {
+        const options = Array.from(dataList.querySelectorAll("option"));
+        element.innerHTML = "";
+        options.forEach((option) => {
+            const opt = document.createElement("option");
+            opt.value = String(option.value); // the index
+            opt.innerHTML = String(option.text);
+            element.appendChild(opt);
+        });
+    }
+    _createDataLists(dataLists) {
+        for (const [name, info] of Object.entries(dataLists)) {
+            const dataList = $(this).create("datalist");
+            dataList.ds("name", name);
+            dataList.ds("filter", info.level || "");
+            info.data.forEach((item) => {
+                //alert(item.value)
+                const option = dataList.create("option");
+                option.prop("value", item.value);
+                option.ds("level", info.level || "");
+                option.html(item.text);
+            });
+        }
     }
     _createCaption(value) {
         $(this).create("gt-caption").html(value);
@@ -279,7 +328,8 @@ class GTForm extends HTMLElement {
         return null;
     }
     _createField(info) {
-        const id = info.id || info.name;
+        const id = info.id || undefined;
+        const name = info.name || "";
         const field = $.create("gt-field");
         if (info.rlabel) {
             field.attr("rlabel", "rlabel");
@@ -290,9 +340,12 @@ class GTForm extends HTMLElement {
         const input = field.create(info.input);
         input.attr("data-form-element", "field");
         input.attr("id", id);
-        input.attr("name", info.name || id);
+        input.attr("name", name);
         if (info.type) {
             input.attr("type", info.type);
+        }
+        if (name in this._data) {
+            input.value(this._data[name]);
         }
         if (info.required) {
             field.create("required-ind").text("*");

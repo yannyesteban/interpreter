@@ -32,6 +32,7 @@ export class DBAdmin {
     }
   }
   get<T>(name: string): T {
+    
     if (!this.dbs[name]) {
       this.dbs[name] = this.create(this.info[name].driver);
       this.dbs[name].connect(this.info[name]);

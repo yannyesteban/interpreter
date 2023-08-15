@@ -8,6 +8,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { Element } from "./element.js";
+export class Model {
+}
 export class Form extends Element {
     constructor() {
         super(...arguments);
@@ -38,39 +40,41 @@ export class Form extends Element {
             }
         });
     }
-    form() {
+    load() {
         return __awaiter(this, void 0, void 0, function* () {
             const db = (this.db = this.store.db.get(this.connection));
-            let result = yield db.infoTable("person");
+            let result = yield db.infoTable("cities");
             this.addResponse({
                 logs: result,
             });
-            let result1 = yield db.query("select a,b,c, d as x, 123 as num, id as f from person");
-            this.addResponse({
-                logs: result1,
-            });
-        });
-    }
-    load() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const data = {
-                mode: "init",
-                type: "element",
-                wc: "gt-form",
-                id: this.id,
-                props: {
-                    dataSource: this.layout,
-                },
-                //replayToken => $this->replayToken,
-                appendTo: this.appendTo,
-                setPanel: this.setPanel,
-            };
+            let data = yield db.query(this.data);
+            this._data = data.rows[0];
+            this.layout.data = data.rows[0];
+            if (this.datafields) {
+                this.layout.dataLists = yield this.evalDataFields(this.datafields);
+            }
+            const output = [];
+            if (this.dataFetch) {
+                //console.log(this.dataFetch)
+                for (const d of this.dataFetch) {
+                    output.push({
+                        name: d.name,
+                        data: yield this.evalData(d.data),
+                        childs: d.childs,
+                        parent: d.parent
+                    });
+                }
+                console.log(output);
+                this.layout.dataFields = output;
+            }
             //this.addResponse(data);
             this.response = {
                 element: "form",
                 propertys: {
-                    dataSource: this.layout
-                }
+                    dataSource: this.layout,
+                    //f: await this.evalDataFields(this.datafields),
+                    output
+                },
             };
         });
     }
@@ -79,6 +83,40 @@ export class Form extends Element {
     }
     addResponse(response) {
         //this.response.push(response);
+    }
+    evalDataFields(dataFields) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const result = {};
+            for (const [field, dataField] of Object.entries(dataFields)) {
+                result[field] = {
+                    data: yield this.evalData(dataField),
+                };
+            }
+            return result;
+        });
+    }
+    evalData(dataField) {
+        var _a, _b;
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log(this._data);
+            dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
+            let info = [];
+            for (const data of dataField) {
+                if (Array.isArray(data)) {
+                    info.push({ value: data[0], text: data[1], level: (_a = data[2]) !== null && _a !== void 0 ? _a : undefined });
+                }
+                else if (typeof data === "object") {
+                    if (data.sql) {
+                        let result = (yield this.db.query(data.sql, (_b = data.params) !== null && _b !== void 0 ? _b : undefined)).rows;
+                        info = [...info, ...result];
+                    }
+                    else if (data.value && data.text) {
+                        info.push(data);
+                    }
+                }
+            }
+            return info;
+        });
     }
     evalFields() {
         return __awaiter(this, void 0, void 0, function* () {

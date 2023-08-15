@@ -1,17 +1,86 @@
 {
-    "fields":[],
-    "data":"select * from units",
-    "datafields":{
-        "country":"select * from countries",
-        "city":["select * from cities where country=#country "]
+    "fields": [],
+    "data": "SELECT * FROM classicmodels.employees WHERE employeeNumber = 1370",
+    "dataFetch": [
+        {
+            "name": "countryId",
+            "data": [
+                ["", "select..."],
+                { "value": "1", "text": "ALL" },
+                {
+                    "sql": "select id as 'value', name as 'text' from countries WHERE subregion=?",
+                    "params": ["South America"]
+                }
+            ],
+            "childs": true
+        },
+        {
+            "name": "state_id",
+            "parent":"countryId",
+            "data": [
+                ["", "select..."],
+                {
+                    "sql": "SELECT id as 'value', name as text FROM classicmodels.states WHERE country_id=?",
+                    "params": ["{{&countryId}}"]
+                }
+            ]
+        }
+    ],
+    "datafields": {
+        "countryId": [
+            ["", "select..."],
+            { "value": "1", "text": "ALL" },
+            {
+                "sql": "select id as 'value', name as 'text' from countries WHERE subregion=?",
+                "params": ["South America"]
+            }
+        ],
+        "state_id": [
+            ["", "select..."],
+            {
+                "sql": "SELECT id as 'value', name as text FROM classicmodels.states WHERE country_id=?",
+                "params": ["#country_id"]
+            }
+        ]
+    },
+
+    "fetchData": {
+        "state_id": [
+            ["", "select..."],
+            {
+                "sql": "SELECT id as 'value', name as text FROM classicmodels.states WHERE country_id=?",
+                "params": ["#country_id"]
+            }
+        ]
+    },
+    "fieldRequest": {
+        "countryId": [
+            {
+                "type": "element",
+                "name": "two",
+                "method": "data-field"
+            }
+        ]
     },
     "layout": {
         "caption": "Users Admin",
         "elements": [
             {
                 "component": "field",
-                "label": "id",
-                "name": "id",
+                "label": "country",
+                "input": "select",
+                "name": "countryId"
+            },
+            {
+                "component": "field",
+                "label": "State",
+                "input": "select",
+                "name": "state_id"
+            },
+            {
+                "component": "field",
+                "label": "Fisrt Name",
+                "name": "firstName",
                 "input": "input",
                 "type": "text",
                 "value": "5"
@@ -25,14 +94,14 @@
                 "value": "Yanny"
             },
             {
-                "component":"button",
-                "label":"OK",
-                "attr":{
-                    "class":"save",
-                    "type":"button"
+                "component": "button",
+                "label": "OK",
+                "attr": {
+                    "class": "save",
+                    "type": "button"
                 },
-                "events":{
-                    "click":"this.closest('wh-app').sendForm({form:this.closest('form')})"
+                "events": {
+                    "click": "this.closest('wh-app').sendForm({form:this.closest('form')})"
                 }
             }
         ]

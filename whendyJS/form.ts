@@ -2,6 +2,12 @@ import { DBSql } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
 
+export class Model {
+    name: string;
+    mode: string;
+    response;
+}
+
 export class Form extends Element {
     public id: string;
     public name: string;
@@ -12,7 +18,7 @@ export class Form extends Element {
 
     templateFile: string;
 
-    response:object = {};
+    response: object = {};
 
     store: Store = null;
 
@@ -22,9 +28,14 @@ export class Form extends Element {
     private connection: string = "mysql";
     private _info: any;
     private fields;
-    private layout:any;
+    private layout: any;
 
-    
+    data;
+    datafields;
+    dataFetch;
+
+    _data;
+
     setStore(store: Store) {
         this.store = store;
     }
@@ -32,9 +43,9 @@ export class Form extends Element {
     init(info: InfoElement) {
         //this._info = this.store.loadJsonFile(info.source) || {};
 
-        console.log("...",info)
+        console.log("...", info);
 
-        for (const [key, value] of Object.entries( info )) {
+        for (const [key, value] of Object.entries(info)) {
             this[key] = value;
         }
     }
@@ -50,50 +61,89 @@ export class Form extends Element {
         }
     }
 
-    async form() {
+    async load() {
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
 
-        let result = await db.infoTable("person");
+        let result = await db.infoTable("cities");
 
         this.addResponse({
             logs: result,
         });
 
-        let result1 = await db.query("select a,b,c, d as x, 123 as num, id as f from person");
-        this.addResponse({
-            logs: result1,
-        });
-    }
-    async load() {
-        const data = {
-            mode: "init",
-            type: "element",
-            wc: "gt-form",
-            id: this.id,
-            props: {
-                dataSource: this.layout,
-            },
-            //replayToken => $this->replayToken,
-            appendTo: this.appendTo,
-            setPanel: this.setPanel,
-        };
+        let data = await db.query(this.data);
+        this._data = data.rows[0];
+        this.layout.data = data.rows[0];
+        if (this.datafields) {
+            this.layout.dataLists = await this.evalDataFields(this.datafields);
+        }
+        const output = [];
+        if(this.dataFetch){
+            
+            //console.log(this.dataFetch)
+            
+            for(const d of this.dataFetch){
+                output.push({
+
+                    name:d.name,
+                    data: await this.evalData(d.data),
+                    childs:d.childs,
+                    parent:d.parent
+                });
+            }
+            console.log(output)
+            this.layout.dataFields = output;
+        }
 
         //this.addResponse(data);
         this.response = {
-           
-            element:"form",
-            propertys : {
-                dataSource: this.layout
-            }
+            element: "form",
+            propertys: {
+                dataSource: this.layout,
+                //f: await this.evalDataFields(this.datafields),
+                output
+            },
         };
     }
+    
 
-    getResponse():any{
+    getResponse(): any {
         return this.response;
     }
 
-    addResponse(response){
+    addResponse(response) {
         //this.response.push(response);
+    }
+
+    async evalDataFields(dataFields) {
+        const result = {};
+        for (const [field, dataField] of Object.entries(dataFields)) {
+            result[field] = {
+                data: await this.evalData(dataField),
+            };
+        }
+
+        return result;
+    }
+
+    async evalData(dataField) {
+        console.log(this._data)
+        dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
+
+        let info = [];
+        for (const data of dataField) {
+            if (Array.isArray(data)) {
+                info.push({ value: data[0], text: data[1], level: data[2] ?? undefined });
+            } else if (typeof data === "object") {
+                if (data.sql) {
+                    let result = (await this.db.query(data.sql, data.params ?? undefined)).rows;
+                    info = [...info, ...result];
+                } else if (data.value && data.text) {
+                    info.push(data);
+                }
+            }
+        }
+        
+        return info;
     }
 
     private async evalFields() {

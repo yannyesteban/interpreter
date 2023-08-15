@@ -155,4 +155,14 @@ export class Store {
 
         return this.outer.execute(template);
     }
+
+    evalSubData(template: string, data:any) {
+        
+        this.outer.resetData();
+        
+        this.outer.setMap("&", data, "");
+        
+
+        return this.outer.execute(template);
+    }
 }

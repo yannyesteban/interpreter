@@ -48,11 +48,13 @@ export class Server {
             session.loadSession(this.constants);
 
             let infoDB = this.db;
+            
             let init = this.init;
 
             if (this.useModule) {
+                
                 const moduleInfo = Tool.loadJsonFile(`./app/modules${req.url}/config.json`);
-
+                
                 session.loadSession(moduleInfo.constants || {});
 
                 infoDB = moduleInfo.db || [];

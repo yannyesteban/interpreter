@@ -24,7 +24,7 @@
     "modules": [
         {
             "src": "./wc/Sevian.js",
-            "name": "App",
+            "name": "app",
             "wc": "sevian-app"
         },
         {

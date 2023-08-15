@@ -73,7 +73,7 @@ export abstract class STMT {
 
 export abstract class DBSql implements IRecordAdmin {
     abstract connect(info: IConnectInfo);
-    abstract query(sql: string, param?: any[]): Promise<QueryResult>;
+    abstract query(sql: string, params?: any[]): Promise<QueryResult>;
     abstract infoQuery(q: string):Promise<IFieldInfo[]>;
     abstract infoTable(table: string):Promise<IFieldInfo[]>;
     abstract prepare(): Promise<STMT>;

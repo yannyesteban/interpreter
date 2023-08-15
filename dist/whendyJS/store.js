@@ -117,5 +117,10 @@ export class Store {
         this.outer.setMap("#", this.vreq, "");
         return this.outer.execute(template);
     }
+    evalSubData(template, data) {
+        this.outer.resetData();
+        this.outer.setMap("&", data, "");
+        return this.outer.execute(template);
+    }
 }
 //# sourceMappingURL=store.js.map
