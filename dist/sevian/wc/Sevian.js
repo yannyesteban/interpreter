@@ -11,7 +11,7 @@ import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
 import * as wc from "./../WC.js";
-class Sevian extends HTMLElement {
+export class Sevian extends HTMLElement {
     static get observedAttributes() {
         return ["server"];
     }

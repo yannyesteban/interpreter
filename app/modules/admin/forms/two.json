@@ -5,10 +5,10 @@
         {
             "name": "countryId",
             "data": [
-                ["", "select..."],
+                ["", "- select your Country"],
                 { "value": "1", "text": "ALL" },
                 {
-                    "sql": "select id as 'value', name as 'text' from countries WHERE subregion=?",
+                    "sql": "select id as 'value', name as 'text' from countries WHERE id IN (233,239)/*subregion=?*/",
                     "params": ["South America"]
                 }
             ],
@@ -17,11 +17,24 @@
         {
             "name": "state_id",
             "parent":"countryId",
+            "mode_":"fetch",
             "data": [
-                ["", "select..."],
+                ["", "- select your State", "*"],
                 {
-                    "sql": "SELECT id as 'value', name as text FROM classicmodels.states WHERE country_id=?",
+                    "sql": "SELECT id as 'value', name as text, country_id as level FROM classicmodels.states WHERE country_id=? or country_id IN (239,233)",
                     "params": ["{{&countryId}}"]
+                }
+            ]
+        },
+        {
+            "name": "city_id",
+            "parent":"state_id",
+            "mode_":"fetch",
+            "data": [
+                ["", "- select your City","*"],
+                {
+                    "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE /*state_id=? or*/ country_id IN (239)",
+                    "params": ["{{&state_id}}"]
                 }
             ]
         }
@@ -79,6 +92,12 @@
             },
             {
                 "component": "field",
+                "label": "City",
+                "input": "select",
+                "name": "city_id"
+            },
+            {
+                "component": "field",
                 "label": "Fisrt Name",
                 "name": "firstName",
                 "input": "input",
@@ -87,8 +106,8 @@
             },
             {
                 "component": "field",
-                "label": "Name",
-                "name": "name",
+                "label": "Last Name",
+                "name": "lastName",
                 "input": "input",
                 "type": "text",
                 "value": "Yanny"

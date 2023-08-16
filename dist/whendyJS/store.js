@@ -77,6 +77,9 @@ export class Store {
     setExp(name, value) {
         this.vexp[name] = value;
     }
+    getVReq() {
+        return this.vreq;
+    }
     setVReq(vreq) {
         this.vreq = vreq;
     }

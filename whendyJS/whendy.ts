@@ -77,7 +77,7 @@ export class Whendy {
 
         ele.setStore(this.store);
         let config = info;
-        if (this.classes.useFileConfig(info.element)) {
+        if (this.classes.useFileConfig(info.element) && info.name) {
             config = { ...this.getElementConfig(info.element, info.name), ...info };
         }
 

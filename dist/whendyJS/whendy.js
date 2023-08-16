@@ -60,7 +60,7 @@ export class Whendy {
             const ele = new cls();
             ele.setStore(this.store);
             let config = info;
-            if (this.classes.useFileConfig(info.element)) {
+            if (this.classes.useFileConfig(info.element) && info.name) {
                 config = Object.assign(Object.assign({}, this.getElementConfig(info.element, info.name)), info);
             }
             ele.init(config);

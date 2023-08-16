@@ -35,6 +35,7 @@ export class Form extends Element {
     dataFetch;
 
     _data;
+    eparams;
 
     setStore(store: Store) {
         this.store = store;
@@ -43,7 +44,7 @@ export class Form extends Element {
     init(info: InfoElement) {
         //this._info = this.store.loadJsonFile(info.source) || {};
 
-        console.log("...", info);
+        //console.log("...", info);
 
         for (const [key, value] of Object.entries(info)) {
             this[key] = value;
@@ -51,12 +52,16 @@ export class Form extends Element {
     }
 
     async evalMethod(method: string) {
+        console.log("eparams..", method, this.eparams);
         switch (method) {
             case "request":
                 await this.load();
                 break;
             case "request2":
                 await this.evalFields();
+                break;
+            case "data-fields":
+                await this.doDataFields(this.eparams?.parent);
                 break;
         }
     }
@@ -72,25 +77,26 @@ export class Form extends Element {
 
         let data = await db.query(this.data);
         this._data = data.rows[0];
+        this._data["state_id"] = 2040;
+        this._data["city_id"] = 130165;
         this.layout.data = data.rows[0];
         if (this.datafields) {
             this.layout.dataLists = await this.evalDataFields(this.datafields);
         }
         const output = [];
-        if(this.dataFetch){
-            
+        if (this.dataFetch) {
             //console.log(this.dataFetch)
-            
-            for(const d of this.dataFetch){
-                output.push({
 
-                    name:d.name,
+            for (const d of this.dataFetch) {
+                output.push({
+                    name: d.name,
                     data: await this.evalData(d.data),
-                    childs:d.childs,
-                    parent:d.parent
+                    childs: d.childs,
+                    parent: d.parent,
+                    mode: d.mode,
                 });
             }
-            console.log(output)
+            //console.log(output)
             this.layout.dataFields = output;
         }
 
@@ -100,11 +106,48 @@ export class Form extends Element {
             propertys: {
                 dataSource: this.layout,
                 //f: await this.evalDataFields(this.datafields),
-                output
+                output,
             },
         };
     }
-    
+
+    async getDataFields(list){
+        const output = [];
+        for (const info of list) {
+            output.push(await(this.getDataField(info)));
+        }
+        return output;
+    }
+
+    async getDataField(info) {
+        return {
+            name: info.name,
+            data: await this.evalData(info.data),
+            childs: info.childs,
+            parent: info.parent,
+            mode: info.mode,
+        };
+    }
+
+    async doDataFields(parent) {
+        this._data = this.store.getVReq();
+        console.log("doDataFields", parent)
+        const db = (this.db = this.store.db.get<DBSql>(this.connection));
+
+        const list = this.dataFetch.filter((data) => data.parent == parent) || [];
+        console.log(list)
+        const output = await this.getDataFields(list);
+        console.log("output-->", output)
+        this.response = {
+            element: "form",
+            propertys: {
+                dataFields: output,
+                //f: await this.evalDataFields(this.datafields),
+                output,
+            },
+        };
+        
+    }
 
     getResponse(): any {
         return this.response;
@@ -126,7 +169,7 @@ export class Form extends Element {
     }
 
     async evalData(dataField) {
-        console.log(this._data)
+        console.log(this._data);
         dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
 
         let info = [];
@@ -142,7 +185,7 @@ export class Form extends Element {
                 }
             }
         }
-        
+
         return info;
     }
 

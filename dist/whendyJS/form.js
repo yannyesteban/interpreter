@@ -23,19 +23,24 @@ export class Form extends Element {
     }
     init(info) {
         //this._info = this.store.loadJsonFile(info.source) || {};
-        console.log("...", info);
+        //console.log("...", info);
         for (const [key, value] of Object.entries(info)) {
             this[key] = value;
         }
     }
     evalMethod(method) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
+            console.log("eparams..", method, this.eparams);
             switch (method) {
                 case "request":
                     yield this.load();
                     break;
                 case "request2":
                     yield this.evalFields();
+                    break;
+                case "data-fields":
+                    yield this.doDataFields((_a = this.eparams) === null || _a === void 0 ? void 0 : _a.parent);
                     break;
             }
         });
@@ -49,6 +54,8 @@ export class Form extends Element {
             });
             let data = yield db.query(this.data);
             this._data = data.rows[0];
+            this._data["state_id"] = 2040;
+            this._data["city_id"] = 130165;
             this.layout.data = data.rows[0];
             if (this.datafields) {
                 this.layout.dataLists = yield this.evalDataFields(this.datafields);
@@ -61,10 +68,11 @@ export class Form extends Element {
                         name: d.name,
                         data: yield this.evalData(d.data),
                         childs: d.childs,
-                        parent: d.parent
+                        parent: d.parent,
+                        mode: d.mode,
                     });
                 }
-                console.log(output);
+                //console.log(output)
                 this.layout.dataFields = output;
             }
             //this.addResponse(data);
@@ -73,7 +81,46 @@ export class Form extends Element {
                 propertys: {
                     dataSource: this.layout,
                     //f: await this.evalDataFields(this.datafields),
-                    output
+                    output,
+                },
+            };
+        });
+    }
+    getDataFields(list) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const output = [];
+            for (const info of list) {
+                output.push(yield (this.getDataField(info)));
+            }
+            return output;
+        });
+    }
+    getDataField(info) {
+        return __awaiter(this, void 0, void 0, function* () {
+            return {
+                name: info.name,
+                data: yield this.evalData(info.data),
+                childs: info.childs,
+                parent: info.parent,
+                mode: info.mode,
+            };
+        });
+    }
+    doDataFields(parent) {
+        return __awaiter(this, void 0, void 0, function* () {
+            this._data = this.store.getVReq();
+            console.log("doDataFields", parent);
+            const db = (this.db = this.store.db.get(this.connection));
+            const list = this.dataFetch.filter((data) => data.parent == parent) || [];
+            console.log(list);
+            const output = yield this.getDataFields(list);
+            console.log("output-->", output);
+            this.response = {
+                element: "form",
+                propertys: {
+                    dataFields: output,
+                    //f: await this.evalDataFields(this.datafields),
+                    output,
                 },
             };
         });

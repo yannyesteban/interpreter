@@ -5,7 +5,7 @@ import { Q as $ } from "./../Q.js";
 import * as wc from "./../WC.js";
 import { AppRequest, ElementResponse, FetchInfo, IElement, IResponse } from "../IApp.js";
 
-class Sevian extends HTMLElement {
+export class Sevian extends HTMLElement {
     private panels: any = {};
     private _modules: wc.WCModule[] = [];
 
