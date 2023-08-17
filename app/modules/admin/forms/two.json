@@ -1,14 +1,14 @@
 {
     "fields": [],
     "data": "SELECT * FROM classicmodels.employees WHERE employeeNumber = 1370",
-    "dataFetch": [
+    "dataLists": [
         {
             "name": "countryId",
             "data": [
                 ["", "- select your Country"],
                 { "value": "1", "text": "ALL" },
                 {
-                    "sql": "select id as 'value', name as 'text' from countries WHERE id IN (233,239)/*subregion=?*/",
+                    "sql": "select id as 'value', name as 'text' from countries WHERE id IN (233,239)/*subregion=?*/ ORDER BY name",
                     "params": ["South America"]
                 }
             ],
@@ -17,11 +17,11 @@
         {
             "name": "state_id",
             "parent":"countryId",
-            "mode_":"fetch",
+            "mode":"fetch",
             "data": [
                 ["", "- select your State", "*"],
                 {
-                    "sql": "SELECT id as 'value', name as text, country_id as level FROM classicmodels.states WHERE country_id=? or country_id IN (239,233)",
+                    "sql": "SELECT id as 'value', name as text, country_id as level FROM classicmodels.states WHERE country_id=?/* or country_id IN (239,233)*/ ORDER BY name",
                     "params": ["{{&countryId}}"]
                 }
             ]
@@ -29,43 +29,18 @@
         {
             "name": "city_id",
             "parent":"state_id",
-            "mode_":"fetch",
+            "mode":"fetch",
             "data": [
                 ["", "- select your City","*"],
                 {
-                    "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE /*state_id=? or*/ country_id IN (239)",
+                    "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE state_id=? /*country_id IN (239)*/  ORDER BY name",
                     "params": ["{{&state_id}}"]
                 }
             ]
         }
     ],
-    "datafields": {
-        "countryId": [
-            ["", "select..."],
-            { "value": "1", "text": "ALL" },
-            {
-                "sql": "select id as 'value', name as 'text' from countries WHERE subregion=?",
-                "params": ["South America"]
-            }
-        ],
-        "state_id": [
-            ["", "select..."],
-            {
-                "sql": "SELECT id as 'value', name as text FROM classicmodels.states WHERE country_id=?",
-                "params": ["#country_id"]
-            }
-        ]
-    },
+    
 
-    "fetchData": {
-        "state_id": [
-            ["", "select..."],
-            {
-                "sql": "SELECT id as 'value', name as text FROM classicmodels.states WHERE country_id=?",
-                "params": ["#country_id"]
-            }
-        ]
-    },
     "fieldRequest": {
         "countryId": [
             {

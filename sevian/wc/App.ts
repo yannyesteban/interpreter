@@ -2,7 +2,9 @@ import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 
 import { Q as $ } from "./../Q.js";
-import { log } from "console";
+
+
+import "./AppRequest.js";
 
 export type selector = string;
 

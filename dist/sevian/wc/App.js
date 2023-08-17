@@ -1,6 +1,7 @@
 import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
+import "./AppRequest.js";
 export class App extends HTMLElement {
     constructor() {
         super();

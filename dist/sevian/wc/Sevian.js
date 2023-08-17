@@ -11,6 +11,7 @@ import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
 import * as wc from "./../WC.js";
+import "./AppRequest.js";
 export class Sevian extends HTMLElement {
     static get observedAttributes() {
         return ["server"];
@@ -26,7 +27,12 @@ export class Sevian extends HTMLElement {
 				display:block;
 
 			}
-			</style><slot></slot>`;
+            main{
+                border:4px solid green;
+                display:flex;
+            }
+			</style>
+            <main><slot></slot></main>`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         const slot = this.shadowRoot.querySelector("slot");
@@ -34,7 +40,9 @@ export class Sevian extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
     }
-    connectedCallback() { }
+    connectedCallback() {
+        this.classList.add("_main_app_");
+    }
     disconnectedCallback() { }
     attributeChangedCallback(name, old, value) {
         switch (name) {
@@ -64,6 +72,18 @@ export class Sevian extends HTMLElement {
     }
     get name() {
         return this.getAttribute("name");
+    }
+    set className(value) {
+        if (Boolean(value)) {
+            $(this).addClass(value);
+            //this.setAttribute("className", value);
+        }
+        else {
+            this.removeAttribute("className");
+        }
+    }
+    get className() {
+        return this.getAttribute("class");
     }
     set token(value) {
         if (Boolean(value)) {

@@ -87,6 +87,8 @@ class GTForm extends HTMLElement {
     constructor() {
         super();
         this._data = {};
+        this.modeInit = false;
+        this._resquest = {};
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
@@ -103,41 +105,54 @@ class GTForm extends HTMLElement {
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         const slot = this.shadowRoot.querySelector("slot:not([name])");
-        slot.addEventListener("slotchange", (e) => {
-            const elems = Array.from(this.querySelectorAll(`[data-form-element="field"]`));
-            elems.forEach(e => {
-                const dataList = this.querySelector(`datalist[data-name="${e.name}"]`);
-                if (dataList) {
-                    console.log(dataList, e);
-                    this._setDataOptions(dataList, e);
-                    console.log(this._values);
-                    e.value = this._values[e.name].toString();
+        slot.addEventListener("slotchange", (event) => {
+            const lists = Array.from(slot.querySelectorAll("datalist:not(.__ready__)"));
+            for (const list of lists) {
+                const name = list.dataset.name;
+                const inputs = Array.from(this.querySelectorAll(`[name="${name}"]`));
+                for (const input of inputs) {
+                    //input.classList.add("__ready__");
+                    //console.log(list, input);
+                    this._setDataOptions(list, input);
+                    //input.value = list.getAttribute("data-value"); //this._values[e.name].toString()
                 }
-            });
-            console.log(elems);
-            slot.assignedNodes().forEach((node) => {
-                //console.log(node.getAttribute("data-form-element"))
-            });
-            console.log(slot.assignedNodes());
-            //Array.from(slot.querySelectorAll("datalist")).forEach(datalist=>datalist.slot="datalist")
-            //console.log(slot.assignedNodes())
-            //const nodes = slot.assignedNodes();
+                list.classList.add("__ready__");
+            }
+            const elems = Array.from(this.querySelectorAll(`[data-form-element="field"]:not(.__ready__)`));
+            for (const input of elems) {
+                const list = this.querySelector(`datalist[data-name="${input.name}"]`);
+                console.log("value: ", input.name, input.value);
+                if (list) {
+                    //input.classList.add("__ready__");
+                    //console.log(list, input);
+                    this._setDataOptions(list, input);
+                    //input.value = list.getAttribute("data-value"); //this._values[e.name].toString()
+                }
+            }
+            this.modeInit = false;
         });
     }
-    handleEvent(ev) {
-    }
-    connectedCallback() {
-        this.initList();
-        this._setStore();
-        $(this).on("change", (event) => {
-            console.log(event.target.name);
+    handleEvent(event) {
+        if (event.type === "change") {
+            console.log(event.detail, event.target.name);
             const lists = $(this).queryAll(`datalist[data-parent="${event.target.name}"]`);
             if (lists) {
                 for (const list of lists) {
                     const name = list.ds("name");
                     const mode = list.ds("mode");
                     if (mode) {
-                        const app = this.closest("sevian-app");
+                        const request = this.getAppRequest("dataField");
+                        if (request) {
+                            let info = request.data;
+                            info.form = this;
+                            info.actions[0].eparams = {
+                                parent: event.target.name,
+                            };
+                            const app = document.querySelector("._main_app_");
+                            app.send(info);
+                        }
+                        /*
+                        const app: Sevian = this.closest("sevian-app");
                         app.send({
                             form: this,
                             actions: [
@@ -152,22 +167,37 @@ class GTForm extends HTMLElement {
                                     },
                                 },
                             ],
-                        });
+                        });*/
                     }
                     else {
-                        const element = $(`[name="${name}"]`).get();
-                        this._setDataOptions(list.get(), element, event.target.value);
+                        const element = $(`[name="${name}"]`);
+                        if (element) {
+                            this._setDataOptions(list.get(), element.get(), event.target.value);
+                        }
                     }
                 }
             }
+        }
+    }
+    connectedCallback() {
+        $(".save1").on("click", () => {
+            this.appendChild($.create("div").get());
+            const s = $.create("select").get();
+            s.dataset.formElement = "field";
+            s.name = "city_id";
+            this.appendChild(s);
+            const d2 = document.getElementById("d2");
+            this.append(d2);
         });
+        this._setStore();
+        $(this).on("change", this);
     }
     disconnectedCallback() {
         console.log("disconnectedCallback");
+        $(this).off("change", this);
     }
     attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
-        this[name] = newVal;
     }
     _setStore() {
         customElements.whenDefined("data-store").then(() => {
@@ -196,90 +226,6 @@ class GTForm extends HTMLElement {
             return a;
         }, {});
     }
-    _setDataList(parentName, value) {
-        console.log(parentName, value);
-        const lists = $(this).queryAll(`[data-parent="${parentName}"]`);
-        console.log(lists);
-        lists.forEach((list) => {
-            if (list.get().tagName === "SELECT") {
-                this._updateSelect(list.get(), value);
-            }
-        });
-    }
-    _updateSelect(select, filter) {
-        console.log(select, filter);
-        const listName = select.getAttribute("list");
-        const list = this.querySelector(`datalist[id="${listName}"]`);
-        console.log(list);
-        let options; //list.querySelectorAll("option");
-        if (filter == "") {
-            options = list.querySelectorAll("option");
-        }
-        else {
-            options = list.querySelectorAll(`option[data-level="${filter}"]`);
-        }
-        select.innerHTML = "";
-        let value = select.value;
-        let _value = null;
-        if (options.length > 0) {
-            _value = options[0].value;
-        }
-        options.forEach((option) => {
-            if (option.value == value) {
-                _value = option.value;
-            }
-            const opt = document.createElement("option");
-            opt.value = String(option.value); // the index
-            opt.innerHTML = String(option.text);
-            select.appendChild(opt);
-        });
-        console.log(_value);
-        select.value = _value;
-        if (value != _value) {
-            $(select).fire("change", []);
-        }
-    }
-    set dataField(info) {
-        const field = this.querySelector(`[name="${info.field}"]`);
-        field.innerHTML = "";
-        let value = field.value;
-        let _value = null;
-        if (info.data.length > 0) {
-            _value = info.data[0].value;
-        }
-        info.data.forEach((option) => {
-            if (option.value == info.value) {
-                _value = option.value;
-            }
-            const opt = document.createElement("option");
-            opt.value = String(option.value); // the index
-            opt.innerHTML = String(option.text);
-            field.appendChild(opt);
-        });
-        field.value = _value;
-    }
-    initList() {
-        const fields = $(this).queryAll("[data-childs=true]");
-        fields.forEach((field) => {
-            field.on("change", (event) => {
-                console.log("xxxx");
-                this._setDataList(event.target.name, event.target.value);
-            });
-        });
-        const sel = this.querySelectorAll("select[list]");
-        sel.forEach((select) => {
-            let parentValue = "";
-            const parentName = select.getAttribute("data-parent");
-            if (parentName) {
-                const parentField = this.getField(parentName);
-                console.log(parentField, parentField.value);
-                if (parentField) {
-                    parentValue = parentField.value;
-                }
-            }
-            this._setDataList(parentName, parentValue);
-        });
-    }
     set type(value) {
         if (Boolean(value)) {
             this.setAttribute("type", value);
@@ -292,20 +238,36 @@ class GTForm extends HTMLElement {
         return this.getAttribute("type");
     }
     set dataSource(source) {
-        this._values = source.data;
+        /*
+        const appRequest = {
+            dataField: {
+                //form: this,
+                actions: [
+                    {
+                        type: "element",
+                        element: "form",
+                        id: this.id,
+                        name: "two",
+                        method: "data-fields",
+                    },
+                ],
+            },
+        };
+        */
+        customElements.whenDefined("app-request").then((x) => {
+            if (source.appRequests) {
+                for (const [name, info] of Object.entries(source.appRequests)) {
+                    const r = $(this).create("app-request").get();
+                    r.setAttribute("name", name);
+                    r.setAttribute("type", "json");
+                    r["data"] = info;
+                    console.log(info);
+                }
+            }
+        });
+        this.modeInit = true;
         this.innerHTML = "";
         console.log(source);
-        if (source.dataFields) {
-            source.dataFields.forEach((info) => {
-                this._createDataList(info);
-            });
-        }
-        if (source.dataLists) {
-            //this._createDataLists(source.dataLists);
-        }
-        if (source.dataLists) {
-            //this._createDataLists(source.dataLists);
-        }
         if (source.caption) {
             this._createCaption(source.caption);
         }
@@ -326,6 +288,11 @@ class GTForm extends HTMLElement {
         */
         console.log("FINAL.....");
         this.values = source.data || {};
+        if (source.dataLists) {
+            source.dataLists.forEach((info) => {
+                this._createDataList(info);
+            });
+        }
     }
     set values(data) {
         this.getFields().forEach((field) => {
@@ -339,25 +306,35 @@ class GTForm extends HTMLElement {
         for (const info of dataFields) {
             const list = this._createDataList(info);
             const element = this.querySelector(`[data-form-element="field"][name="${info.name}"]`);
-            this._setDataOptions(list, element);
+            if (element) {
+                this._setDataOptions(list, element);
+            }
         }
     }
-    _setDataOptions(dataList, element, level) {
+    _setDataOptions(list, input, level) {
+        console.log(input);
+        if (list.dataset.parent) {
+            level = this.querySelector(`[data-form-element="field"][name="${list.dataset.parent}"]`).value;
+        }
         let options;
         if (level) {
-            options = Array.from(dataList.querySelectorAll(`option[data-level="${level}"],option[data-level="*"]`));
+            options = Array.from(list.querySelectorAll(`option[data-level="${level}"],option[data-level="*"]`));
         }
         else {
-            options = Array.from(dataList.querySelectorAll("option"));
+            options = Array.from(list.querySelectorAll("option"));
         }
-        element.innerHTML = "";
+        input.classList.add("__ready__");
+        input.innerHTML = "";
         options.forEach((option) => {
             const opt = document.createElement("option");
-            opt.value = String(option.value); // the index
+            opt.value = String(option.value);
             opt.innerHTML = String(option.text);
-            element.appendChild(opt);
+            input.appendChild(opt);
         });
-        $(element).fire("change", {});
+        input.value = list.getAttribute("data-value");
+        if (!this.modeInit) {
+            $(input).fire("change", { value: input.value });
+        }
     }
     _createDataList(info) {
         let dataList = $(this).query(`datalist[data-name="${info.name}"]`);
@@ -370,6 +347,7 @@ class GTForm extends HTMLElement {
         dataList.ds("parent", info.parent || "");
         dataList.ds("childs", info.childs || "");
         dataList.ds("filter", info.level || "");
+        dataList.ds("value", info.value || "");
         info.data.forEach((item) => {
             //alert(item.value)
             const option = dataList.create("option");
@@ -379,20 +357,6 @@ class GTForm extends HTMLElement {
         });
         $(this).append(dataList);
         return dataList.get();
-    }
-    _createDataLists(dataLists) {
-        for (const [name, info] of Object.entries(dataLists)) {
-            const dataList = $(this).create("datalist");
-            dataList.ds("name", name);
-            dataList.ds("filter", info.level || "");
-            info.data.forEach((item) => {
-                //alert(item.value)
-                const option = dataList.create("option");
-                option.prop("value", item.value);
-                option.ds("level", info.level || "");
-                option.html(item.text);
-            });
-        }
     }
     _createCaption(value) {
         $(this).create("gt-caption").html(value);
@@ -515,6 +479,19 @@ class GTForm extends HTMLElement {
             separator.addClass(info.className);
         }
         return separator.get();
+    }
+    getAppRequest(name) {
+        return this.querySelector(`app-request[name="${name}"]`);
+    }
+    sendRequest(name) {
+        const info = this.getAppRequest(name);
+        if (info) {
+            const app = document.querySelector("._main_app_");
+            app.send(info);
+        }
+        else {
+            console.log("request don't exists!");
+        }
     }
     test(h, i) {
         console.log(h, i);

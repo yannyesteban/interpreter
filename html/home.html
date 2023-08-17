@@ -1,34 +1,67 @@
 <!DOCTYPE html>
 <html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Home Form</title>
-    <link rel="icon" type="image/x-icon" href="./images/favicon.ico">
-    <style>
-        body{
-            background-image: url("./images/wallpapers/003.jpg");
-            background-position: center center;
-            background-size: 100vw auto;
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Home Form</title>
+        <link rel="icon" type="image/x-icon" href="./images/favicon.ico" />
+        <style>
+            body {
+                background-image: url("./images/wallpapers/003.jpg");
+                background-position: center center;
+                background-size: 100vw auto;
+            }
 
-        }
+            form {
+                height: 200px;
+            }
+        </style>
+        <script defer type="module" src="../dist/sevian/wc/Sevian.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/WaitLayer.js"></script>
+    </head>
+    <body>
+        <sevian-app module="admin" id="gtcomm" name="home" server="http://127.0.0.1:8080/admin">
+            <div id="f">...</div>
 
-        form{
-            height:200px;
-        }
-    </style>
-    <script defer type="module" src="../dist/sevian/wc/Sevian.js"></script>
-    <script defer type="module" src="../dist/sevian/wc/WaitLayer.js"></script>
+            <wh-html>ggg</wh-html>
 
-</head>
-<body>
-    <sevian-app module="admin" id="gtcomm" name="home" server="http://127.0.0.1:8080/admin">
 
-        <div id="f">...</div>
+            
+        </sevian-app>
 
-        <wh-html>ggg</wh-html>
-    </sevian-app>
-    
-    <button type="button" id ="x">SEND...</button>
-</body>
+        <button type="button" id="x">SEND...</button>
+        <button type="button" class="save1">SAVE 1</button>
+
+        <datalist id="d2" data-name="_city_id" data-mode="" data-parent="countryId" data-value="2">
+            <option value="" data-level="">- select your soon</option>
+            
+            <option value="1" data-level="239">Candelaria</option>
+            <option value="2" data-level="239">Paraiso</option>
+            <option value="3" data-level="239">Cúa</option>
+
+            <option value="1" data-level="233">Poughkeepsie</option>
+            <option value="2" data-level="233">Bruckwick</option>
+            <option value="3" data-level="233">Jacksonville</option>
+        </datalist>
+
+        <app-request name="field-data" type="json" hidden>
+            {
+             
+                "confirm": "a?",
+                "actions": [
+                    {
+                        "type": "element",
+                        "element": "form",
+                        "id": "unit",
+                        "name": "two",
+                        "method": "data-fields",
+                        "eparams": {
+                          
+                        }
+                    }
+                ]
+            }
+            
+        </app-request>
+    </body>
 </html>

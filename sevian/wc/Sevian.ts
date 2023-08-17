@@ -4,6 +4,7 @@ import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
 import * as wc from "./../WC.js";
 import { AppRequest, ElementResponse, FetchInfo, IElement, IResponse } from "../IApp.js";
+import "./AppRequest.js";
 
 export class Sevian extends HTMLElement {
     private panels: any = {};
@@ -23,7 +24,12 @@ export class Sevian extends HTMLElement {
 				display:block;
 
 			}
-			</style><slot></slot>`;
+            main{
+                border:4px solid green;
+                display:flex;
+            }
+			</style>
+            <main><slot></slot></main>`;
 
         this.attachShadow({ mode: "open" });
 
@@ -36,7 +42,9 @@ export class Sevian extends HTMLElement {
         });
     }
 
-    public connectedCallback() {}
+    public connectedCallback() {
+        this.classList.add("_main_app_")
+    }
 
     public disconnectedCallback() {}
 
@@ -70,6 +78,19 @@ export class Sevian extends HTMLElement {
 
     get name() {
         return this.getAttribute("name");
+    }
+
+    set className(value) {
+        if (Boolean(value)) {
+            $(this).addClass(value)
+            //this.setAttribute("className", value);
+        } else {
+            this.removeAttribute("className");
+        }
+    }
+
+    get className() {
+        return this.getAttribute("class");
     }
 
     set token(value) {

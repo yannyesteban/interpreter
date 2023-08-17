@@ -33,6 +33,7 @@ export class Form extends Element {
     data;
     datafields;
     dataFetch;
+    dataLists;
 
     _data;
     eparams;
@@ -81,26 +82,43 @@ export class Form extends Element {
         this._data["city_id"] = 130165;
         this.layout.data = data.rows[0];
         if (this.datafields) {
-            this.layout.dataLists = await this.evalDataFields(this.datafields);
+            //this.layout.dataLists = await this.evalDataFields(this.datafields);
         }
         const output = [];
-        if (this.dataFetch) {
+        if (this.dataLists) {
             //console.log(this.dataFetch)
 
-            for (const d of this.dataFetch) {
+            for (const d of this.dataLists) {
                 output.push({
                     name: d.name,
                     data: await this.evalData(d.data),
                     childs: d.childs,
                     parent: d.parent,
                     mode: d.mode,
+                    value: this._data[d.name],
                 });
             }
             //console.log(output)
-            this.layout.dataFields = output;
+            this.layout.dataLists = output;
         }
 
         //this.addResponse(data);
+
+        this.layout.appRequests = {
+            dataField: {
+                //form: this,
+                actions: [
+                    {
+                        type: "element",
+                        element: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "data-fields",
+                    },
+                ],
+            },
+        };
+
         this.response = {
             element: "form",
             propertys: {
@@ -111,10 +129,10 @@ export class Form extends Element {
         };
     }
 
-    async getDataFields(list){
+    async getDataFields(list) {
         const output = [];
         for (const info of list) {
-            output.push(await(this.getDataField(info)));
+            output.push(await this.getDataField(info));
         }
         return output;
     }
@@ -131,13 +149,13 @@ export class Form extends Element {
 
     async doDataFields(parent) {
         this._data = this.store.getVReq();
-        console.log("doDataFields", parent)
+        console.log("doDataFields", parent);
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
 
-        const list = this.dataFetch.filter((data) => data.parent == parent) || [];
-        console.log(list)
+        const list = this.dataLists.filter((data) => data.parent == parent) || [];
+        console.log(list);
         const output = await this.getDataFields(list);
-        console.log("output-->", output)
+        console.log("output-->", output);
         this.response = {
             element: "form",
             propertys: {
@@ -146,7 +164,6 @@ export class Form extends Element {
                 output,
             },
         };
-        
     }
 
     getResponse(): any {
