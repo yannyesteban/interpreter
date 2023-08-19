@@ -19,7 +19,7 @@ export class DBUpdate {
                 host: "localhost",
                 user: "root",
                 pass: "123456",
-                dbase: "whendy",
+                dbase: "whendy"
             },
             {
                 name: "postgres",
@@ -27,7 +27,7 @@ export class DBUpdate {
                 host: "localhost",
                 user: "postgres",
                 pass: "12345678",
-                dbase: "whendy",
+                dbase: "whendy"
             },
             {
                 name: "sqlite",
@@ -35,8 +35,8 @@ export class DBUpdate {
                 host: "",
                 user: "",
                 pass: "",
-                dbase: "./whendy.db",
-            },
+                dbase: "./whendy.db"
+            }
         ]);
         this.config = config;
         let db;
@@ -58,17 +58,15 @@ export class DBUpdate {
                 let result;
                 if (mode === RecordMode.DELETE) {
                     result = yield db.deleteRecord({
-                        table: scheme.table,
-                        record: info.record,
+                        "table": scheme.table,
+                        "record": info.record
                     });
                     continue;
                 }
                 const data = info.data;
                 //const find = scheme.fields.find(e => e.serial);
-                const keys = scheme.fields.filter((e) => e.key);
-                const recordId = keys.reduce((acc, value) => {
-                    return Object.assign(Object.assign({}, acc), { [value.name]: value });
-                }, {});
+                const keys = scheme.fields.filter(e => e.key);
+                const recordId = keys.reduce((acc, value) => { return Object.assign(Object.assign({}, acc), { [value.name]: value }); }, {});
                 const newData = {};
                 let serialField = null;
                 for (const field of scheme.fields) {
@@ -80,7 +78,7 @@ export class DBUpdate {
                     if (name in recordId) {
                         recordId[name] = value;
                     }
-                    if (field.aux || (mode === RecordMode.UPDATE && field.noUpdate)) {
+                    if (field.aux || mode === RecordMode.UPDATE && field.noUpdate) {
                         continue;
                     }
                     if (field.masterValue && field.masterValue in master) {
@@ -113,24 +111,24 @@ export class DBUpdate {
                 }
                 if (mode === RecordMode.INSERT) {
                     result = yield db.insertRecord({
-                        table: scheme.table,
-                        serial: serialField,
-                        data: newData,
+                        "table": scheme.table,
+                        "serial": serialField,
+                        "data": newData
                     });
                 }
                 else if (mode === RecordMode.UPDATE) {
                     result = yield db.updateRecord({
-                        table: scheme.table,
-                        serial: serialField,
-                        data: newData,
-                        record: info.record,
+                        "table": scheme.table,
+                        "serial": serialField,
+                        "data": newData,
+                        "record": info.record
                     });
                 }
                 else if (mode === RecordMode.UPSERT) {
                     result = yield db.upsertRecord({
-                        table: scheme.table,
-                        serial: serialField,
-                        data: newData,
+                        "table": scheme.table,
+                        "serial": serialField,
+                        "data": newData
                     });
                 }
                 console.log("result::::", mode, result);
@@ -144,4 +142,4 @@ export class DBUpdate {
         });
     }
 }
-//# sourceMappingURL=DBUpdate.js.map
+//# sourceMappingURL=DBUpdate%20copy.js.map

@@ -1,5 +1,10 @@
 {
+    "db":"mysq",
     "fields": [],
+    "record": {
+        "employeeNumber": 1370
+    },
+    "mode": 2,
     "data": "SELECT * FROM classicmodels.employees WHERE employeeNumber = 1370",
     "dataLists": [
         {
@@ -16,8 +21,8 @@
         },
         {
             "name": "state_id",
-            "parent":"countryId",
-            "mode":"fetch",
+            "parent": "countryId",
+            "mode": "fetch",
             "data": [
                 ["", "- select your State", "*"],
                 {
@@ -28,10 +33,10 @@
         },
         {
             "name": "city_id",
-            "parent":"state_id",
-            "mode":"fetch",
+            "parent": "state_id",
+            "mode": "fetch",
             "data": [
-                ["", "- select your City","*"],
+                ["", "- select your City", "*"],
                 {
                     "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE state_id=? /*country_id IN (239)*/  ORDER BY name",
                     "params": ["{{&state_id}}"]
@@ -39,7 +44,6 @@
             ]
         }
     ],
-    
 
     "fieldRequest": {
         "countryId": [
@@ -51,6 +55,88 @@
         ]
     },
     "layout": {
+        "caption": "Users Admin",
+        "elements": [
+            {
+                "component": "field",
+                "label": "Employee ID",
+                "input": "input",
+                "name": "employeeNumber"
+            },
+            {
+                "component": "field",
+                "label": "Apellido",
+                "input": "input",
+                "name": "lastName"
+            },
+            {
+                "component": "field",
+                "label": "Nombre",
+                "input": "input",
+                "name": "firstName"
+            },
+            {
+                "component": "field",
+                "label": "Extensión",
+                "input": "input",
+                "name": "extension"
+            },
+            {
+                "component": "field",
+                "label": "Correo",
+                "input": "input",
+                "name": "email"
+            },
+            {
+                "component": "field",
+                "label": "officeCode",
+                "input": "input",
+                "name": "officeCode"
+            },
+            {
+                "component": "field",
+                "label": "reportsTo",
+                "input": "input",
+                "name": "reportsTo"
+            },
+            {
+                "component": "field",
+                "label": "job",
+                "input": "input",
+                "name": "jobTitle"
+            },
+            {
+                "component": "field",
+                "label": "countryId",
+                "input": "input",
+                "name": "countryId"
+            },
+            {
+                "component": "field",
+                "label": "stateId",
+                "input": "input",
+                "name": "stateId"
+            },
+            {
+                "component": "field",
+                "label": "cityId",
+                "input": "input",
+                "name": "cityId"
+            },
+            {
+                "component": "button",
+                "label": "OK",
+                "attr": {
+                    "class": "save",
+                    "type": "button"
+                },
+                "events": {
+                    "click": "this.sendRequest('save')"
+                }
+            }
+        ]
+    },
+    "layout2": {
         "caption": "Users Admin",
         "elements": [
             {
@@ -95,8 +181,53 @@
                     "type": "button"
                 },
                 "events": {
-                    "click": "this.closest('wh-app').sendForm({form:this.closest('form')})"
+                    "click": "this.sendRequest('save')"
                 }
+            }
+        ]
+    },
+    "scheme": {
+        "name": "employees",
+        "table": "employees",
+        "keys": ["employeeNumber"],
+        "fields": [
+            {
+                "name": "employeeNumber",
+                "type": "I",
+                "key": true,
+                "serial": true,
+                "notNull": true,
+                "default": ""
+            },
+            {
+                "name": "lastName"
+            },
+            {
+                "name": "firstName"
+            },
+            {
+                "name": "extension"
+            },
+            {
+                "name": "email"
+            },
+            {
+                "name": "officeCode"
+            },
+            {
+                "name": "reportsTo"
+            },
+            {
+                "name": "jobTitle"
+            },
+            {
+                "name": "countryId"
+            },
+            {
+                "name": "stateId"
+            },
+            {
+                "name": "cityId"
             }
         ]
     }

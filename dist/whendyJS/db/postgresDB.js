@@ -12,19 +12,22 @@ import pg from "pg";
 export class PostgreDB extends DBSql {
     query(sql, param) {
         return __awaiter(this, void 0, void 0, function* () {
-            sql = sql.replace(/`/igm, '"');
+            sql = sql.replace(/`/gim, '"');
             let index = 1;
-            sql = sql.replace(/\?/igm, (e) => {
+            sql = sql.replace(/\?/gim, (e) => {
                 console.log(e, index);
                 return "$" + index.toString();
             });
-            return yield this.client.query(sql, param).then(result => {
+            return yield this.client
+                .query(sql, param)
+                .then((result) => {
                 return {
                     errno: 0,
                     error: null,
-                    rows: result.rows
+                    rows: result.rows,
                 };
-            }).catch(err => {
+            })
+                .catch((err) => {
                 return {
                     errno: err.errno,
                     error: err.error,
@@ -75,19 +78,22 @@ export class PostgreDB extends DBSql {
             const wildcard = Object.keys(data).map((f, index) => "$" + (index + 1));
             let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) RETURNING *;`;
             console.log(query);
-            return yield this.client.query(query, values).then(result => {
+            return yield this.client
+                .query(query, values)
+                .then((result) => {
                 return {
                     type: result.command,
                     row: result.rows[0],
                     errno: 0,
                     error: "",
-                    lastId: result.rows[0][info.serial]
+                    lastId: result.rows[0][info.serial],
                 };
-            }).catch(e => {
+            })
+                .catch((e) => {
                 console.log(e);
                 return {
                     errno: e.code,
-                    error: e.error
+                    error: e.error,
                 };
             });
         });
@@ -103,25 +109,26 @@ export class PostgreDB extends DBSql {
             const update = fields.map((field, index) => `"${field}"=$${index + 1}`);
             const fields1 = Object.keys(record);
             const values1 = Object.values(record);
-            const where = fields1
-                .map((field) => `"${field}"=$${fields.length + 1}`)
-                .join(" AND ");
+            const where = fields1.map((field) => `"${field}"=$${fields.length + 1}`).join(" AND ");
             console.log("data ->", fields, values);
             let query = `UPDATE "${info.table}" SET ${update} WHERE ${where};`;
             console.log(query);
-            return yield this.client.query(query, [...values, ...values1]).then(result => {
+            return yield this.client
+                .query(query, [...values, ...values1])
+                .then((result) => {
                 return {
                     type: result.command,
                     row: data,
                     errno: 0,
                     error: "",
-                    lastId: null
+                    lastId: null,
                 };
-            }).catch(e => {
+            })
+                .catch((e) => {
                 console.log(e);
                 return {
                     errno: e.code,
-                    error: e.error
+                    error: e.error,
                 };
             });
         });
@@ -139,18 +146,21 @@ export class PostgreDB extends DBSql {
             let query = `INSERT INTO "${info.table}" ("${fields.join('","')}") VALUES (${wildcard.join(",")}) 
             ON CONFLICT (id) DO UPDATE SET ${update} RETURNING *;`;
             console.log(query, values);
-            return yield this.client.query(query, values).then(result => {
+            return yield this.client
+                .query(query, values)
+                .then((result) => {
                 return {
                     type: result.command,
                     row: result.rows[0],
                     errno: 0,
                     error: "",
-                    lastId: result.rows[0][info.serial]
+                    lastId: result.rows[0][info.serial],
                 };
-            }).catch(e => {
+            })
+                .catch((e) => {
                 return {
                     errno: e.code,
-                    error: e.error
+                    error: e.error,
                 };
             });
         });
@@ -160,23 +170,24 @@ export class PostgreDB extends DBSql {
             const record = info.record;
             const fields = Object.keys(record);
             const values = Object.values(record);
-            const where = fields
-                .map((field, index) => `"${field}"=$${index + 1}`)
-                .join(" AND ");
+            const where = fields.map((field, index) => `"${field}"=$${index + 1}`).join(" AND ");
             let query = `DELETE FROM "${info.table}" WHERE ${where};`;
             console.log(query);
-            return yield this.client.query(query, values).then(result => {
+            return yield this.client
+                .query(query, values)
+                .then((result) => {
                 return {
                     type: result.command,
                     row: result.rows[0],
                     errno: 0,
                     error: "",
-                    lastId: result.rows[0][info.serial]
+                    lastId: result.rows[0][info.serial],
                 };
-            }).catch(e => {
+            })
+                .catch((e) => {
                 return {
                     errno: e.code,
-                    error: e.error
+                    error: e.error,
                 };
             });
         });

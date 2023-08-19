@@ -17,7 +17,7 @@
         },
         {
           "name": "user",
-          "modifiers": ["lower"]
+          "modifiers": ["upper"]
         },
         {
           "name": "pass"
@@ -68,7 +68,7 @@
       "data": {
         "id": null,
         "user": "luiggi",
-        "pass": "661",
+        "pass": "662",
         "expire": "2015-10-10",
         "status": 1
       },
@@ -116,7 +116,7 @@
       },
       "data": {
         "id": null,
-        "user": "upsert pepe 2000",
+        "user": "maria pepe 2000",
         "pass": "998899",
         "expire": "2024-10-05",
         "status": 1

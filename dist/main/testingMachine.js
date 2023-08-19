@@ -63,6 +63,6 @@ function start2() {
     });
 }
 //start2()
-const config = Tool.loadJsonFile("whendy/json/dbs/test.json");
+const config = Tool.loadJsonFile("./app/json/dbs/test.json");
 const db = new DBUpdate(config);
 //# sourceMappingURL=testingMachine.js.map

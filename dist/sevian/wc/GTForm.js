@@ -484,8 +484,10 @@ class GTForm extends HTMLElement {
         return this.querySelector(`app-request[name="${name}"]`);
     }
     sendRequest(name) {
-        const info = this.getAppRequest(name);
+        var _a;
+        const info = (_a = this.getAppRequest(name)) === null || _a === void 0 ? void 0 : _a.data;
         if (info) {
+            info.form = this;
             const app = document.querySelector("._main_app_");
             app.send(info);
         }

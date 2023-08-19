@@ -11,7 +11,7 @@ import { DBSql } from "./db.js";
 import sqlite3 from "sqlite3";
 export class SQLiteDB extends DBSql {
     query(sql, param) {
-        sql = sql.replace(/`/igm, '"');
+        sql = sql.replace(/`/gim, '"');
         return new Promise((resolve, reject) => {
             this.db.serialize(() => {
                 this.db.all(sql, param, (error, rows) => __awaiter(this, void 0, void 0, function* () {
@@ -26,7 +26,7 @@ export class SQLiteDB extends DBSql {
                         resolve({
                             errno: 0,
                             error: null,
-                            rows: rows
+                            rows: rows,
                         });
                     }
                 }));
@@ -76,7 +76,7 @@ export class SQLiteDB extends DBSql {
                             row: null,
                             errno: err.errno,
                             error: err.message,
-                            lastId: null
+                            lastId: null,
                         });
                     }
                     else {
@@ -84,7 +84,7 @@ export class SQLiteDB extends DBSql {
                             row: result,
                             errno: 0,
                             error: "",
-                            lastId: result[info.serial]
+                            lastId: result[info.serial],
                         });
                     }
                 });
@@ -116,7 +116,7 @@ export class SQLiteDB extends DBSql {
                             row: null,
                             errno: err.errno,
                             error: err.message,
-                            lastId: null
+                            lastId: null,
                         });
                     }
                     else {
@@ -124,7 +124,7 @@ export class SQLiteDB extends DBSql {
                             row: result,
                             errno: 0,
                             error: "",
-                            lastId: null
+                            lastId: null,
                         });
                     }
                 });
@@ -151,7 +151,7 @@ export class SQLiteDB extends DBSql {
                             row: null,
                             errno: err.errno,
                             error: err.message,
-                            lastId: null
+                            lastId: null,
                         });
                     }
                     else {
@@ -159,7 +159,7 @@ export class SQLiteDB extends DBSql {
                             row: result,
                             errno: 0,
                             error: "",
-                            lastId: null
+                            lastId: null,
                         });
                     }
                 });
@@ -172,9 +172,7 @@ export class SQLiteDB extends DBSql {
             console.log("doDelete ->", record);
             const fields = Object.keys(record);
             const values = Object.values(record);
-            const where = fields
-                .map((field, index) => `"${field}"=$${index + 1}`)
-                .join(" AND ");
+            const where = fields.map((field, index) => `"${field}"=$${index + 1}`).join(" AND ");
             console.log("doDelete ->", fields, values);
             console.log("Where  ->", where, `--${where}--`);
             let query = `DELETE FROM "${info.table}" WHERE ${where};`;
@@ -187,7 +185,7 @@ export class SQLiteDB extends DBSql {
                             row: null,
                             errno: err.errno,
                             error: err.message,
-                            lastId: null
+                            lastId: null,
                         });
                     }
                     else {
@@ -195,7 +193,7 @@ export class SQLiteDB extends DBSql {
                             row: null,
                             errno: 0,
                             error: "",
-                            lastId: null
+                            lastId: null,
                         });
                     }
                 });

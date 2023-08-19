@@ -342,6 +342,7 @@ class GTForm extends HTMLElement {
     }
 
     set dataSource(source) {
+        
         /*
         const appRequest = {
             dataField: {
@@ -585,6 +586,7 @@ class GTForm extends HTMLElement {
     }
 
     _createButton(info): HTMLElement {
+        
         const button = $.create("button");
         for (const [key, value] of Object.entries(info.events || {})) {
             button.on(key, $.bind(value, this));
@@ -633,8 +635,9 @@ class GTForm extends HTMLElement {
     }
 
     sendRequest(name) {
-        const info = this.getAppRequest(name);
+        const info = this.getAppRequest(name)?.data;
         if (info) {
+            info.form = this;
             const app: any = document.querySelector("._main_app_");
 
             app.send(info);

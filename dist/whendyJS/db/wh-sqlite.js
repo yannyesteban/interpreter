@@ -24,7 +24,7 @@ export class WhSQLite extends DB {
         });
     }
     query(sql, options) {
-        throw new Error('Method not implemented.');
+        throw new Error("Method not implemented.");
     }
     getData(sql, param) {
         return new Promise((resolve, reject) => {

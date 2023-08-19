@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { DBTransaction } from "./db/DBTransaction.js";
 import { Element } from "./element.js";
 export class Model {
 }
@@ -42,6 +43,9 @@ export class Form extends Element {
                 case "data-fields":
                     yield this.doDataFields((_a = this.eparams) === null || _a === void 0 ? void 0 : _a.parent);
                     break;
+                case "save":
+                    yield this.transaction();
+                    break;
             }
         });
     }
@@ -56,6 +60,8 @@ export class Form extends Element {
             this._data = data.rows[0];
             this._data["state_id"] = 2040;
             this._data["city_id"] = 130165;
+            this._data["__mode_"] = this.mode;
+            this._data["__record_"] = JSON.stringify(this.record);
             this.layout.data = data.rows[0];
             if (this.datafields) {
                 //this.layout.dataLists = await this.evalDataFields(this.datafields);
@@ -90,13 +96,63 @@ export class Form extends Element {
                         },
                     ],
                 },
+                save: {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "save",
+                        },
+                    ],
+                },
             };
+            console.log("this.layout", this.layout);
+            this.layout.elements.push({
+                "component": "field",
+                "label": "__mode_",
+                "input": "input",
+                "name": "__mode_"
+            }, {
+                "component": "field",
+                "label": "__record_",
+                "input": "input",
+                "name": "__record_"
+            });
             this.response = {
                 element: "form",
                 propertys: {
                     dataSource: this.layout,
                     //f: await this.evalDataFields(this.datafields),
                     output,
+                },
+            };
+        });
+    }
+    transaction() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const json = {
+                db: "mysql",
+                transaction: true,
+                schemes: [Object.assign(Object.assign({}, this.scheme), { name: this.name })],
+                dataset: [
+                    {
+                        "scheme": this.name,
+                        "mode": 1,
+                        "data": this.store.getVReq()
+                    }
+                ],
+                masterData: {}
+            };
+            console.log("JSON----->", json);
+            const c = new DBTransaction(json, this.store.db);
+            this.response = {
+                element: "form",
+                propertys: {
+                    //f: await this.evalDataFields(this.datafields),
+                    output: "SAVE FORM"
                 },
             };
         });

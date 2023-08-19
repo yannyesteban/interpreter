@@ -1,6 +1,8 @@
+import { DBTransaction } from "./db/DBTransaction.js";
 import { DBSql } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
+import { JWT } from "./JWT.js";
 
 export class Model {
     name: string;
@@ -38,6 +40,11 @@ export class Form extends Element {
     _data;
     eparams;
 
+    record;
+    mode;
+    scheme;
+    private keyToken;
+
     setStore(store: Store) {
         this.store = store;
     }
@@ -64,6 +71,9 @@ export class Form extends Element {
             case "data-fields":
                 await this.doDataFields(this.eparams?.parent);
                 break;
+            case "save":
+                await this.transaction();
+                break;
         }
     }
 
@@ -80,6 +90,8 @@ export class Form extends Element {
         this._data = data.rows[0];
         this._data["state_id"] = 2040;
         this._data["city_id"] = 130165;
+        this._data["__mode_"] = this.mode;
+        this._data["__record_"] = JSON.stringify(this.record);
         this.layout.data = data.rows[0];
         if (this.datafields) {
             //this.layout.dataLists = await this.evalDataFields(this.datafields);
@@ -117,8 +129,35 @@ export class Form extends Element {
                     },
                 ],
             },
+            save: {
+                //form: this,
+                actions: [
+                    {
+                        type: "element",
+                        element: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "save",
+                    },
+                ],
+            },
         };
 
+        console.log("this.layout", this.layout)
+        this.layout.elements.push(
+            {
+                "component": "field",
+                "label": "__mode_",
+                "input": "input",
+                "name": "__mode_"
+            },
+            {
+                "component": "field",
+                "label": "__record_",
+                "input": "input",
+                "name": "__record_"
+            }
+        );
         this.response = {
             element: "form",
             propertys: {
@@ -129,6 +168,35 @@ export class Form extends Element {
         };
     }
 
+    async transaction(){
+
+        const json = {
+            db: "mysql",
+            transaction: true,
+            schemes: [{...this.scheme, name:this.name}],
+            dataset: [
+                {
+                  "scheme": this.name,
+                  "mode": 1,
+                  
+                  "data": this.store.getVReq()
+                }
+            ],
+            masterData: {}
+        };
+
+        console.log("JSON----->", json)
+        const c= new  DBTransaction(json, this.store.db);
+
+        this.response = {
+            element: "form",
+            propertys: {
+                
+                //f: await this.evalDataFields(this.datafields),
+                output:"SAVE FORM"
+            },
+        };
+    }
     async getDataFields(list) {
         const output = [];
         for (const info of list) {

@@ -8,41 +8,11 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { RecordMode } from "./db.js";
-import { DBAdmin } from "./dbAdmin.js";
-export class DBUpdate {
-    constructor(config) {
-        let dbAdmin = new DBAdmin();
-        dbAdmin.init([
-            {
-                name: "mysql",
-                driver: "mysql",
-                host: "localhost",
-                user: "root",
-                pass: "123456",
-                dbase: "whendy",
-            },
-            {
-                name: "postgres",
-                driver: "postgres",
-                host: "localhost",
-                user: "postgres",
-                pass: "12345678",
-                dbase: "whendy",
-            },
-            {
-                name: "sqlite",
-                driver: "sqlite",
-                host: "",
-                user: "",
-                pass: "",
-                dbase: "./whendy.db",
-            },
-        ]);
+export class DBTransaction {
+    constructor(config, dbAdmin) {
+        this.dbAdmin = dbAdmin;
         this.config = config;
-        let db;
-        let driver = "postgres";
-        db = dbAdmin.get(driver);
-        this.db = db;
+        this.db = dbAdmin.get(config.db);
         this.schemes = config.schemes.reduce((a, b) => {
             a[b.name] = b;
             return a;
@@ -144,4 +114,4 @@ export class DBUpdate {
         });
     }
 }
-//# sourceMappingURL=DBUpdate.js.map
+//# sourceMappingURL=DBTransaction.js.map

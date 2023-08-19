@@ -2,89 +2,61 @@ import { DBSql, IRecordAdmin, IRecordInfo, RecordMode, STMTResult } from "./db.j
 import { DBAdmin } from "./dbAdmin.js";
 
 export interface IFieldInfo {
-    field: string;
-    name: string;
-    type: string;
-    key: boolean;
-    serial: boolean;
-    notNull: boolean;
-    default: string | number | boolean;
-    value: string | number | boolean;
-    modifiers: string[];
-    aux: boolean;
-    masterValue: string;
-    inputValue: string;
-    noUpdate: boolean;
+    field?: string;
+    name?: string;
+    type?: string;
+    key?: boolean;
+    serial?: boolean;
+    notNull?: boolean;
+    default?: string | number | boolean;
+    value?: string | number | boolean;
+    modifiers?: string[];
+    aux?: boolean;
+    masterValue?: string;
+    inputValue?: string;
+    noUpdate?: boolean;
 }
 
 export interface ISchemeInfo {
-    name: string;
-    table: string;
-    keys: string[];
-    fields: IFieldInfo[];
+    name?: string;
+    table?: string;
+    keys?: string[];
+    fields?: IFieldInfo[];
 }
 
 export interface IDataInfo {
-    scheme: string;
-    mode: RecordMode;
-    record: {};
-    data: {};
-    detail: IDataInfo[];
+    scheme?: string;
+    mode?: RecordMode;
+    record?: {};
+    data?: {};
+    detail?: IDataInfo[];
 }
 
 export interface DBSaveInfo {
-    db: string;
-    transaction: boolean;
-    schemes: ISchemeInfo[];
-    dataset: IDataInfo[];
-    masterData: {};
+    db?: string;
+    transaction?: boolean;
+    schemes?: ISchemeInfo[];
+    dataset?: IDataInfo[];
+    masterData?: {};
 }
 
-export class DBUpdate {
+export class DBTransaction {
     connection;
     transaction;
 
+    private dbAdmin: DBAdmin;
     private db: DBSql;
     private config;
     private schemes: { [name: string]: ISchemeInfo };
 
-    constructor(config?: DBSaveInfo) {
-        let dbAdmin = new DBAdmin();
-        dbAdmin.init([
-            {
-                name: "mysql",
-                driver: "mysql",
-                host: "localhost",
-                user: "root",
-                pass: "123456",
-                dbase: "whendy",
-            },
-            {
-                name: "postgres",
-                driver: "postgres",
-                host: "localhost",
-                user: "postgres",
-                pass: "12345678",
-                dbase: "whendy",
-            },
-            {
-                name: "sqlite",
-                driver: "sqlite",
-                host: "",
-                user: "",
-                pass: "",
-                dbase: "./whendy.db",
-            },
-        ]);
+    constructor(config: DBSaveInfo, dbAdmin: DBAdmin) {
+        this.dbAdmin = dbAdmin;
 
         this.config = config;
-        let db: DBSql;
-        let driver = "postgres";
-        db = dbAdmin.get<DBSql>(driver);
 
-        this.db = db;
+        this.db = dbAdmin.get<DBSql>(config.db);
 
-        this.schemes = config.schemes.reduce((a, b) => {
+        this.schemes = config.schemes.reduce((a: any, b) => {
             a[b.name] = b;
             return a;
         }, {});
