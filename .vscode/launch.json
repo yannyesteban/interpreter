@@ -24,8 +24,8 @@
       {
         "type": "node",
         "request": "launch",
-        "name": "Wendy Program",
-        "program": "${workspaceFolder}/whendy/node/main.ts",
+        "name": "Main Server",
+        "program": "${workspaceFolder}/whendyJS/main.ts",
         "preLaunchTask": "tsc: build - tsconfig.json",
         "outFiles": ["${workspaceFolder}/dist/**/*.js"]
       }

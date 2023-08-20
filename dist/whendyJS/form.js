@@ -9,6 +9,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { DBTransaction } from "./db/DBTransaction.js";
 import { Element } from "./element.js";
+import { JWT } from "./JWT.js";
 export class Model {
 }
 export class Form extends Element {
@@ -39,6 +40,9 @@ export class Form extends Element {
                     break;
                 case "request2":
                     yield this.evalFields();
+                    break;
+                case "find":
+                    yield this.find();
                     break;
                 case "data-fields":
                     yield this.doDataFields((_a = this.eparams) === null || _a === void 0 ? void 0 : _a.parent);
@@ -111,15 +115,122 @@ export class Form extends Element {
             };
             console.log("this.layout", this.layout);
             this.layout.elements.push({
-                "component": "field",
-                "label": "__mode_",
-                "input": "input",
-                "name": "__mode_"
+                component: "field",
+                label: "__mode_",
+                input: "input",
+                name: "__mode_",
             }, {
-                "component": "field",
-                "label": "__record_",
-                "input": "input",
-                "name": "__record_"
+                component: "field",
+                label: "__record_",
+                input: "input",
+                name: "__record_",
+            });
+            this.response = {
+                element: "form",
+                propertys: {
+                    dataSource: this.layout,
+                    //f: await this.evalDataFields(this.datafields),
+                    output,
+                },
+            };
+        });
+    }
+    getDataRecord(info) {
+        var _a;
+        return __awaiter(this, void 0, void 0, function* () {
+            console.log("....", info);
+            //info = JSON.parse(this.store.evalSubData(JSON.stringify(info), this._data));
+            if (info.sql) {
+                const rows = (yield this.db.query(info.sql, (_a = info.params) !== null && _a !== void 0 ? _a : undefined)).rows;
+                if (rows.length > 0) {
+                    return rows[0];
+                }
+            }
+            return {};
+        });
+    }
+    find() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = (this.db = this.store.db.get(this.connection));
+            let data = yield this.getDataRecord(this.dataRecord);
+            this._data = data;
+            let key;
+            console.log(this.dataRecord, "......", data);
+            if (this.recordKey) {
+                key = {
+                    record: this.recordKey.reduce((a, fieldName) => ((a[fieldName] = data[fieldName]), a), {}),
+                };
+            }
+            const jwt = new JWT({ key: "yanny" });
+            const token = jwt.generate(key);
+            console.log(key, token);
+            //employeeNumber
+            data["__key_"] = token;
+            data["__mode_"] = 2;
+            //this._data["__record_"] = JSON.stringify(this.record);
+            this.layout.data = data;
+            if (this.datafields) {
+                //this.layout.dataLists = await this.evalDataFields(this.datafields);
+            }
+            const output = [];
+            if (this.dataLists) {
+                //console.log(this.dataFetch)
+                for (const d of this.dataLists) {
+                    output.push({
+                        name: d.name,
+                        data: yield this.evalData(d.data),
+                        childs: d.childs,
+                        parent: d.parent,
+                        mode: d.mode,
+                        value: data[d.name],
+                    });
+                }
+                //console.log(output)
+                this.layout.dataLists = output;
+            }
+            //this.addResponse(data);
+            this.layout.appRequests = {
+                dataField: {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "data-fields",
+                        },
+                    ],
+                },
+                save: {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "save",
+                        },
+                    ],
+                },
+            };
+            console.log("this.layout", this.layout);
+            this.layout.elements.push({
+                component: "field",
+                label: "__mode_",
+                input: "input",
+                name: "__mode_",
+            }, {
+                component: "field",
+                label: "__record_",
+                input: "input",
+                name: "__record_",
+            }, {
+                component: "field",
+                label: "__key_",
+                input: "input",
+                name: "__key_",
             });
             this.response = {
                 element: "form",
@@ -133,26 +244,31 @@ export class Form extends Element {
     }
     transaction() {
         return __awaiter(this, void 0, void 0, function* () {
+            const token = this.store.getReq("__key_");
+            const jwt = new JWT({ key: "yanny" });
+            const key = jwt.verify(token);
+            console.log(key, token);
             const json = {
                 db: "mysql",
                 transaction: true,
                 schemes: [Object.assign(Object.assign({}, this.scheme), { name: this.name })],
                 dataset: [
                     {
-                        "scheme": this.name,
-                        "mode": 1,
-                        "data": this.store.getVReq()
-                    }
+                        scheme: this.name,
+                        mode: +this.store.getReq("__mode_"),
+                        record: key.record,
+                        data: this.store.getVReq(),
+                    },
                 ],
-                masterData: {}
+                masterData: {},
             };
-            console.log("JSON----->", json);
+            console.log("JSON----->", JSON.stringify(json));
             const c = new DBTransaction(json, this.store.db);
             this.response = {
                 element: "form",
                 propertys: {
                     //f: await this.evalDataFields(this.datafields),
-                    output: "SAVE FORM"
+                    output: "SAVE FORM",
                 },
             };
         });
@@ -216,8 +332,9 @@ export class Form extends Element {
     evalData(dataField) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log(this._data);
+            console.log("que data -> ", this._data);
             dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
+            console.log("dataField.....", dataField);
             let info = [];
             for (const data of dataField) {
                 if (Array.isArray(data)) {

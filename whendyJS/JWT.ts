@@ -14,7 +14,7 @@ export class JWT {
 
     private key = "your-256-bit-secret";
 
-    constructor(opt) {
+    constructor(opt?:any) {
         for (let key in opt) {
             this[key] = opt[key];
         }

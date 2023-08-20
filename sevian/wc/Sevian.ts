@@ -308,7 +308,7 @@ export class Sevian extends HTMLElement {
         } else if (Array.isArray(request.store)) {
             store = request.store.reduce((store: any, e: string) => ((store[e] = _store[e]), store), {});
         } else if (typeof request.store === "object") {
-            store = typeof request.store;
+            store = request.store;
         }
 
         let contentType = request.contentType === undefined ? "application/json" : request.contentType;

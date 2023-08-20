@@ -1,11 +1,13 @@
 {
-    "db":"mysq",
+    "db": "mysq",
     "fields": [],
-    "record": {
-        "employeeNumber": 1370
-    },
+    "recordKey": ["employeeNumber"],
     "mode": 2,
     "data": "SELECT * FROM classicmodels.employees WHERE employeeNumber = 1370",
+    "dataRecord": {
+        "sql": "SELECT * FROM classicmodels.employees WHERE employeeNumber = ?",
+        "params": ["{{@formId}}"]
+    },
     "dataLists": [
         {
             "name": "countryId",
@@ -13,14 +15,14 @@
                 ["", "- select your Country"],
                 { "value": "1", "text": "ALL" },
                 {
-                    "sql": "select id as 'value', name as 'text' from countries WHERE id IN (233,239)/*subregion=?*/ ORDER BY name",
+                    "sql": "select id as 'value', name as 'text' from countries WHERE subregion=? ORDER BY name",
                     "params": ["South America"]
                 }
             ],
             "childs": true
         },
         {
-            "name": "state_id",
+            "name": "stateId",
             "parent": "countryId",
             "mode": "fetch",
             "data": [
@@ -32,14 +34,14 @@
             ]
         },
         {
-            "name": "city_id",
-            "parent": "state_id",
+            "name": "cityId",
+            "parent": "stateId",
             "mode": "fetch",
             "data": [
                 ["", "- select your City", "*"],
                 {
                     "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE state_id=? /*country_id IN (239)*/  ORDER BY name",
-                    "params": ["{{&state_id}}"]
+                    "params": ["{{&stateId}}"]
                 }
             ]
         }
@@ -108,19 +110,19 @@
             {
                 "component": "field",
                 "label": "countryId",
-                "input": "input",
+                "input": "select",
                 "name": "countryId"
             },
             {
                 "component": "field",
                 "label": "stateId",
-                "input": "input",
+                "input": "select",
                 "name": "stateId"
             },
             {
                 "component": "field",
                 "label": "cityId",
-                "input": "input",
+                "input": "select",
                 "name": "cityId"
             },
             {
