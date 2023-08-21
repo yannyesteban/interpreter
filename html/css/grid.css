@@ -1,0 +1,87 @@
+body {
+  background-color: rgb(134, 134, 134);
+}
+
+.container {
+  border: 2px solid red;
+  height: 600px;
+  overflow: auto;
+}
+
+ss-grid {
+  display: block;
+  width: 100%;
+  height: 300px;
+  overflow: auto;
+  position: relative;
+  height: 100%;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
+}
+ss-grid ss-body {
+  position: relative;
+  background-color: antiquewhite;
+  display: grid;
+  grid-template-columns: 100px repeat(19, auto);
+  width: 100%;
+  grid-gap: 5px;
+  overflow: auto;
+}
+ss-grid ss-row {
+  display: contents;
+}
+ss-grid ss-th {
+  background-color: aquamarine;
+}
+ss-grid ss-td {
+  background-color: rgb(53, 33, 131);
+  color: rgb(20, 74, 120);
+  font-size: 10pt;
+}
+
+.grid-entry, .grid-header {
+  padding: 7px;
+  background-color: white;
+  border-right: 1px solid gray;
+  border-bottom: 1px solid gray;
+}
+
+.grid-entry.last, .grid-header.last {
+  border-right: none;
+}
+
+.grid-header {
+  background-color: rgb(181, 115, 115);
+  position: sticky;
+  top: 0;
+  z-index: 1;
+}
+
+.grid-header.fixed-left {
+  z-index: 2;
+}
+
+.fixed-left {
+  position: sticky;
+  left: 0;
+}
+
+.fixed-right {
+  border-left: 1px solid gray;
+  border-right: none;
+  position: sticky;
+  right: 0;
+}
+
+.fixed-right2 {
+  border-left: 1px solid gray;
+  border-right: none;
+  position: sticky;
+  right: auto;
+}
+
+.placeholder {
+  grid-column-start: 1;
+  grid-column-end: 21;
+  border-right: none;
+}/*# sourceMappingURL=grid.css.map */

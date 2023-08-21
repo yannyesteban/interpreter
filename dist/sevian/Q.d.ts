@@ -1,0 +1,41 @@
+export declare class QElement {
+    e: HTMLElement;
+    constructor(element: any);
+    get<T>(): T;
+    on(event: any, fn: any): this;
+    off(event: any, fn: any): this;
+    id(id?: any): string | this;
+    append(element: QElement | HTMLElement): this;
+    add(config: any): this;
+    create(config: any): QElement;
+    appendText(text: any): this;
+    text(text?: any): string | this;
+    html(html?: any): QElement | any;
+    attr(attrs: any, value?: any): QElement | any;
+    prop(attrs: any, value?: any): any;
+    value(data?: any): any;
+    style(attrs: any, value?: any): any;
+    ds(attrs: any, value?: any): string | this;
+    addClass(classes: any): this;
+    removeClass(classes: any): this;
+    toggleClass(classes: any): this;
+    hasClass(className: any): boolean;
+    children(): QElement[];
+    query(selector: any): QElement;
+    queryAll(selector: any): QElement[];
+    appendTo(target: any): this;
+    remove(): void;
+    fire(name: any, detail: any): boolean;
+    define(prop: any, descriptor: any): this;
+    parentElement(tagName: string): HTMLElement;
+}
+export declare const Q: {
+    (query: any): QElement;
+    id(id: any): QElement;
+    create(config: any): QElement;
+    query(selector: any): QElement;
+    queryAll(selector: any): QElement[];
+    bind(fn: any, context: any, ...arg: any[]): any;
+    fire(element: any, eventName: any, detail: any): void;
+};
+export declare function getParentElement(child: HTMLElement, parentTag: string): HTMLElement;

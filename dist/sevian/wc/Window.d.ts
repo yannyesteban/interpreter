@@ -1,0 +1,32 @@
+export declare class WHWin extends HTMLElement {
+    private lastStatus;
+    private _resize;
+    static get observedAttributes(): string[];
+    constructor();
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    attributeChangedCallback(name: any, oldVal: any, newVal: any): void;
+    set mode(value: string);
+    get mode(): string;
+    set width(value: string);
+    get width(): string;
+    set height(value: string);
+    get height(): string;
+    set left(value: string);
+    get left(): string;
+    set right(value: string);
+    get right(): string;
+    set top(value: string);
+    get top(): string;
+    set bottom(value: string);
+    get bottom(): string;
+    set visibility(value: string);
+    get visibility(): string;
+    set resizable(value: boolean);
+    get resizable(): boolean;
+    test(): void;
+    updatePos(): void;
+    updateSize(): void;
+    _setMode(): void;
+    _resizable(): void;
+}

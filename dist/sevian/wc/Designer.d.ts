@@ -1,0 +1,16 @@
+import "./Designer/Container.js";
+import "./Designer/FieldDesigner.js";
+import "./Designer/FormDesigner.js";
+import "./Designer/SectionDesigner.js";
+import "./Designer/TabDesigner.js";
+import "./Designer/TableMenu.js";
+import "./Designer/Toolbox.js";
+import "./Designer/LastActiveExt.js";
+import "./Designer/CaptionDesigner.js";
+import "./Designer/ButtonDesigner.js";
+import "./Designer/SeparatorDesigner.js";
+import "./Designer/ToolExt.js";
+import "./Window.js";
+import "./Field.js";
+import "./Section.js";
+import "./GTForm.js";

@@ -1,0 +1,34 @@
+import * as wc from "./../WC.js";
+import { AppRequest, ElementResponse, IElement } from "../IApp.js";
+import "./AppRequest.js";
+export declare class Sevian extends HTMLElement {
+    private panels;
+    private _modules;
+    static get observedAttributes(): string[];
+    constructor();
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    attributeChangedCallback(name: any, old: any, value: any): void;
+    set server(value: string);
+    get server(): string;
+    set name(value: string);
+    get name(): string;
+    set className(value: string);
+    get className(): string;
+    set token(value: string);
+    get token(): string;
+    private whenValid;
+    setElement(info: IElement | ElementResponse): Promise<void>;
+    updateElement(info: any): Promise<void>;
+    evalResponse(response: ElementResponse[]): Promise<boolean>;
+    initApp(): void;
+    set cssSheets(data: any);
+    set jsModules(files: any);
+    set modules(info: wc.WCModule[]);
+    get modules(): wc.WCModule[];
+    getStore(): any;
+    sendFormData(request: any): void;
+    sendForm(request: any): void;
+    sendJson(request: any): void;
+    send(request: AppRequest): void;
+}

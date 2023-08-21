@@ -1,0 +1,30 @@
+declare class FieldDesigner extends HTMLElement {
+    iName: HTMLInputElement;
+    iCaption: HTMLInputElement;
+    iInput: HTMLSelectElement;
+    iType: HTMLSelectElement;
+    _info: any;
+    private _data;
+    static get observedAttributes(): string[];
+    constructor();
+    connectedCallback(): void;
+    disconnectedCallback(): void;
+    attributeChangedCallback(name: any, oldValue: any, newValue: any): void;
+    set caption(value: string);
+    get caption(): string;
+    set name(value: string);
+    get name(): string;
+    set selected(value: boolean);
+    get selected(): boolean;
+    set input(value: string);
+    get input(): string;
+    set type(value: string);
+    get type(): string;
+    set default(value: string);
+    get default(): string;
+    set info(info: any);
+    get info(): any;
+    get designerType(): boolean;
+    set dataSource(data: any);
+    get dataSource(): any;
+}
