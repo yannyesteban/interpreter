@@ -11,23 +11,25 @@ body {
 ss-grid {
   display: block;
   width: 100%;
-  height: 300px;
   overflow: auto;
   position: relative;
   height: 100%;
   display: grid;
   grid-template-rows: auto 1fr auto;
 }
-ss-grid ss-body {
+ss-grid ss-body, ss-grid section {
   position: relative;
-  background-color: antiquewhite;
+  background-color: rgb(146, 105, 51);
   display: grid;
-  grid-template-columns: 100px repeat(19, auto);
+  grid-template-columns: repeat(var(--grid-columns), auto);
   width: 100%;
   grid-gap: 5px;
   overflow: auto;
 }
-ss-grid ss-row {
+ss-grid ss-grid-row[selected] {
+  color: red;
+}
+ss-grid ss-row, ss-grid ss-grid-row {
   display: contents;
 }
 ss-grid ss-th {
@@ -37,6 +39,15 @@ ss-grid ss-td {
   background-color: rgb(53, 33, 131);
   color: rgb(20, 74, 120);
   font-size: 10pt;
+}
+ss-grid ss-cell {
+  background-color: rgb(53, 33, 131);
+  color: rgb(20, 74, 120);
+  font-size: 10pt;
+}
+
+ss-grid-cell {
+  background-color: rgb(166, 173, 173);
 }
 
 .grid-entry, .grid-header {
