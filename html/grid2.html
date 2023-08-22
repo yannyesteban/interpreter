@@ -11,6 +11,11 @@
         <script defer type="module" src="../dist/sevian/wc/Grid.js"></script>
     </head>
     <body>
+        <span class="material-symbols-outlined">
+            autorenew
+            </span><span class="material-symbols-outlined">
+                search
+                </span>
         <ss-grid mode-select="checkbox"></ss-grid>
 
         <script defer type="module">
@@ -338,7 +343,21 @@
             grid.dataSource = {
 
                 data,
-                fields
+                fields,
+                actions:[
+                    {
+                        title:"+",
+                        action:"new"
+                    },
+                    {
+                        title:"Edit",
+                        action:"edit"
+                    },
+                    {
+                        title:"Delete",
+                        action:"delete"
+                    }
+                ]
             }
         </script>
     </body>

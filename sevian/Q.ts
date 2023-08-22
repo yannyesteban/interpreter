@@ -17,7 +17,7 @@ export class QElement {
         this.e = element;
     }
 
-    get<T>():T {
+    get<T>(): T {
         return this.e as T;
     }
 
@@ -43,12 +43,11 @@ export class QElement {
         return this;
     }
 
-    append(element:QElement | HTMLElement ) {
+    append(element: QElement | HTMLElement) {
         if (element === undefined || element === null) {
             return this;
         }
 
-        
         if (element instanceof HTMLElement) {
             this.e.appendChild(element);
         }
@@ -103,18 +102,26 @@ export class QElement {
         }
 
         if (typeof attrs === "object") {
-            for (let key in attrs) {
-                if (Boolean(attrs[key])) {
-                    this.e.setAttribute(key, attrs[key]);
+            for (const [key, value] of Object.entries(attrs as { key: string; value: boolean | string })) {
+                if (typeof value === "boolean") {
+                    if (value) {
+                        this.e.setAttribute(key, "");
+                    } else {
+                        this.e.removeAttribute(key);
+                    }
                 } else {
-                    this.e.removeAttribute(key);
+                    this.e.setAttribute(key, value);
                 }
             }
         } else {
-            if (Boolean(value)) {
-                this.e.setAttribute(attrs, value);
+            if (typeof value === "boolean") {
+                if (value) {
+                    this.e.setAttribute(attrs, "");
+                } else {
+                    this.e.removeAttribute(attrs);
+                }
             } else {
-                this.e.removeAttribute(attrs);
+                this.e.setAttribute(attrs, value);
             }
         }
 
@@ -150,8 +157,9 @@ export class QElement {
         setProp(this.e.style, attrs, value);
         return this;
     }
-
-    ds(attrs, value?) {
+    ds(attrs): string;
+    ds(attrs, value): QElement;
+    ds(attrs, value?): unknown {
         if (typeof attrs === "string" && value === undefined) {
             return this.e.dataset[attrs];
         }
@@ -306,14 +314,14 @@ Q.bind = (fn, context, ...arg) => {
 };
 
 Q.fire = (element, eventName, detail) => {
-	const event = new CustomEvent(eventName, {
-		detail,
-		cancelable: true,
-		bubbles: true
-	});
+    const event = new CustomEvent(eventName, {
+        detail,
+        cancelable: true,
+        bubbles: true,
+    });
 
-	element.dispatchEvent(event);
-}
+    element.dispatchEvent(event);
+};
 
 export function getParentElement(child: HTMLElement, parentTag: string) {
     let parent: HTMLElement = child.parentNode as HTMLElement;

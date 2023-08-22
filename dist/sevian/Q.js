@@ -82,21 +82,31 @@ export class QElement {
             return this.e.getAttribute(attrs);
         }
         if (typeof attrs === "object") {
-            for (let key in attrs) {
-                if (Boolean(attrs[key])) {
-                    this.e.setAttribute(key, attrs[key]);
+            for (const [key, value] of Object.entries(attrs)) {
+                if (typeof value === "boolean") {
+                    if (value) {
+                        this.e.setAttribute(key, "");
+                    }
+                    else {
+                        this.e.removeAttribute(key);
+                    }
                 }
                 else {
-                    this.e.removeAttribute(key);
+                    this.e.setAttribute(key, value);
                 }
             }
         }
         else {
-            if (Boolean(value)) {
-                this.e.setAttribute(attrs, value);
+            if (typeof value === "boolean") {
+                if (value) {
+                    this.e.setAttribute(attrs, "");
+                }
+                else {
+                    this.e.removeAttribute(attrs);
+                }
             }
             else {
-                this.e.removeAttribute(attrs);
+                this.e.setAttribute(attrs, value);
             }
         }
         return this;
@@ -261,7 +271,7 @@ Q.fire = (element, eventName, detail) => {
     const event = new CustomEvent(eventName, {
         detail,
         cancelable: true,
-        bubbles: true
+        bubbles: true,
     });
     element.dispatchEvent(event);
 };
