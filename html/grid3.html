@@ -1,0 +1,56 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+        <style>
+            ss-body{
+                display: block;
+            }
+            .container {
+                display: grid;
+                grid-template-columns: [first] 60px [line2] 80px [line3] auto [col4-start];
+                
+            }
+
+            ss-td{
+                border:thin red solid;
+            }
+            .h1{
+                _display: none;
+                grid-column: first;
+            }
+            .h2{
+                _display: none;
+            }
+            .h3{
+                display: none;
+            }
+
+            .h4{
+                display: none;
+            }
+        </style>
+    </head>
+    <body>
+        <ss-body class="container">
+            
+            <ss-td class="h1">Column .1</ss-td>
+            <ss-td class="h2">Column .2</ss-td>
+            <ss-td class="h3">Column .3</ss-td>
+            <ss-td class="h4">Column .4</ss-td>
+            <ss-td class="h1">Column a1</ss-td>
+            <ss-td class="h2">Column a2</ss-td>
+            <ss-td class="h3">Column a3</ss-td>
+            <ss-td class="h4">Column a4</ss-td>
+            <ss-td class="h1">Column b1</ss-td>
+            <ss-td class="h2">Column b2</ss-td>
+            <ss-td class="h3">Column b3</ss-td>
+            <ss-td class="h4">Column b4</ss-td>
+            <ss-td class="h1">Column c1</ss-td>
+            <ss-td class="h2">Column c2</ss-td>
+            <ss-td class="h3">Column c3</ss-td>
+        </ss-body>
+    </body>
+</html>

@@ -33,7 +33,7 @@ class WHWinCaption extends HTMLElement {
     }
 }
 customElements.define("wh-win-caption", WHWinCaption);
-class WHWinBody extends HTMLElement {
+export class WHWinBody extends HTMLElement {
     constructor() {
         super();
     }
@@ -42,7 +42,7 @@ class WHWinBody extends HTMLElement {
     }
 }
 customElements.define("wh-win-body", WHWinBody);
-class WHWinHeader extends HTMLElement {
+export class WHWinHeader extends HTMLElement {
     static get observedAttributes() {
         return ["mode", "paz"];
     }
@@ -53,7 +53,7 @@ class WHWinHeader extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-			<link rel="stylesheet" href="./../sass/WHHeader.css">
+			<link rel="stylesheet" href="./css/WHHeader.css">
 			
 				<div class="icon"><slot name="icon"></slot></div>
 				<div class="caption"><slot name="caption"></slot></div>
@@ -150,7 +150,7 @@ export class WHWin extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 
-			<link rel="stylesheet" href="./../sass/WHWindow.css">
+			<link rel="stylesheet" href="./css/WHWindow.css">
 			
 			<slot name="header"></slot>
 			<slot name="body"></slot>

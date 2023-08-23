@@ -1,5 +1,80 @@
 import { Q as $ } from "../Q.js";
 import "./Paginator.js";
+import "./Window.js";
+class GridBar extends HTMLElement {
+    static get observedAttributes() {
+        return ["type"];
+    }
+    constructor() {
+        super();
+        const template = document.createElement("template");
+        template.innerHTML = `
+			<style>
+			:host {
+				display:inline-block;
+
+			}
+			</style><slot></slot>`;
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        const slot = this.shadowRoot.querySelector("slot");
+        slot.addEventListener("slotchange", (e) => {
+            //const nodes = slot.assignedNodes();
+        });
+    }
+    connectedCallback() { }
+    disconnectedCallback() { }
+    attributeChangedCallback(name, oldVal, newVal) { }
+    set type(value) {
+        if (Boolean(value)) {
+            this.setAttribute("type", value);
+        }
+        else {
+            this.removeAttribute("type");
+        }
+    }
+    get type() {
+        return this.getAttribute("type");
+    }
+}
+customElements.define("ss-grid-bar", GridBar);
+class GridCaption extends HTMLElement {
+    static get observedAttributes() {
+        return ["type"];
+    }
+    constructor() {
+        super();
+        const template = document.createElement("template");
+        template.innerHTML = `
+			<style>
+			:host {
+				display:inline-block;
+
+			}
+			</style><slot></slot>`;
+        this.attachShadow({ mode: "open" });
+        this.shadowRoot.appendChild(template.content.cloneNode(true));
+        const slot = this.shadowRoot.querySelector("slot");
+        slot.addEventListener("slotchange", (e) => {
+            //const nodes = slot.assignedNodes();
+        });
+    }
+    connectedCallback() { }
+    disconnectedCallback() { }
+    attributeChangedCallback(name, oldVal, newVal) { }
+    set type(value) {
+        if (Boolean(value)) {
+            this.setAttribute("type", value);
+        }
+        else {
+            this.removeAttribute("type");
+        }
+    }
+    get type() {
+        return this.getAttribute("type");
+    }
+}
+customElements.define("ss-grid-caption", GridCaption);
 class GridSearcher extends HTMLElement {
     static get observedAttributes() {
         return ["type"];
@@ -155,6 +230,7 @@ class Grid extends HTMLElement {
     }
     constructor() {
         super();
+        this.modeAction = 1;
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
@@ -162,15 +238,29 @@ class Grid extends HTMLElement {
 				display:inline-block;
 
 			}
+
+            ::slotted(ss-grid-searcher){
+                
+            }
 			</style><slot></slot>`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         const slot = this.shadowRoot.querySelector("slot");
         slot.addEventListener("slotchange", (e) => {
+            let c = 0;
+            let str = `[p${++c}]`;
+            const rows = Array.from(this.querySelectorAll("ss-grid-cell.cell-header:not([hidden])"));
+            rows.forEach((row, index) => {
+                const width = row.dataset.width || "auto";
+                str += ` ${width} [p${++c}]`;
+            });
+            console.log(str);
+            this.style.setProperty("--grid-columns", str);
             //const nodes = slot.assignedNodes();
         });
     }
     connectedCallback() {
+        this.style.setProperty("--grid-columns", "");
         console.log("connectedCallback");
         this.addEventListener("click", (event) => {
             const target = event.target;
@@ -243,11 +333,22 @@ class Grid extends HTMLElement {
     }
     set dataSource(source) {
         console.log("dataSource");
-        let columnsNumber = source.fields.length;
-        if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
-            columnsNumber++;
+        Promise.all([
+            customElements.whenDefined("wh-win"),
+            customElements.whenDefined("wh-win-header"),
+            customElements.whenDefined("wh-win-body"),
+        ]).then(() => {
+            const win = $(document.body).create("wh-win");
+            win.create("wh-win-header").text("Ventana");
+            win.create("wh-win-body").text("hello");
+        });
+        if (source.caption) {
+            this._setCaption(source.caption);
         }
-        this.style.setProperty("--grid-columns", columnsNumber);
+        if (source.actions) {
+            this._setBarAction(source.actions);
+        }
+        this._actions = source.actions;
         const data = source.data;
         $(this).create("ss-grid-searcher");
         const body = $(this).create("section");
@@ -261,9 +362,22 @@ class Grid extends HTMLElement {
             .attr("page", "1")
             .attr("pages", "88")
             .attr("max-pages", "8")
-            .on("page-change", (event) => {
+            .on("page-select", (event) => {
             console.log(event.detail);
             event.target.page = event.detail.page;
+        });
+    }
+    _setCaption(value) {
+        let caption = $(this).query("ss-grid-caption");
+        if (!caption) {
+            caption = $(this).create("ss-grid-caption");
+        }
+        caption.text(value);
+    }
+    _setBarAction(actions) {
+        const bar = $(this).create("ss-grid-bar");
+        actions.forEach((a) => {
+            bar.create("button").create("span").addClass("ss-symbols").text(a.title);
         });
     }
     _createHeaderRow(body, fields) {
@@ -271,15 +385,31 @@ class Grid extends HTMLElement {
         row.addClass("header-row");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
             const cell = row.create("ss-grid-cell");
-            cell.addClass(["cell-select", "cell-header"]);
+            cell.addClass(["cell-select", "cell-header", "first-cell"]);
+            cell.ds("width", "min-content");
             const check = cell.create("input");
             check.attr("type", this.modeSelect);
             check.addClass("cell-header");
         }
         for (const field of fields) {
-            const cell = row.create("ss-grid-cell");
+            const cell = row.create("ss-grid-cell").ds("field", field.name);
             cell.addClass("cell-header");
             cell.text(field.label);
+            if (field.type == "info") {
+                cell.addClass("cell-info");
+                cell.attr("hidden", "");
+                //str += " " + (field.cellWidth || "0") + ` [p${++c}]`
+            }
+            else {
+                const width = field.cellWidth || "auto";
+                cell.ds("width", width);
+            }
+        }
+        if (this._actions) {
+            const cell = row.create("ss-grid-cell");
+            cell.addClass("cell-header");
+            //cell.ds("width", "fit-content")
+            cell.text("-");
         }
     }
     _createRow(body, fields, data, index) {
@@ -287,16 +417,37 @@ class Grid extends HTMLElement {
         row.addClass("row");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
             const cell = row.create("ss-grid-cell");
-            cell.addClass("cell-select");
+            cell.addClass(["cell-select", "first-cell"]);
             const check = cell.create("input");
             check.attr("type", this.modeSelect);
             check.attr("nid", index);
         }
         for (const field of fields) {
-            const cell = row.create("ss-grid-cell");
+            const cell = row.create("ss-grid-cell").ds("field", field.name);
             cell.text(data[field.name]);
+            if (field.type == "info") {
+                cell.addClass("cell-info");
+                cell.attr("hidden", "");
+            }
+        }
+        if (this._actions) {
+            const cell = row.create("ss-grid-cell");
+            cell.addClass("cell-action");
+            this._actions.forEach((a) => {
+                cell.create("button").create("span").addClass("ss-symbols").text(a.title);
+            });
         }
     }
+    setAction(action) {
+        alert(action);
+    }
+    newRecord() { }
+    loadRecord() { }
+    deleteRecords() {
+    }
 }
+//customElements.define("ss-win-header", WHWinHeader);
+//customElements.define("ss-win-body", WHWinBody);
+//customElements.define("ss-win", WHWin);
 customElements.define("ss-grid", Grid);
 //# sourceMappingURL=Grid.js.map

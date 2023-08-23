@@ -45,7 +45,7 @@ class Paginator extends HTMLElement {
         });
     }
     fireEvent(detail) {
-        const customEvent = new CustomEvent("page-change", {
+        const customEvent = new CustomEvent("page-select", {
             detail,
             cancelable: true,
             bubbles: true,

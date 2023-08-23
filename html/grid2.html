@@ -11,15 +11,11 @@
         <script defer type="module" src="../dist/sevian/wc/Grid.js"></script>
     </head>
     <body>
-        <span class="material-symbols-outlined">
-            autorenew
-            </span><span class="material-symbols-outlined">
-                search
-                </span>
+        
         <ss-grid mode-select="checkbox"></ss-grid>
 
         <script defer type="module">
-            const data = [
+            let data = [
                 {
                     employeeNumber: 1002,
                     lastName: "Murphy",
@@ -321,32 +317,39 @@
                 },
             ];
 
+
+            data = data.map((d, index)=>({...d, __mode_:{value:1}, __key_:{record:index}}))
+
+            console.log(data)
             const grid = document.querySelector("ss-grid");
 
 
             console.log(grid)
             grid.type="kkk"
             const fields = [
-                { name:"employeeNumber", type:"n", label:"Id"},
+                { name:"employeeNumber", type:"info", label:"Id", cellWidth:"200px"},
                 { name:"lastName", type:"s", label:"Last Name"},
                 { name:"firstName", type:"s", label:"First Name"},
-                { name:"extension", type:"s", label:"Extension"},
-                { name:"email", type:"s", label:"Email"},
+                { name:"extension", type:"s", label:"Extension", cellWidth:"200px"},
+                { name:"email", type:"info", label:"Email"},
                 { name:"officeCode", type:"s", label:"Office"},
-                { name:"reportsTo", type:"s", label:"Report To"},
-                { name:"jobTitle", type:"s", label:"Job Title"},
+                { name:"reportsTo", type:"info", label:"Report To"},
+                { name:"jobTitle", type:"s", label:"Job Title",  cellWidth:"300px"},
                 { name:"countryId", type:"n", label:"Country"},
                 { name:"stateId", type:"n", label:"State"},
-                { name:"cityId", type:"n", label:"City"}
+                { name:"cityId", type:"", label:"City"},
+                { name:"__mode_", type:"info", label:"__mode_"},
+                { name:"__key_", type:"info", label:"__key_"}
 
             ];
             grid.dataSource = {
 
+                caption:"hello Mundo",
                 data,
                 fields,
                 actions:[
                     {
-                        title:"+",
+                        title:"Add",
                         action:"new"
                     },
                     {
@@ -357,7 +360,40 @@
                         title:"Delete",
                         action:"delete"
                     }
-                ]
+                ],
+                nav:[
+                    {
+                        title:"save",
+                        action:"save",
+                        className:"button"
+                    },
+                    {
+                        title:"select",
+                        action:"loadRecord",
+                        title:"new Record",
+                        request:"loadForm",
+                        className:"button"
+                    }
+                ],
+                loadForm:{
+                    mode:"window",
+                    title:"x",
+                    request:{
+
+                    }
+
+                },
+                requests:{
+                    saveRecord:{
+
+                    },
+                    setPage:{
+
+                    },
+                    loadForm:{
+
+                    }
+                }
             }
         </script>
     </body>
