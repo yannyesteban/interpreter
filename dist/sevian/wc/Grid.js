@@ -1,6 +1,7 @@
 import { Q as $ } from "../Q.js";
 import "./Paginator.js";
-import "./Window.js";
+import "./Win.js";
+import "./Menu.js";
 class GridBar extends HTMLElement {
     static get observedAttributes() {
         return ["type"];
@@ -332,6 +333,41 @@ class Grid extends HTMLElement {
         return this.getAttribute("mode-select");
     }
     set dataSource(source) {
+        this.task = {
+            new: {
+                actions: [
+                    {
+                        "window": "name",
+                        id: "this",
+                        element: "form",
+                        name: "two",
+                        method: "request",
+                    },
+                ],
+            },
+            load: {
+                body: "this.getRecordKey()",
+                actions: [
+                    {
+                        id: "this",
+                        element: "form",
+                        name: "two",
+                        method: "load",
+                    },
+                ],
+            },
+            delete: {
+                body: "this.selected()",
+                actions: [
+                    {
+                        id: "this",
+                        element: "form",
+                        name: "two",
+                        method: "delete"
+                    }
+                ]
+            }
+        };
         console.log("dataSource");
         Promise.all([
             customElements.whenDefined("wh-win"),
@@ -339,8 +375,17 @@ class Grid extends HTMLElement {
             customElements.whenDefined("wh-win-body"),
         ]).then(() => {
             const win = $(document.body).create("wh-win");
-            win.create("wh-win-header").text("Ventana");
-            win.create("wh-win-body").text("hello");
+            //win.attr("width", "687px");
+            //win.attr("height", "600px");
+            //win.attr("top", "middle");
+            //win.attr("mode", "custom");
+            //win.attr("left", "center");
+            win.attr("resizable", "");
+            win.create("div").addClass("mydiv").html("hello div<br>uyastdutsy<br>aksdsañkdñl<br>sdjkdñ");
+            win.attr("caption", "Ventana");
+            //win.get().show()
+            //win.attr("visibility", true)
+            //$(document.body).append(win);
         });
         if (source.caption) {
             this._setCaption(source.caption);
@@ -443,7 +488,21 @@ class Grid extends HTMLElement {
     }
     newRecord() { }
     loadRecord() { }
-    deleteRecords() {
+    deleteRecords() { }
+    getAppRequest(name) {
+        return this.querySelector(`app-request[name="${name}"]`);
+    }
+    sendRequest(name) {
+        var _a;
+        const info = (_a = this.getAppRequest(name)) === null || _a === void 0 ? void 0 : _a.data;
+        if (info) {
+            info.form = this;
+            const app = document.querySelector("._main_app_");
+            app.send(info);
+        }
+        else {
+            console.log("request don't exists!");
+        }
     }
 }
 //customElements.define("ss-win-header", WHWinHeader);

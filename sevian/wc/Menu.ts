@@ -78,7 +78,7 @@ class WHMenuGroup extends HTMLElement {
 
 		template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../sass/WHMenuItem.css">
+		<link rel="stylesheet" href="./css/WHMenuItem.css">
 		<slot name="item"></slot>	
 	
 		`;
@@ -106,7 +106,7 @@ class WHMenuLink extends HTMLElement {
 		const template = document.createElement("template");
 
 		template.innerHTML = `
-		<link rel="stylesheet" href="./../sass/WHMenuItem.css">
+		<link rel="stylesheet" href="./css/WHMenuItem.css">
 			<slot name="check"></slot>
 			<slot name="icon"></slot>
 			<slot name="caption"></slot>
@@ -192,7 +192,7 @@ class WHMenuItem extends HTMLElement {
 
 		template.innerHTML = `
 			
-			<link rel="stylesheet" href="./../sass/WHMenuItem.css">
+			<link rel="stylesheet" href="./css/WHMenuItem.css">
 			<slot name="link"></slot>
 			<slot name="group"></slot>
 			
@@ -600,7 +600,7 @@ class WHMenu extends HTMLElement {
 		const template = document.createElement("template");
 
 		template.innerHTML = `
-		<link rel="stylesheet" href="./../sass/WHMenu.css">
+		<link rel="stylesheet" href="./css/WHMenu.css">
 		<slot name="item"></slot>
 
 		`;

@@ -1,8 +1,10 @@
+import { AppRequest } from "./AppRequest.js";
 import { Q as $, QElement } from "../Q.js";
 
 import "./Paginator.js";
-import "./Window.js";
-import { WHWin, WHWinBody, WHWinHeader } from "./Window.js";
+import "./Win.js";
+import "./Menu.js";
+import { WHWin, WHWinBody, WHWinHeader } from "./Win.js";
 
 class GridBar extends HTMLElement {
     static get observedAttributes() {
@@ -295,6 +297,7 @@ class Grid extends HTMLElement {
         title: string;
         action: string;
     }[];
+    task:any; 
     static get observedAttributes() {
         return ["type"];
     }
@@ -418,20 +421,68 @@ class Grid extends HTMLElement {
     }
 
     set dataSource(source) {
+        this.task = {
+            new: {
+                actions: [
+                    {
+                        "window":"name",
+                        id: "this",
+                        element: "form",
+                        name: "two",
+                        method: "request",
+                    },
+                ],
+            },
+            load: {
+                body:"this.getRecordKey()",
+                actions: [
+                    {
+                        id: "this",
+                        element: "form",
+                        name:"two",
+                        method:"load",
+                        
+                    },
+                ],
+            },
+            delete:{
+                body:"this.selected()",
+                actions:[
+                    {
+                        id:"this",
+                        element:"form",
+                        name:"two",
+                        method:"delete"
+
+                    }
+                ]
+            }
+        };
         console.log("dataSource");
 
         Promise.all([
             customElements.whenDefined("wh-win"),
             customElements.whenDefined("wh-win-header"),
             customElements.whenDefined("wh-win-body"),
-        ]).then(() =>{
-            const win = $(document.body).create("wh-win");
-        
-            win.create("wh-win-header").text("Ventana");
-            win.create("wh-win-body").text("hello")
-        });
+        ]).then(() => {
+            const win: any = $(document.body).create("wh-win");
 
-        
+            //win.attr("width", "687px");
+            //win.attr("height", "600px");
+
+            //win.attr("top", "middle");
+            //win.attr("mode", "custom");
+            //win.attr("left", "center");
+
+            win.attr("resizable", "");
+            win.create("div").addClass("mydiv").html("hello div<br>uyastdutsy<br>aksdsañkdñl<br>sdjkdñ");
+
+            win.attr("caption", "Ventana");
+            //win.get().show()
+
+            //win.attr("visibility", true)
+            //$(document.body).append(win);
+        });
 
         if (source.caption) {
             this._setCaption(source.caption);
@@ -550,18 +601,28 @@ class Grid extends HTMLElement {
         alert(action);
     }
 
-    newRecord(){}
+    newRecord() {}
 
-    loadRecord(){}
+    loadRecord() {}
 
-    deleteRecords(){
+    deleteRecords() {}
 
-        
+    getAppRequest(name: string): AppRequest {
+        return this.querySelector(`app-request[name="${name}"]`);
+    }
+
+    sendRequest(name) {
+        const info = this.getAppRequest(name)?.data;
+        if (info) {
+            info.form = this;
+            const app: any = document.querySelector("._main_app_");
+
+            app.send(info);
+        } else {
+            console.log("request don't exists!");
+        }
     }
 }
-
-
-
 
 //customElements.define("ss-win-header", WHWinHeader);
 //customElements.define("ss-win-body", WHWinBody);

@@ -32,8 +32,9 @@ dd {
 	display: grid;
 	grid-template-columns: auto 1fr auto auto;
 	gap: 4px;
-	padding: 0.1rem;
+	padding: 0.2rem;
 	gap: 6px;
+	user-select: none;
 
 	& > .icon {
 		height: 1.2rem;
@@ -84,7 +85,7 @@ dd {
 		}
 	}
 }
-
+/*
 :host-context(wh-window-caption div) {
 	font-weight: bold;
 }
@@ -92,13 +93,13 @@ dd {
 :host-context(.rojo) {
 	font-weight: bold;
 }
-
+*/
 :host(.win) {
 	font-weight: bold;
 	color: rgb(38, 156, 14) !important;
 }
 
-
+/*
 .min{
 	background-image: url(../images/win_icons.png?i=18);
 	background-position: 0px -20px;
@@ -118,6 +119,31 @@ dd {
 	background-position: -60px -20px;
 }
 
+*/
+
+.min::before {
+	content: "minimize";
+
+}
+
+.auto::before {
+	content: "stack";
+
+}
+.max::before {
+	content: "square";
+
+}
+
+.exit::before {
+	content: "close";
+	
+
+}
+
+.control button:hover{
+	color:aqua;
+}
 
 :host([mode="modal"]) {
 	
@@ -130,4 +156,27 @@ dd {
 	.auto{
 		display:none;
 	}
+}
+
+@font-face {
+    font-family: "Material Symbols Outlined";
+    font-style: normal;
+    font-weight: 100 200;
+    src: url(./fonts/google1.woff2) format("woff2");
+}
+
+.ss-symbols {
+    color: rgb(255, 255, 255);
+    font-family: "Material Symbols Outlined";
+    font-weight: normal;
+    font-style: normal;
+    font-size: 1.3rem!important;
+    line-height: 1;
+    letter-spacing: normal;
+    text-transform: none;
+    display: inline-block;
+    white-space: nowrap;
+    word-wrap: normal;
+    direction: ltr;
+    -moz-font-feature-settings: "liga";
 }

@@ -18,12 +18,16 @@ dl,
 dd {
 	margin: 0;
 }
+body{
+	height: 100%;
+	width: 100%;
+}
 :host {
 	position: fixed;
-
+	top:0px;
 	min-width: 10rem;
 	min-height: 2rem;
-	max-height: 100hv;
+	max-height: 100vh;
 	max-width: 100vw;
 
 	display: grid;
@@ -37,12 +41,19 @@ dd {
 	
 	overflow: auto !important;
 }
-
-
-
-:host:not(:defined) {
-	display: inline-block;
+::slotted(div) {
+	
+	overflow: auto !important;
 }
+::slotted(div.rs){
+	user-select: none;
+}
+
+
+main{
+	overflow: auto !important;
+}
+
 
 :host:not([mode]) {
 	display: none;
@@ -52,6 +63,7 @@ dd {
 :host([visibility="hidden"]) {
 	display: none;
 }
+
 
 :host([mode="max"]), :host([mode="modal"]) {
 	width: calc(100% - 20px) !important;

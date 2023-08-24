@@ -9,10 +9,11 @@ export class Menu extends Element{
     public className : string | string [];
     public setPanel:string;
     public appendTo: string;
-    
+    response: object = {};
+
     templateFile: string;
     
-    response:object[] = [];
+    
 
     store:Store = null;
 
@@ -23,16 +24,10 @@ export class Menu extends Element{
     }
     
     init(info:InfoElement){
-
-        const config = this.store.loadJsonFile(info.source) || {};
-        this._config = config;
-        
-        for(const [key, value] of Object.entries({...config, ...info})){
-            console.log(key, "=", value)
+        this._config = info
+        for (const [key, value] of Object.entries(info)) {
             this[key] = value;
         }
-
-        //console.log("....FORM..", this._config)
         
     }
 
@@ -47,29 +42,21 @@ export class Menu extends Element{
 
     async load(){
 
-        
-        const data = {
-            
-            mode: "init",
-            type: "element",
-            wc:"wh-menu",
-            id: this.id,
-            props: {
-                dataSource : this._config.element
+        this.response = {
+            element: "menu",
+            propertys: {
+                dataSource: this._config,
+                
+                
             },
-            //replayToken => $this->replayToken,
-            appendTo:this.appendTo,
-            setPanel: this.setPanel,
         };
-        //console.log(data)
-        this.addResponse(data);
     }
     
-    getResponse():object[]{
+    getResponse(): any {
         return this.response;
     }
 
-    addResponse(response){
-        this.response.push(response);
+    addResponse(response) {
+        //this.response.push(response);
     }
 }

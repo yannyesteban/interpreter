@@ -271,6 +271,7 @@ class GTForm extends HTMLElement {
     }
 
     public connectedCallback() {
+        /*
         $(".save1").on("click", () => {
             this.appendChild($.create("div").get<HTMLElement>());
 
@@ -282,7 +283,7 @@ class GTForm extends HTMLElement {
             const d2 = document.getElementById("d2");
             this.append(d2);
         });
-
+        */
         this._setStore();
 
         $(this).on("change", this);

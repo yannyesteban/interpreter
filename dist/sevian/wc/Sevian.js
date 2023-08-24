@@ -28,7 +28,7 @@ export class Sevian extends HTMLElement {
 
 			}
             main{
-                border:4px solid green;
+           
                 display:flex;
             }
 			</style>
@@ -171,6 +171,7 @@ export class Sevian extends HTMLElement {
         });
     }
     initApp() {
+        /*
         const btn = $("#x");
         btn.on("click", (e) => {
             this.sendForm({
@@ -179,9 +180,11 @@ export class Sevian extends HTMLElement {
                 blockLayers: ["#p3", "#p2", "#x"],
                 blockForm: true,
                 reportValidity: true,
+
                 //confirm:"hello"
             });
         });
+        */
         window.history.pushState({ a: 2 }, "yanny", "?page=2");
         console.log(window.history.state);
         const request = {

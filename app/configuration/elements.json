@@ -22,5 +22,13 @@
         "class": "Form",
         "fileConfig": true,
         "template": "forms/{name}.json"
+    },
+    {
+        "name": "menu",
+        "enable": true,
+        "file": "./menu.js",
+        "class": "Menu",
+        "fileConfig": true,
+        "template": "menus/{name}.json"
     }
 ]

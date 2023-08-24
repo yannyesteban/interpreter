@@ -690,7 +690,7 @@ export class Resize {
         }
 
         const main = this.main; 
-        main.style.userSelect = "none";
+        //main.style.userSelect = "none";
 
         let left = 0;
         let top = 0;

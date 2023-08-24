@@ -9,6 +9,8 @@
         <link rel="stylesheet" href="css/main.css" />
         <link rel="stylesheet" href="css/grid.css" />
         <script defer type="module" src="../dist/sevian/wc/Grid.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/Form.js"></script>
+        
     </head>
     <body>
         
@@ -395,6 +397,61 @@
                     }
                 }
             }
+        </script>
+
+        <script type="module">
+
+        import { Q as $ } from "../dist/sevian/Q.js";
+            let menu = $(document.body).create("wh-menu");
+        menu.get().dataSource = {
+            "addClass": ["exit-menu", "unit"],
+            "hideCheck": true,
+            "hideIcon": false,
+            "events": {
+                "link-action": "console.log('hola')"
+            },
+            "items": [
+                {
+                    "caption": "Mapa",
+                    "addClass": "map_01",
+                    "title": "GoogleMaps / MapBopx",
+                    "events": {
+                        "link-action": "document.getElementById('gt-map').toggle()"
+                    }
+                },
+
+                {
+                    "caption": "Conf",
+                    "addClass": "setting",
+                    "title": "Configuración del Sistema",
+                    "request": {
+                        "request": [
+                            {
+                                "id": "gt-config",
+                                "type": "element",
+                                "appendTo": "wh-app",
+                                "element": "gt-config",
+                                "name": null,
+                                "method": "init",
+                                "config": {}
+                            }
+                        ]
+                    },
+                    "events": {
+                        "link-action": "this.send = true;"
+                    }
+                },
+                {
+                    "caption": "Salir",
+                    "addClass": "exit",
+                    "title": "Salir",
+                    "events": {
+                        "link-action": "console.log(this)"
+                    }
+                }
+            ]
+        };
+
         </script>
     </body>
 </html>

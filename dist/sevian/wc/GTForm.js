@@ -180,15 +180,19 @@ class GTForm extends HTMLElement {
         }
     }
     connectedCallback() {
+        /*
         $(".save1").on("click", () => {
-            this.appendChild($.create("div").get());
-            const s = $.create("select").get();
+            this.appendChild($.create("div").get<HTMLElement>());
+
+            const s = $.create("select").get<HTMLSelectElement>();
             s.dataset.formElement = "field";
             s.name = "city_id";
             this.appendChild(s);
+
             const d2 = document.getElementById("d2");
             this.append(d2);
         });
+        */
         this._setStore();
         $(this).on("change", this);
     }

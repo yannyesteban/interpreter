@@ -36,6 +36,11 @@
             "src": "./wc/GTForm.js",
             "name": "form",
             "wc": "gt-form"
+        },
+        {
+            "src": "./wc/Menu.js",
+            "name": "menu",
+            "wc": "wh-menu"
         }
     ]
 }

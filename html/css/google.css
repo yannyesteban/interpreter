@@ -1,0 +1,39 @@
+.header {
+  grid-area: header;
+  background-color: antiquewhite;
+}
+
+.menu {
+  grid-area: menu;
+  background-color: rgb(126, 126, 126);
+}
+
+.sidebar {
+  grid-area: sidebar;
+  background-color: burlywood;
+}
+
+.panel {
+  grid-area: panel;
+  background-color: aqua;
+}
+
+.side-panel {
+  grid-area: side-panel;
+  background-color: rgb(43, 97, 97);
+}
+
+.footer {
+  grid-area: footer;
+  background-color: chocolate;
+}
+
+.google {
+  width: 100%;
+  height: 100vh;
+  border: 2px solid red;
+  display: grid;
+  grid-template-columns: 230px 1fr 1fr 400px;
+  grid-template-rows: 70px 35px 1fr 30px;
+  grid-template-areas: "header header header header" "menu menu menu menu" "sidebar panel panel side-panel" "footer footer footer footer";
+}/*# sourceMappingURL=google.css.map */
