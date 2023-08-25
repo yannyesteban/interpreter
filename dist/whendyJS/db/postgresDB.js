@@ -10,8 +10,15 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { DBSql } from "./db.js";
 import pg from "pg";
 export class PostgreDB extends DBSql {
-    query(sql, param) {
+    query(value, param) {
         return __awaiter(this, void 0, void 0, function* () {
+            let sql;
+            if (typeof value === "object") {
+                sql = this.doQuery(value);
+            }
+            else {
+                sql = value;
+            }
             sql = sql.replace(/`/gim, '"');
             let index = 1;
             sql = sql.replace(/\?/gim, (e) => {
@@ -191,6 +198,19 @@ export class PostgreDB extends DBSql {
                 };
             });
         });
+    }
+    doQuery(value) {
+        let query = value.sql;
+        if (value.limit) {
+            const limit = " LIMIT " + value.limit;
+            if (value.pagination) {
+                query += limit + " OFFSET " + (value.page - 1) * value.limit;
+            }
+        }
+        return query;
+    }
+    doQueryAll(query) {
+        return query.replace(/(select\s)(.+) FROM\s/i, "$1count(*) as total FROM ");
     }
 }
 //# sourceMappingURL=postgresDB.js.map

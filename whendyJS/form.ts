@@ -51,6 +51,7 @@ export class Form extends Element {
     }
 
     init(info: InfoElement) {
+        this._info = info;
         //this._info = this.store.loadJsonFile(info.source) || {};
 
         //console.log("...", info);
@@ -78,6 +79,121 @@ export class Form extends Element {
             case "save":
                 await this.transaction();
                 break;
+            case "list":
+                const page = this.store.getSes("__page_") || "1";
+                await this.list(Number(page));
+                break;
+            case "load-page":
+                await this.loadPageInfo();
+        }
+    }
+
+    async list(page: number) {
+        const fields = this._info.fields.map((field) => ({
+            name: field.name,
+            label: field.label,
+            type: field.cellType,
+            cellWidth: field.cellWidth,
+        }));
+
+        console.log("listData...", this._info.listData);
+
+        const list = this._info.listData;
+
+        let info;
+        let totalRecords = null;
+
+        if (list) {
+            info = await this._pageData(list)
+        }
+
+        const appRequests = {
+            "load-page": {
+                //form: this,
+                actions: [
+                    {
+                        type: "element",
+                        element: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "load-page",
+                    },
+                ],
+            },
+            "edit-record": {
+                //form: this,
+                actions: [
+                    {
+                        type: "set",
+                        element: "form",
+                        "setPanel": "p2",
+                        id: this.id,
+                        name: this.name,
+                        method: "request",
+                    },
+                ],
+            }
+        }
+
+        
+        const dataSource = {
+            caption: "hello Mundo",
+            data: info.data,
+            fields,
+            limit: +list.limit,
+            page: +list.page,
+            records: +totalRecords,
+            maxPages: +list.maxPages || 6,
+            appRequests
+        };
+        this.response = {
+            element: "grid",
+            propertys: {
+                dataSource,
+                //f: await this.evalDataFields(this.datafields),
+                output: info.data,
+            },
+        };
+    }
+
+    async loadPageInfo(){
+        const list = this._info.listData;
+
+        let pageData = await this._pageData(list);
+
+        
+
+        //console.log("--------------------", this._pageData(list))
+        this.response = {
+            element: "grid",
+            propertys: {
+                pageData : {...pageData, fields: this._info.fields},
+                //f: await this.evalDataFields(this.datafields),
+                
+            },
+        };
+    }
+
+    async _pageData(info){
+        let data:any[] = []
+        let totalRecords = 0;
+        if (info.sql) {
+            const db = (this.db = this.store.db.get<DBSql>(this.connection));
+
+            let result = await db.query(info);
+            if (result.rows) {
+                data = result.rows.map((row, index) => ({ ...row, __mode_: 2, __key_: this.genToken(index) }));
+            }
+
+            console.log(db.doQueryAll(info.sql));
+            result = await db.query(db.doQueryAll(info.sql));
+            if (result.rows.length > 0) {
+                totalRecords = result.rows[0].total;
+            }
+        }
+
+        return {
+            data, totalRecords, page:info.page, limit: info.page
         }
     }
 
@@ -160,7 +276,7 @@ export class Form extends Element {
                 label: "__record_",
                 input: "input",
                 name: "__record_",
-            }
+            },
         );
         this.response = {
             element: "form",
@@ -196,7 +312,7 @@ export class Form extends Element {
             key = {
                 record: this.recordKey.reduce(
                     (a: object, fieldName: string) => ((a[fieldName] = data[fieldName]), a),
-                    {}
+                    {},
                 ),
             };
         }
@@ -281,7 +397,7 @@ export class Form extends Element {
                 label: "__key_",
                 input: "input",
                 name: "__key_",
-            }
+            },
         );
         this.response = {
             element: "form",
@@ -298,7 +414,6 @@ export class Form extends Element {
         const jwt = new JWT({ key: "yanny" });
         const key = jwt.verify(token);
         console.log(key, token);
-
 
         const json = {
             db: "mysql",
@@ -386,7 +501,7 @@ export class Form extends Element {
         console.log("que data -> ", this._data);
         dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
 
-           console.log("dataField.....", dataField) 
+        console.log("dataField.....", dataField);
         let info = [];
         for (const data of dataField) {
             if (Array.isArray(data)) {
@@ -473,5 +588,13 @@ export class Form extends Element {
             logs: section,
             con: mainElements,
         });
+    }
+
+    private genToken(payload){
+        const jwt = new JWT({ key: "yanny" });
+        return jwt.generate(payload);
+
+
+        
     }
 }

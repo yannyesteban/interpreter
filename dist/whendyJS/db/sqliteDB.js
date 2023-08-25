@@ -200,5 +200,18 @@ export class SQLiteDB extends DBSql {
             });
         });
     }
+    doQuery(value) {
+        let query = value.sql;
+        if (value.limit) {
+            const limit = " LIMIT " + value.limit;
+            if (value.pagination) {
+                query += limit + " OFFSET " + (value.page - 1) * value.limit;
+            }
+        }
+        return query;
+    }
+    doQueryAll(query) {
+        return query.replace(/(select\s)(.+) FROM\s/i, "$1count(*) as total FROM ");
+    }
 }
 //# sourceMappingURL=sqliteDB.js.map

@@ -211,6 +211,12 @@ class WHMenuItem extends HTMLElement {
     }
     connectedCallback() {
         this.slot = "item";
+        $(this).on("click", event => {
+            console.log(event);
+            if (this.request) {
+                this.send();
+            }
+        });
     }
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
@@ -226,6 +232,8 @@ class WHMenuItem extends HTMLElement {
             case 'use-check':
                 break;
             case 'use-icon':
+                break;
+            case 'appRequest':
                 break;
             case 'onaction':
                 $(this).on("link-action", $.bind(newValue, this, "event"));
@@ -384,13 +392,6 @@ class WHMenuItem extends HTMLElement {
     get request() {
         return this._request;
     }
-    set send(value) {
-        if (value) {
-            this.whenApp().then((app) => {
-                app.go(this.request);
-            });
-        }
-    }
     _getCheckbox() {
         return this.querySelector(`:scope > wh-menu-link > wh-menu-check input`);
     }
@@ -400,17 +401,23 @@ class WHMenuItem extends HTMLElement {
             checkbox.checked = this.hasAttribute("checked");
         }
     }
-    getApp() {
+    getApp1() {
         return getParentElement(this, "wh-app");
     }
     whenApp() {
-        return new Promise((resolve, reject) => {
-            const app = this.getApp();
-            if (app) {
-                resolve(app);
-            }
-            reject({ error: "App not found!" });
-        });
+    }
+    getApp() {
+        return this.closest("._main_app_");
+    }
+    send() {
+        const app = this.getApp();
+        if (app) {
+            const request = this.request;
+            app.send(request);
+        }
+        else {
+            console.log("request don't exists!");
+        }
     }
 }
 customElements.define("wh-menu-item", WHMenuItem);
@@ -587,9 +594,6 @@ class WHMenu extends HTMLElement {
     }
     set removeClass(className) {
         $(this).removeClass(className);
-    }
-    getApp() {
-        return getParentElement(this, "wh-app");
     }
 }
 customElements.define("wh-menu", WHMenu);

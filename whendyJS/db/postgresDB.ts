@@ -5,7 +5,15 @@ import pg from "pg";
 export class PostgreDB extends DBSql {
     client;
 
-    async query(sql: string, param?: any[]) {
+    async query(value: string, param?: any[]) {
+
+        let sql: string;
+        if (typeof value === "object") {
+            sql = this.doQuery(value);
+        } else {
+            sql = value;
+        }
+
         sql = sql.replace(/`/gim, '"');
         let index = 1;
         sql = sql.replace(/\?/gim, (e) => {
@@ -199,5 +207,23 @@ export class PostgreDB extends DBSql {
                     error: e.error,
                 };
             });
+    }
+
+    doQuery(value):string {
+        let query = value.sql;
+
+        if (value.limit) {
+            const limit = " LIMIT " + value.limit;
+
+            if (value.pagination) {
+                query += limit + " OFFSET " + (value.page - 1) * value.limit;
+            }
+        }
+
+        return query;
+    }
+
+    doQueryAll(query:string):string {
+        return query.replace(/(select\s)(.+) FROM\s/i, "$1count(*) as total FROM ");
     }
 }

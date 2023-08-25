@@ -41,7 +41,7 @@ export interface IRecordInfo {
 export interface QueryResult {
     type?: string;
     lastId?;
-    rows?;
+    rows?:any[];
     info?;
     error?;
     errno?;
@@ -73,7 +73,7 @@ export abstract class STMT {
 
 export abstract class DBSql implements IRecordAdmin {
     abstract connect(info: IConnectInfo);
-    abstract query(sql: string, params?: any[]): Promise<QueryResult>;
+    abstract query(sql: string | object, params?: any[]): Promise<QueryResult>;
     abstract infoQuery(q: string): Promise<IFieldInfo[]>;
     abstract infoTable(table: string): Promise<IFieldInfo[]>;
     abstract prepare(): Promise<STMT>;
@@ -85,6 +85,8 @@ export abstract class DBSql implements IRecordAdmin {
     abstract updateRecord(info: IRecordInfo): Promise<STMTResult>;
     abstract upsertRecord(info: IRecordInfo): Promise<STMTResult>;
     abstract deleteRecord(info: IRecordInfo): Promise<STMTResult>;
+
+    abstract doQueryAll(query:string):string 
 }
 
 export abstract class DBSqll {

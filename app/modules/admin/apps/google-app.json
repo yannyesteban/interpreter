@@ -1,7 +1,7 @@
 {
     "id": "gtcomm",
     "name": "home",
-    "templateFile": "app/templates/form.html",
+    "templateFile": "app/templates/google-template.html",
     "elements": [
         
         
@@ -41,6 +41,11 @@
             "src": "./wc/Menu.js",
             "name": "menu",
             "wc": "wh-menu"
+        },
+        {
+            "src": "./wc/Grid.js",
+            "name": "grid",
+            "wc": "ss-grid"
         }
     ]
 }

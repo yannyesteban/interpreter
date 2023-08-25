@@ -17,7 +17,14 @@ enum FLAGS {
 export class MysqlDB extends DBSql {
     client;
     dbase: string;
-    query(sql: string, param?: any[]): Promise<QueryResult> {
+    query(value: string | object, param?: any[]): Promise<QueryResult> {
+        let sql: string;
+        if (typeof value === "object") {
+            sql = this.doQuery(value);
+        } else {
+            sql = value;
+        }
+
         return new Promise((resolve, reject) => {
             this.client.query(sql, param, (error, results, fields) => {
                 if (error) {
@@ -69,7 +76,7 @@ export class MysqlDB extends DBSql {
             FROM INFORMATION_SCHEMA.COLUMNS
             WHERE TABLE_SCHEMA = ? AND TABLE_NAME = ?
             ORDER BY pos;`,
-            [dbase || this.dbase, table]
+            [dbase || this.dbase, table],
         );
 
         return rows.map((row) => {
@@ -255,7 +262,7 @@ export class MysqlDB extends DBSql {
             const update = fields.map((field) => `\`${field}\`=new.` + field);
 
             let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(
-                ","
+                ",",
             )}) AS new ON DUPLICATE KEY UPDATE ${update};`;
 
             console.log(query);
@@ -349,5 +356,23 @@ export class MysqlDB extends DBSql {
                 });
             });
         });
+    }
+
+    doQuery(value):string {
+        let query = value.sql;
+
+        if (value.limit) {
+            const limit = " LIMIT " + value.limit;
+
+            if (value.pagination) {
+                query += limit + " OFFSET " + (value.page - 1) * value.limit;
+            }
+        }
+
+        return query;
+    }
+
+    doQueryAll(query:string):string {
+        return query.replace(/(select\s)(.+) FROM\s/i, "$1count(*) as total FROM ");
     }
 }

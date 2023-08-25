@@ -1,0 +1,150 @@
+{
+    "id": "person",
+    "caption": "Personas",
+    "className": "main",
+    "items": [
+        {
+            "caption": "Google Form",
+            "request": {
+                "form_":"#p2",
+                "store":{
+                    "__page_":"3"
+                },
+                "_confirm": "sure?",
+                "actions": [
+                    {
+                        "id": "google",
+                        "setPanel": "p2",
+                        "type": "set",
+                        "element": "form",
+                        "name": "google_form",
+                        "method": "list",
+                        "eparams": {}
+                    }
+                ]
+            }
+        },
+        {
+            "caption": "Load Form",
+            "request": {
+                "form":"#p1",
+                "_confirm": "sure?",
+                "store":{
+                    "__page_":"1"
+                },
+                "actions": [
+                    {
+                        "id": "unit",
+                        "setPanel": "p1",
+                        "type": "set",
+                        "element": "form",
+                        "name": "two",
+                        "method": "request",
+                        "eparams": {}
+                    }
+                ]
+            }
+        },
+        {
+            "caption": "Load Form",
+            "request": {
+                "_confirm": "sure?",
+                "actions": [
+                    {
+                        "id": "unit3",
+                        "setPanel": "p2",
+                        "type": "set",
+                        "element": "form",
+                        "name": "two",
+                        "method": "request",
+                        "eparams": {}
+                    }
+                ]
+            }
+        },
+        {
+            "caption": "Mapa",
+            "addClass": "map_01",
+            "title": "GoogleMaps / MapBopx",
+            "events": {
+                "link-action": "document.getElementById('gt-map').toggle()"
+            },
+            "items": [
+                {
+                    "caption": "Mapa",
+                    "addClass": "map_01",
+                    "title": "GoogleMaps / MapBopx",
+                    "events": {
+                        "link-action": "document.getElementById('gt-map').toggle()"
+                    }
+                },
+                {
+                    "caption": "Conf",
+                    "addClass": "setting",
+                    "title": "Configuración del Sistema",
+                    "request": {
+                        "request": [
+                            {
+                                "id": "gt-config",
+                                "type": "element",
+                                "appendTo": "wh-app",
+                                "element": "gt-config",
+                                "name": null,
+                                "method": "init",
+                                "config": {}
+                            }
+                        ]
+                    },
+                    "events": {
+                        "link-action": "this.send = true;"
+                    }
+                },
+                {
+                    "caption": "Salir",
+                    "addClass": "exit",
+                    "title": "Salir",
+                    "events": {
+                        "link-action": "console.log(this)"
+                    }
+                }
+            ]
+        },
+        {
+            "caption": "Conf",
+            "addClass": "setting",
+            "title": "Configuración del Sistema",
+            "request": {
+                "request": [
+                    {
+                        "id": "gt-config",
+                        "type": "element",
+                        "appendTo": "wh-app",
+                        "element": "gt-config",
+                        "name": null,
+                        "method": "init",
+                        "config": {}
+                    }
+                ]
+            },
+            "events": {
+                "link-action": "this.send = true;"
+            }
+        },
+        {
+            "caption": "Salir",
+            "addClass": "exit",
+            "title": "Salir",
+            "events": {
+                "link-action": "console.log(this)"
+            }
+        }
+    ],
+    "element": {
+        "addClass": ["exit-menu", "unit"],
+        "hideCheck": true,
+        "hideIcon": false,
+        "events": {
+            "link-action": "console.log('hola')"
+        }
+    }
+}

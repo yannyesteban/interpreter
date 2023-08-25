@@ -1,7 +1,7 @@
 import { Q as $ } from "./../Q.js";
 import { getParentElement } from "./../Tool.js";
 import { App } from "./App.js";
-
+import { Sevian } from "./Sevian.js";
 
 
 function dispatchEvent(element, eventName, detail) {
@@ -318,6 +318,13 @@ class WHMenuItem extends HTMLElement {
 
 		this.slot = "item";
 
+		$(this).on("click", event=>{
+			console.log(event)
+			if(this.request){
+				this.send()
+			}
+		})
+
 	}
 
 
@@ -336,6 +343,8 @@ class WHMenuItem extends HTMLElement {
 			case 'use-check':
 				break;
 			case 'use-icon':
+				break;
+			case 'appRequest':
 				break;
 			case 'onaction':
 				$(this).on("link-action", $.bind(newValue, this, "event"));
@@ -545,14 +554,7 @@ class WHMenuItem extends HTMLElement {
 		return this._request;
 	}
 
-	set send(value) {
-		if (value) {
-			this.whenApp().then((app: App) => {
-				app.go(this.request);
-			});
-		}
-
-	}
+	
 
 	_getCheckbox() {
 		return this.querySelector(`:scope > wh-menu-link > wh-menu-check input`) as HTMLInputElement
@@ -566,23 +568,31 @@ class WHMenuItem extends HTMLElement {
 
 	}
 
-	public getApp() {
+	public getApp1() {
 		return getParentElement(this, "wh-app") as App;
 	}
 
 	public whenApp() {
 
-		return new Promise((resolve, reject) => {
-			const app = this.getApp();
-			if (app) {
-				resolve(app);
-			}
-
-			reject({ error: "App not found!" });
-
-		});
+		
 
 	}
+
+	getApp():Sevian {
+        return this.closest("._main_app_");
+    }
+
+    send() {
+        const app = this.getApp();
+        if (app) {
+            const request = this.request
+            
+
+            app.send(request);
+        }else{
+            console.log("request don't exists!");
+        }
+    }
 }
 
 customElements.define("wh-menu-item", WHMenuItem);
@@ -813,11 +823,13 @@ class WHMenu extends HTMLElement {
 	set removeClass(className) {
 		$(this).removeClass(className);
 	}
-
+	/*
 	public getApp() {
 		return getParentElement(this, "wh-app");
 	}
 
+	*/
+	
 }
 
 customElements.define("wh-menu", WHMenu);

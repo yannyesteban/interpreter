@@ -22,7 +22,14 @@ var FLAGS;
     FLAGS[FLAGS["UNIQUE_FLAG"] = 65536] = "UNIQUE_FLAG";
 })(FLAGS || (FLAGS = {}));
 export class MysqlDB extends DBSql {
-    query(sql, param) {
+    query(value, param) {
+        let sql;
+        if (typeof value === "object") {
+            sql = this.doQuery(value);
+        }
+        else {
+            sql = value;
+        }
         return new Promise((resolve, reject) => {
             this.client.query(sql, param, (error, results, fields) => {
                 if (error) {
@@ -317,6 +324,19 @@ export class MysqlDB extends DBSql {
                 });
             });
         });
+    }
+    doQuery(value) {
+        let query = value.sql;
+        if (value.limit) {
+            const limit = " LIMIT " + value.limit;
+            if (value.pagination) {
+                query += limit + " OFFSET " + (value.page - 1) * value.limit;
+            }
+        }
+        return query;
+    }
+    doQueryAll(query) {
+        return query.replace(/(select\s)(.+) FROM\s/i, "$1count(*) as total FROM ");
     }
 }
 //# sourceMappingURL=mysqlDB.js.map

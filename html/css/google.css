@@ -1,3 +1,8 @@
+@font-face {
+  font-family: "MS";
+  font-style: normal;
+  src: url(./fonts/google1.woff2) format("woff2");
+}
 .header {
   grid-area: header;
   background-color: antiquewhite;
@@ -36,4 +41,18 @@
   grid-template-columns: 230px 1fr 1fr 400px;
   grid-template-rows: 70px 35px 1fr 30px;
   grid-template-areas: "header header header header" "menu menu menu menu" "sidebar panel panel side-panel" "footer footer footer footer";
+}
+
+wh-menu-icon {
+  color: rgb(122, 122, 122);
+  font-size: 1.5rem;
+  text-align: center;
+  font-family: "MS";
+  line-height: 1;
+  letter-spacing: normal;
+  text-transform: none;
+  display: inline-block;
+}
+wh-menu-icon:after {
+  content: "article";
 }/*# sourceMappingURL=google.css.map */

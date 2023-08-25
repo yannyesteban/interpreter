@@ -231,6 +231,7 @@ class Grid extends HTMLElement {
     }
     constructor() {
         super();
+        this.barInfo = " página {page} de {pages}, {records} registros";
         this.modeAction = 1;
         const template = document.createElement("template");
         template.innerHTML = `
@@ -265,6 +266,7 @@ class Grid extends HTMLElement {
         console.log("connectedCallback");
         this.addEventListener("click", (event) => {
             const target = event.target;
+            console.log(target);
             if (target.tagName === "INPUT" && target.type == "radio") {
                 if (this._lastChecked) {
                     this._lastChecked.checked = false;
@@ -305,6 +307,14 @@ class Grid extends HTMLElement {
                     this.removeAttribute("selected");
                 }
             }
+            if (target.tagName === "SS-GRID-ROW" || target.tagName === "SS-GRID-CELL") {
+                const request = this.getAppRequest("edit-record");
+                request.store = {
+                //__page_: event.detail.page,
+                };
+                console.log(request);
+                this.send(request);
+            }
             //console.log(event.target);
         });
     }
@@ -333,11 +343,21 @@ class Grid extends HTMLElement {
         return this.getAttribute("mode-select");
     }
     set dataSource(source) {
+        const maxPages = source.maxPages;
+        const records = source.records;
+        const limit = source.limit;
+        const pages = Math.ceil(records / limit);
+        this._maxPages = maxPages;
+        this._records = records;
+        this._limit = limit;
+        this._pages = pages;
+        this._page = source.page;
+        this.appRequests = source.appRequests;
         this.task = {
             new: {
                 actions: [
                     {
-                        "window": "name",
+                        window: "name",
                         id: "this",
                         element: "form",
                         name: "two",
@@ -363,10 +383,10 @@ class Grid extends HTMLElement {
                         id: "this",
                         element: "form",
                         name: "two",
-                        method: "delete"
-                    }
-                ]
-            }
+                        method: "delete",
+                    },
+                ],
+            },
         };
         console.log("dataSource");
         Promise.all([
@@ -404,13 +424,26 @@ class Grid extends HTMLElement {
         }
         $(this)
             .create("ss-paginator")
-            .attr("page", "1")
-            .attr("pages", "88")
-            .attr("max-pages", "8")
+            .attr("page", source.page)
+            .attr("pages", pages)
+            .attr("max-pages", maxPages)
             .on("page-select", (event) => {
             console.log(event.detail);
             event.target.page = event.detail.page;
+            const request = this.getAppRequest("load-page");
+            request.store = {
+                __page_: event.detail.page,
+            };
+            console.log(request);
+            this.send(request);
         });
+        this._createBarInfo();
+    }
+    set pageData(info) {
+        console.log(info);
+        this._page = info.page;
+        this._createBody(info.fields, info.data);
+        this._createBarInfo();
     }
     _setCaption(value) {
         let caption = $(this).query("ss-grid-caption");
@@ -437,7 +470,8 @@ class Grid extends HTMLElement {
             check.addClass("cell-header");
         }
         for (const field of fields) {
-            const cell = row.create("ss-grid-cell").ds("field", field.name);
+            console.log(field);
+            const cell = row.create("ss-grid-cell").ds("field", field.name || "");
             cell.addClass("cell-header");
             cell.text(field.label);
             if (field.type == "info") {
@@ -468,7 +502,7 @@ class Grid extends HTMLElement {
             check.attr("nid", index);
         }
         for (const field of fields) {
-            const cell = row.create("ss-grid-cell").ds("field", field.name);
+            const cell = row.create("ss-grid-cell").ds("field", field.name || "");
             cell.text(data[field.name]);
             if (field.type == "info") {
                 cell.addClass("cell-info");
@@ -483,15 +517,43 @@ class Grid extends HTMLElement {
             });
         }
     }
+    _createBody(fields, data) {
+        let body = $(this).query("section");
+        if (body) {
+            body.html("");
+        }
+        else {
+            body = $(this).create("section");
+        }
+        this._createHeaderRow(body, fields);
+        let i = 0;
+        for (const line of data) {
+            this._createRow(body, fields, line, ++i);
+        }
+    }
+    _createBarInfo() {
+        let bar = $(this).query(".bar-info");
+        if (!bar) {
+            bar = $(this).create("div").addClass("bar-info");
+        }
+        //barInfo = " página {page} de {pages}, {records} registros";
+        bar.html(this.evalTemplate(this.barInfo, {
+            page: this._page,
+            pages: this._pages,
+            records: this._records,
+        }));
+    }
     setAction(action) {
         alert(action);
     }
     newRecord() { }
     loadRecord() { }
     deleteRecords() { }
-    getAppRequest(name) {
+    /*
+    getAppRequest(name: string): AppRequest {
         return this.querySelector(`app-request[name="${name}"]`);
     }
+    */
     sendRequest(name) {
         var _a;
         const info = (_a = this.getAppRequest(name)) === null || _a === void 0 ? void 0 : _a.data;
@@ -503,6 +565,33 @@ class Grid extends HTMLElement {
         else {
             console.log("request don't exists!");
         }
+    }
+    getApp() {
+        return this.closest("._main_app_");
+    }
+    send(request) {
+        const app = this.getApp();
+        if (app) {
+            app.send(request);
+        }
+        else {
+            console.log("app don't found!");
+        }
+    }
+    getAppRequest(name) {
+        return this.appRequests[name];
+    }
+    evalTemplate(str, data) {
+        str = str.replace(/{(\w+)}/g, (matched, index, original) => {
+            console.log(index, matched);
+            if (index !== 0) {
+                return data[index];
+            }
+            else {
+                return matched;
+            }
+        });
+        return str;
     }
 }
 //customElements.define("ss-win-header", WHWinHeader);

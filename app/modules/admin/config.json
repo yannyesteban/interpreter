@@ -5,7 +5,7 @@
                 "id":"gtcomm",
                 "type":"element",
                 "element":"app",
-                "name":"os2",
+                "name":"google-app",
                 "method":"load"
             },
             {
@@ -31,7 +31,7 @@
                 "setPanel":"m2",
                 "type": "set",
                 "element": "menu",
-                "name": "main",
+                "name": "main-menu",
                 "method": "load",
                 "eparams": {}
             }

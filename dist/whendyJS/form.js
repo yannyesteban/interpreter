@@ -24,6 +24,7 @@ export class Form extends Element {
         this.store = store;
     }
     init(info) {
+        this._info = info;
         //this._info = this.store.loadJsonFile(info.source) || {};
         //console.log("...", info);
         for (const [key, value] of Object.entries(info)) {
@@ -50,7 +51,110 @@ export class Form extends Element {
                 case "save":
                     yield this.transaction();
                     break;
+                case "list":
+                    const page = this.store.getSes("__page_") || "1";
+                    yield this.list(Number(page));
+                    break;
+                case "load-page":
+                    yield this.loadPageInfo();
             }
+        });
+    }
+    list(page) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const fields = this._info.fields.map((field) => ({
+                name: field.name,
+                label: field.label,
+                type: field.cellType,
+                cellWidth: field.cellWidth,
+            }));
+            console.log("listData...", this._info.listData);
+            const list = this._info.listData;
+            let info;
+            let totalRecords = null;
+            if (list) {
+                info = yield this._pageData(list);
+            }
+            const appRequests = {
+                "load-page": {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "load-page",
+                        },
+                    ],
+                },
+                "edit-record": {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "set",
+                            element: "form",
+                            "setPanel": "p2",
+                            id: this.id,
+                            name: this.name,
+                            method: "request",
+                        },
+                    ],
+                }
+            };
+            const dataSource = {
+                caption: "hello Mundo",
+                data: info.data,
+                fields,
+                limit: +list.limit,
+                page: +list.page,
+                records: +totalRecords,
+                maxPages: +list.maxPages || 6,
+                appRequests
+            };
+            this.response = {
+                element: "grid",
+                propertys: {
+                    dataSource,
+                    //f: await this.evalDataFields(this.datafields),
+                    output: info.data,
+                },
+            };
+        });
+    }
+    loadPageInfo() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const list = this._info.listData;
+            let pageData = yield this._pageData(list);
+            //console.log("--------------------", this._pageData(list))
+            this.response = {
+                element: "grid",
+                propertys: {
+                    pageData: Object.assign(Object.assign({}, pageData), { fields: this._info.fields }),
+                    //f: await this.evalDataFields(this.datafields),
+                },
+            };
+        });
+    }
+    _pageData(info) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let data = [];
+            let totalRecords = 0;
+            if (info.sql) {
+                const db = (this.db = this.store.db.get(this.connection));
+                let result = yield db.query(info);
+                if (result.rows) {
+                    data = result.rows.map((row, index) => (Object.assign(Object.assign({}, row), { __mode_: 2, __key_: this.genToken(index) })));
+                }
+                console.log(db.doQueryAll(info.sql));
+                result = yield db.query(db.doQueryAll(info.sql));
+                if (result.rows.length > 0) {
+                    totalRecords = result.rows[0].total;
+                }
+            }
+            return {
+                data, totalRecords, page: info.page, limit: info.page
+            };
         });
     }
     load() {
@@ -417,6 +521,10 @@ export class Form extends Element {
                 con: mainElements,
             });
         });
+    }
+    genToken(payload) {
+        const jwt = new JWT({ key: "yanny" });
+        return jwt.generate(payload);
     }
 }
 //# sourceMappingURL=form.js.map
