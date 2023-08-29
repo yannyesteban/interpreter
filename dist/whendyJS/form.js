@@ -34,10 +34,13 @@ export class Form extends Element {
     evalMethod(method) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("eparams..", method, this.eparams);
+            //console.log("eparams..", method, this.eparams);
             switch (method) {
                 case "request":
                     yield this.load();
+                    break;
+                case "load-record":
+                    yield this.loadRecord();
                     break;
                 case "request2":
                     yield this.evalFields();
@@ -68,7 +71,6 @@ export class Form extends Element {
                 type: field.cellType,
                 cellWidth: field.cellWidth,
             }));
-            console.log("listData...", this._info.listData);
             const list = this._info.listData;
             let info;
             let totalRecords = null;
@@ -97,7 +99,20 @@ export class Form extends Element {
                             "setPanel": "p2",
                             id: this.id,
                             name: this.name,
-                            method: "request",
+                            method: "load-record",
+                        },
+                    ],
+                },
+                "filter": {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            "setPanel": "p2",
+                            id: this.id,
+                            name: this.name,
+                            method: "load-page",
                         },
                     ],
                 }
@@ -108,8 +123,37 @@ export class Form extends Element {
                 fields,
                 limit: +list.limit,
                 page: +list.page,
-                records: +totalRecords,
+                records: +info.totalRecords,
                 maxPages: +list.maxPages || 6,
+                filter: list.filter,
+                nav: {
+                    elements: [
+                        {
+                            type: "button",
+                            label: "save",
+                            className: "",
+                            action: "save",
+                            "request": {},
+                            click: ""
+                        },
+                        {
+                            type: "button",
+                            label: "Delete",
+                            className: "",
+                            action: "delete",
+                            "request": {},
+                            click: ""
+                        },
+                        {
+                            type: "button",
+                            label: "Todos",
+                            className: "",
+                            action: "list",
+                            "request": {},
+                            click: ""
+                        }
+                    ]
+                },
                 appRequests
             };
             this.response = {
@@ -123,8 +167,12 @@ export class Form extends Element {
         });
     }
     loadPageInfo() {
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
             const list = this._info.listData;
+            if ((_a = this.eparams) === null || _a === void 0 ? void 0 : _a.filter) {
+                list.filter = (_b = this.eparams) === null || _b === void 0 ? void 0 : _b.filter;
+            }
             let pageData = yield this._pageData(list);
             //console.log("--------------------", this._pageData(list))
             this.response = {
@@ -136,24 +184,45 @@ export class Form extends Element {
             };
         });
     }
+    doKeyRecord(record1, data) {
+        const record = ["employeeNumber"];
+        const key = record.reduce((acc, e) => (acc[e] = data[e], acc), {});
+        //console.log(data, "................",key)
+        return key;
+    }
     _pageData(info) {
         return __awaiter(this, void 0, void 0, function* () {
             let data = [];
             let totalRecords = 0;
             if (info.sql) {
                 const db = (this.db = this.store.db.get(this.connection));
-                let result = yield db.query(info);
-                if (result.rows) {
-                    data = result.rows.map((row, index) => (Object.assign(Object.assign({}, row), { __mode_: 2, __key_: this.genToken(index) })));
+                let filters = [];
+                let values = [];
+                if (this.eparams.filter) {
+                    if (info.searchIn) {
+                        info.searchIn.forEach(e => {
+                            filters.push(`${e} like concat('%',?,'%')`);
+                            values.push(info.filter);
+                        });
+                    }
+                    info.sql += " WHERE " + filters.join(" OR ");
+                    console.log(this.eparams, info.sql, filters, values);
                 }
+                let result = yield db.query(info, values);
+                const record = ["id"];
+                console.log(result);
+                if (result.rows) {
+                    data = result.rows.map((row, index) => (Object.assign(Object.assign({}, row), { __mode_: 2, __key_: this.genToken(this.doKeyRecord({}, row)) })));
+                }
+                //console.log(data)
                 console.log(db.doQueryAll(info.sql));
-                result = yield db.query(db.doQueryAll(info.sql));
+                result = yield db.query(db.doQueryAll(info.sql), values);
                 if (result.rows.length > 0) {
                     totalRecords = result.rows[0].total;
                 }
             }
             return {
-                data, totalRecords, page: info.page, limit: info.page
+                data, totalRecords, page: info.page, limit: info.limit, filter: info.filter
             };
         });
     }
@@ -169,7 +238,7 @@ export class Form extends Element {
             this._data["state_id"] = 2040;
             this._data["city_id"] = 130165;
             this._data["__mode_"] = this.mode;
-            this._data["__record_"] = JSON.stringify(this.record);
+            this._data["__key_"] = JSON.stringify(this.record);
             this.layout.data = data.rows[0];
             if (this.datafields) {
                 //this.layout.dataLists = await this.evalDataFields(this.datafields);
@@ -217,7 +286,6 @@ export class Form extends Element {
                     ],
                 },
             };
-            console.log("this.layout", this.layout);
             this.layout.elements.push({
                 component: "field",
                 label: "__mode_",
@@ -225,9 +293,97 @@ export class Form extends Element {
                 name: "__mode_",
             }, {
                 component: "field",
-                label: "__record_",
+                label: "__key_",
                 input: "input",
-                name: "__record_",
+                name: "__key_",
+            });
+            this.response = {
+                element: "form",
+                propertys: {
+                    dataSource: this.layout,
+                    //f: await this.evalDataFields(this.datafields),
+                    output,
+                },
+            };
+        });
+    }
+    loadRecord() {
+        return __awaiter(this, void 0, void 0, function* () {
+            //console.log(this._info.recordData)
+            let query = this._info.recordData.sql;
+            const key = this.decodeToken(this.store.getSes("__key_"));
+            let conditions = [];
+            let values = [];
+            const record = this._info.recordData.record.forEach(field => {
+                conditions.push(field + "= ?");
+                values.push(key[field]);
+            });
+            query += " WHERE " + conditions.join(" AND ");
+            const db = (this.db = this.store.db.get(this.connection));
+            //console.log("__key_......",this.decodeToken(this.store.getSes("__key_")))
+            let data = yield db.query(query, values);
+            this._data = data.rows[0];
+            this._data["state_id"] = 2040;
+            this._data["city_id"] = 130165;
+            this._data["__mode_"] = this.mode;
+            this._data["__key_"] = this.store.getSes("__key_"); //JSON.stringify(this.record);
+            this.layout.data = data.rows[0];
+            if (this.datafields) {
+                //this.layout.dataLists = await this.evalDataFields(this.datafields);
+            }
+            const output = [];
+            if (this.dataLists) {
+                //console.log(this.dataFetch)
+                for (const d of this.dataLists) {
+                    output.push({
+                        name: d.name,
+                        data: yield this.evalData(d.data),
+                        childs: d.childs,
+                        parent: d.parent,
+                        mode: d.mode,
+                        value: this._data[d.name],
+                    });
+                }
+                //console.log(output)
+                this.layout.dataLists = output;
+            }
+            //this.addResponse(data);
+            this.layout.appRequests = {
+                dataField: {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "data-fields",
+                        },
+                    ],
+                },
+                save: {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "save",
+                        },
+                    ],
+                },
+            };
+            this.layout.elements.push({
+                component: "field",
+                label: "__mode_",
+                input: "input",
+                name: "__mode_",
+            }, {
+                component: "field",
+                label: "__key_",
+                input: "input",
+                name: "__key_",
             });
             this.response = {
                 element: "form",
@@ -242,7 +398,6 @@ export class Form extends Element {
     getDataRecord(info) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("....", info);
             //info = JSON.parse(this.store.evalSubData(JSON.stringify(info), this._data));
             if (info.sql) {
                 const rows = (yield this.db.query(info.sql, (_a = info.params) !== null && _a !== void 0 ? _a : undefined)).rows;
@@ -259,7 +414,6 @@ export class Form extends Element {
             let data = yield this.getDataRecord(this.dataRecord);
             this._data = data;
             let key;
-            console.log(this.dataRecord, "......", data);
             if (this.recordKey) {
                 key = {
                     record: this.recordKey.reduce((a, fieldName) => ((a[fieldName] = data[fieldName]), a), {}),
@@ -267,11 +421,11 @@ export class Form extends Element {
             }
             const jwt = new JWT({ key: "yanny" });
             const token = jwt.generate(key);
-            console.log(key, token);
+            //console.log(key, token);
             //employeeNumber
             data["__key_"] = token;
             data["__mode_"] = 2;
-            //this._data["__record_"] = JSON.stringify(this.record);
+            //this._data["__key_"] = JSON.stringify(this.record);
             this.layout.data = data;
             if (this.datafields) {
                 //this.layout.dataLists = await this.evalDataFields(this.datafields);
@@ -319,7 +473,6 @@ export class Form extends Element {
                     ],
                 },
             };
-            console.log("this.layout", this.layout);
             this.layout.elements.push({
                 component: "field",
                 label: "__mode_",
@@ -327,9 +480,9 @@ export class Form extends Element {
                 name: "__mode_",
             }, {
                 component: "field",
-                label: "__record_",
+                label: "__key_",
                 input: "input",
-                name: "__record_",
+                name: "__key_",
             }, {
                 component: "field",
                 label: "__key_",
@@ -351,7 +504,7 @@ export class Form extends Element {
             const token = this.store.getReq("__key_");
             const jwt = new JWT({ key: "yanny" });
             const key = jwt.verify(token);
-            console.log(key, token);
+            //console.log("-----KEY ", key)
             const json = {
                 db: "mysql",
                 transaction: true,
@@ -360,13 +513,12 @@ export class Form extends Element {
                     {
                         scheme: this.name,
                         mode: +this.store.getReq("__mode_"),
-                        record: key.record,
+                        record: key,
                         data: this.store.getVReq(),
                     },
                 ],
                 masterData: {},
             };
-            console.log("JSON----->", JSON.stringify(json));
             const c = new DBTransaction(json, this.store.db);
             this.response = {
                 element: "form",
@@ -400,12 +552,9 @@ export class Form extends Element {
     doDataFields(parent) {
         return __awaiter(this, void 0, void 0, function* () {
             this._data = this.store.getVReq();
-            console.log("doDataFields", parent);
             const db = (this.db = this.store.db.get(this.connection));
             const list = this.dataLists.filter((data) => data.parent == parent) || [];
-            console.log(list);
             const output = yield this.getDataFields(list);
-            console.log("output-->", output);
             this.response = {
                 element: "form",
                 propertys: {
@@ -436,9 +585,7 @@ export class Form extends Element {
     evalData(dataField) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            console.log("que data -> ", this._data);
             dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
-            console.log("dataField.....", dataField);
             let info = [];
             for (const data of dataField) {
                 if (Array.isArray(data)) {
@@ -525,6 +672,10 @@ export class Form extends Element {
     genToken(payload) {
         const jwt = new JWT({ key: "yanny" });
         return jwt.generate(payload);
+    }
+    decodeToken(token) {
+        const jwt = new JWT({ key: "yanny" });
+        return jwt.verify(token);
     }
 }
 //# sourceMappingURL=form.js.map

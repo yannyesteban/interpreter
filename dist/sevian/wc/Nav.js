@@ -1,3 +1,4 @@
+import { Q as $ } from "../Q.js";
 class Nav extends HTMLElement {
     static get observedAttributes() {
         return ["type"];
@@ -33,6 +34,20 @@ class Nav extends HTMLElement {
     get type() {
         return this.getAttribute("type");
     }
+    set dataSource(source) {
+        if (source.elements) {
+            for (const item of source.elements) {
+                this.createElement(item);
+            }
+        }
+    }
+    createElement(info) {
+        switch (info.type) {
+            case "button":
+                $(this).create("button").addClass(info.className).html(info.label);
+                break;
+        }
+    }
 }
-customElements.define("wh-nav", Nav);
+customElements.define("ss-nav", Nav);
 //# sourceMappingURL=Nav.js.map

@@ -26,6 +26,8 @@
 .side-panel {
   grid-area: side-panel;
   background-color: rgb(43, 97, 97);
+  overflow: auto;
+  display: none;
 }
 
 .footer {
@@ -38,7 +40,7 @@
   height: 100vh;
   border: 2px solid red;
   display: grid;
-  grid-template-columns: 230px 1fr 1fr 400px;
+  grid-template-columns: 230px 1fr 1fr auto;
   grid-template-rows: 70px 35px 1fr 30px;
   grid-template-areas: "header header header header" "menu menu menu menu" "sidebar panel panel side-panel" "footer footer footer footer";
 }

@@ -14,7 +14,6 @@ export class App extends AppElement {
         this.store = store;
     }
     init(info) {
-        console.log("xxxxxxxxxxxxxxxxxxxxxxx", info);
         //const config = loadJsonFile(info.source);
         if (info) {
             for (const [key, value] of Object.entries(info)) {

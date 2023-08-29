@@ -25,7 +25,7 @@ export class App extends AppElement {
     }
 
     init(info: InfoElement) {
-        console.log("xxxxxxxxxxxxxxxxxxxxxxx", info)
+        
         //const config = loadJsonFile(info.source);
 
         if (info) {

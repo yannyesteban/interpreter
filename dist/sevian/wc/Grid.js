@@ -78,7 +78,7 @@ class GridCaption extends HTMLElement {
 customElements.define("ss-grid-caption", GridCaption);
 class GridSearcher extends HTMLElement {
     static get observedAttributes() {
-        return ["type"];
+        return ["text"];
     }
     constructor() {
         super();
@@ -122,19 +122,36 @@ class GridSearcher extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
     }
-    connectedCallback() { }
+    connectedCallback() {
+        this.shadowRoot.querySelector("button").addEventListener("click", () => {
+            const event = new CustomEvent("search", {
+                detail: {
+                    text: this.shadowRoot.querySelector("input").value
+                },
+                cancelable: true,
+                bubbles: true,
+            });
+            this.dispatchEvent(event);
+        });
+    }
     disconnectedCallback() { }
-    attributeChangedCallback(name, oldVal, newVal) { }
-    set type(value) {
-        if (Boolean(value)) {
-            this.setAttribute("type", value);
-        }
-        else {
-            this.removeAttribute("type");
+    attributeChangedCallback(name, oldVal, newVal) {
+        switch (name) {
+            case "text":
+                this.shadowRoot.querySelector("input").value = newVal;
+                break;
         }
     }
-    get type() {
-        return this.getAttribute("type");
+    set text(value) {
+        if (Boolean(value)) {
+            this.setAttribute("text", value);
+        }
+        else {
+            this.removeAttribute("text");
+        }
+    }
+    get text() {
+        return this.getAttribute("text");
     }
 }
 customElements.define("ss-grid-searcher", GridSearcher);
@@ -264,6 +281,18 @@ class Grid extends HTMLElement {
     connectedCallback() {
         this.style.setProperty("--grid-columns", "");
         console.log("connectedCallback");
+        this.addEventListener("search", (event) => {
+            //this.dispatchEvent(event)
+            const request = this.getAppRequest("filter");
+            request.store = {
+                __page_: 1,
+                __filter_: event.detail.text
+            };
+            this.filter = event.target["text"];
+            request.actions[0].eparams = Object.assign(Object.assign({}, request.actions[0].eparams || {}), { filter: event.detail.text });
+            console.log(request);
+            this.send(request);
+        });
         this.addEventListener("click", (event) => {
             const target = event.target;
             console.log(target);
@@ -308,9 +337,12 @@ class Grid extends HTMLElement {
                 }
             }
             if (target.tagName === "SS-GRID-ROW" || target.tagName === "SS-GRID-CELL") {
+                const row = target.closest("ss-grid-row");
                 const request = this.getAppRequest("edit-record");
                 request.store = {
-                //__page_: event.detail.page,
+                    __key_: row.dataset.key,
+                    __mode_: row.dataset.mode,
+                    __page_: this._page
                 };
                 console.log(request);
                 this.send(request);
@@ -320,6 +352,17 @@ class Grid extends HTMLElement {
     }
     disconnectedCallback() { }
     attributeChangedCallback(name, oldVal, newVal) { }
+    set page(value) {
+        if (Boolean(value)) {
+            this.setAttribute("page", value);
+        }
+        else {
+            this.removeAttribute("page");
+        }
+    }
+    get page() {
+        return this.getAttribute("page");
+    }
     set type(value) {
         if (Boolean(value)) {
             this.setAttribute("type", value);
@@ -330,6 +373,17 @@ class Grid extends HTMLElement {
     }
     get type() {
         return this.getAttribute("type");
+    }
+    set filter(value) {
+        let filterElement = $(this).query("ss-grid-searcher");
+        if (!filterElement) {
+            filterElement = $(this).create("ss-grid-searcher");
+        }
+        filterElement.prop("text", value);
+    }
+    get filter() {
+        let filterElement = $(this).query("ss-grid-searcher");
+        return filterElement.prop("text");
     }
     set modeSelect(value) {
         if (Boolean(value)) {
@@ -434,16 +488,29 @@ class Grid extends HTMLElement {
             request.store = {
                 __page_: event.detail.page,
             };
+            request.actions[0].eparams = Object.assign(Object.assign({}, request.actions[0].eparams || {}), { filter: this.filter });
             console.log(request);
             this.send(request);
         });
         this._createBarInfo();
+        this.querySelector("ss-grid-searcher").text = source.filter || "";
+        if (source.nav) {
+            let nav = $(this).create("ss-nav").get();
+            nav.dataSource = source.nav;
+        }
     }
     set pageData(info) {
-        console.log(info);
+        console.log(info, this.querySelector("ss-grid-searcher"));
+        this.filter = info.filter;
+        this._pages = Math.ceil(info.totalRecords / info.limit);
+        this._records = info.totalRecords;
+        $(this).query("ss-paginator")
+            .attr("page", info.page)
+            .attr("pages", this._pages);
         this._page = info.page;
         this._createBody(info.fields, info.data);
         this._createBarInfo();
+        //(<GridSearcher>this.querySelector("ss-grid-searcher")).text =info.filter || ""
     }
     _setCaption(value) {
         let caption = $(this).query("ss-grid-caption");
@@ -493,7 +560,7 @@ class Grid extends HTMLElement {
     }
     _createRow(body, fields, data, index) {
         const row = body.create("ss-grid-row");
-        row.addClass("row");
+        row.addClass("row").ds("key", data.__key_ || "").ds("mode", data.__mode_ || "0");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
             const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "first-cell"]);

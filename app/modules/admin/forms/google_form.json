@@ -1,16 +1,33 @@
 {
+    "panelInfo": {
+        "panel": "p5",
+        "data": {
+            "a": 1
+        }
+    },
+
+    "eparams": ["__page_", "__key_", "__mode_", "__search_", ""],
     "db": "mysq",
-    "listData":{
-        
-            "sql":"select * from classicmodels.employees",
-            "pagination":true,
-            "limit":"10",
-            "page":"{{@__page_}}"
-        
+    "listData": {
+        "sql": "select * from classicmodels.employees",
+        "params": ["2", "3"],
+        "pagination": true,
+        "limit": "6",
+        "page": "{{@__page_}}",
+        "searchIn": ["lastName", "firstName"],
+        "filter_": "{{@__filter_}}"
     },
     "recordKey": ["employeeNumber"],
     "mode": 2,
     "data": "SELECT * FROM classicmodels.employees WHERE employeeNumber = 1370",
+    "recordData": {
+        "sql": "SELECT * FROM classicmodels.employees",
+        "record": ["employeeNumber"],
+        "searchIn": ["lastName", "firstName"],
+        "orderBy": ["lastName"],
+        "pagination": true,
+        "limit": "10"
+    },
     "dataRecord": {
         "sql": "SELECT * FROM classicmodels.employees WHERE employeeNumber = ?",
         "params": ["{{@formId}}"]
@@ -142,6 +159,36 @@
                 "events": {
                     "click": "this.sendRequest('save')"
                 }
+            },
+
+            {
+                "component": "nav",
+                "elements": [
+                    {
+                        "type": "button",
+                        "label": "save",
+                        "className": "",
+                        "action": "save",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "type": "button",
+                        "label": "Delete",
+                        "className": "",
+                        "action": "delete",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "type": "button",
+                        "label": "Todos",
+                        "className": "",
+                        "action": "list",
+                        "request": {},
+                        "click": ""
+                    }
+                ]
             }
         ]
     },
@@ -247,7 +294,7 @@
             "label": "Employee ID",
             "input": "input",
             "name": "employeeNumber",
-            "cell":""
+            "cell": ""
         },
         {
             "component": "field",
@@ -308,17 +355,6 @@
             "label": "cityId",
             "input": "select",
             "name": "cityId"
-        },
-        {
-            "component": "button",
-            "label": "OK",
-            "attr": {
-                "class": "save",
-                "type": "button"
-            },
-            "events": {
-                "click": "this.sendRequest('save')"
-            }
         }
     ]
 }

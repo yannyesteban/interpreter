@@ -44,7 +44,7 @@ export class Fragment extends Element{
     load(str){
 
         let template = this.store.loadFile(this.templateFile);
-        console.log(template)
+        
         this.response = {
            
             element:"fragment",
