@@ -159,19 +159,15 @@ class GridSearcher extends HTMLElement {
     }
 
     public connectedCallback() {
-
-        this.shadowRoot.querySelector("button").addEventListener("click", ()=>{
-
-
+        this.shadowRoot.querySelector("button").addEventListener("click", () => {
             const event = new CustomEvent("search", {
-                detail : {
-                    text : (<HTMLInputElement>this.shadowRoot.querySelector("input")).value
+                detail: {
+                    text: (<HTMLInputElement>this.shadowRoot.querySelector("input")).value,
                 },
                 cancelable: true,
                 bubbles: true,
             });
-            
-    
+
             this.dispatchEvent(event);
         });
     }
@@ -179,11 +175,10 @@ class GridSearcher extends HTMLElement {
     public disconnectedCallback() {}
 
     public attributeChangedCallback(name, oldVal, newVal) {
-        switch(name){
+        switch (name) {
             case "text":
                 (<HTMLInputElement>this.shadowRoot.querySelector("input")).value = newVal;
                 break;
-
         }
     }
 
@@ -379,31 +374,26 @@ class Grid extends HTMLElement {
         this.style.setProperty("--grid-columns", "");
 
         console.log("connectedCallback");
-        this.addEventListener("search", (event:CustomEvent) => {
+        this.addEventListener("search", (event: CustomEvent) => {
             //this.dispatchEvent(event)
 
             const request = this.getAppRequest("filter");
-            
 
-                request.store = {
-                    __page_ : 1,
-                    __filter_ : event.detail.text
-                }
+            request.store = {
+                __page_: 1,
+                __filter_: event.detail.text,
+            };
 
-
-                this.filter = event.target["text"]
-                request.actions[0].eparams = {...request.actions[0].eparams || {}, filter:event.detail.text}
-                console.log(request);
-                this.send(request);
-            
-        })
+            this.filter = event.detail.text;
+            request.actions[0].eparams = { ...(request.actions[0].eparams || {}), filter: event.detail.text };
+            console.log(request);
+            this.send(request);
+        });
 
         this.addEventListener("click", (event) => {
-
-            
             const target: any = event.target;
 
-            console.log(target)
+            console.log(target);
 
             if (target.tagName === "INPUT" && target.type == "radio") {
                 if (this._lastChecked) {
@@ -446,25 +436,41 @@ class Grid extends HTMLElement {
                 }
             }
 
-            if(target.tagName === "SS-GRID-ROW" || target.tagName === "SS-GRID-CELL"){
-
-                const row = target.closest("ss-grid-row")
-
-                
-                
+            if (target.tagName === "SS-GRID-ROW" || target.tagName === "SS-GRID-CELL") {
+                const row = target.closest("ss-grid-row");
+                if (!$(row).hasClass("row")) {
+                    return;
+                }
 
                 const request = this.getAppRequest("edit-record");
 
                 request.store = {
                     __key_: row.dataset.key,
                     __mode_: row.dataset.mode,
-                    __page_:this._page
+                    __page_: this._page,
                 };
                 console.log(request);
-                this.send(request);
+                //this.send(request);
+
+                $(this)
+                    .queryAll("ss-grid-row.row.selected")
+                    .forEach((r) => r.removeClass("selected"));
+                $(row).addClass("selected");
+                this.setRecord();
             }
 
             //console.log(event.target);
+        });
+
+        this.addEventListener("do-action", (event: CustomEvent) => {
+            const action = event.detail.action;
+
+            const request = this.getAppRequest(action);
+
+            request.form = this.closest("form")
+            console.log(request);
+
+            this.send(request);
         });
     }
 
@@ -497,23 +503,18 @@ class Grid extends HTMLElement {
     }
 
     set filter(value) {
-       
         let filterElement = $(this).query("ss-grid-searcher");
-        if(!filterElement){
+        if (!filterElement) {
             filterElement = $(this).create("ss-grid-searcher");
         }
 
-        filterElement.prop("text", value)
-
-
-
+        filterElement.prop("text", value);
     }
 
     get filter() {
         let filterElement = $(this).query("ss-grid-searcher");
 
-        
-        return filterElement.prop("text")
+        return filterElement.prop("text");
     }
 
     set modeSelect(value) {
@@ -578,7 +579,7 @@ class Grid extends HTMLElement {
             },
         };
         console.log("dataSource");
-
+        /*
         Promise.all([
             customElements.whenDefined("wh-win"),
             customElements.whenDefined("wh-win-header"),
@@ -602,6 +603,7 @@ class Grid extends HTMLElement {
             //win.attr("visibility", true)
             //$(document.body).append(win);
         });
+        */
 
         if (source.caption) {
             this._setCaption(source.caption);
@@ -640,32 +642,28 @@ class Grid extends HTMLElement {
                     __page_: event.detail.page,
                 };
 
-                request.actions[0].eparams = {...request.actions[0].eparams || {}, filter:this.filter}
+                request.actions[0].eparams = { ...(request.actions[0].eparams || {}), filter: this.filter };
                 console.log(request);
                 this.send(request);
             });
 
         this._createBarInfo();
-        (<GridSearcher>this.querySelector("ss-grid-searcher")).text =source.filter || "";
+        (<GridSearcher>this.querySelector("ss-grid-searcher")).text = source.filter || "";
 
-        if(source.nav){
-            let nav:any = $(this).create("ss-nav").get()
-            nav.dataSource = source.nav
-
+        if (source.nav) {
+            let nav: any = $(this).create("ss-nav").get();
+            nav.dataSource = source.nav;
         }
     }
 
     set pageData(info) {
         console.log(info, this.querySelector("ss-grid-searcher"));
 
-        this.filter = info.filter
-       this._pages = Math.ceil(info.totalRecords / info.limit);
-       this._records = info.totalRecords;
-       $(this).query("ss-paginator")
-       .attr("page", info.page)
-       .attr("pages", this._pages);
+        this.filter = info.filter;
+        this._pages = Math.ceil(info.totalRecords / info.limit);
+        this._records = info.totalRecords;
+        $(this).query("ss-paginator").attr("page", info.page).attr("pages", this._pages);
 
-       
         this._page = info.page;
         this._createBody(info.fields, info.data);
         this._createBarInfo();
@@ -725,7 +723,9 @@ class Grid extends HTMLElement {
     }
     _createRow(body, fields, data, index) {
         const row = body.create("ss-grid-row");
-        row.addClass("row").ds("key", data.__key_ || "").ds("mode", data.__mode_ || "0");
+        row.addClass("row")
+            .ds("key", data.__key_ || "")
+            .ds("mode", data.__mode_ || "0");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
             const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "first-cell"]);
@@ -756,7 +756,6 @@ class Grid extends HTMLElement {
         let body = $(this).query("section");
         if (body) {
             body.html("");
-            
         } else {
             body = $(this).create("section");
         }
@@ -769,9 +768,9 @@ class Grid extends HTMLElement {
         }
     }
 
-    _createBarInfo(){
+    _createBarInfo() {
         let bar = $(this).query(".bar-info");
-        if(!bar){
+        if (!bar) {
             bar = $(this).create("div").addClass("bar-info");
         }
         //barInfo = " página {page} de {pages}, {records} registros";
@@ -837,6 +836,29 @@ class Grid extends HTMLElement {
         });
 
         return str;
+    }
+
+    setRecord() {
+        this.querySelectorAll("input[data-input-type='record']").forEach((i) => i.remove());
+
+        const row: HTMLElement = this.querySelector("ss-grid-row.selected");
+
+        const mode = row.dataset.mode;
+        const key = row.dataset.key;
+
+        const fields: HTMLElement[] = Array.from(row.querySelectorAll("ss-grid-cell"));
+
+        fields.forEach((field) => {
+            $(this)
+                .create("input")
+                .ds("inputType", "record")
+                .prop("type", "text")
+                .prop("name", field.dataset.field)
+                .value(field.innerHTML);
+        });
+
+        $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__mode_").value(mode);
+        $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__key_").value(key);
     }
 }
 

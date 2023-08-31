@@ -280,6 +280,11 @@ export class Sevian extends HTMLElement {
         else {
             body = new FormData();
         }
+        if (request["setFormValue"]) {
+            for (const [key, value] of Object.entries(request["setFormValue"])) {
+                body.append(key, value);
+            }
+        }
         if (request.store === true) {
             store = _store;
         }

@@ -7,7 +7,7 @@ class FormContainer extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../css/WHForm.css">
+		<link rel="stylesheet" href="./css/WHForm.css">
 		<slot></slot>	
 	
 		`;
@@ -373,6 +373,7 @@ class GTForm extends HTMLElement {
                 parent.appendChild(component);
             }
             else {
+                console.log(element);
                 throw new Error("component not found!");
             }
         });
@@ -461,6 +462,7 @@ class GTForm extends HTMLElement {
         return button.get();
     }
     _createNav(info) {
+        console.log(info);
         const nav = $.create("form-container");
         if (info.elements) {
             this.setElements(nav.get(), info.elements);

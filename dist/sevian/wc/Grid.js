@@ -126,7 +126,7 @@ class GridSearcher extends HTMLElement {
         this.shadowRoot.querySelector("button").addEventListener("click", () => {
             const event = new CustomEvent("search", {
                 detail: {
-                    text: this.shadowRoot.querySelector("input").value
+                    text: this.shadowRoot.querySelector("input").value,
                 },
                 cancelable: true,
                 bubbles: true,
@@ -286,10 +286,10 @@ class Grid extends HTMLElement {
             const request = this.getAppRequest("filter");
             request.store = {
                 __page_: 1,
-                __filter_: event.detail.text
+                __filter_: event.detail.text,
             };
-            this.filter = event.target["text"];
-            request.actions[0].eparams = Object.assign(Object.assign({}, request.actions[0].eparams || {}), { filter: event.detail.text });
+            this.filter = event.detail.text;
+            request.actions[0].eparams = Object.assign(Object.assign({}, (request.actions[0].eparams || {})), { filter: event.detail.text });
             console.log(request);
             this.send(request);
         });
@@ -338,16 +338,31 @@ class Grid extends HTMLElement {
             }
             if (target.tagName === "SS-GRID-ROW" || target.tagName === "SS-GRID-CELL") {
                 const row = target.closest("ss-grid-row");
+                if (!$(row).hasClass("row")) {
+                    return;
+                }
                 const request = this.getAppRequest("edit-record");
                 request.store = {
                     __key_: row.dataset.key,
                     __mode_: row.dataset.mode,
-                    __page_: this._page
+                    __page_: this._page,
                 };
                 console.log(request);
-                this.send(request);
+                //this.send(request);
+                $(this)
+                    .queryAll("ss-grid-row.row.selected")
+                    .forEach((r) => r.removeClass("selected"));
+                $(row).addClass("selected");
+                this.setRecord();
             }
             //console.log(event.target);
+        });
+        this.addEventListener("do-action", (event) => {
+            const action = event.detail.action;
+            const request = this.getAppRequest(action);
+            request.form = this.closest("form");
+            console.log(request);
+            this.send(request);
         });
     }
     disconnectedCallback() { }
@@ -443,24 +458,31 @@ class Grid extends HTMLElement {
             },
         };
         console.log("dataSource");
+        /*
         Promise.all([
             customElements.whenDefined("wh-win"),
             customElements.whenDefined("wh-win-header"),
             customElements.whenDefined("wh-win-body"),
         ]).then(() => {
-            const win = $(document.body).create("wh-win");
+            const win: any = $(document.body).create("wh-win");
+
             //win.attr("width", "687px");
             //win.attr("height", "600px");
+
             //win.attr("top", "middle");
             //win.attr("mode", "custom");
             //win.attr("left", "center");
+
             win.attr("resizable", "");
             win.create("div").addClass("mydiv").html("hello div<br>uyastdutsy<br>aksdsañkdñl<br>sdjkdñ");
+
             win.attr("caption", "Ventana");
             //win.get().show()
+
             //win.attr("visibility", true)
             //$(document.body).append(win);
         });
+        */
         if (source.caption) {
             this._setCaption(source.caption);
         }
@@ -488,7 +510,7 @@ class Grid extends HTMLElement {
             request.store = {
                 __page_: event.detail.page,
             };
-            request.actions[0].eparams = Object.assign(Object.assign({}, request.actions[0].eparams || {}), { filter: this.filter });
+            request.actions[0].eparams = Object.assign(Object.assign({}, (request.actions[0].eparams || {})), { filter: this.filter });
             console.log(request);
             this.send(request);
         });
@@ -504,9 +526,7 @@ class Grid extends HTMLElement {
         this.filter = info.filter;
         this._pages = Math.ceil(info.totalRecords / info.limit);
         this._records = info.totalRecords;
-        $(this).query("ss-paginator")
-            .attr("page", info.page)
-            .attr("pages", this._pages);
+        $(this).query("ss-paginator").attr("page", info.page).attr("pages", this._pages);
         this._page = info.page;
         this._createBody(info.fields, info.data);
         this._createBarInfo();
@@ -560,7 +580,9 @@ class Grid extends HTMLElement {
     }
     _createRow(body, fields, data, index) {
         const row = body.create("ss-grid-row");
-        row.addClass("row").ds("key", data.__key_ || "").ds("mode", data.__mode_ || "0");
+        row.addClass("row")
+            .ds("key", data.__key_ || "")
+            .ds("mode", data.__mode_ || "0");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
             const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "first-cell"]);
@@ -659,6 +681,23 @@ class Grid extends HTMLElement {
             }
         });
         return str;
+    }
+    setRecord() {
+        this.querySelectorAll("input[data-input-type='record']").forEach((i) => i.remove());
+        const row = this.querySelector("ss-grid-row.selected");
+        const mode = row.dataset.mode;
+        const key = row.dataset.key;
+        const fields = Array.from(row.querySelectorAll("ss-grid-cell"));
+        fields.forEach((field) => {
+            $(this)
+                .create("input")
+                .ds("inputType", "record")
+                .prop("type", "text")
+                .prop("name", field.dataset.field)
+                .value(field.innerHTML);
+        });
+        $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__mode_").value(mode);
+        $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__key_").value(key);
     }
 }
 //customElements.define("ss-win-header", WHWinHeader);

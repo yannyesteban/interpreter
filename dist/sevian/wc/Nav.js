@@ -20,7 +20,21 @@ class Nav extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
     }
-    connectedCallback() { }
+    connectedCallback() {
+        $(this).on("click", (event) => {
+            const target = event.target;
+            if (target.dataset.action) {
+                const customEvent = new CustomEvent("do-action", {
+                    detail: {
+                        action: target.dataset.action,
+                    },
+                    cancelable: true,
+                    bubbles: true,
+                });
+                this.dispatchEvent(customEvent);
+            }
+        });
+    }
     disconnectedCallback() { }
     attributeChangedCallback(name, oldVal, newVal) { }
     set type(value) {
@@ -44,8 +58,12 @@ class Nav extends HTMLElement {
     createElement(info) {
         switch (info.type) {
             case "button":
-                $(this).create("button").addClass(info.className).html(info.label);
-                break;
+                $(this)
+                    .create("button")
+                    .attr("type", "button")
+                    .addClass(info.className)
+                    .ds("action", info.action)
+                    .html(info.label);
         }
     }
 }

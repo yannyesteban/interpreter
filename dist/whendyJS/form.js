@@ -36,6 +36,9 @@ export class Form extends Element {
         return __awaiter(this, void 0, void 0, function* () {
             //console.log("eparams..", method, this.eparams);
             switch (method) {
+                case "new-record":
+                    yield this.newRecord();
+                    break;
                 case "request":
                     yield this.load();
                     break;
@@ -103,6 +106,34 @@ export class Form extends Element {
                         },
                     ],
                 },
+                "delete-record": {
+                    //form: this,
+                    confirm: "borrando!",
+                    setFormValue: {
+                        "__mode_": "3",
+                    },
+                    "store": {
+                        "__page_": "1"
+                    },
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            setPanel: this.setPanel,
+                            id: this.id,
+                            name: this.name,
+                            method: "save",
+                        },
+                        {
+                            type: "set",
+                            element: "form",
+                            setPanel: this.setPanel,
+                            id: this.id,
+                            name: this.name,
+                            method: "list",
+                        },
+                    ],
+                },
                 "filter": {
                     //form: this,
                     actions: [
@@ -113,6 +144,19 @@ export class Form extends Element {
                             id: this.id,
                             name: this.name,
                             method: "load-page",
+                        },
+                    ],
+                },
+                "new": {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "set",
+                            element: "form",
+                            "setPanel": "p2",
+                            id: this.id,
+                            name: this.name,
+                            method: "new-record",
                         },
                     ],
                 }
@@ -129,6 +173,14 @@ export class Form extends Element {
                 nav: {
                     elements: [
                         {
+                            "type": "button",
+                            "label": "+",
+                            "className": "",
+                            "action": "new",
+                            "request": {},
+                            "click": ""
+                        },
+                        {
                             type: "button",
                             label: "save",
                             className: "",
@@ -138,17 +190,17 @@ export class Form extends Element {
                         },
                         {
                             type: "button",
-                            label: "Delete",
+                            label: "Delete Record",
                             className: "",
-                            action: "delete",
+                            action: "delete-record",
                             "request": {},
                             click: ""
                         },
                         {
                             type: "button",
-                            label: "Todos",
+                            label: "Edit",
                             className: "",
-                            action: "list",
+                            action: "edit-record",
                             "request": {},
                             click: ""
                         }
@@ -191,6 +243,7 @@ export class Form extends Element {
         return key;
     }
     _pageData(info) {
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let data = [];
             let totalRecords = 0;
@@ -198,14 +251,14 @@ export class Form extends Element {
                 const db = (this.db = this.store.db.get(this.connection));
                 let filters = [];
                 let values = [];
-                if (this.eparams.filter) {
+                if ((_a = this.eparams) === null || _a === void 0 ? void 0 : _a.filter) {
                     if (info.searchIn) {
                         info.searchIn.forEach(e => {
                             filters.push(`${e} like concat('%',?,'%')`);
                             values.push(info.filter);
                         });
+                        info.sql += " WHERE " + filters.join(" OR ");
                     }
-                    info.sql += " WHERE " + filters.join(" OR ");
                     console.log(this.eparams, info.sql, filters, values);
                 }
                 let result = yield db.query(info, values);
@@ -223,6 +276,96 @@ export class Form extends Element {
             }
             return {
                 data, totalRecords, page: info.page, limit: info.limit, filter: info.filter
+            };
+        });
+    }
+    newRecord() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = (this.db = this.store.db.get(this.connection));
+            this.layout.data = {
+                __mode_: 1
+            };
+            this._data = this.layout.data;
+            if (this.datafields) {
+                //this.layout.dataLists = await this.evalDataFields(this.datafields);
+            }
+            const output = [];
+            if (this.dataLists) {
+                //console.log(this.dataFetch)
+                for (const d of this.dataLists) {
+                    output.push({
+                        name: d.name,
+                        data: yield this.evalData(d.data),
+                        childs: d.childs,
+                        parent: d.parent,
+                        mode: d.mode,
+                        //value: this.layout.data[d.name],
+                    });
+                }
+                //console.log(output)
+                this.layout.dataLists = output;
+            }
+            //this.addResponse(data);
+            this.layout.appRequests = {
+                dataField: {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "data-fields",
+                        },
+                    ],
+                },
+                save: {
+                    //form: this,
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "save",
+                        },
+                    ],
+                },
+                list: {
+                    //form: this,
+                    "store": {
+                        "__page_": "1"
+                    },
+                    actions: [
+                        {
+                            setPanel: this.setPanel,
+                            type: "set",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "list",
+                        },
+                    ],
+                },
+            };
+            this.layout.elements.push({
+                component: "field",
+                label: "__mode_",
+                input: "input",
+                name: "__mode_",
+            }, {
+                component: "field",
+                label: "__key_",
+                input: "input",
+                name: "__key_",
+            });
+            this.response = {
+                element: "form",
+                propertys: {
+                    dataSource: this.layout,
+                    //f: await this.evalDataFields(this.datafields),
+                    output,
+                },
             };
         });
     }
@@ -285,6 +428,32 @@ export class Form extends Element {
                         },
                     ],
                 },
+                delete: {
+                    //form: this,
+                    setFormValue: {
+                        "__mode_": "3"
+                    },
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "save",
+                        },
+                    ],
+                },
+                list: {
+                    actions: [
+                        {
+                            type: "list",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "list",
+                        },
+                    ],
+                }
             };
             this.layout.elements.push({
                 component: "field",
@@ -373,6 +542,33 @@ export class Form extends Element {
                         },
                     ],
                 },
+                delete: {
+                    //form: this,
+                    confirm: "Secure delete this record!",
+                    setFormValue: {
+                        "__mode_": "3"
+                    },
+                    actions: [
+                        {
+                            type: "element",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "save",
+                        },
+                    ],
+                },
+                list: {
+                    actions: [
+                        {
+                            type: "set",
+                            element: "form",
+                            id: this.id,
+                            name: this.name,
+                            method: "list",
+                        },
+                    ],
+                }
             };
             this.layout.elements.push({
                 component: "field",
@@ -504,7 +700,7 @@ export class Form extends Element {
             const token = this.store.getReq("__key_");
             const jwt = new JWT({ key: "yanny" });
             const key = jwt.verify(token);
-            //console.log("-----KEY ", key)
+            console.log("-----KEY ", key, this.store.getReq("__mode_"));
             const json = {
                 db: "mysql",
                 transaction: true,

@@ -280,6 +280,8 @@ export class Sevian extends HTMLElement {
             return;
         }
 
+        
+
         let form: HTMLFormElement = null;
 
         if (typeof request.form === "string") {
@@ -294,7 +296,7 @@ export class Sevian extends HTMLElement {
             return;
         }
 
-        let body: any;
+        let body: FormData | any;
         let actions = request.actions || [];
         let store: any = {};
         const _store = this.getStore();
@@ -303,6 +305,13 @@ export class Sevian extends HTMLElement {
             body = new FormData(form);
         } else {
             body = new FormData();
+        }
+
+        if(request["setFormValue"]){
+            for(const [key, value] of Object.entries(request["setFormValue"]) as any){
+                body.append(key, value) 
+            }
+            
         }
 
         if (request.store === true) {

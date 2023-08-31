@@ -6,7 +6,7 @@
         }
     },
 
-    "eparams": ["__page_", "__key_", "__mode_", "__search_", ""],
+    "eparamss": ["__page_", "__key_", "__mode_", "__search_", ""],
     "db": "mysq",
     "listData": {
         "sql": "select * from classicmodels.employees",
@@ -160,12 +160,42 @@
                     "click": "this.sendRequest('save')"
                 }
             },
+            {
+                "component": "button",
+                "label": "Delete",
+                "attr": {
+                    "class": "delete",
+                    "type": "button"
+                },
+                "events": {
+                    "click": "this.sendRequest('delete')"
+                }
+            },
+            {
+                "component": "button",
+                "label": "Show All",
+                "attr": {
+                    "class": "delete",
+                    "type": "button"
+                },
+                "events": {
+                    "click": "this.sendRequest('list')"
+                }
+            },
 
             {
                 "component": "nav",
                 "elements": [
                     {
-                        "type": "button",
+                        "component": "button",
+                        "label": "+",
+                        "className": "",
+                        "action": "new",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "component": "button",
                         "label": "save",
                         "className": "",
                         "action": "save",
@@ -173,7 +203,7 @@
                         "click": ""
                     },
                     {
-                        "type": "button",
+                        "component": "button",
                         "label": "Delete",
                         "className": "",
                         "action": "delete",
@@ -181,7 +211,7 @@
                         "click": ""
                     },
                     {
-                        "type": "button",
+                        "component": "button",
                         "label": "Todos",
                         "className": "",
                         "action": "list",

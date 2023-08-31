@@ -28,7 +28,21 @@ class Nav extends HTMLElement {
         });
     }
 
-    public connectedCallback() {}
+    public connectedCallback() {
+        $(this).on("click", (event) => {
+            const target: HTMLElement = event.target;
+            if (target.dataset.action) {
+                const customEvent = new CustomEvent("do-action", {
+                    detail: {
+                        action: target.dataset.action,
+                    },
+                    cancelable: true,
+                    bubbles: true,
+                });
+                this.dispatchEvent(customEvent);
+            }
+        });
+    }
 
     public disconnectedCallback() {}
 
@@ -46,24 +60,24 @@ class Nav extends HTMLElement {
         return this.getAttribute("type");
     }
 
-
-    set dataSource(source){
-
-
-        if(source.elements){
-            for(const item of source.elements){
-                this.createElement(item)
+    set dataSource(source) {
+        if (source.elements) {
+            for (const item of source.elements) {
+                this.createElement(item);
             }
         }
     }
 
-    createElement(info){
-        switch(info.type){
+    createElement(info) {
+        switch (info.type) {
             case "button":
-                $(this).create("button").addClass(info.className).html(info.label)
-                break;
+                $(this)
+                    .create("button")
+                    .attr("type", "button")
+                    .addClass(info.className)
+                    .ds("action", info.action)
+                    .html(info.label);
         }
-
     }
 }
 
