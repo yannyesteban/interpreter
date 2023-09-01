@@ -1,4 +1,60 @@
 [
+    [
+        {
+            "do": "set-panel",
+            "panel": "x",
+            "data": {},
+            "state": {
+                "do": "set-panel",
+                "panel": "x",
+                "api": "formAdmin",
+                "name": "one",
+                "method": "request",
+                "params": {}
+            }
+        },
+        {
+            "do": "update-panel",
+            "panel": "x",
+            "data": {},
+            "state": {
+                "do": "update-element",
+                "panel": "x",
+                "api": "formAdmin",
+                "name": "one",
+                "method": "request",
+                "params": {}
+            }
+        },
+        {
+            "do": "set-element",
+            "id": "#po",
+            "setTo": "div > ul",
+            "element": "form",
+            "data": {}
+        },
+        {
+            "do": "update-element",
+            "id": "#po",
+            "appendTo": "div > ul",
+            "element": "form",
+            "data": {}
+        },
+        {
+            "do": "message",
+            "message": {
+                "type": "error",
+                "caption": "hello",
+                "text": "hello",
+                "okButton": "OK"
+            }
+        },
+        {
+            "do": "log",
+            "message": "text"
+        }
+    ],
+
     {
         "panels": [
             {
