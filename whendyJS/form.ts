@@ -404,6 +404,26 @@ export class Form extends Element {
         */
     }
 
+    addRequest(type, info){
+
+        /*
+        
+
+        this.addRequest("message",{caption:"hello", text:"error"})
+        this.addRequest(request.do,{caption:"hello", text:"error"})
+
+        */
+
+        return {
+            type:"set-panel",
+            element:"form",
+            id:this.id,
+            
+            
+        }
+
+    }
+
     async loadRecord() {
 
         //console.log(this._info.recordData)

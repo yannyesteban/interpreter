@@ -313,6 +313,20 @@ export class Form extends Element {
             */
         });
     }
+    addRequest(type, info) {
+        /*
+        
+
+        this.addRequest("message",{caption:"hello", text:"error"})
+        this.addRequest(request.do,{caption:"hello", text:"error"})
+
+        */
+        return {
+            type: "set-panel",
+            element: "form",
+            id: this.id,
+        };
+    }
     loadRecord() {
         return __awaiter(this, void 0, void 0, function* () {
             //console.log(this._info.recordData)
