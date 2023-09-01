@@ -22,7 +22,8 @@ export class Fragment extends Element{
     
     init(info:InfoElement){
 
-        const config = this.store.loadJsonFile(info.source);
+        console.log("fragment", info)
+        const config = this.store.loadJsonFile(info.name);
         
         for(const [key, value] of Object.entries({...config, ...info})){
             this[key] = value;

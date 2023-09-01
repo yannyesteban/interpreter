@@ -5,6 +5,8 @@ import { Store } from "./store.js";
 import { JWT } from "./JWT.js";
 import { type } from "os";
 
+
+
 export class Model {
     name: string;
     mode: string;
@@ -12,6 +14,7 @@ export class Model {
 }
 
 export class Form extends Element {
+    public panel: string;
     public id: string;
     public name: string;
     public element: string = "wh-html";
@@ -114,89 +117,8 @@ export class Form extends Element {
             info = await this._pageData(list)
         }
 
-        const appRequests = {
-            "load-page": {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "load-page",
-                    },
-                ],
-            },
-            "edit-record": {
-                //form: this,
-                actions: [
-                    {
-                        type: "set",
-                        element: "form",
-                        "setPanel": "p2",
-                        id: this.id,
-                        name: this.name,
-                        method: "load-record",
-                    },
-                ],
-            },
-            "delete-record": {
-                //form: this,
-                confirm:"borrando!",
-                setFormValue:{
-                    "__mode_":"3",
-                    
-                },
-                "store":{
-                    "__page_":"1"
-                },
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        setPanel:this.setPanel,
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                    {
-                        type: "set",
-                        element: "form",
-                        
-                        setPanel:this.setPanel,
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                    },
-                ],
-            },
-            "filter": {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        "setPanel": "p2",
-                        id: this.id,
-                        name: this.name,
-                        method: "load-page",
-                    },
-                ],
-            },
-            "new": {
-                //form: this,
-                actions: [
-                    {
-                        type: "set",
-                        element: "form",
-                        "setPanel": "p2",
-                        id: this.id,
-                        name: this.name,
-                        method: "new-record",
-                    },
-                ],
-            }
-        }
+        
+        const appRequests = this._appRequests("list");
 
         
         const dataSource = {
@@ -313,7 +235,7 @@ export class Form extends Element {
     
                 
     
-                console.log(this.eparams, info.sql, filters, values)
+                
             }
             
 
@@ -321,7 +243,7 @@ export class Form extends Element {
 
             const record = ["id"]
 
-            console.log(result)
+            
             if (result.rows) {
 
                 
@@ -330,7 +252,7 @@ export class Form extends Element {
 
             //console.log(data)
 
-            console.log(db.doQueryAll(info.sql));
+            
             result = await db.query(db.doQueryAll(info.sql), values);
             if (result.rows.length > 0) {
                 totalRecords = result.rows[0].total;
@@ -376,50 +298,9 @@ export class Form extends Element {
 
         //this.addResponse(data);
 
-        this.layout.appRequests = {
-            dataField: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "data-fields",
-                    },
-                ],
-            },
-            save: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
-            },
-            list: {
-                //form: this,
-                "store":{
-                    "__page_":"1"
-                },
-                actions: [
-                    
-                    {
-                        setPanel:this.setPanel,
-                        type: "set",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                    },
-                ],
-            },
-        };
-
+        this.layout.appRequests =this._appRequests("list");
+        
+       
         
         this.layout.elements.push(
             {
@@ -484,61 +365,7 @@ export class Form extends Element {
 
         //this.addResponse(data);
 
-        this.layout.appRequests = {
-            dataField: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "data-fields",
-                    },
-                ],
-            },
-            save: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
-            },
-            delete: {
-                //form: this,
-                setFormValue:{
-                    "__mode_":"3"
-                },
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
-            },
-            list: {
-                
-                
-                
-                actions: [
-                    {
-                        type: "list",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                    },
-                ],
-            }
-        };
+        this.layout.appRequests =  this._appRequests("list");
 
         
         this.layout.elements.push(
@@ -563,6 +390,18 @@ export class Form extends Element {
                 output,
             },
         };
+        /*
+        const f:any = {};
+        f.setComponent("form", {datasource:{}})
+        f.addMessage({
+            "className":"yes",
+            "type":"error",
+            "title":"hello",
+            "message":"welcome",
+            "okButton":"Aceptar"
+
+        })
+        */
     }
 
     async loadRecord() {
@@ -615,62 +454,7 @@ export class Form extends Element {
 
         //this.addResponse(data);
 
-        this.layout.appRequests = {
-            dataField: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "data-fields",
-                    },
-                ],
-            },
-            save: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
-            },
-            delete: {
-                //form: this,
-                confirm:"Secure delete this record!",
-                setFormValue:{
-                    "__mode_":"3"
-                },
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
-            },
-            list: {
-                
-                
-                
-                actions: [
-                    {
-                        type: "set",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                    },
-                ],
-            }
-        };
+        this.layout.appRequests =this._appRequests("list");
 
         
         this.layout.elements.push(
@@ -760,33 +544,7 @@ export class Form extends Element {
 
         //this.addResponse(data);
 
-        this.layout.appRequests = {
-            dataField: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "data-fields",
-                    },
-                ],
-            },
-            save: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
-            },
-        };
-
+        this.layout.appRequests = this._appRequests("list");
         
         this.layout.elements.push(
             {
@@ -823,7 +581,7 @@ export class Form extends Element {
         const jwt = new JWT({ key: "yanny" });
         const key = jwt.verify(token);
         
-        console.log("-----KEY ", key, this.store.getReq("__mode_"))
+        
 
         const json = {
             db: "mysql",
@@ -1012,5 +770,147 @@ export class Form extends Element {
         const jwt = new JWT({ key: "yanny" });
         return jwt.verify(token)
        
+    }
+
+    private _appRequests(type?:string){
+        console.log(this.panel)
+        return {
+
+            dataField: {
+                //form: this,
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "data-fields",
+                    },
+                ],
+            },
+            save: {
+                //form: this,
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "save",
+                    },
+                ],
+            },
+            delete: {
+                //form: this,
+                setFormValue:{
+                    "__mode_":"3"
+                },
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "save",
+                    },
+                ],
+            },
+            list: {
+                
+                
+                
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "list",
+                    },
+                ],
+            },
+
+            "load-page": {
+                //form: this,
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: this.id,
+                        name: this.name,
+                        method: "load-page",
+                    },
+                ],
+            },
+            "edit-record": {
+                //form: this,
+                actions: [
+                    {
+                        do: "set-panel",
+                        api: "form",
+                        panel: this.panel,
+                        id: this.id,
+                        name: this.name,
+                        method: "load-record",
+                    },
+                ],
+            },
+            "delete-record": {
+                //form: this,
+                confirm:"borrando!",
+                setFormValue:{
+                    "__mode_":"3",
+                    
+                },
+                "store":{
+                    "__page_":"1"
+                },
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        panel:this.setPanel,
+                        id: this.id,
+                        name: this.name,
+                        method: "save",
+                    },
+                    {
+                        do: "set-panel",
+                        api: "form",
+                        
+                        panel:this.setPanel,
+                        id: this.id,
+                        name: this.name,
+                        method: "list",
+                    },
+                ],
+            },
+            "filter": {
+                //form: this,
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        panel: this.panel,
+                        id: this.id,
+                        name: this.name,
+                        method: "load-page",
+                    },
+                ],
+            },
+            "new": {
+                //form: this,
+                actions: [
+                    {
+                        do: "set-panel",
+                        api: "form",
+                        panel: this.panel,
+                        id: this.id,
+                        name: this.name,
+                        method: "new-record",
+                    },
+                ],
+            }
+        }
     }
 }

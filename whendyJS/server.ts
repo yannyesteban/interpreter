@@ -3,7 +3,7 @@ import { register, Manager } from "./manager.js";
 import { Store } from "./store.js";
 import { Memory } from "./memory.js";
 import { InfoElement } from "./element.js";
-import { ClassManager } from "./classManager.js"; 
+import { ClassManager } from "./classManager.js";
 import { IConnectInfo } from "./dataModel.js";
 import { Authorization } from "./Authorization.js";
 import { DBAdmin } from "./db/dbAdmin.js";
@@ -48,19 +48,17 @@ export class Server {
             session.loadSession(this.constants);
 
             let infoDB = this.db;
-            
+
             let init = this.init;
 
             if (this.useModule) {
-                
                 const moduleInfo = Tool.loadJsonFile(`./app/modules${req.url}/config.json`);
-                
+
                 session.loadSession(moduleInfo.constants || {});
 
                 infoDB = moduleInfo.db || [];
                 init = moduleInfo.init;
 
-                
                 //console.log("-> ", req.url, path.dirname(req.url));
                 //console.log(url.parse(req.url));
             }
@@ -90,7 +88,7 @@ export class Server {
             if (appStore) {
                 session.loadSession(appStore);
             }
-            
+
             const start = wh.store.getHeader("Application-Name")?.toString();
 
             if (start && init[start]) {
@@ -118,25 +116,25 @@ export class Server {
                     type: "element",
 
                     id: "x",
-                    data:{
-                       innerHTML : "hello"  
+                    data: {
+                        innerHTML: "hello",
                     },
-                    
+
                     appendTo: "#y",
                 },
                 {
                     type: "set",
-                    data:{
+                    data: {
                         element: "form",
                         propertys: {
                             dataSource: {
                                 title: "hello World!",
                             },
-                        }
+                        },
                     },
-                    
+
                     id: "x",
-                    setpanel:"p4",
+                    setpanel: "p4",
                     appendTo: "#y",
                 },
                 {

@@ -44,10 +44,10 @@ export interface AppRequest {
 export interface HtmlFragment {}
 
 export interface ElementResponse {
-    setPanel?: string;
+    panel?: string;
     setTo?: selector;
     appendTo?: selector;
-    type?: string;
+    do?: string;
     id?: string;
     mode?: string;
     element: string;
@@ -108,7 +108,7 @@ export interface IElement {
     props: any;
     propertys: any;
     data: any;
-    setPanel?: string;
+    panel?: string;
     setTo?: selector;
     appendTo?: string;
 }

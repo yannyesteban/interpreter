@@ -661,6 +661,7 @@ class Grid extends HTMLElement {
     send(request) {
         const app = this.getApp();
         if (app) {
+            request.form = this.closest("form");
             app.send(request);
         }
         else {

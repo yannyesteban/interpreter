@@ -34,7 +34,7 @@ export class User extends Element implements IUserAdmin {
     }
 
     init(info: InfoElement) {
-        const source = this.store.getSes("JSON_PATH") + info.source + ".json";
+        const source = this.store.getSes("JSON_PATH") + info.name + ".json";
 
         const config = this.store.loadJsonFile(source);
 

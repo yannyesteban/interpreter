@@ -49,10 +49,16 @@ export class Whendy {
     }
     setElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
-            this.store.setExp("ID_", info.id);
-            this.store.setExp("ELEMENT_", info.element);
+            const id = info.id;
+            const panel = info.panel;
+            const api = info.api;
+            const name = info.name;
+            const method = info.method;
+            const params = info.params;
+            this.store.setExp("ID_", id);
+            this.store.setExp("API_", api);
             //this.store.LoadExp(info.eparams)
-            const cls = yield this.classes.getClass(info.element);
+            const cls = yield this.classes.getClass(api);
             if (!cls) {
                 console.log("error, clas not found");
                 return;
@@ -60,28 +66,32 @@ export class Whendy {
             const ele = new cls();
             ele.setStore(this.store);
             let config = info;
-            if (this.classes.useFileConfig(info.element) && info.name) {
-                config = Object.assign(Object.assign({}, this.getElementConfig(info.element, info.name)), info);
+            if (this.classes.useFileConfig(api) && name) {
+                config = Object.assign(Object.assign({}, this.getElementConfig(api, name)), info);
             }
             ele.init(config);
-            const data = yield ele.evalMethod(info.method);
+            const data = yield ele.evalMethod(method);
             if (this.mode == AppMode.RESTAPI) {
                 this.doRestData(ele);
             }
             else {
                 const data = ele.getResponse();
                 let response = null;
-                switch (info.type) {
-                    case "set":
-                        this.addResponse([Object.assign(Object.assign({ dinamic: false }, info), { data })]);
+                switch (info.do) {
+                    case "set-panel":
+                        this.addResponse([
+                            Object.assign(Object.assign({ dinamic: false }, info), { data }),
+                        ]);
                         break;
-                    case "element":
-                        this.addResponse([Object.assign(Object.assign({ dinamic: false }, info), { 
+                    case "update":
+                        this.addResponse([
+                            Object.assign(Object.assign({ dinamic: false }, info), { 
                                 //type: info.type,
                                 //setPanel: info.setPanel,
                                 //appendTo: info.appendTo,
                                 //id: info.id,
-                                data })]);
+                                data }),
+                        ]);
                         break;
                 }
                 //this.addResponse([response]);

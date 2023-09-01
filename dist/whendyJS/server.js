@@ -95,7 +95,7 @@ export class Server {
                     type: "element",
                     id: "x",
                     data: {
-                        innerHTML: "hello"
+                        innerHTML: "hello",
                     },
                     appendTo: "#y",
                 },
@@ -107,7 +107,7 @@ export class Server {
                             dataSource: {
                                 title: "hello World!",
                             },
-                        }
+                        },
                     },
                     id: "x",
                     setpanel: "p4",

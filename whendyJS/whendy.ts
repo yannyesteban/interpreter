@@ -62,11 +62,18 @@ export class Whendy {
     }
 
     async setElement(info: InfoElement) {
-        this.store.setExp("ID_", info.id);
-        this.store.setExp("ELEMENT_", info.element);
+        const id = info.id;
+        const panel = info.panel;
+        const api = info.api;
+        const name = info.name;
+        const method = info.method;
+        const params = info.params;
+
+        this.store.setExp("ID_", id);
+        this.store.setExp("API_", api);
         //this.store.LoadExp(info.eparams)
 
-        const cls = await this.classes.getClass(info.element);
+        const cls = await this.classes.getClass(api);
 
         if (!cls) {
             console.log("error, clas not found");
@@ -77,12 +84,12 @@ export class Whendy {
 
         ele.setStore(this.store);
         let config = info;
-        if (this.classes.useFileConfig(info.element) && info.name) {
-            config = { ...this.getElementConfig(info.element, info.name), ...info };
+        if (this.classes.useFileConfig(api) && name) {
+            config = { ...this.getElementConfig(api, name), ...info };
         }
 
         ele.init(config);
-        const data = await ele.evalMethod(info.method);
+        const data = await ele.evalMethod(method);
 
         if (this.mode == AppMode.RESTAPI) {
             this.doRestData(ele);
@@ -91,24 +98,28 @@ export class Whendy {
 
             let response: OutputInfo = null;
 
-            switch (info.type) {
-                case "set":
-                    this.addResponse( [{
-                        dinamic:false, 
-                        ...info,
-                        data,
-                    }]);
+            switch (info.do) {
+                case "set-panel":
+                    this.addResponse([
+                        {
+                            dinamic: false,
+                            ...info,
+                            data,
+                        },
+                    ]);
                     break;
-                case "element":
-                    this.addResponse( [{
-                        dinamic:false,
-                        ...info,
-                        //type: info.type,
-                        //setPanel: info.setPanel,
-                        //appendTo: info.appendTo,
-                        //id: info.id,
-                        data,
-                    }]);
+                case "update":
+                    this.addResponse([
+                        {
+                            dinamic: false,
+                            ...info,
+                            //type: info.type,
+                            //setPanel: info.setPanel,
+                            //appendTo: info.appendTo,
+                            //id: info.id,
+                            data,
+                        },
+                    ]);
                     break;
             }
 

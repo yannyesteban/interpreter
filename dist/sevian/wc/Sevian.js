@@ -128,11 +128,11 @@ export class Sevian extends HTMLElement {
                 e = $.create(element);
                 e.id(info.id);
                 e.prop(info.data.propertys);
-                const panel = $(`#${info.setPanel}` || info.setTo || info.appendTo);
+                const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
                 if (!panel) {
                     return;
                 }
-                if (info.setPanel || info.setTo) {
+                if (info.panel || info.setTo) {
                     panel.text("");
                 }
                 panel.append(e);
@@ -155,14 +155,14 @@ export class Sevian extends HTMLElement {
         return __awaiter(this, void 0, void 0, function* () {
             console.log(response);
             for (const r of response) {
-                switch (r.type) {
-                    case "set":
+                switch (r.do) {
+                    case "set-panel":
                         yield this.setElement(r);
-                        if (r.setPanel) {
-                            this.panels[r.setPanel] = r;
+                        if (r.panel) {
+                            this.panels[r.panel] = r;
                         }
                         break;
-                    case "element":
+                    case "update":
                         yield this.updateElement(r);
                         break;
                 }

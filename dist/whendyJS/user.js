@@ -29,7 +29,7 @@ export class User extends Element {
         this.store = store;
     }
     init(info) {
-        const source = this.store.getSes("JSON_PATH") + info.source + ".json";
+        const source = this.store.getSes("JSON_PATH") + info.name + ".json";
         const config = this.store.loadJsonFile(source);
         for (const [key, value] of Object.entries(Object.assign(Object.assign({}, config), info))) {
             this[key] = value;

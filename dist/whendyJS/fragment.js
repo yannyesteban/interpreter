@@ -10,7 +10,8 @@ export class Fragment extends Element {
         this.store = store;
     }
     init(info) {
-        const config = this.store.loadJsonFile(info.source);
+        console.log("fragment", info);
+        const config = this.store.loadJsonFile(info.name);
         for (const [key, value] of Object.entries(Object.assign(Object.assign({}, config), info))) {
             this[key] = value;
         }

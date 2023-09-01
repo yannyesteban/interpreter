@@ -1,0 +1,43 @@
+[
+    {
+        "panels": [
+            {
+                "panel": "LOP",
+                "api": "formAdmin",
+                "name": "one",
+                "method": "request",
+                "eparams": {}
+            }
+        ]
+    },
+    {
+        "do": "update-panel",
+        "panel": "LOP",
+        "id": "x",
+        "api": "formAdmin",
+        "name": "one",
+        "method": "request",
+        "eparams": { "a": 1 }
+    },
+    {
+        "do": "set-element",
+        "id": "x",
+        "target": "div > ul",
+        "api": "formAdmin",
+        "name": "one",
+        "method": "request",
+        "eparams": { "a": 1 }
+    },
+    {
+        "api": "formAdmin",
+        "name": "one",
+        "method": "save"
+    },
+    {
+        "api": "formAdmin",
+        "name": "one",
+        "method": "request",
+        "do": "set-app-store, set-panel-store",
+        "storeTo": "unit"
+    }
+]

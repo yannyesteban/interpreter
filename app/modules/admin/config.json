@@ -2,38 +2,38 @@
     "init": {
         "home": [
             {
+                "do":"update",
                 "id":"gtcomm",
-                "type":"element",
-                "element":"app",
+                "api":"app",
                 "name":"google-app",
                 "method":"load"
             },
             {
-                "id":"f",
-                "setPanel":"p3",
-                "type": "set",
-                "element": "fragment",
+                "do":"set-panel",
+                "panel":"p3",
+                "id":"banner",
+                "api": "fragmentt",
                 "name": "one",
                 "method": "load",
-                "eparams": {}
+                "params": {}
             },
             {
-                "id":"unit",
-                "setPanel":"p2",
-                "type": "set",
-                "element": "form",
+                "do":"set-panel",
+                "panel":"p2",
+                "id":"two",
+                "api": "form",
                 "name": "two",
                 "method": "request",
-                "eparams": {}
+                "params": {}
             },
             {
-                "id":"unit2",
-                "setPanel":"m2",
-                "type": "set",
-                "element": "menu",
+                "do":"set-panel",
+                "panel":"m2",
+                "id":"main-menu",
+                "api": "menu",
                 "name": "main-menu",
                 "method": "load",
-                "eparams": {}
+                "params": {}
             }
         ]
     },

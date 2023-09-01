@@ -14,12 +14,12 @@
                 "actions": [
                     {
                         "id": "google",
-                        "setPanel": "p2",
-                        "type": "set",
-                        "element": "form",
+                        "panel": "p2",
+                        "do": "set-panel",
+                        "api": "form",
                         "name": "google_form",
                         "method": "list",
-                        "eparams": {}
+                        "params": {}
                     }
                 ]
             }
@@ -35,12 +35,12 @@
                 "actions": [
                     {
                         "id": "unit",
-                        "setPanel": "p1",
-                        "type": "set",
-                        "element": "form",
+                        "panel": "p1",
+                        "do": "set-panel",
+                        "api": "form",
                         "name": "two",
                         "method": "request",
-                        "eparams": {}
+                        "params": {}
                     }
                 ]
             }
@@ -52,12 +52,12 @@
                 "actions": [
                     {
                         "id": "unit3",
-                        "setPanel": "p2",
-                        "type": "set",
-                        "element": "form",
+                        "panel": "p2",
+                        "do": "set-panel",
+                        "api": "form",
                         "name": "two",
                         "method": "request",
-                        "eparams": {}
+                        "params": {}
                     }
                 ]
             }

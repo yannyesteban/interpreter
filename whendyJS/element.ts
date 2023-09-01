@@ -30,16 +30,18 @@ export class OutputInfo {
 }
 
 export class InfoElement {
+  do?:string;
+  panel?:string;
   id?: string;
-  mode?:string;
-  type?: string;
+  //mode?:string;
+  //type?: string;
   appendTo?: string;
-  setPanel?: string;
-  element?: string;
-  source?: string;
+  //setPanel?: string;
+  api?: string;
+  //source?: string;
   name?: string;
   method?: string;
-  eparams?: object[];
+  params?: object[];
 
   constructor(info) {
 
