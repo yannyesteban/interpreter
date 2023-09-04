@@ -3,14 +3,11 @@ import { Float } from "../Float.js";
 const html = 0;
 class WHPopup extends HTMLElement {
     static get observedAttributes() {
-        return ["mode", "left", "top", "width", "height", "caption",
-            "delay", "auto-close",
-        ];
+        return ["mode", "left", "top", "width", "height"];
     }
     constructor() {
         super();
         this._timer = null;
-        this.a = 5;
         const template = document.createElement("template");
         template.innerHTML = /*html*/ `
 
@@ -44,14 +41,14 @@ class WHPopup extends HTMLElement {
             this.mode = "close";
         }
         else if (event.type === "mouseover") {
+            this._stopTimer();
         }
         else if (event.type === "mouseout") {
+            this._setTimer();
         }
     }
     connectedCallback() {
         //this._click = this._click.bind(this);
-        this._mouseover = this._mouseover.bind(this);
-        this._mouseout = this._mouseout.bind(this);
         Float.init(this);
         /*
         Float.show({
@@ -61,51 +58,8 @@ class WHPopup extends HTMLElement {
             deltaY: "80"
         });
         */
-        if (this.mode !== "open" && this.mode !== "close") {
+        if (!this.mode) {
             this.mode = "open";
-        }
-    }
-    _click(event) {
-        if (event.target === this) {
-            return;
-        }
-        this.mode = "close";
-    }
-    _mouseover(event) {
-        this._stopTimer();
-    }
-    _mouseout(event) {
-        this._setTimer();
-    }
-    _close() {
-        document.removeEventListener("click", this.handleEvent.bind(this));
-        this.removeEventListener("mouseover", this.handleEvent);
-        this.removeEventListener("mouseout", this.handleEvent);
-        this.style.zIndex = "-1";
-        if (this._timer) {
-            clearTimeout(this._timer);
-        }
-        this.tabIndex = -1;
-    }
-    _open() {
-        Float.upIndex(this);
-        document.addEventListener("click", this.handleEvent.bind(this));
-        this.addEventListener("mouseover", this.handleEvent);
-        this.addEventListener("mouseout", this.handleEvent);
-        //$(document).on("click", this._click);
-        //$(this).on("mouseover", this._mouseover);
-        //$(this).on("mouseout", this._mouseout);
-        this.tabIndex = 0;
-        this._setTimer();
-    }
-    _setTimer() {
-        if (this.delay) {
-            this._timer = setTimeout(() => { this.mode = "close"; }, Number(this.delay));
-        }
-    }
-    _stopTimer() {
-        if (this._timer) {
-            clearTimeout(this._timer);
         }
     }
     disconnectedCallback() {
@@ -126,9 +80,11 @@ class WHPopup extends HTMLElement {
                 break;
             case "left":
             case "top":
+                Float.show({ e: this, left: this.left, top: this.top });
                 break;
             case "width":
             case "height":
+                this.updateSize();
                 break;
         }
     }
@@ -165,6 +121,28 @@ class WHPopup extends HTMLElement {
     get top() {
         return this.getAttribute("top");
     }
+    set width(value) {
+        if (Boolean(value)) {
+            this.setAttribute("width", value);
+        }
+        else {
+            this.removeAttribute("width");
+        }
+    }
+    get width() {
+        return this.getAttribute("width");
+    }
+    set height(value) {
+        if (Boolean(value)) {
+            this.setAttribute("height", value);
+        }
+        else {
+            this.removeAttribute("height");
+        }
+    }
+    get height() {
+        return this.getAttribute("height");
+    }
     set delay(value) {
         if (Boolean(value)) {
             this.setAttribute("delay", value);
@@ -175,6 +153,45 @@ class WHPopup extends HTMLElement {
     }
     get delay() {
         return this.getAttribute("delay");
+    }
+    updateSize() {
+        this.style.width = this.width;
+        this.style.height = this.height;
+        console.log(this.width);
+        Float.show({ e: this, left: this.left, top: this.top });
+    }
+    _close() {
+        document.removeEventListener("click", this.handleEvent.bind(this));
+        this.removeEventListener("mouseover", this.handleEvent);
+        this.removeEventListener("mouseout", this.handleEvent);
+        this.style.zIndex = "-1";
+        if (this._timer) {
+            clearTimeout(this._timer);
+        }
+        this.tabIndex = -1;
+    }
+    _open() {
+        Float.upIndex(this);
+        document.addEventListener("click", this.handleEvent.bind(this));
+        this.addEventListener("mouseover", this.handleEvent);
+        this.addEventListener("mouseout", this.handleEvent);
+        //$(document).on("click", this._click);
+        //$(this).on("mouseover", this._mouseover);
+        //$(this).on("mouseout", this._mouseout);
+        this.tabIndex = 0;
+        this._setTimer();
+    }
+    _setTimer() {
+        if (this.delay) {
+            this._timer = setTimeout(() => {
+                this.mode = "close";
+            }, Number(this.delay));
+        }
+    }
+    _stopTimer() {
+        if (this._timer) {
+            clearTimeout(this._timer);
+        }
     }
 }
 customElements.define("ss-popup", WHPopup);
