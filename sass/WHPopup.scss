@@ -21,9 +21,9 @@ dd {
 :host {
 	background-color: aqua;
 	position: fixed;
-	top:30px;
-	display: inline-block;
-	height: auto;
+	//top:30px;
+	display: block;
+	//height: auto;
 	border: 2px solid rgb(197, 197, 197);
 	font-size: 3rem;
 	overflow: hidden;
@@ -33,7 +33,7 @@ dd {
 }
 
 :host([mode="close"]) {
-	opacity: 0;
+	opacity: 0.5;
 	transition-duration: 0.2s;
 	transition-property: all;
 	transition-timing-function: ease-in;

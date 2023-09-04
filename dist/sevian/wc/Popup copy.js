@@ -1,10 +1,9 @@
-import { Q as $ } from "../Q.js";
 import { fire } from "../Tool.js";
 import { Float } from "../Float.js";
 const html = 0;
-class Popup extends HTMLElement {
+class BasicPopup extends HTMLElement {
     static get observedAttributes() {
-        return ["caption", "mode", "left", "top", "width", "height", "auto-close", "closable"];
+        return ["mode", "left", "top", "width", "height", "closable"];
     }
     constructor() {
         super();
@@ -20,9 +19,8 @@ class Popup extends HTMLElement {
 			
 			</style>
 			<link rel="stylesheet" href="./css/WHPopup.css">
-			<slot name="caption"></slot>
+			
 			<slot></slot>
-			<slot name="buttons"></slot>
 			`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
@@ -32,14 +30,7 @@ class Popup extends HTMLElement {
     }
     handleEvent(event) {
         if (event.type === "click") {
-            if (this.contains(event.target) && event.target.dataset.type == "close") {
-                this.mode = "close";
-                return;
-            }
             if (event.target === this) {
-                if (this.autoClose) {
-                    this.mode = "close";
-                }
                 return;
             }
             if (this.closable) {
@@ -82,21 +73,7 @@ class Popup extends HTMLElement {
             case "height":
                 this.updateSize();
                 break;
-            case "caption":
-                this.setCaption();
-                break;
         }
-    }
-    set caption(value) {
-        if (Boolean(value)) {
-            this.setAttribute("caption", value);
-        }
-        else {
-            this.removeAttribute("caption");
-        }
-    }
-    get caption() {
-        return this.getAttribute("caption");
     }
     set mode(value) {
         if (Boolean(value)) {
@@ -166,25 +143,14 @@ class Popup extends HTMLElement {
     }
     set closable(value) {
         if (Boolean(value)) {
-            this.setAttribute("closable", "");
+            this.setAttribute("closable", value);
         }
         else {
             this.removeAttribute("closable");
         }
     }
     get closable() {
-        return this.hasAttribute("closable");
-    }
-    set autoClose(value) {
-        if (Boolean(value)) {
-            this.setAttribute("auto-close", "");
-        }
-        else {
-            this.removeAttribute("auto-close");
-        }
-    }
-    get autoClose() {
-        return this.hasAttribute("auto-close");
+        return this.getAttribute("closable");
     }
     updateSize() {
         this.style.width = this.width;
@@ -221,9 +187,6 @@ class Popup extends HTMLElement {
             clearTimeout(this._timer);
         }
     }
-    setCaption() {
-        $(this).create("div").attr("slot", "caption").html(this.caption);
-    }
 }
-customElements.define("ss-popup", Popup);
-//# sourceMappingURL=Popup.js.map
+customElements.define("basic-popup", BasicPopup);
+//# sourceMappingURL=Popup%20copy.js.map

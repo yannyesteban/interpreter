@@ -6,11 +6,11 @@ import { Float, Move, Drag, Resize } from "../Float.js";
 
 const html = 0;
 
-class WHPopup extends HTMLElement {
+class Popup extends HTMLElement {
     _timer = null;
 
     static get observedAttributes() {
-        return ["mode", "left", "top", "width", "height"];
+        return ["caption", "mode", "left", "top", "width", "height", "auto-close", "closable"];
     }
 
     constructor() {
@@ -20,37 +20,44 @@ class WHPopup extends HTMLElement {
 
         template.innerHTML = /*html*/ `
 
-			<link rel="stylesheet" href="./css/WHPopup.css">
+			<style>
+
+				:host{
+					display: inline-block;
+				}
 			
+			</style>
+			<link rel="stylesheet" href="./css/WHPopup.css">
+			<slot name="caption"></slot>
 			<slot></slot>
+			<slot name="buttons"></slot>
 			`;
 
         this.attachShadow({ mode: "open" });
 
         this.shadowRoot.appendChild(template.content.cloneNode(true));
-        /*
-		this.shadowRoot.addEventListener("slotchange", (event) => {
-					[...event.target.assignedElements()].forEach(e => {
-						console.log(e.nodeName)
-						if (e.nodeName.toLowerCase() == "wh-win-header") {
-							e.slot = "header"
-						}
 
-						if (e.nodeName.toLowerCase() == "wh-win-body") {
-							e.slot = "body"
-						}
-					})
-
-				});
-		*/
+        this.shadowRoot.addEventListener("slotchangeee", (event) => {
+            //Float.show({ e: this, left: this.left, top: this.top });
+        });
     }
 
     handleEvent(event) {
         if (event.type === "click") {
+            if (this.contains(event.target) && event.target.dataset.type == "close") {
+                this.mode = "close";
+				return;
+            }
+
             if (event.target === this) {
+				if(this.autoClose){
+					this.mode = "close";
+				}
                 return;
             }
-            this.mode = "close";
+            if (this.closable) {
+                this.mode = "close";
+            }
         } else if (event.type === "mouseover") {
             this._stopTimer();
         } else if (event.type === "mouseout") {
@@ -59,17 +66,8 @@ class WHPopup extends HTMLElement {
     }
 
     public connectedCallback() {
-        //this._click = this._click.bind(this);
-
         Float.init(this);
-        /*
-		Float.show({
-			e: this,
-			left: this.left || "acenter",
-			top: this.top || "bottom",
-			deltaY: "80"
-		});
-		*/
+
         if (!this.mode) {
             this.mode = "open";
         }
@@ -80,11 +78,10 @@ class WHPopup extends HTMLElement {
     }
 
     public attributeChangedCallback(name, oldVal, newVal) {
-        console.log("attributeChangedCallback", name);
+        console.log("attributeChangedCallback", name, oldVal, newVal);
 
         switch (name) {
             case "mode":
-                console.log(newVal);
                 if (newVal === "close") {
                     this._close();
                 }
@@ -95,13 +92,30 @@ class WHPopup extends HTMLElement {
                 break;
             case "left":
             case "top":
-				Float.show({ e: this, left: this.left, top: this.top });
+                Float.show({ e: this, left: this.left, top: this.top });
                 break;
             case "width":
             case "height":
-				this.updateSize();
+                this.updateSize();
+                break;
+
+            case "caption":
+                this.setCaption();
+
                 break;
         }
+    }
+
+    set caption(value) {
+        if (Boolean(value)) {
+            this.setAttribute("caption", value);
+        } else {
+            this.removeAttribute("caption");
+        }
+    }
+
+    get caption() {
+        return this.getAttribute("caption");
     }
 
     set mode(value) {
@@ -140,8 +154,7 @@ class WHPopup extends HTMLElement {
         return this.getAttribute("top");
     }
 
-
-	set width(value) {
+    set width(value) {
         if (Boolean(value)) {
             this.setAttribute("width", value);
         } else {
@@ -176,10 +189,34 @@ class WHPopup extends HTMLElement {
         return this.getAttribute("delay");
     }
 
-	public updateSize() {
+    set closable(value) {
+        if (Boolean(value)) {
+            this.setAttribute("closable", "");
+        } else {
+            this.removeAttribute("closable");
+        }
+    }
+
+    get closable() {
+        return this.hasAttribute("closable");
+    }
+
+	set autoClose(value) {
+        if (Boolean(value)) {
+            this.setAttribute("auto-close", "");
+        } else {
+            this.removeAttribute("auto-close");
+        }
+    }
+
+    get autoClose() {
+        return this.hasAttribute("auto-close");
+    }
+
+    public updateSize() {
         this.style.width = this.width;
         this.style.height = this.height;
-		console.log(this.width)
+
         Float.show({ e: this, left: this.left, top: this.top });
     }
 
@@ -203,10 +240,6 @@ class WHPopup extends HTMLElement {
         this.addEventListener("mouseover", this.handleEvent);
         this.addEventListener("mouseout", this.handleEvent);
 
-        //$(document).on("click", this._click);
-        //$(this).on("mouseover", this._mouseover);
-        //$(this).on("mouseout", this._mouseout);
-
         this.tabIndex = 0;
         this._setTimer();
     }
@@ -224,6 +257,10 @@ class WHPopup extends HTMLElement {
             clearTimeout(this._timer);
         }
     }
+
+    setCaption() {
+        $(this).create("div").attr("slot", "caption").html(this.caption);
+    }
 }
 
-customElements.define("ss-popup", WHPopup);
+customElements.define("ss-popup", Popup);

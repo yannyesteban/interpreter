@@ -1,15 +1,23 @@
 import { Q as $ } from "../Q.js";
-import { fire } from "../Tool.js";
-import { Float } from "../Float.js";
+
+import { getParentElement, fire } from "../Tool.js";
+
+import { Float, Move, Drag, Resize } from "../Float.js";
+
 const html = 0;
-class Popup extends HTMLElement {
+
+class BasicPopup extends HTMLElement {
+    _timer = null;
+
     static get observedAttributes() {
-        return ["caption", "mode", "left", "top", "width", "height", "auto-close", "closable"];
+        return ["mode", "left", "top", "width", "height", "closable"];
     }
+
     constructor() {
         super();
-        this._timer = null;
+
         const template = document.createElement("template");
+
         template.innerHTML = /*html*/ `
 
 			<style>
@@ -20,50 +28,50 @@ class Popup extends HTMLElement {
 			
 			</style>
 			<link rel="stylesheet" href="./css/WHPopup.css">
-			<slot name="caption"></slot>
+			
 			<slot></slot>
-			<slot name="buttons"></slot>
 			`;
+
         this.attachShadow({ mode: "open" });
+
         this.shadowRoot.appendChild(template.content.cloneNode(true));
+
         this.shadowRoot.addEventListener("slotchangeee", (event) => {
             //Float.show({ e: this, left: this.left, top: this.top });
         });
     }
+
     handleEvent(event) {
         if (event.type === "click") {
-            if (this.contains(event.target) && event.target.dataset.type == "close") {
-                this.mode = "close";
-                return;
-            }
             if (event.target === this) {
-                if (this.autoClose) {
-                    this.mode = "close";
-                }
                 return;
             }
-            if (this.closable) {
-                this.mode = "close";
-            }
-        }
-        else if (event.type === "mouseover") {
+			if(this.closable){
+				this.mode = "close";
+			}
+            
+        } else if (event.type === "mouseover") {
             this._stopTimer();
-        }
-        else if (event.type === "mouseout") {
+        } else if (event.type === "mouseout") {
             this._setTimer();
         }
     }
-    connectedCallback() {
+
+    public connectedCallback() {
         Float.init(this);
+
         if (!this.mode) {
             this.mode = "open";
         }
     }
-    disconnectedCallback() {
+
+    public disconnectedCallback() {
         console.log("disconnectedCallback");
     }
-    attributeChangedCallback(name, oldVal, newVal) {
+
+    public attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback", name, oldVal, newVal);
+
         switch (name) {
             case "mode":
                 if (newVal === "close") {
@@ -82,133 +90,124 @@ class Popup extends HTMLElement {
             case "height":
                 this.updateSize();
                 break;
-            case "caption":
-                this.setCaption();
-                break;
         }
     }
-    set caption(value) {
-        if (Boolean(value)) {
-            this.setAttribute("caption", value);
-        }
-        else {
-            this.removeAttribute("caption");
-        }
-    }
-    get caption() {
-        return this.getAttribute("caption");
-    }
+
     set mode(value) {
         if (Boolean(value)) {
             this.setAttribute("mode", value);
-        }
-        else {
+        } else {
             this.removeAttribute("mode");
         }
     }
+
     get mode() {
         return this.getAttribute("mode");
     }
+
     set left(value) {
         if (Boolean(value)) {
             this.setAttribute("left", value);
-        }
-        else {
+        } else {
             this.removeAttribute("left");
         }
     }
+
     get left() {
         return this.getAttribute("left");
     }
+
     set top(value) {
         if (Boolean(value)) {
             this.setAttribute("top", value);
-        }
-        else {
+        } else {
             this.removeAttribute("top");
         }
     }
+
     get top() {
         return this.getAttribute("top");
     }
+
     set width(value) {
         if (Boolean(value)) {
             this.setAttribute("width", value);
-        }
-        else {
+        } else {
             this.removeAttribute("width");
         }
     }
+
     get width() {
         return this.getAttribute("width");
     }
+
     set height(value) {
         if (Boolean(value)) {
             this.setAttribute("height", value);
-        }
-        else {
+        } else {
             this.removeAttribute("height");
         }
     }
+
     get height() {
         return this.getAttribute("height");
     }
     set delay(value) {
         if (Boolean(value)) {
             this.setAttribute("delay", value);
-        }
-        else {
+        } else {
             this.removeAttribute("delay");
         }
     }
+
     get delay() {
         return this.getAttribute("delay");
     }
-    set closable(value) {
+
+
+	set closable(value) {
         if (Boolean(value)) {
-            this.setAttribute("closable", "");
-        }
-        else {
+            this.setAttribute("closable", value);
+        } else {
             this.removeAttribute("closable");
         }
     }
+
     get closable() {
-        return this.hasAttribute("closable");
+        return this.getAttribute("closable");
     }
-    set autoClose(value) {
-        if (Boolean(value)) {
-            this.setAttribute("auto-close", "");
-        }
-        else {
-            this.removeAttribute("auto-close");
-        }
-    }
-    get autoClose() {
-        return this.hasAttribute("auto-close");
-    }
-    updateSize() {
+
+    public updateSize() {
         this.style.width = this.width;
         this.style.height = this.height;
+
         Float.show({ e: this, left: this.left, top: this.top });
     }
+
     _close() {
         document.removeEventListener("click", this.handleEvent.bind(this));
         this.removeEventListener("mouseover", this.handleEvent);
         this.removeEventListener("mouseout", this.handleEvent);
+
         this.style.zIndex = "-1";
+
         if (this._timer) {
             clearTimeout(this._timer);
         }
         this.tabIndex = -1;
     }
+
     _open() {
         Float.upIndex(this);
+
         document.addEventListener("click", this.handleEvent.bind(this));
         this.addEventListener("mouseover", this.handleEvent);
         this.addEventListener("mouseout", this.handleEvent);
+
         this.tabIndex = 0;
         this._setTimer();
     }
+
     _setTimer() {
         if (this.delay) {
             this._timer = setTimeout(() => {
@@ -216,14 +215,13 @@ class Popup extends HTMLElement {
             }, Number(this.delay));
         }
     }
+
     _stopTimer() {
         if (this._timer) {
             clearTimeout(this._timer);
         }
     }
-    setCaption() {
-        $(this).create("div").attr("slot", "caption").html(this.caption);
-    }
 }
-customElements.define("ss-popup", Popup);
-//# sourceMappingURL=Popup.js.map
+
+
+customElements.define("basic-popup", BasicPopup);

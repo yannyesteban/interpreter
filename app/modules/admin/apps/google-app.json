@@ -10,10 +10,10 @@
         "home"
     ],
     "acceptedRoles": [
-        "** public **"
+        "** public **", "{{ @CSS_PATH }}reset.css"
     ],
     "cssSheets": [
-        "{{ @CSS_PATH }}reset.css",
+        
         "{{ @CSS_PATH }}main.css"
     ],
     "jsModuless": [
