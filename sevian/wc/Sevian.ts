@@ -43,7 +43,7 @@ export class Sevian extends HTMLElement {
     }
 
     public connectedCallback() {
-        this.classList.add("_main_app_")
+        this.classList.add("_main_app_");
     }
 
     public disconnectedCallback() {}
@@ -82,7 +82,7 @@ export class Sevian extends HTMLElement {
 
     set className(value) {
         if (Boolean(value)) {
-            $(this).addClass(value)
+            $(this).addClass(value);
             //this.setAttribute("className", value);
         } else {
             this.removeAttribute("className");
@@ -127,8 +127,8 @@ export class Sevian extends HTMLElement {
         });
     }
 
-    async setElement(info: IElement | ElementResponse) {
-        await this.whenValid(info.data.element).then((element) => {
+    async setElement(info: IElement) {
+        await this.whenValid(info.element).then((element) => {
             let e = $.id(info.id);
             if (e) {
                 e.remove();
@@ -136,9 +136,20 @@ export class Sevian extends HTMLElement {
 
             e = $.create(element);
             e.id(info.id);
-            e.prop(info.data.propertys);
+            e.prop(info.propertys);
 
-            const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
+            let panel;
+            //set-panel, set-element, update, append-to, before-to, request, request-to, DATA?
+            if (info.do == "set-panel") {
+                console.log(info);
+                panel = $(`#${info.to}`);
+                panel.text("");
+            } else if (info.do == "set-element") {
+                panel = $(info.to);
+                panel.text("");
+            }
+
+            //const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
 
             if (!panel) {
                 return;
@@ -152,19 +163,19 @@ export class Sevian extends HTMLElement {
     }
 
     async updateElement(info) {
-        await this.whenValid(info.data.element).then(() => {
+        await this.whenValid(info.element).then(() => {
             const e = $.id(info.id);
 
             if (e) {
-                if (info.data.propertys) {
-                    e.prop(info.data.propertys);
+                if (info.propertys) {
+                    e.prop(info.propertys);
                 }
             }
         });
     }
 
-    async evalResponse(response: ElementResponse[]) {
-        console.log(response)
+    async evalResponse(response: IElement[]) {
+        console.log(response);
         for (const r of response) {
             switch (r.do) {
                 case "set-panel":
@@ -178,10 +189,28 @@ export class Sevian extends HTMLElement {
                     await this.updateElement(r);
                     break;
             }
+
+            if (r.message) {
+                alert(r.message);
+            }
+
+            if (r.log) {
+                console.log(r.log);
+            }
         }
+
+        this.showMessage({
+            type: "alert",
+            caption: "hello",
+            delay: 10,
+            text: "hello",
+            className: "x",
+        });
 
         return true;
     }
+
+    showMessage(message) {}
     initApp() {
         /*
         const btn = $("#x");
@@ -280,8 +309,6 @@ export class Sevian extends HTMLElement {
             return;
         }
 
-        
-
         let form: HTMLFormElement = null;
 
         if (typeof request.form === "string") {
@@ -307,11 +334,10 @@ export class Sevian extends HTMLElement {
             body = new FormData();
         }
 
-        if(request["setFormValue"]){
-            for(const [key, value] of Object.entries(request["setFormValue"]) as any){
-                body.append(key, value) 
+        if (request["setFormValue"]) {
+            for (const [key, value] of Object.entries(request["setFormValue"]) as any) {
+                body.append(key, value);
             }
-            
         }
 
         if (request.store === true) {

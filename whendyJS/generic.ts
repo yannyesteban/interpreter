@@ -11,7 +11,5 @@ export class Generic extends Element{
     evalMethod(method: string){
 
     }
-    getResponse():object[]{
-        return [];
-    }
+    
 }

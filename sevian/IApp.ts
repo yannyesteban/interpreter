@@ -48,6 +48,7 @@ export interface ElementResponse {
     setTo?: selector;
     appendTo?: selector;
     do?: string;
+    to?: string;
     id?: string;
     mode?: string;
     element: string;
@@ -95,6 +96,8 @@ export interface IResponse {
 }
 
 export interface IElement {
+    do?:string;
+    to?:string;
     id: string;
     element: string;
     iClass: string;
@@ -111,4 +114,6 @@ export interface IElement {
     panel?: string;
     setTo?: selector;
     appendTo?: string;
+    message?:string;
+    log?:string;
 }

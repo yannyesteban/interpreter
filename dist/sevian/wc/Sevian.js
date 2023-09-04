@@ -120,15 +120,26 @@ export class Sevian extends HTMLElement {
     }
     setElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.whenValid(info.data.element).then((element) => {
+            yield this.whenValid(info.element).then((element) => {
                 let e = $.id(info.id);
                 if (e) {
                     e.remove();
                 }
                 e = $.create(element);
                 e.id(info.id);
-                e.prop(info.data.propertys);
-                const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
+                e.prop(info.propertys);
+                let panel;
+                //set-panel, set-element, update, append-to, before-to, request, request-to, DATA?
+                if (info.do == "set-panel") {
+                    console.log(info);
+                    panel = $(`#${info.to}`);
+                    panel.text("");
+                }
+                else if (info.do == "set-element") {
+                    panel = $(info.to);
+                    panel.text("");
+                }
+                //const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
                 if (!panel) {
                     return;
                 }
@@ -141,11 +152,11 @@ export class Sevian extends HTMLElement {
     }
     updateElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.whenValid(info.data.element).then(() => {
+            yield this.whenValid(info.element).then(() => {
                 const e = $.id(info.id);
                 if (e) {
-                    if (info.data.propertys) {
-                        e.prop(info.data.propertys);
+                    if (info.propertys) {
+                        e.prop(info.propertys);
                     }
                 }
             });
@@ -166,10 +177,24 @@ export class Sevian extends HTMLElement {
                         yield this.updateElement(r);
                         break;
                 }
+                if (r.message) {
+                    alert(r.message);
+                }
+                if (r.log) {
+                    console.log(r.log);
+                }
             }
+            this.showMessage({
+                type: "alert",
+                caption: "hello",
+                delay: 10,
+                text: "hello",
+                className: "x",
+            });
             return true;
         });
     }
+    showMessage(message) { }
     initApp() {
         /*
         const btn = $("#x");

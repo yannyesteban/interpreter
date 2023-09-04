@@ -15,6 +15,12 @@ export class InfoElement {
     }
 }
 export class Element {
+    getResponse() {
+        return this._response;
+    }
+    doResponse(response) {
+        this._response = response;
+    }
 }
 export class AppElement extends Element {
 }

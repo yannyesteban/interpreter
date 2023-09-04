@@ -14,7 +14,7 @@
                 "actions": [
                     {
                         "id": "google",
-                        "panel": "p2",
+                        "to": "p2",
                         "do": "set-panel",
                         "api": "form",
                         "name": "google_form",
@@ -35,7 +35,7 @@
                 "actions": [
                     {
                         "id": "unit",
-                        "panel": "p1",
+                        "to": "p1",
                         "do": "set-panel",
                         "api": "form",
                         "name": "two",
@@ -52,7 +52,7 @@
                 "actions": [
                     {
                         "id": "unit3",
-                        "panel": "p2",
+                        "to": "p2",
                         "do": "set-panel",
                         "api": "form",
                         "name": "two",

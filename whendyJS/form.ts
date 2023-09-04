@@ -67,6 +67,7 @@ export class Form extends Element {
 
     async evalMethod(method: string) {
         //console.log("eparams..", method, this.eparams);
+        
         switch (method) {
             case "new-record":
                 await this.newRecord();
@@ -168,14 +169,18 @@ export class Form extends Element {
             },
             appRequests
         };
-        this.response = {
+
+        this.doResponse({
             element: "grid",
             propertys: {
                 dataSource,
                 //f: await this.evalDataFields(this.datafields),
                 output: info.data,
             },
-        };
+            log:"yanny esteban",
+        })
+
+        
     }
 
     async loadPageInfo(){
@@ -194,14 +199,15 @@ export class Form extends Element {
         
 
         //console.log("--------------------", this._pageData(list))
-        this.response = {
+        this.doResponse({
             element: "grid",
             propertys: {
                 pageData : {...pageData, fields: this._info.fields},
                 //f: await this.evalDataFields(this.datafields),
                 
             },
-        };
+        });
+        
     }
 
 
@@ -296,7 +302,7 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        //this.addResponse(data);
+        
 
         this.layout.appRequests =this._appRequests("list");
         
@@ -316,14 +322,14 @@ export class Form extends Element {
                 name: "__key_",
             },
         );
-        this.response = {
+        this.doResponse({
             element: "form",
             propertys: {
                 dataSource: this.layout,
                 //f: await this.evalDataFields(this.datafields),
                 output,
             },
-        };
+        });
     }
 
     async load() {
@@ -331,9 +337,7 @@ export class Form extends Element {
 
         let result = await db.infoTable("cities");
 
-        this.addResponse({
-            logs: result,
-        });
+        
 
         let data = await db.query(this.data);
         this._data = data.rows[0];
@@ -363,7 +367,7 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        //this.addResponse(data);
+        
 
         this.layout.appRequests =  this._appRequests("list");
 
@@ -382,14 +386,14 @@ export class Form extends Element {
                 name: "__key_",
             },
         );
-        this.response = {
+        this.doResponse({
             element: "form",
             propertys: {
                 dataSource: this.layout,
                 //f: await this.evalDataFields(this.datafields),
                 output,
             },
-        };
+        });
         /*
         const f:any = {};
         f.setComponent("form", {datasource:{}})
@@ -472,7 +476,7 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        //this.addResponse(data);
+        
 
         this.layout.appRequests =this._appRequests("list");
 
@@ -491,14 +495,14 @@ export class Form extends Element {
                 name: "__key_",
             },
         );
-        this.response = {
+        this.doResponse({
             element: "form",
             propertys: {
                 dataSource: this.layout,
                 //f: await this.evalDataFields(this.datafields),
                 output,
             },
-        };
+        });
     }
 
     async getDataRecord(info) {
@@ -562,7 +566,7 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        //this.addResponse(data);
+        
 
         this.layout.appRequests = this._appRequests("list");
         
@@ -586,14 +590,14 @@ export class Form extends Element {
                 name: "__key_",
             },
         );
-        this.response = {
+        this.doResponse({
             element: "form",
             propertys: {
                 dataSource: this.layout,
                 //f: await this.evalDataFields(this.datafields),
                 output,
             },
-        };
+        });
     }
 
     async transaction() {
@@ -621,13 +625,13 @@ export class Form extends Element {
         
         const c = new DBTransaction(json, this.store.db);
 
-        this.response = {
+        this.doResponse({
             element: "form",
             propertys: {
                 //f: await this.evalDataFields(this.datafields),
                 output: "SAVE FORM",
             },
-        };
+        });
     }
     async getDataFields(list) {
         const output = [];
@@ -656,23 +660,19 @@ export class Form extends Element {
         
         const output = await this.getDataFields(list);
         
-        this.response = {
+        this.doResponse({
             element: "form",
             propertys: {
                 dataFields: output,
                 //f: await this.evalDataFields(this.datafields),
                 output,
             },
-        };
+        });
     }
 
-    getResponse(): any {
-        return this.response;
-    }
+   
 
-    addResponse(response) {
-        //this.response.push(response);
-    }
+    
 
     async evalDataFields(dataFields) {
         const result = {};
@@ -772,10 +772,7 @@ export class Form extends Element {
 
             elements.push(field);
         }
-        this.addResponse({
-            logs: section,
-            con: mainElements,
-        });
+        
     }
 
     private genToken(payload){

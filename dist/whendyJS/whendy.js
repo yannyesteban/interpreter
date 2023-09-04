@@ -75,26 +75,11 @@ export class Whendy {
                 this.doRestData(ele);
             }
             else {
-                const data = ele.getResponse();
-                let response = null;
-                switch (info.do) {
-                    case "set-panel":
-                        this.addResponse([
-                            Object.assign(Object.assign({ dinamic: false }, info), { data }),
-                        ]);
-                        break;
-                    case "update":
-                        this.addResponse([
-                            Object.assign(Object.assign({ dinamic: false }, info), { 
-                                //type: info.type,
-                                //setPanel: info.setPanel,
-                                //appendTo: info.appendTo,
-                                //id: info.id,
-                                data }),
-                        ]);
-                        break;
+                let response = ele.getResponse();
+                if (info.do != "data") {
+                    response = Object.assign({ do: info.do, to: info.to, id: info.id, api: info.api, name: info.name, params: info.params }, response);
                 }
-                //this.addResponse([response]);
+                this.addResponse([response]);
             }
             this.doUserAdmin(ele);
             yield this.doElementAdmin(ele);

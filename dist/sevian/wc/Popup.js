@@ -4,7 +4,7 @@ import { Float } from "../Float.js";
 const html = 0;
 class WHPopup extends HTMLElement {
     static get observedAttributes() {
-        return ["mode", "left", "top", "width", "height",
+        return ["mode", "left", "top", "width", "height", "caption",
             "delay", "auto-close",
         ];
     }

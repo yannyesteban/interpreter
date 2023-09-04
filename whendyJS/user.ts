@@ -112,9 +112,7 @@ export class User extends Element implements IUserAdmin {
         return [];
     }
 
-    getResponse(): object[] {
-        return this.response;
-    }
+    
 
     addResponse(response) {
         this.response.push(response);

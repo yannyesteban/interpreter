@@ -128,14 +128,15 @@ export class Form extends Element {
                 },
                 appRequests
             };
-            this.response = {
+            this.doResponse({
                 element: "grid",
                 propertys: {
                     dataSource,
                     //f: await this.evalDataFields(this.datafields),
                     output: info.data,
                 },
-            };
+                log: "yanny esteban",
+            });
         });
     }
     loadPageInfo() {
@@ -147,13 +148,13 @@ export class Form extends Element {
             }
             let pageData = yield this._pageData(list);
             //console.log("--------------------", this._pageData(list))
-            this.response = {
+            this.doResponse({
                 element: "grid",
                 propertys: {
                     pageData: Object.assign(Object.assign({}, pageData), { fields: this._info.fields }),
                     //f: await this.evalDataFields(this.datafields),
                 },
-            };
+            });
         });
     }
     doKeyRecord(record1, data) {
@@ -222,7 +223,6 @@ export class Form extends Element {
                 //console.log(output)
                 this.layout.dataLists = output;
             }
-            //this.addResponse(data);
             this.layout.appRequests = this._appRequests("list");
             this.layout.elements.push({
                 component: "field",
@@ -235,23 +235,20 @@ export class Form extends Element {
                 input: "input",
                 name: "__key_",
             });
-            this.response = {
+            this.doResponse({
                 element: "form",
                 propertys: {
                     dataSource: this.layout,
                     //f: await this.evalDataFields(this.datafields),
                     output,
                 },
-            };
+            });
         });
     }
     load() {
         return __awaiter(this, void 0, void 0, function* () {
             const db = (this.db = this.store.db.get(this.connection));
             let result = yield db.infoTable("cities");
-            this.addResponse({
-                logs: result,
-            });
             let data = yield db.query(this.data);
             this._data = data.rows[0];
             this._data["state_id"] = 2040;
@@ -278,7 +275,6 @@ export class Form extends Element {
                 //console.log(output)
                 this.layout.dataLists = output;
             }
-            //this.addResponse(data);
             this.layout.appRequests = this._appRequests("list");
             this.layout.elements.push({
                 component: "field",
@@ -291,14 +287,14 @@ export class Form extends Element {
                 input: "input",
                 name: "__key_",
             });
-            this.response = {
+            this.doResponse({
                 element: "form",
                 propertys: {
                     dataSource: this.layout,
                     //f: await this.evalDataFields(this.datafields),
                     output,
                 },
-            };
+            });
             /*
             const f:any = {};
             f.setComponent("form", {datasource:{}})
@@ -367,7 +363,6 @@ export class Form extends Element {
                 //console.log(output)
                 this.layout.dataLists = output;
             }
-            //this.addResponse(data);
             this.layout.appRequests = this._appRequests("list");
             this.layout.elements.push({
                 component: "field",
@@ -380,14 +375,14 @@ export class Form extends Element {
                 input: "input",
                 name: "__key_",
             });
-            this.response = {
+            this.doResponse({
                 element: "form",
                 propertys: {
                     dataSource: this.layout,
                     //f: await this.evalDataFields(this.datafields),
                     output,
                 },
-            };
+            });
         });
     }
     getDataRecord(info) {
@@ -441,7 +436,6 @@ export class Form extends Element {
                 //console.log(output)
                 this.layout.dataLists = output;
             }
-            //this.addResponse(data);
             this.layout.appRequests = this._appRequests("list");
             this.layout.elements.push({
                 component: "field",
@@ -459,14 +453,14 @@ export class Form extends Element {
                 input: "input",
                 name: "__key_",
             });
-            this.response = {
+            this.doResponse({
                 element: "form",
                 propertys: {
                     dataSource: this.layout,
                     //f: await this.evalDataFields(this.datafields),
                     output,
                 },
-            };
+            });
         });
     }
     transaction() {
@@ -489,13 +483,13 @@ export class Form extends Element {
                 masterData: {},
             };
             const c = new DBTransaction(json, this.store.db);
-            this.response = {
+            this.doResponse({
                 element: "form",
                 propertys: {
                     //f: await this.evalDataFields(this.datafields),
                     output: "SAVE FORM",
                 },
-            };
+            });
         });
     }
     getDataFields(list) {
@@ -524,21 +518,15 @@ export class Form extends Element {
             const db = (this.db = this.store.db.get(this.connection));
             const list = this.dataLists.filter((data) => data.parent == parent) || [];
             const output = yield this.getDataFields(list);
-            this.response = {
+            this.doResponse({
                 element: "form",
                 propertys: {
                     dataFields: output,
                     //f: await this.evalDataFields(this.datafields),
                     output,
                 },
-            };
+            });
         });
-    }
-    getResponse() {
-        return this.response;
-    }
-    addResponse(response) {
-        //this.response.push(response);
     }
     evalDataFields(dataFields) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -632,10 +620,6 @@ export class Form extends Element {
                 }
                 elements.push(field);
             }
-            this.addResponse({
-                logs: section,
-                con: mainElements,
-            });
         });
     }
     genToken(payload) {

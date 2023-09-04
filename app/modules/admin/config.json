@@ -3,6 +3,7 @@
         "home": [
             {
                 "do":"update",
+                "to":"gtcomm",
                 "id":"gtcomm",
                 "api":"app",
                 "name":"google-app",
@@ -10,7 +11,7 @@
             },
             {
                 "do":"set-panel",
-                "panel":"p3",
+                "to":"p3",
                 "id":"banner",
                 "api": "fragmentt",
                 "name": "one",
@@ -19,7 +20,7 @@
             },
             {
                 "do":"set-panel",
-                "panel":"p2",
+                "to":"p2",
                 "id":"two",
                 "api": "form",
                 "name": "two",
@@ -28,7 +29,7 @@
             },
             {
                 "do":"set-panel",
-                "panel":"m2",
+                "to":"m2",
                 "id":"main-menu",
                 "api": "menu",
                 "name": "main-menu",

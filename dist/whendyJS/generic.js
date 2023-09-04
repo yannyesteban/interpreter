@@ -6,8 +6,5 @@ export class Generic extends Element {
     }
     evalMethod(method) {
     }
-    getResponse() {
-        return [];
-    }
 }
 //# sourceMappingURL=generic.js.map

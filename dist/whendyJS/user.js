@@ -95,9 +95,6 @@ export class User extends Element {
             return [];
         });
     }
-    getResponse() {
-        return this.response;
-    }
     addResponse(response) {
         this.response.push(response);
     }

@@ -94,36 +94,21 @@ export class Whendy {
         if (this.mode == AppMode.RESTAPI) {
             this.doRestData(ele);
         } else {
-            const data = ele.getResponse();
+            let response = ele.getResponse();
 
-            let response: OutputInfo = null;
-
-            switch (info.do) {
-                case "set-panel":
-                    this.addResponse([
-                        {
-                            dinamic: false,
-                            ...info,
-                            data,
-                        },
-                    ]);
-                    break;
-                case "update":
-                    this.addResponse([
-                        {
-                            dinamic: false,
-                            ...info,
-                            //type: info.type,
-                            //setPanel: info.setPanel,
-                            //appendTo: info.appendTo,
-                            //id: info.id,
-                            data,
-                        },
-                    ]);
-                    break;
+            if (info.do != "data") {
+                response = {
+                    do: info.do,
+                    to: info.to,
+                    id: info.id,
+                    api: info.api,
+                    name: info.name,
+                    params: info.params,
+                    ...response,
+                };
             }
 
-            //this.addResponse([response]);
+            this.addResponse([response]);
         }
 
         this.doUserAdmin(ele);
