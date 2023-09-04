@@ -1,4 +1,3 @@
-import { Q as $ } from "../Q.js";
 import { fire } from "../Tool.js";
 import { Float } from "../Float.js";
 const html = 0;
@@ -11,6 +10,7 @@ class WHPopup extends HTMLElement {
     constructor() {
         super();
         this._timer = null;
+        this.a = 5;
         const template = document.createElement("template");
         template.innerHTML = /*html*/ `
 
@@ -36,8 +36,20 @@ class WHPopup extends HTMLElement {
                 });
         */
     }
+    handleEvent(event) {
+        if (event.type === "click") {
+            if (event.target === this) {
+                return;
+            }
+            this.mode = "close";
+        }
+        else if (event.type === "mouseover") {
+        }
+        else if (event.type === "mouseout") {
+        }
+    }
     connectedCallback() {
-        this._click = this._click.bind(this);
+        //this._click = this._click.bind(this);
         this._mouseover = this._mouseover.bind(this);
         this._mouseout = this._mouseout.bind(this);
         Float.init(this);
@@ -66,10 +78,10 @@ class WHPopup extends HTMLElement {
         this._setTimer();
     }
     _close() {
+        document.removeEventListener("click", this.handleEvent.bind(this));
+        this.removeEventListener("mouseover", this.handleEvent);
+        this.removeEventListener("mouseout", this.handleEvent);
         this.style.zIndex = "-1";
-        $(document).off("click", this._click);
-        $(this).off("mouseover", this._mouseover);
-        $(this).off("mouseout", this._mouseout);
         if (this._timer) {
             clearTimeout(this._timer);
         }
@@ -77,9 +89,12 @@ class WHPopup extends HTMLElement {
     }
     _open() {
         Float.upIndex(this);
-        $(document).on("click", this._click);
-        $(this).on("mouseover", this._mouseover);
-        $(this).on("mouseout", this._mouseout);
+        document.addEventListener("click", this.handleEvent.bind(this));
+        this.addEventListener("mouseover", this.handleEvent);
+        this.addEventListener("mouseout", this.handleEvent);
+        //$(document).on("click", this._click);
+        //$(this).on("mouseover", this._mouseover);
+        //$(this).on("mouseout", this._mouseout);
         this.tabIndex = 0;
         this._setTimer();
     }

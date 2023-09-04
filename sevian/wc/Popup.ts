@@ -10,7 +10,7 @@ const html =0;
 class WHPopup extends HTMLElement {
 	_timer = null;
 
-
+	a=5
 	static get observedAttributes() {
 		return ["mode", "left", "top", "width", "height", "caption",
 			"delay", "auto-close",
@@ -50,10 +50,26 @@ class WHPopup extends HTMLElement {
 
 	}
 
+	handleEvent(event) {
+		if (event.type === "click") {
+			if (event.target === this) {
+				return;
+			}
+			this.mode = "close";
+
+		}else if(event.type === "mouseover"){
+
+		}else if(event.type === "mouseout"){
+
+		}
+	}
 
 
 	public connectedCallback() {
-		this._click = this._click.bind(this);
+
+		
+
+		//this._click = this._click.bind(this);
 		this._mouseover = this._mouseover.bind(this);
 		this._mouseout = this._mouseout.bind(this);
 
@@ -90,11 +106,13 @@ class WHPopup extends HTMLElement {
 	}
 
 	_close() {
-		this.style.zIndex = "-1";
-		$(document).off("click", this._click);
 
-		$(this).off("mouseover", this._mouseover);
-		$(this).off("mouseout", this._mouseout);
+		document.removeEventListener("click", this.handleEvent.bind(this));
+		this.removeEventListener("mouseover", this.handleEvent);
+		this.removeEventListener("mouseout", this.handleEvent);
+
+		this.style.zIndex = "-1";
+		
 
 		if (this._timer) {
 			clearTimeout(this._timer);
@@ -105,9 +123,15 @@ class WHPopup extends HTMLElement {
 	_open() {
 
 		Float.upIndex(this);
-		$(document).on("click", this._click);
-		$(this).on("mouseover", this._mouseover);
-		$(this).on("mouseout", this._mouseout);
+
+		document.addEventListener("click", this.handleEvent.bind(this));
+		this.addEventListener("mouseover", this.handleEvent);
+		this.addEventListener("mouseout", this.handleEvent);
+
+
+		//$(document).on("click", this._click);
+		//$(this).on("mouseover", this._mouseover);
+		//$(this).on("mouseout", this._mouseout);
 
 		this.tabIndex = 0;
 		this._setTimer();
