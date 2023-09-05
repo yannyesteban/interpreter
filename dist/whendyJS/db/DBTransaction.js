@@ -10,6 +10,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { RecordMode } from "./db.js";
 export class DBTransaction {
     constructor(config, dbAdmin) {
+        this.result = "esteban";
         this.dbAdmin = dbAdmin;
         this.config = config;
         this.db = dbAdmin.get(config.db);
@@ -17,7 +18,7 @@ export class DBTransaction {
             a[b.name] = b;
             return a;
         }, {});
-        this.save(config.dataset, (config === null || config === void 0 ? void 0 : config.masterData) || {});
+        //this.save(config.dataset, config?.masterData || {});
     }
     save(dataset, master) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -103,10 +104,14 @@ export class DBTransaction {
                         data: newData,
                     });
                 }
-                console.log("result::::", mode, result);
                 if ((result === null || result === void 0 ? void 0 : result.lastId) && serialField) {
                     recordId[serialField] = result.lastId;
+                    this.lastId = result.lastId;
+                    result[serialField];
+                    console.log("result::::", mode, result);
                 }
+                console.log("result::::", recordId, result);
+                this.result = result;
                 if (info.detail) {
                     this.save(info.detail, Object.assign(Object.assign({}, master), data));
                 }

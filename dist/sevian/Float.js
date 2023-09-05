@@ -28,7 +28,7 @@ export class Float {
             pageWidth: document.documentElement.clientWidth,
             pageHeigh: document.documentElement.clientHeight,
             scrollTop: document.documentElement.scrollTop,
-            scrollLeft: document.documentElement.scrollLeft
+            scrollLeft: document.documentElement.scrollLeft,
         };
     }
     stop() {
@@ -51,16 +51,75 @@ export class Float {
             top: rect.top,
             width: rect.width,
             height: rect.height,
-            cW: cW, cH: cH, sT: sT, sL: sL
+            cW: cW,
+            cH: cH,
+            sT: sT,
+            sL: sL,
         };
     }
-    static showElem(opt) {
-        let e = opt.e, left = opt.left, top = opt.top, z = (opt.z !== undefined) ? opt.z : undefined;
-        if (top !== null) {
-            e.style.top = top + "px";
+    static setTop({ e, top, deltaX }) {
+        switch (top) {
+            case "top":
+                e.style.top = "0px";
+                break;
+            case "middle":
+                //e.style.marginTop = "auto";
+                //e.style.marginBottom = "auto";
+                e.style.top = "50%";
+                //-webkit-transform: translateY(-50%);
+                //-ms-transform: translateY(-50%);
+                //e.style.transform="translateY(-50%)";
+                e.style.transform = "translateX(-50%) translateY(-50%)";
+                break;
+            case "bottom":
+                e.style.bottom = "0px";
+                break;
+            default:
+                if (deltaX) {
+                    e.style.top = `calc(${top} + ${deltaX} )`;
+                }
+                else {
+                    e.style.top = top;
+                }
         }
-        if (left !== null) {
-            e.style.left = left + "px";
+    }
+    static setLeft({ e, left, deltaY }) {
+        switch (left) {
+            case "center":
+                //e.style.marginLeft = "auto";
+                //e.style.marginRight = "auto";
+                e.style.left = "50%";
+                //-webkit-transform: translateY(-50%);
+                //-ms-transform: translateY(-50%);
+                e.style.transform = "translateX(-50%) translateY(-50%)";
+                break;
+            case "left":
+                e.style.left = "0px";
+                break;
+            case "right":
+                e.style.right = "0px";
+                break;
+            default:
+                if (deltaY) {
+                    e.style.left = `calc(${left} + ${deltaY} )`;
+                }
+                else {
+                    e.style.left = left;
+                }
+        }
+    }
+    static showElem({ e, left, top, z, deltaX, deltaY }) {
+        if (deltaX) {
+            e.style.top = `calc(${top} + ${deltaX} )`;
+        }
+        else {
+            e.style.top = top;
+        }
+        if (deltaY) {
+            e.style.left = `calc(${left} + ${deltaY} )`;
+        }
+        else {
+            e.style.left = left;
         }
         if (z !== undefined) {
             if (z > 0) {
@@ -73,57 +132,55 @@ export class Float {
         return { e: e, left: left, top: top, z: z };
     }
     static show(opt) {
-        let e = opt.e, xx = (opt.left === undefined) ? null : opt.left, yy = (opt.top === undefined) ? null : opt.top, z = opt.z || undefined, deltaX = opt.deltaX || 0, deltaY = opt.deltaY || 0, left = null, top = null;
+        console.log(opt);
+        let e = opt.e, xx = opt.left === undefined ? null : opt.left, yy = opt.top === undefined ? null : opt.top, z = opt.z || undefined, deltaX = opt.deltaX, deltaY = opt.deltaY, left = null, top = null;
         let c = this.getXY(opt.e);
-        if (typeof xx === "string") {
-            switch (xx) {
-                case "center":
-                    left = c.sL + (c.cW - c.width) / 2;
-                    break;
-                case "left":
-                    left = c.sL;
-                    break;
-                case "right":
-                    left = c.sL + c.cW - c.width;
-                    break;
-                case "acenter":
-                    left = (c.cW - c.width) / 2;
-                    break;
-            }
+        switch (xx) {
+            case "center":
+                left = c.sL + (c.cW - c.width) / 2 + "px";
+                break;
+            case "left":
+                left = c.sL + "px";
+                break;
+            case "right":
+                left = c.sL + c.cW - c.width + "px";
+                break;
+            case "acenter":
+                left = (c.cW - c.width) / 2 + "px";
+                break;
+            default:
+                left = xx;
         }
-        else {
-            left = xx;
+        switch (yy) {
+            case "middle":
+                top = c.sT + (c.cH - c.height) / 2 + "px";
+                break;
+            case "top":
+                top = c.sT + "px";
+                break;
+            case "bottom":
+                top = c.sT + c.cH - c.height + "px";
+                break;
+            case "amiddle":
+                top = (c.cH - c.height) / 2 + "px";
+                break;
+            default:
+                top = yy;
         }
-        if (typeof yy === "string") {
-            switch (yy) {
-                case "middle":
-                    top = c.sT + (c.cH - c.height) / 2;
-                    break;
-                case "top":
-                    top = c.sT;
-                    break;
-                case "bottom":
-                    top = c.sT + c.cH - c.height;
-                    break;
-                case "amiddle":
-                    top = (c.cH - c.height) / 2;
-                    break;
-            }
-        }
-        else {
-            top = yy;
-        }
-        if (left !== null) {
+        /*if (left !== null) {
             left = left + (deltaX || 0);
         }
         if (top !== null) {
             top = top + (deltaY || 0);
         }
-        //console.log({ e: e, left: left, top: top, z: z })
-        return this.showElem({ e: e, left: left, top: top, z: z });
+        */
+        //console.log({ e, left, top, z, deltaX, deltaY });
+        return this.showElem({ e, left, top, z, deltaX, deltaY });
+        //this.setLeft({ e, left:opt.left, deltaY })
+        //this.setTop({ e, top:opt.top, deltaX })
     }
     static showMenu(opt) {
-        let e = opt.e, context = opt.context, xx = opt.left || "", yy = opt.top || "", deltaX = opt.deltaX || 0, deltaY = opt.deltaY || 0, z = (opt.z !== undefined) ? opt.z : undefined, left = null, top = null, c = this.getXY(context), fixed = (e.style.position === "fixed"), width = e.offsetWidth, height = e.offsetHeight, cW = c.cW, cH = c.cH, sL = c.sL, sT = c.sT;
+        let e = opt.e, context = opt.context, xx = opt.left || "", yy = opt.top || "", deltaX = opt.deltaX || 0, deltaY = opt.deltaY || 0, z = opt.z !== undefined ? opt.z : undefined, left = null, top = null, c = this.getXY(context), fixed = e.style.position === "fixed", width = e.offsetWidth, height = e.offsetHeight, cW = c.cW, cH = c.cH, sL = c.sL, sT = c.sT;
         switch (xx) {
             case "center":
                 left = c.left + c.width / 2 - width / 2;
@@ -168,22 +225,22 @@ export class Float {
         }
         left = left + deltaX;
         top = top + deltaY;
-        if ((left + width) > (cW + sL)) {
+        if (left + width > cW + sL) {
             left = cW + sL - width;
         }
         if (left < sL) {
             left = sL;
         }
-        if ((top + height) > (cH + sT)) {
+        if (top + height > cH + sT) {
             top = cH + sT - height;
         }
         if (top < sT && !fixed) {
             top = sT;
         }
-        return this.showElem({ e: e, left: left, top: top, z: z });
+        return this.showElem({ e: e, left: left, top: top, z: z, deltaX, deltaY });
     }
     static dropDown(opt) {
-        let e = opt.e, context = opt.context, xx = opt.left || "", yy = opt.top || "", deltaX = opt.deltaX || 0, deltaY = opt.deltaY || 0, z = (opt.z !== undefined) ? opt.z : undefined, left = null, top = null, c = this.getXY(context), width = e.offsetWidth, height = e.offsetHeight, cW = c.cW, cH = c.cH, sL = c.sL, sT = c.sT;
+        let e = opt.e, context = opt.context, xx = opt.left || "", yy = opt.top || "", deltaX = opt.deltaX || 0, deltaY = opt.deltaY || 0, z = opt.z !== undefined ? opt.z : undefined, left = null, top = null, c = this.getXY(context), width = e.offsetWidth, height = e.offsetHeight, cW = c.cW, cH = c.cH, sL = c.sL, sT = c.sT;
         switch (xx) {
             case "center":
                 left = c.left + c.width / 2;
@@ -218,22 +275,22 @@ export class Float {
         }
         left = left + deltaX;
         top = top + deltaY;
-        if ((left + width) > (cW + sL)) {
+        if (left + width > cW + sL) {
             left = cW + sL - width;
         }
         if (left < sL) {
             left = sL;
         }
-        if ((top + height) > (cH + sT)) {
+        if (top + height > cH + sT) {
             //top = cH + sT - height;
         }
         if (top < sT) {
             top = sT;
         }
-        if ((c.top + c.height + height) > (cH + sT)) {
+        if (c.top + c.height + height > cH + sT) {
             top = c.top - height;
         }
-        return this.showElem({ e: e, left: left, top: top, z: z });
+        return this.showElem({ e: e, left: left, top: top, z: z, deltaX, deltaY });
     }
     static center(e) {
         e.style.position = "fixed";
@@ -334,7 +391,7 @@ export class Drag {
                     left,
                     top,
                     deltaX: event.clientX - startX,
-                    deltaY: event.clientY - startY
+                    deltaY: event.clientY - startY,
                 });
             };
             const release = (event) => {
@@ -356,7 +413,7 @@ export class Drag {
                     left,
                     top,
                     deltaX: event.clientX - startX,
-                    deltaY: event.clientY - startY
+                    deltaY: event.clientY - startY,
                 });
             };
             on(document, "mousemove", drag);
@@ -377,7 +434,6 @@ export class Drag {
         off(this.e, "mousedown", this._mouseDown);
         off(this.e, "touchstart", this._mouseDown);
     }
-    ;
     static init(config) {
         return new Drag(config);
     }
@@ -388,8 +444,8 @@ export class Move {
         const hand = config.hand;
         let startLeft = 0;
         let startTop = 0;
-        const minVisibleX = (config.minVisibleX !== undefined) ? config.minVisibleX : 40;
-        const minVisibleY = (config.minVisibleY !== undefined) ? config.minVisibleX : 40;
+        const minVisibleX = config.minVisibleX !== undefined ? config.minVisibleX : 40;
+        const minVisibleY = config.minVisibleY !== undefined ? config.minVisibleX : 40;
         const drag = (info) => {
             let left = startLeft + info.deltaX;
             let top = startTop + info.deltaY;
@@ -413,8 +469,8 @@ export class Move {
         const release = (reps) => {
             const info = Float.getXY(main);
             if (info.left > info.cW - minVisibleX || info.top > info.cH - minVisibleY) {
-                const left = (info.left > info.cW - minVisibleX) ? info.cW - minVisibleX : info.left;
-                const top = (info.top > info.cH - minVisibleY) ? info.cH - minVisibleY : info.top;
+                const left = info.left > info.cW - minVisibleX ? info.cW - minVisibleX : info.left;
+                const top = info.top > info.cH - minVisibleY ? info.cH - minVisibleY : info.top;
                 reps.left = left;
                 reps.top = top;
                 Float.move(main, left + "px", top + "px");
@@ -436,11 +492,10 @@ export class Move {
                 }
             },
             onDrag: drag,
-            onRelease: release
+            onRelease: release,
         });
     }
 }
-;
 class Resize {
     constructor(config) {
         this.main = null;
@@ -617,13 +672,13 @@ class Resize {
                 context: main,
                 onCapture: capture,
                 onDrag: resize,
-                onRelease: release
+                onRelease: release,
             }));
         });
     }
     stop() {
-        this._drag.forEach(drag => drag.stop());
-        Array.from(this.main.querySelectorAll(`:scope > div.rs`)).map(child => child.remove());
+        this._drag.forEach((drag) => drag.stop());
+        Array.from(this.main.querySelectorAll(`:scope > div.rs`)).map((child) => child.remove());
     }
     static init(config) {
         return new Resize(config);
@@ -631,44 +686,100 @@ class Resize {
 }
 Resize.holders = [
     {
-        className: "rs t", backgroundColor: "", cursor: "s-resize",
-        left: "0", top: "0", width: "100%", height: "", margin: "-2px",
-        modeX: 0, modeY: 1
+        className: "rs t",
+        backgroundColor: "",
+        cursor: "s-resize",
+        left: "0",
+        top: "0",
+        width: "100%",
+        height: "",
+        margin: "-2px",
+        modeX: 0,
+        modeY: 1,
     },
     {
-        className: "rs r", backgroundColor: "", cursor: "e-resize",
-        left: "100%", top: "0", width: "", height: "100%", margin: "-2px",
-        modeX: 2, modeY: 0
+        className: "rs r",
+        backgroundColor: "",
+        cursor: "e-resize",
+        left: "100%",
+        top: "0",
+        width: "",
+        height: "100%",
+        margin: "-2px",
+        modeX: 2,
+        modeY: 0,
     },
     {
-        className: "rs b", backgroundColor: "", cursor: "n-resize",
-        left: "0", top: "100%", width: "100%", height: "", margin: "-2px",
-        modeX: 0, modeY: 2
+        className: "rs b",
+        backgroundColor: "",
+        cursor: "n-resize",
+        left: "0",
+        top: "100%",
+        width: "100%",
+        height: "",
+        margin: "-2px",
+        modeX: 0,
+        modeY: 2,
     },
     {
-        className: "rs l", backgroundColor: "", cursor: "w-resize",
-        left: "0", top: "0", width: "", height: "100%", margin: "-2px",
-        modeX: 1, modeY: 0
+        className: "rs l",
+        backgroundColor: "",
+        cursor: "w-resize",
+        left: "0",
+        top: "0",
+        width: "",
+        height: "100%",
+        margin: "-2px",
+        modeX: 1,
+        modeY: 0,
     },
     {
-        className: "rs lt", backgroundColor: "red", cursor: "nwse-resize",
-        left: "0", top: "0", width: "0.6rem", height: "0.6rem", margin: "-0.3rem",
-        modeX: 1, modeY: 1
+        className: "rs lt",
+        backgroundColor: "red",
+        cursor: "nwse-resize",
+        left: "0",
+        top: "0",
+        width: "0.6rem",
+        height: "0.6rem",
+        margin: "-0.3rem",
+        modeX: 1,
+        modeY: 1,
     },
     {
-        className: "rs rt", backgroundColor: "", cursor: "sw-resize",
-        left: "100%", top: "0", width: "0.6rem", height: "0.6rem", margin: "-0.3rem",
-        modeX: 2, modeY: 1
+        className: "rs rt",
+        backgroundColor: "",
+        cursor: "sw-resize",
+        left: "100%",
+        top: "0",
+        width: "0.6rem",
+        height: "0.6rem",
+        margin: "-0.3rem",
+        modeX: 2,
+        modeY: 1,
     },
     {
-        className: "rs lb", backgroundColor: "", cursor: "ne-resize",
-        left: "0", top: "100%", width: "0.6rem", height: "0.6rem", margin: "-0.3rem",
-        modeX: 1, modeY: 2
+        className: "rs lb",
+        backgroundColor: "",
+        cursor: "ne-resize",
+        left: "0",
+        top: "100%",
+        width: "0.6rem",
+        height: "0.6rem",
+        margin: "-0.3rem",
+        modeX: 1,
+        modeY: 2,
     },
     {
-        className: "rs rb", backgroundColor: "blue", cursor: "nwse-resize",
-        left: "100%", top: "100%", width: "0.6rem", height: "0.6rem", margin: "-0.3rem",
-        modeX: 2, modeY: 2
+        className: "rs rb",
+        backgroundColor: "blue",
+        cursor: "nwse-resize",
+        left: "100%",
+        top: "100%",
+        width: "0.6rem",
+        height: "0.6rem",
+        margin: "-0.3rem",
+        modeX: 2,
+        modeY: 2,
     },
 ];
 export { Resize };

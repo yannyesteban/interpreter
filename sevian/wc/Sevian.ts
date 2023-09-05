@@ -191,7 +191,19 @@ export class Sevian extends HTMLElement {
             }
 
             if (r.message) {
-                alert(r.message);
+                
+
+                this.showMessage({
+                    type: "alert",
+                    caption: "Sevian 1.0",
+                    //delay: 5000,
+                    text: r.message,
+                    className: "x",
+                    left:"center",
+                    top:"20px",
+                    
+                    autoClose: "true",
+                });
             }
 
             if (r.log) {
@@ -199,18 +211,12 @@ export class Sevian extends HTMLElement {
             }
         }
 
-        this.showMessage({
-            type: "alert",
-            caption: "hello",
-            delay: 10,
-            text: "hello",
-            className: "x",
-        });
+        
 
         return true;
     }
 
-    showMessage(message) {}
+    
     initApp() {
         /*
         const btn = $("#x");
@@ -293,6 +299,11 @@ export class Sevian extends HTMLElement {
         this.send(request);
     }
 
+    showMessage(message){
+        const popup = $(this).findOrCreate("ss-popup", "ss-popup").get<any>();
+        popup.dataSource = message
+        popup.mode = "open"
+    }
     send(request: AppRequest) {
         if (request.validate && typeof request.validate === "function" && !request.validate()) {
             return;

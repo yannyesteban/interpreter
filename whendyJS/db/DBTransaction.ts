@@ -49,6 +49,11 @@ export class DBTransaction {
     private config;
     private schemes: { [name: string]: ISchemeInfo };
 
+    lastRecord: any;
+    lastId: number;
+    error;
+    result:any="esteban";
+
     constructor(config: DBSaveInfo, dbAdmin: DBAdmin) {
         this.dbAdmin = dbAdmin;
 
@@ -61,7 +66,7 @@ export class DBTransaction {
             return a;
         }, {});
 
-        this.save(config.dataset, config?.masterData || {});
+        //this.save(config.dataset, config?.masterData || {});
     }
 
     async save(dataset: IDataInfo[], master?: {}) {
@@ -156,12 +161,20 @@ export class DBTransaction {
                 });
             }
 
-            console.log("result::::", mode, result);
+            
 
             if (result?.lastId && serialField) {
                 recordId[serialField] = result.lastId;
+                this.lastId = result.lastId;
+
+                result[serialField]
+
+                console.log("result::::", mode, result);
             }
 
+            console.log("result::::", recordId, result);
+            this.result = result;
+            
             if (info.detail) {
                 this.save(info.detail, { ...master, ...data });
             }

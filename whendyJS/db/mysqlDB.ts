@@ -224,7 +224,7 @@ export class MysqlDB extends DBSql {
 
             let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")});`;
 
-            console.log(query);
+            console.log("query", query);
 
             this.client.query(query, values, function (err, rows, fields) {
                 if (err) {
@@ -236,7 +236,11 @@ export class MysqlDB extends DBSql {
                     });
                 }
 
-                data[info.serial] = rows?.insertId;
+                
+                if(rows?.insertId){
+                    data[info.serial] = rows?.insertId;
+                }
+                
 
                 resolve({
                     row: data,

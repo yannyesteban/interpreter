@@ -2,9 +2,36 @@ import { Q as $ } from "../Q.js";
 import { fire } from "../Tool.js";
 import { Float } from "../Float.js";
 const html = 0;
+class PopupCaption extends HTMLElement {
+    constructor() {
+        super();
+    }
+    connectedCallback() {
+        this.slot = "caption";
+    }
+}
+customElements.define("ss-popup-caption", PopupCaption);
+class PopupBody extends HTMLElement {
+    constructor() {
+        super();
+    }
+    connectedCallback() {
+        this.slot = "body";
+    }
+}
+customElements.define("ss-popup-body", PopupBody);
+class PopupButton extends HTMLElement {
+    constructor() {
+        super();
+    }
+    connectedCallback() {
+        this.slot = "body";
+    }
+}
+customElements.define("ss-popup-button", PopupButton);
 class Popup extends HTMLElement {
     static get observedAttributes() {
-        return ["caption", "mode", "left", "top", "width", "height", "auto-close", "closable"];
+        return ["caption", "text", "mode", "left", "top", "width", "height", "auto-close", "closable"];
     }
     constructor() {
         super();
@@ -19,10 +46,13 @@ class Popup extends HTMLElement {
 				}
 			
 			</style>
-			<link rel="stylesheet" href="./css/WHPopup.css">
+			<!--<link rel="stylesheet" href="./css/WHPopup.css">-->
+            <style>
+            @import "./css/WHPopup.css";
+            </style>
 			<slot name="caption"></slot>
-			<slot></slot>
-			<slot name="buttons"></slot>
+			<slot name="body"></slot>
+			<slot name="button"></slot>
 			`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
@@ -32,12 +62,12 @@ class Popup extends HTMLElement {
     }
     handleEvent(event) {
         if (event.type === "click") {
-            if (this.contains(event.target) && event.target.dataset.type == "close") {
-                this.mode = "close";
-                return;
-            }
-            if (event.target === this) {
-                if (this.autoClose) {
+            console.log("CLICK...............", this, event.target);
+            if (this.contains(event.target)) {
+                if (event.target.dataset.type == "close") {
+                    this.mode = "close";
+                }
+                else if (this.autoClose) {
                     this.mode = "close";
                 }
                 return;
@@ -54,6 +84,7 @@ class Popup extends HTMLElement {
         }
     }
     connectedCallback() {
+        this.handleEvent = this.handleEvent.bind(this);
         Float.init(this);
         if (!this.mode) {
             this.mode = "open";
@@ -76,6 +107,7 @@ class Popup extends HTMLElement {
                 break;
             case "left":
             case "top":
+                console.log(this.top);
                 Float.show({ e: this, left: this.left, top: this.top });
                 break;
             case "width":
@@ -84,6 +116,9 @@ class Popup extends HTMLElement {
                 break;
             case "caption":
                 this.setCaption();
+                break;
+            case "text":
+                this.setBody();
                 break;
         }
     }
@@ -97,6 +132,17 @@ class Popup extends HTMLElement {
     }
     get caption() {
         return this.getAttribute("caption");
+    }
+    set text(value) {
+        if (Boolean(value)) {
+            this.setAttribute("text", value);
+        }
+        else {
+            this.removeAttribute("text");
+        }
+    }
+    get text() {
+        return this.getAttribute("text");
     }
     set mode(value) {
         if (Boolean(value)) {
@@ -192,7 +238,7 @@ class Popup extends HTMLElement {
         Float.show({ e: this, left: this.left, top: this.top });
     }
     _close() {
-        document.removeEventListener("click", this.handleEvent.bind(this));
+        document.removeEventListener("click", this.handleEvent);
         this.removeEventListener("mouseover", this.handleEvent);
         this.removeEventListener("mouseout", this.handleEvent);
         this.style.zIndex = "-1";
@@ -203,7 +249,7 @@ class Popup extends HTMLElement {
     }
     _open() {
         Float.upIndex(this);
-        document.addEventListener("click", this.handleEvent.bind(this));
+        document.addEventListener("click", this.handleEvent);
         this.addEventListener("mouseover", this.handleEvent);
         this.addEventListener("mouseout", this.handleEvent);
         this.tabIndex = 0;
@@ -222,7 +268,16 @@ class Popup extends HTMLElement {
         }
     }
     setCaption() {
-        $(this).create("div").attr("slot", "caption").html(this.caption);
+        console.log(this.caption);
+        $(this).findOrCreate("ss-popup-caption", "ss-popup-caption").addClass("popup-caption").html(this.caption);
+    }
+    setBody() {
+        $(this).findOrCreate("ss-popup-body", "ss-popup-body").addClass("popup-body").html(this.text);
+    }
+    set dataSource(source) {
+        for (const [prop, value] of Object.entries(source)) {
+            this[prop] = value;
+        }
     }
 }
 customElements.define("ss-popup", Popup);

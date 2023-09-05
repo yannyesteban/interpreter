@@ -206,7 +206,7 @@ class GTForm extends HTMLElement {
 
             for (const input of elems) {
                 const list = this.querySelector(`datalist[data-name="${input.name}"]`);
-                console.log("value: ", input.name, input.value);
+                
                 if (list) {
                     //input.classList.add("__ready__");
                     //console.log(list, input);

@@ -59,6 +59,15 @@ export class QElement {
         this.append(element);
         return element;
     }
+    findOrCreate(selector, tagName) {
+        const ele = this.e.querySelector(selector);
+        if (ele) {
+            return Q(ele);
+        }
+        const element = Q.create(tagName);
+        this.append(element);
+        return element;
+    }
     appendText(text) {
         this.e.innerHTML += text;
         return this;

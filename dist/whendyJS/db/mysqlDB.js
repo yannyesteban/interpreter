@@ -217,7 +217,7 @@ export class MysqlDB extends DBSql {
             const values = Object.values(data);
             const wildcard = "?".repeat(fields.length).split("");
             let query = `INSERT INTO \`${info.table}\` (\`${fields.join("`,`")}\`) VALUES (${wildcard.join(",")});`;
-            console.log(query);
+            console.log("query", query);
             this.client.query(query, values, function (err, rows, fields) {
                 if (err) {
                     resolve({
@@ -227,7 +227,9 @@ export class MysqlDB extends DBSql {
                         lastId: null,
                     });
                 }
-                data[info.serial] = rows === null || rows === void 0 ? void 0 : rows.insertId;
+                if (rows === null || rows === void 0 ? void 0 : rows.insertId) {
+                    data[info.serial] = rows === null || rows === void 0 ? void 0 : rows.insertId;
+                }
                 resolve({
                     row: data,
                     errno: 0,

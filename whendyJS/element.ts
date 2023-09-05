@@ -19,7 +19,7 @@ export interface IResponse {
     params?: any;
     message?: string;
     error?: string;
-    log?: string;
+    log?: any;
 }
 
 export class OutputInfo {

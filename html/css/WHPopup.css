@@ -18,19 +18,31 @@ dd {
   margin: 0;
 }
 
+@supports ((-webkit-backdrop-filter: none) or (backdrop-filter: none)) {
+  :host {
+    -webkit-backdrop-filter: blur(10px);
+    backdrop-filter: blur(10px);
+  }
+}
 :host {
-  background-color: aqua;
+  background: rgba(255, 255, 255, 0.192);
+  -webkit-backdrop-filter: saturate(180%) blur(10px);
+          backdrop-filter: saturate(180%) blur(10px);
+  position: absolute;
+  border-radius: 5px;
+  border: 1px solid rgba(43, 43, 43, 0.568);
+  font-size: 1.2rem;
   position: fixed;
-  display: block;
-  border: 2px solid rgb(197, 197, 197);
-  font-size: 3rem;
+  display: grid;
+  grid-template-rows: auto 1fr auto;
   overflow: hidden;
   padding: 0.1rem;
   opacity: 1;
+  min-width: 200px;
 }
 
 :host([mode=close]) {
-  opacity: 0.5;
+  opacity: 0;
   transition-duration: 0.2s;
   transition-property: all;
   transition-timing-function: ease-in;
@@ -41,4 +53,17 @@ dd {
   transition-duration: 0.5s;
   transition-property: all;
   transition-timing-function: ease-in;
+}
+
+::slotted([slot=caption]) {
+  text-align: center;
+  padding: 0.2rem;
+  color: white;
+  border-bottom: 1px solid white;
+}
+
+::slotted([slot=body]) {
+  padding: 0.2rem;
+  color: white;
+  min-height: 60px;
 }/*# sourceMappingURL=WHPopup.css.map */

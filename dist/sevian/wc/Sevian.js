@@ -178,23 +178,24 @@ export class Sevian extends HTMLElement {
                         break;
                 }
                 if (r.message) {
-                    alert(r.message);
+                    this.showMessage({
+                        type: "alert",
+                        caption: "Sevian 1.0",
+                        //delay: 5000,
+                        text: r.message,
+                        className: "x",
+                        left: "center",
+                        top: "20px",
+                        autoClose: "true",
+                    });
                 }
                 if (r.log) {
                     console.log(r.log);
                 }
             }
-            this.showMessage({
-                type: "alert",
-                caption: "hello",
-                delay: 10,
-                text: "hello",
-                className: "x",
-            });
             return true;
         });
     }
-    showMessage(message) { }
     initApp() {
         /*
         const btn = $("#x");
@@ -264,6 +265,11 @@ export class Sevian extends HTMLElement {
     sendJson(request) {
         request.contentType = "application/json";
         this.send(request);
+    }
+    showMessage(message) {
+        const popup = $(this).findOrCreate("ss-popup", "ss-popup").get();
+        popup.dataSource = message;
+        popup.mode = "open";
     }
     send(request) {
         var _a;

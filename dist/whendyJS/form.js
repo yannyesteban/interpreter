@@ -483,12 +483,24 @@ export class Form extends Element {
                 masterData: {},
             };
             const c = new DBTransaction(json, this.store.db);
+            yield c.save(json.dataset, json.masterData);
+            console.log(c);
+            const result = c.result;
+            let message = "";
+            if (result.error) {
+                message = result.error;
+            }
+            else {
+                message = "record was saved correctly!";
+            }
             this.doResponse({
                 element: "form",
                 propertys: {
                     //f: await this.evalDataFields(this.datafields),
                     output: "SAVE FORM",
                 },
+                log: { result, a: "yanny" },
+                message
             });
         });
     }
@@ -646,6 +658,7 @@ export class Form extends Element {
                 ],
             },
             save: {
+                confirm: "secure save?",
                 //form: this,
                 actions: [
                     {
@@ -751,11 +764,12 @@ export class Form extends Element {
             },
             "new": {
                 //form: this,
+                //confirm:"x?"+this.to,
                 actions: [
                     {
                         do: "set-panel",
+                        to: this.to,
                         api: "form",
-                        panel: this.panel,
                         id: this.id,
                         name: this.name,
                         method: "new-record",
