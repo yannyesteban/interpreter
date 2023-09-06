@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import { EvalWhen } from "./EvalWhen.js";
 var AppMode;
 (function (AppMode) {
     AppMode[AppMode["START"] = 1] = "START";
@@ -49,6 +50,13 @@ export class Whendy {
     }
     setElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
+            if (info.doWhen) {
+                const evalWhen = new EvalWhen(this.store.getVSes());
+                if (!evalWhen.eval(info.doWhen)) {
+                    console.log("element aborted");
+                    return;
+                }
+            }
             const id = info.id;
             const panel = info.panel;
             const api = info.api;
@@ -57,6 +65,7 @@ export class Whendy {
             const params = info.params;
             this.store.setExp("ID_", id);
             this.store.setExp("API_", api);
+            this.store.setExp("PARAMS_", params);
             //this.store.LoadExp(info.eparams)
             const cls = yield this.classes.getClass(api);
             if (!cls) {

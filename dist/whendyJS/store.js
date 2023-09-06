@@ -89,6 +89,9 @@ export class Store {
     setReq(name, value) {
         this.vreq[name] = value;
     }
+    getVSes() {
+        return this.session.data;
+    }
     getSes(key) {
         return this.session.get(key);
     }

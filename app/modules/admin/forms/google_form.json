@@ -9,19 +9,21 @@
     "eparamss": ["__page_", "__key_", "__mode_", "__search_", ""],
     "db": "mysq",
     "listData": {
-        "sql": "select * from classicmodels.employees",
+        "sql": "select * from classicmodels.em",
         "params": ["2", "3"],
         "pagination": true,
         "limit": "6",
-        "page": "{{@__page_}}",
+        "page_": "{{@__page_}}",
+        "page":"{{&PARAMS_.page}}",
+        "test": "{{@params.f}} - {{ &API_ }}",
         "searchIn": ["lastName", "firstName"],
         "filter_": "{{@__filter_}}"
     },
     "recordKey": ["employeeNumber"],
     "mode": 2,
-    "data": "SELECT * FROM classicmodels.employees WHERE employeeNumber = 1370",
+    "data": "SELECT * FROM classicmodels.em WHERE employeeNumber = 1370",
     "recordData": {
-        "sql": "SELECT * FROM classicmodels.employees",
+        "sql": "SELECT * FROM classicmodels.em",
         "record": ["employeeNumber"],
         "searchIn": ["lastName", "firstName"],
         "orderBy": ["lastName"],
@@ -29,7 +31,7 @@
         "limit": "10"
     },
     "dataRecord": {
-        "sql": "SELECT * FROM classicmodels.employees WHERE employeeNumber = ?",
+        "sql": "SELECT * FROM classicmodels.em WHERE employeeNumber = ?",
         "params": ["{{@formId}}"]
     },
     "dataLists": [
@@ -188,7 +190,7 @@
                 "elements": [
                     {
                         "component": "button",
-                        "label": "+",
+                        "label": "Save Record",
                         "className": "",
                         "action": "new",
                         "request": {},
@@ -273,8 +275,8 @@
         ]
     },
     "scheme": {
-        "name": "employees",
-        "table": "employees",
+        "name": "em",
+        "table": "em",
         "keys": ["employeeNumber"],
         "fields": [
             {

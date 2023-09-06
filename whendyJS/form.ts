@@ -7,6 +7,7 @@ import { type } from "os";
 
 
 
+
 export class Model {
     name: string;
     mode: string;
@@ -42,7 +43,7 @@ export class Form extends Element {
     dataLists;
 
     _data;
-    eparams;
+    params;
 
     record;
     mode;
@@ -67,7 +68,8 @@ export class Form extends Element {
     }
 
     async evalMethod(method: string) {
-        //console.log("eparams..", method, this.eparams);
+        console.log("Method ", method, this.params);
+
         
         switch (method) {
             case "new-record":
@@ -77,8 +79,8 @@ export class Form extends Element {
                 await this.load();
                 break;
             case "load-record":
-                await this.loadRecord();
-                break;                
+                await this.loadRecord(2);
+                break;
             case "request2":
                 await this.evalFields();
                 break;
@@ -86,7 +88,7 @@ export class Form extends Element {
                 await this.find();
                 break;
             case "data-fields":
-                await this.doDataFields(this.eparams?.parent);
+                await this.doDataFields(this.params?.parent);
                 break;
             case "save":
                 await this.transaction();
@@ -108,21 +110,19 @@ export class Form extends Element {
             cellWidth: field.cellWidth,
         }));
 
-        
-
         const list = this._info.listData;
 
         let info;
         let totalRecords = null;
 
         if (list) {
-            info = await this._pageData(list)
+            info = await this._pageData(list);
         }
 
-        
         const appRequests = this._appRequests("list");
 
-        
+        console.log(JSON.stringify(appRequests))
+
         const dataSource = {
             caption: "hello Mundo",
             data: info.data,
@@ -132,43 +132,43 @@ export class Form extends Element {
             records: +info.totalRecords,
             maxPages: +list.maxPages || 6,
             filter: list.filter,
-            nav:{
-                elements:[
+            nav: {
+                elements: [
                     {
-                        "type": "button",
-                        "label": "+",
-                        "className": "",
-                        "action": "new",
-                        "request": {},
-                        "click": ""
+                        type: "button",
+                        label: "+",
+                        className: "",
+                        action: "new",
+                        request: {},
+                        click: "",
                     },
                     {
-                        type:"button",
-                        label:"save",
-                        className:"",
-                        action:"save",
-                        "request":{},
-                        click:""
+                        type: "button",
+                        label: "save",
+                        className: "",
+                        action: "save",
+                        request: {},
+                        click: "",
                     },
                     {
-                        type:"button",
-                        label:"Delete Record",
-                        className:"",
-                        action:"delete-record",
-                        "request":{},
-                        click:""
+                        type: "button",
+                        label: "Delete Record",
+                        className: "",
+                        action: "delete-record",
+                        request: {},
+                        click: "",
                     },
                     {
-                        type:"button",
-                        label:"Edit",
-                        className:"",
-                        action:"edit-record",
-                        "request":{},
-                        click:""
-                    }
-                ]
+                        type: "button",
+                        label: "Edit",
+                        className: "",
+                        action: "edit-record",
+                        request: {},
+                        click: "",
+                    },
+                ],
             },
-            appRequests
+            appRequests,
         };
 
         this.doResponse({
@@ -178,88 +178,71 @@ export class Form extends Element {
                 //f: await this.evalDataFields(this.datafields),
                 output: info.data,
             },
-            log:"yanny esteban",
-        })
-
-        
+            log: "yanny esteban",
+        });
     }
 
-    async loadPageInfo(){
-
+    async loadPageInfo() {
         const list = this._info.listData;
 
-        if(this.eparams?.filter){
-            list.filter = this.eparams?.filter
+        if (this.params?.filter) {
+            list.filter = this.params?.filter;
         }
 
-
-        
-
         let pageData = await this._pageData(list);
-
-        
 
         //console.log("--------------------", this._pageData(list))
         this.doResponse({
             element: "grid",
             propertys: {
-                pageData : {...pageData, fields: this._info.fields},
+                pageData: { ...pageData, fields: this._info.fields },
                 //f: await this.evalDataFields(this.datafields),
-                
             },
         });
-        
     }
 
+    doKeyRecord(record1, data) {
+        const record = ["employeeNumber"];
 
-    doKeyRecord(record1, data){
-        const record = ["employeeNumber"]
-
-        const key = record.reduce((acc, e)=>(acc[e]=data[e], acc),{})
+        const key = record.reduce((acc, e) => ((acc[e] = data[e]), acc), {});
         //console.log(data, "................",key)
-        return key
+        return key;
     }
 
-    async _pageData(info){
-        let data:any[] = []
+    async _pageData(info) {
+        console.log("List Info", info);
+        let data: any[] = [];
         let totalRecords = 0;
         if (info.sql) {
             const db = (this.db = this.store.db.get<DBSql>(this.connection));
-            let filters = []
-            let values = []
+            let filters = [];
+            let values = [];
 
-            
-            if(this.eparams?.filter){
-                
-                if(info.searchIn){
-                    info.searchIn.forEach(e=>{
-                        filters.push(`${e} like concat('%',?,'%')`)
-                        values.push(info.filter)
-                    })
+            if (this.params?.filter) {
+                if (info.searchIn) {
+                    info.searchIn.forEach((e) => {
+                        filters.push(`${e} like concat('%',?,'%')`);
+                        values.push(info.filter);
+                    });
 
-                    info.sql += " WHERE "+filters.join(" OR ")
+                    info.sql += " WHERE " + filters.join(" OR ");
                 }
-    
-                
-    
-                
             }
-            
 
             let result = await db.query(info, values);
 
-            const record = ["id"]
+            const record = ["id"];
 
-            
             if (result.rows) {
-
-                
-                data = result.rows.map((row, index) => ({ ...row, __mode_: 2, __key_: this.genToken(this.doKeyRecord({}, row)) }));
+                data = result.rows.map((row, index) => ({
+                    ...row,
+                    __mode_: 2,
+                    __key_: this.genToken(this.doKeyRecord({}, row)),
+                }));
             }
 
             //console.log(data)
 
-            
             result = await db.query(db.doQueryAll(info.sql), values);
             if (result.rows.length > 0) {
                 totalRecords = result.rows[0].total;
@@ -267,21 +250,21 @@ export class Form extends Element {
         }
 
         return {
-            data, totalRecords, page:info.page, limit: info.limit, filter: info.filter
-        }
+            data,
+            totalRecords,
+            page: info.page,
+            limit: info.limit,
+            filter: info.filter,
+        };
     }
 
     async newRecord() {
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
 
-
-
-
-        
         this.layout.data = {
-            __mode_:1
+            __mode_: 1,
         };
-        this._data = this.layout.data
+        this._data = this.layout.data;
         if (this.datafields) {
             //this.layout.dataLists = await this.evalDataFields(this.datafields);
         }
@@ -303,12 +286,8 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        
+        this.layout.appRequests = this._appRequests("list");
 
-        this.layout.appRequests =this._appRequests("list");
-        
-       
-        
         this.layout.elements.push(
             {
                 component: "field",
@@ -338,8 +317,6 @@ export class Form extends Element {
 
         let result = await db.infoTable("cities");
 
-        
-
         let data = await db.query(this.data);
         this._data = data.rows[0];
         this._data["state_id"] = 2040;
@@ -368,11 +345,8 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        
+        this.layout.appRequests = this._appRequests("list");
 
-        this.layout.appRequests =  this._appRequests("list");
-
-        
         this.layout.elements.push(
             {
                 component: "field",
@@ -409,8 +383,7 @@ export class Form extends Element {
         */
     }
 
-    addRequest(type, info){
-
+    addRequest(type, info) {
         /*
         
 
@@ -420,29 +393,35 @@ export class Form extends Element {
         */
 
         return {
-            type:"set-panel",
-            element:"form",
-            id:this.id,
-            
-            
-        }
-
+            type: "set-panel",
+            element: "form",
+            id: this.id,
+        };
     }
 
-    async loadRecord() {
+    async loadRecord(mode) {
 
-        //console.log(this._info.recordData)
+        let key:any ;
+        const keyToken = this.params.__key_ || this.store.getReq("__key_")  || this.store.getSes("__key_");
 
-        let query = this._info.recordData.sql
-        const key = this.decodeToken(this.store.getSes("__key_"))
+        if(keyToken){
+            key = this.decodeToken(keyToken);
+        }else{
+            key = this.params.__record_ || this.store.getReq("__record_")  || this.store.getSes("__record_");
+        }
 
 
-        let conditions = []
-        let values = []
-        const record = this._info.recordData.record.forEach(field=>{
-            conditions.push(field + "= ?")
-            values.push(key[field])
-        })
+        console.log("key-->", this.store.getVSes(), key)
+
+        let query = this._info.recordData.sql;
+        
+
+        let conditions = [];
+        let values = [];
+        const record = this._info.recordData.record.forEach((field) => {
+            conditions.push(field + "= ?");
+            values.push(key[field]);
+        });
 
         query += " WHERE " + conditions.join(" AND ");
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
@@ -451,10 +430,10 @@ export class Form extends Element {
 
         let data = await db.query(query, values);
         this._data = data.rows[0];
-        this._data["state_id"] = 2040;
-        this._data["city_id"] = 130165;
-        this._data["__mode_"] = this.mode;
-        this._data["__key_"] = this.store.getSes("__key_")//JSON.stringify(this.record);
+        
+        
+        this._data["__mode_"] = mode;
+        this._data["__key_"] = keyToken;
         this.layout.data = data.rows[0];
         if (this.datafields) {
             //this.layout.dataLists = await this.evalDataFields(this.datafields);
@@ -477,11 +456,8 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        
+        this.layout.appRequests = this._appRequests("list");
 
-        this.layout.appRequests =this._appRequests("list");
-
-        
         this.layout.elements.push(
             {
                 component: "field",
@@ -507,7 +483,6 @@ export class Form extends Element {
     }
 
     async getDataRecord(info) {
-        
         //info = JSON.parse(this.store.evalSubData(JSON.stringify(info), this._data));
 
         if (info.sql) {
@@ -525,7 +500,7 @@ export class Form extends Element {
         let data = await this.getDataRecord(this.dataRecord);
         this._data = data;
         let key;
-        
+
         if (this.recordKey) {
             key = {
                 record: this.recordKey.reduce(
@@ -567,10 +542,8 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        
-
         this.layout.appRequests = this._appRequests("list");
-        
+
         this.layout.elements.push(
             {
                 component: "field",
@@ -605,8 +578,6 @@ export class Form extends Element {
         const token = this.store.getReq("__key_");
         const jwt = new JWT({ key: "yanny" });
         const key = jwt.verify(token);
-        
-        
 
         const json = {
             db: "mysql",
@@ -623,29 +594,37 @@ export class Form extends Element {
             masterData: {},
         };
 
-        
         const c = new DBTransaction(json, this.store.db);
 
+        const r = await c.save(json.dataset, json.masterData);
+        console.log(r);
+        
 
-        await c.save(json.dataset, json.masterData);
-        console.log(c)
-
-        const result = c.result
+        
+        
         let message = "";
-        if(result.error){
-            message = result.error
-        }else{
-            message = "record was saved correctly!"
+        let keyToken = "";
+        if (r.error) {
+            message = r.error;
+            this.store.setSes("__error_", true);
+        } else {
+            this.store.setSes("__error_", false);
+            message = "record was saved correctly!";
+            keyToken = this.genToken(r.recordId);
         }
+
+        
+
+        this.store.setSes("__key_", keyToken);
         this.doResponse({
             element: "form",
             propertys: {
                 //f: await this.evalDataFields(this.datafields),
                 output: "SAVE FORM",
             },
-            log: {result, a:"yanny"},
-            
-            message
+            log: { ...r},
+
+            message,
         });
     }
     async getDataFields(list) {
@@ -668,13 +647,13 @@ export class Form extends Element {
 
     async doDataFields(parent) {
         this._data = this.store.getVReq();
-        
+
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
 
         const list = this.dataLists.filter((data) => data.parent == parent) || [];
-        
+
         const output = await this.getDataFields(list);
-        
+
         this.doResponse({
             element: "form",
             propertys: {
@@ -684,10 +663,6 @@ export class Form extends Element {
             },
         });
     }
-
-   
-
-    
 
     async evalDataFields(dataFields) {
         const result = {};
@@ -701,10 +676,8 @@ export class Form extends Element {
     }
 
     async evalData(dataField) {
-        
         dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
 
-        
         let info = [];
         for (const data of dataField) {
             if (Array.isArray(data)) {
@@ -787,27 +760,21 @@ export class Form extends Element {
 
             elements.push(field);
         }
-        
     }
 
-    private genToken(payload){
+    private genToken(payload) {
         const jwt = new JWT({ key: "yanny" });
         return jwt.generate(payload);
-       
-
-        
     }
 
-    private decodeToken(token){
+    private decodeToken(token) {
         const jwt = new JWT({ key: "yanny" });
-        return jwt.verify(token)
-       
+        return jwt.verify(token);
     }
 
-    private _appRequests(type?:string){
-        console.log(this.panel)
+    private _appRequests(type?: string) {
+        console.log(this.panel);
         return {
-
             dataField: {
                 //form: this,
                 actions: [
@@ -821,7 +788,7 @@ export class Form extends Element {
                 ],
             },
             save: {
-                confirm:"secure save?",
+                confirm: "secure save?",
                 //form: this,
                 actions: [
                     {
@@ -831,12 +798,26 @@ export class Form extends Element {
                         name: this.name,
                         method: "save",
                     },
+                    {
+                        do: "set-panel",
+                        to: this.to,
+                        id: this.id,
+                        name: this.name,
+                        api: "form",
+                        method: "load-record",
+                        params: {
+                            page: 2,
+                        },
+                        doWhen:{
+                            "__error_":false
+                        }
+                    },
                 ],
             },
             delete: {
                 //form: this,
-                setFormValue:{
-                    "__mode_":"3"
+                setFormValue: {
+                    __mode_: "3",
                 },
                 actions: [
                     {
@@ -849,9 +830,6 @@ export class Form extends Element {
                 ],
             },
             list: {
-                
-                
-                
                 actions: [
                     {
                         do: "update",
@@ -890,19 +868,18 @@ export class Form extends Element {
             },
             "delete-record": {
                 //form: this,
-                confirm:"borrando!",
-                setFormValue:{
-                    "__mode_":"3",
-                    
+                confirm: "borrando!",
+                setFormValue: {
+                    __mode_: "3",
                 },
-                "store":{
-                    "__page_":"1"
+                store: {
+                    __page_: "1",
                 },
                 actions: [
                     {
                         do: "update",
                         api: "form",
-                        panel:this.setPanel,
+                        panel: this.setPanel,
                         id: this.id,
                         name: this.name,
                         method: "save",
@@ -910,15 +887,15 @@ export class Form extends Element {
                     {
                         do: "set-panel",
                         api: "form",
-                        
-                        panel:this.setPanel,
+
+                        panel: this.setPanel,
                         id: this.id,
                         name: this.name,
                         method: "list",
                     },
                 ],
             },
-            "filter": {
+            filter: {
                 //form: this,
                 actions: [
                     {
@@ -931,7 +908,7 @@ export class Form extends Element {
                     },
                 ],
             },
-            "new": {
+            new: {
                 //form: this,
                 //confirm:"x?"+this.to,
                 actions: [
@@ -939,13 +916,152 @@ export class Form extends Element {
                         do: "set-panel",
                         to: this.to,
                         api: "form",
-                        
+
                         id: this.id,
                         name: this.name,
                         method: "new-record",
                     },
                 ],
-            }
-        }
+            },
+        };
     }
+
+    private appRequest(){
+        return `
+        {
+            "dataField": {
+                "actions": [
+                    {
+                        "do": "update",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "data-fields"
+                    }
+                ]
+            },
+            "save": {
+                "confirm": "secure save?",
+                "actions": [
+                    {
+                        "do": "update",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "save"
+                    },
+                    {
+                        "do": "set-panel",
+                        "to": "p2",
+                        "id": "google",
+                        "name": "google_form",
+                        "api": "form",
+                        "method": "load-record",
+                        "params": {
+                            "page": 2
+                        }
+                    }
+                ]
+            },
+            "delete": {
+                "setFormValue": {
+                    "__mode_": "3"
+                },
+                "actions": [
+                    {
+                        "do": "update",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "save"
+                    }
+                ]
+            },
+            "list": {
+                "actions": [
+                    {
+                        "do": "update",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "list"
+                    }
+                ]
+            },
+            "load-page": {
+                "actions": [
+                    {
+                        "do": "update",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "load-page"
+                    }
+                ]
+            },
+            "edit-record": {
+                "actions": [
+                    {
+                        "do": "set-panel",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "load-record"
+                    }
+                ]
+            },
+            "delete-record": {
+                "confirm": "borrando!",
+                "setFormValue": {
+                    "__mode_": "3"
+                },
+                "store": {
+                    "__page_": "1"
+                },
+                "actions": [
+                    {
+                        "do": "update",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "save"
+                    },
+                    {
+                        "do": "set-panel",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "list"
+                    }
+                ]
+            },
+            "filter": {
+                "actions": [
+                    {
+                        "do": "update",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "load-page"
+                    }
+                ]
+            },
+            "new": {
+                "actions": [
+                    {
+                        "do": "set-panel",
+                        "to": "p2",
+                        "api": "form",
+                        "id": "google",
+                        "name": "google_form",
+                        "method": "new-record"
+                    }
+                ]
+            }
+        }        
+        
+        `
+    }
+
+
 }

@@ -8,7 +8,7 @@
             "request": {
                 "form_":"#p2",
                 "store":{
-                    "__page_":"1"
+                  
                 },
                 "_confirm": "sure?",
                 "actions": [
@@ -19,7 +19,9 @@
                         "api": "form",
                         "name": "google_form",
                         "method": "list",
-                        "params": {}
+                        "params": {
+                            "page":1
+                        }
                     }
                 ]
             }

@@ -49,10 +49,8 @@ export class DBTransaction {
     private config;
     private schemes: { [name: string]: ISchemeInfo };
 
-    lastRecord: any;
-    lastId: number;
-    error;
-    result:any="esteban";
+    
+    result: any = "esteban";
 
     constructor(config: DBSaveInfo, dbAdmin: DBAdmin) {
         this.dbAdmin = dbAdmin;
@@ -72,6 +70,13 @@ export class DBTransaction {
     async save(dataset: IDataInfo[], master?: {}) {
         const db = this.db;
 
+        let error: string = "";
+        let errno: number = 0;
+        let lastId: number = null;
+        let record: { [key: string]: any } = {};
+
+        let recordId :any;
+
         for (const info of dataset) {
             const scheme = this.schemes[info.scheme];
             const mode = info.mode;
@@ -83,13 +88,17 @@ export class DBTransaction {
                     record: info.record,
                 });
 
+                error = result.error;
+                errno = result.errno;
+                record = info.record;
+
                 continue;
             }
 
             const data = info.data;
             //const find = scheme.fields.find(e => e.serial);
             const keys = scheme.fields.filter((e) => e.key);
-            const recordId = keys.reduce((acc, value) => {
+            recordId = keys.reduce((acc, value) => {
                 return { ...acc, [value.name]: value };
             }, {});
             const newData = {};
@@ -161,23 +170,26 @@ export class DBTransaction {
                 });
             }
 
-            
-
             if (result?.lastId && serialField) {
                 recordId[serialField] = result.lastId;
-                this.lastId = result.lastId;
+                lastId = result.lastId;
 
-                result[serialField]
+                result[serialField];
 
-                console.log("result::::", mode, result);
+                //console.log("result::::", mode, result);
             }
 
-            console.log("result::::", recordId, result);
+            //console.log("result::::", recordId, result);
             this.result = result;
-            
+
+            error = result.error;
+            errno = result.errno;
+            record = result.row;
             if (info.detail) {
                 this.save(info.detail, { ...master, ...data });
             }
         }
+
+        return { error, errno, lastId, record, recordId};
     }
 }

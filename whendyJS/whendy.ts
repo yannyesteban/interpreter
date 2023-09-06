@@ -2,6 +2,7 @@ import { Store } from "./store.js";
 import { InfoElement, Element, IRestElement, IElementAdmin, IUserAdmin, OutputInfo } from "./element.js";
 import { ClassManager } from "./classManager.js";
 import { Authorization } from "./Authorization.js";
+import { EvalWhen } from "./EvalWhen.js";
 
 enum AppMode {
     START = 1,
@@ -62,6 +63,14 @@ export class Whendy {
     }
 
     async setElement(info: InfoElement) {
+        if (info.doWhen) {
+            const evalWhen = new EvalWhen(this.store.getVSes());
+            if (!evalWhen.eval(info.doWhen)) {
+                console.log("element aborted");
+                return;
+            }
+        }
+
         const id = info.id;
         const panel = info.panel;
         const api = info.api;
@@ -71,6 +80,7 @@ export class Whendy {
 
         this.store.setExp("ID_", id);
         this.store.setExp("API_", api);
+        this.store.setExp("PARAMS_", params);
         //this.store.LoadExp(info.eparams)
 
         const cls = await this.classes.getClass(api);

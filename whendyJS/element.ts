@@ -57,6 +57,7 @@ export class InfoElement {
     name?: string;
     method?: string;
     params?: object[];
+    doWhen?: any;
 
     constructor(info) {
         for (const [key, value] of Object.entries(info)) {

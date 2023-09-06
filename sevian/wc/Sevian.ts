@@ -196,7 +196,7 @@ export class Sevian extends HTMLElement {
                 this.showMessage({
                     type: "alert",
                     caption: "Sevian 1.0",
-                    //delay: 5000,
+                    delay: 2000,
                     text: r.message,
                     className: "x",
                     left:"center",
