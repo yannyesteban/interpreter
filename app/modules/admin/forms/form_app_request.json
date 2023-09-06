@@ -1,0 +1,131 @@
+{
+    "dataField": {
+        "actions": [
+            {
+                "do": "update",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "data-fields"
+            }
+        ]
+    },
+    "save": {
+        "confirm": "secure save?",
+        "actions": [
+            {
+                "do": "update",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "save"
+            },
+            {
+                "do": "set-panel",
+                "to": "p2",
+                "id": "google",
+                "name": "google_form",
+                "api": "form",
+                "method": "load-record",
+                "params": {
+                    "page": 2
+                }
+            }
+        ]
+    },
+    "delete": {
+        "setFormValue": {
+            "__mode_": "3"
+        },
+        "actions": [
+            {
+                "do": "update",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "save"
+            }
+        ]
+    },
+    "list": {
+        "actions": [
+            {
+                "do": "update",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "list"
+            }
+        ]
+    },
+    "load-page": {
+        "actions": [
+            {
+                "do": "update",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "load-page"
+            }
+        ]
+    },
+    "edit-record": {
+        "actions": [
+            {
+                "do": "set-panel",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "load-record"
+            }
+        ]
+    },
+    "delete-record": {
+        "confirm": "borrando!",
+        "setFormValue": {
+            "__mode_": "3"
+        },
+        "store": {
+            "__page_": "1"
+        },
+        "actions": [
+            {
+                "do": "update",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "save"
+            },
+            {
+                "do": "set-panel",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "list"
+            }
+        ]
+    },
+    "filter": {
+        "actions": [
+            {
+                "do": "update",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "load-page"
+            }
+        ]
+    },
+    "new": {
+        "actions": [
+            {
+                "do": "set-panel",
+                "to": "p2",
+                "api": "form",
+                "id": "google",
+                "name": "google_form",
+                "method": "new-record"
+            }
+        ]
+    }
+}

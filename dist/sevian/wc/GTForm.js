@@ -144,7 +144,7 @@ class GTForm extends HTMLElement {
                         if (request) {
                             let info = request.data;
                             info.form = this;
-                            info.actions[0].eparams = {
+                            info.actions[0].params = {
                                 parent: event.target.name,
                             };
                             const app = document.querySelector("._main_app_");
@@ -161,7 +161,7 @@ class GTForm extends HTMLElement {
                                     id: this.id,
                                     name: "two",
                                     method: "data-fields",
-                                    eparams: {
+                                    params: {
                                         parent: event.target.name,
                                     },
                                 },

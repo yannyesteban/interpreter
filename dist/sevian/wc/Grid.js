@@ -289,7 +289,7 @@ class Grid extends HTMLElement {
                 __filter_: event.detail.text,
             };
             this.filter = event.detail.text;
-            request.actions[0].eparams = Object.assign(Object.assign({}, (request.actions[0].eparams || {})), { filter: event.detail.text });
+            request.actions[0].params = Object.assign(Object.assign({}, (request.actions[0].params || {})), { filter: event.detail.text, page: 1 });
             console.log(request);
             this.send(request);
         });
@@ -510,7 +510,7 @@ class Grid extends HTMLElement {
             request.store = {
                 __page_: event.detail.page,
             };
-            request.actions[0].eparams = Object.assign(Object.assign({}, (request.actions[0].eparams || {})), { filter: this.filter });
+            request.actions[0].params = Object.assign(Object.assign({}, (request.actions[0].params || {})), { filter: this.filter, page: event.detail.page });
             console.log(request);
             this.send(request);
         });
@@ -699,6 +699,7 @@ class Grid extends HTMLElement {
         });
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__mode_").value(mode);
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__key_").value(key);
+        $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__page_").value(this._page);
     }
 }
 //customElements.define("ss-win-header", WHWinHeader);

@@ -81,7 +81,7 @@ export class Whendy {
         this.store.setExp("ID_", id);
         this.store.setExp("API_", api);
         this.store.setExp("PARAMS_", params);
-        //this.store.LoadExp(info.eparams)
+        //this.store.LoadExp(info.params)
 
         const cls = await this.classes.getClass(api);
 
@@ -105,20 +105,21 @@ export class Whendy {
             this.doRestData(ele);
         } else {
             let response = ele.getResponse();
+            if (response) {
+                if (info.do != "data") {
+                    response = {
+                        do: info.do,
+                        to: info.to,
+                        id: info.id,
+                        api: info.api,
+                        name: info.name,
+                        params: info.params,
+                        ...response,
+                    };
+                }
 
-            if (info.do != "data") {
-                response = {
-                    do: info.do,
-                    to: info.to,
-                    id: info.id,
-                    api: info.api,
-                    name: info.name,
-                    params: info.params,
-                    ...response,
-                };
-            }
-
-            this.addResponse([response]);
+                this.addResponse([response]);
+           }
         }
 
         this.doUserAdmin(ele);

@@ -12,7 +12,7 @@ interface RequestAction {
     name: string;
     source: string;
     method: string;
-    eparams: object;
+    params: object;
     resToken: string;
 }
 interface Request {
@@ -234,7 +234,7 @@ class GTForm extends HTMLElement {
                         if (request) {
                             let info = request.data;
                             info.form = this;
-                            info.actions[0].eparams = {
+                            info.actions[0].params = {
                                 parent: event.target.name,
                             };
 
@@ -253,7 +253,7 @@ class GTForm extends HTMLElement {
                                     id: this.id,
                                     name: "two",
                                     method: "data-fields",
-                                    eparams: {
+                                    params: {
                                         parent: event.target.name,
                                     },
                                 },

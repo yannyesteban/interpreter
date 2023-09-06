@@ -14,7 +14,9 @@
         "pagination": true,
         "limit": "6",
         "page_": "{{@__page_}}",
-        "page":"{{&PARAMS_.page}}",
+        "page1":"{{ PARAMS_.page}}",
+        "page2":"{{ PARAMS_.page}}",
+        "page":"1",
         "test": "{{@params.f}} - {{ &API_ }}",
         "searchIn": ["lastName", "firstName"],
         "filter_": "{{@__filter_}}"

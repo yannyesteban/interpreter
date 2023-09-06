@@ -5,9 +5,6 @@ import { Store } from "./store.js";
 import { JWT } from "./JWT.js";
 import { type } from "os";
 
-
-
-
 export class Model {
     name: string;
     mode: string;
@@ -43,7 +40,7 @@ export class Form extends Element {
     dataLists;
 
     _data;
-    params;
+    params: any = {};
 
     record;
     mode;
@@ -60,7 +57,7 @@ export class Form extends Element {
         this._info = info;
         //this._info = this.store.loadJsonFile(info.source) || {};
 
-        //console.log("...", info);
+        
 
         for (const [key, value] of Object.entries(info)) {
             this[key] = value;
@@ -68,9 +65,8 @@ export class Form extends Element {
     }
 
     async evalMethod(method: string) {
-        console.log("Method ", method, this.params);
-
         
+
         switch (method) {
             case "new-record":
                 await this.newRecord();
@@ -112,6 +108,12 @@ export class Form extends Element {
 
         const list = this._info.listData;
 
+        
+        if (this.params.page === null) {
+            
+            list.page = this.store.getReq("__page_") || this.store.getSes("__page_");
+        }
+
         let info;
         let totalRecords = null;
 
@@ -120,8 +122,6 @@ export class Form extends Element {
         }
 
         const appRequests = this._appRequests("list");
-
-        console.log(JSON.stringify(appRequests))
 
         const dataSource = {
             caption: "hello Mundo",
@@ -191,7 +191,7 @@ export class Form extends Element {
 
         let pageData = await this._pageData(list);
 
-        //console.log("--------------------", this._pageData(list))
+        
         this.doResponse({
             element: "grid",
             propertys: {
@@ -205,12 +205,12 @@ export class Form extends Element {
         const record = ["employeeNumber"];
 
         const key = record.reduce((acc, e) => ((acc[e] = data[e]), acc), {});
-        //console.log(data, "................",key)
+        
         return key;
     }
 
     async _pageData(info) {
-        console.log("List Info", info);
+        
         let data: any[] = [];
         let totalRecords = 0;
         if (info.sql) {
@@ -229,7 +229,17 @@ export class Form extends Element {
                 }
             }
 
-            let result = await db.query(info, values);
+            let result = await db.query(db.doQueryAll(info.sql), values);
+            if (result.rows.length > 0) {
+                totalRecords = result.rows[0].total;
+                const totalPages = Math.ceil(totalRecords / info.limit);
+
+                if (info.page > totalPages) {
+                    info.page = totalPages;
+                }
+            }
+
+            result = await db.query(info, values);
 
             const record = ["id"];
 
@@ -241,12 +251,7 @@ export class Form extends Element {
                 }));
             }
 
-            //console.log(data)
-
-            result = await db.query(db.doQueryAll(info.sql), values);
-            if (result.rows.length > 0) {
-                totalRecords = result.rows[0].total;
-            }
+            
         }
 
         return {
@@ -270,7 +275,7 @@ export class Form extends Element {
         }
         const output = [];
         if (this.dataLists) {
-            //console.log(this.dataFetch)
+            
 
             for (const d of this.dataLists) {
                 output.push({
@@ -282,7 +287,7 @@ export class Form extends Element {
                     //value: this.layout.data[d.name],
                 });
             }
-            //console.log(output)
+            
             this.layout.dataLists = output;
         }
 
@@ -329,7 +334,7 @@ export class Form extends Element {
         }
         const output = [];
         if (this.dataLists) {
-            //console.log(this.dataFetch)
+            
 
             for (const d of this.dataLists) {
                 output.push({
@@ -341,7 +346,7 @@ export class Form extends Element {
                     value: this._data[d.name],
                 });
             }
-            //console.log(output)
+            
             this.layout.dataLists = output;
         }
 
@@ -400,21 +405,18 @@ export class Form extends Element {
     }
 
     async loadRecord(mode) {
+        let key: any;
+        const keyToken = this.params.__key_ || this.store.getReq("__key_") || this.store.getSes("__key_");
 
-        let key:any ;
-        const keyToken = this.params.__key_ || this.store.getReq("__key_")  || this.store.getSes("__key_");
-
-        if(keyToken){
+        if (keyToken) {
             key = this.decodeToken(keyToken);
-        }else{
-            key = this.params.__record_ || this.store.getReq("__record_")  || this.store.getSes("__record_");
+        } else {
+            key = this.params.__record_ || this.store.getReq("__record_") || this.store.getSes("__record_");
         }
 
-
-        console.log("key-->", this.store.getVSes(), key)
+        
 
         let query = this._info.recordData.sql;
-        
 
         let conditions = [];
         let values = [];
@@ -426,12 +428,11 @@ export class Form extends Element {
         query += " WHERE " + conditions.join(" AND ");
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
 
-        //console.log("__key_......",this.decodeToken(this.store.getSes("__key_")))
+        
 
         let data = await db.query(query, values);
         this._data = data.rows[0];
-        
-        
+
         this._data["__mode_"] = mode;
         this._data["__key_"] = keyToken;
         this.layout.data = data.rows[0];
@@ -440,7 +441,7 @@ export class Form extends Element {
         }
         const output = [];
         if (this.dataLists) {
-            //console.log(this.dataFetch)
+            
 
             for (const d of this.dataLists) {
                 output.push({
@@ -452,7 +453,7 @@ export class Form extends Element {
                     value: this._data[d.name],
                 });
             }
-            //console.log(output)
+            
             this.layout.dataLists = output;
         }
 
@@ -512,9 +513,9 @@ export class Form extends Element {
 
         const jwt = new JWT({ key: "yanny" });
         const token = jwt.generate(key);
-        //console.log(key, token);
+        
 
-        //employeeNumber
+        
 
         data["__key_"] = token;
         data["__mode_"] = 2;
@@ -526,7 +527,7 @@ export class Form extends Element {
         }
         const output = [];
         if (this.dataLists) {
-            //console.log(this.dataFetch)
+            
 
             for (const d of this.dataLists) {
                 output.push({
@@ -538,7 +539,7 @@ export class Form extends Element {
                     value: data[d.name],
                 });
             }
-            //console.log(output)
+            
             this.layout.dataLists = output;
         }
 
@@ -579,6 +580,8 @@ export class Form extends Element {
         const jwt = new JWT({ key: "yanny" });
         const key = jwt.verify(token);
 
+        
+
         const json = {
             db: "mysql",
             transaction: true,
@@ -597,11 +600,8 @@ export class Form extends Element {
         const c = new DBTransaction(json, this.store.db);
 
         const r = await c.save(json.dataset, json.masterData);
-        console.log(r);
         
 
-        
-        
         let message = "";
         let keyToken = "";
         if (r.error) {
@@ -610,10 +610,10 @@ export class Form extends Element {
         } else {
             this.store.setSes("__error_", false);
             message = "record was saved correctly!";
-            keyToken = this.genToken(r.recordId);
+            if (r.recordId) {
+                keyToken = this.genToken(r.recordId);
+            }
         }
-
-        
 
         this.store.setSes("__key_", keyToken);
         this.doResponse({
@@ -622,7 +622,7 @@ export class Form extends Element {
                 //f: await this.evalDataFields(this.datafields),
                 output: "SAVE FORM",
             },
-            log: { ...r},
+            log: { ...r },
 
             message,
         });
@@ -773,13 +773,14 @@ export class Form extends Element {
     }
 
     private _appRequests(type?: string) {
-        console.log(this.panel);
+        
         return {
             dataField: {
                 //form: this,
                 actions: [
                     {
                         do: "update",
+                        to: this.to,
                         api: "form",
                         id: this.id,
                         name: this.name,
@@ -808,9 +809,9 @@ export class Form extends Element {
                         params: {
                             page: 2,
                         },
-                        doWhen:{
-                            "__error_":false
-                        }
+                        doWhen: {
+                            __error_: false,
+                        },
                     },
                 ],
             },
@@ -823,7 +824,7 @@ export class Form extends Element {
                     {
                         do: "update",
                         api: "form",
-                        id: this.id,
+                        id: null,
                         name: this.name,
                         method: "save",
                     },
@@ -859,7 +860,7 @@ export class Form extends Element {
                     {
                         do: "set-panel",
                         api: "form",
-                        panel: this.panel,
+                        to: this.to,
                         id: this.id,
                         name: this.name,
                         method: "load-record",
@@ -879,8 +880,8 @@ export class Form extends Element {
                     {
                         do: "update",
                         api: "form",
-                        panel: this.setPanel,
-                        id: this.id,
+                        to: null,
+                        id: null, //this.id,
                         name: this.name,
                         method: "save",
                     },
@@ -888,10 +889,13 @@ export class Form extends Element {
                         do: "set-panel",
                         api: "form",
 
-                        panel: this.setPanel,
+                        to: this.to,
                         id: this.id,
                         name: this.name,
                         method: "list",
+                        params: {
+                            page: null,
+                        },
                     },
                 ],
             },
@@ -926,142 +930,5 @@ export class Form extends Element {
         };
     }
 
-    private appRequest(){
-        return `
-        {
-            "dataField": {
-                "actions": [
-                    {
-                        "do": "update",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "data-fields"
-                    }
-                ]
-            },
-            "save": {
-                "confirm": "secure save?",
-                "actions": [
-                    {
-                        "do": "update",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "save"
-                    },
-                    {
-                        "do": "set-panel",
-                        "to": "p2",
-                        "id": "google",
-                        "name": "google_form",
-                        "api": "form",
-                        "method": "load-record",
-                        "params": {
-                            "page": 2
-                        }
-                    }
-                ]
-            },
-            "delete": {
-                "setFormValue": {
-                    "__mode_": "3"
-                },
-                "actions": [
-                    {
-                        "do": "update",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "save"
-                    }
-                ]
-            },
-            "list": {
-                "actions": [
-                    {
-                        "do": "update",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "list"
-                    }
-                ]
-            },
-            "load-page": {
-                "actions": [
-                    {
-                        "do": "update",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "load-page"
-                    }
-                ]
-            },
-            "edit-record": {
-                "actions": [
-                    {
-                        "do": "set-panel",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "load-record"
-                    }
-                ]
-            },
-            "delete-record": {
-                "confirm": "borrando!",
-                "setFormValue": {
-                    "__mode_": "3"
-                },
-                "store": {
-                    "__page_": "1"
-                },
-                "actions": [
-                    {
-                        "do": "update",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "save"
-                    },
-                    {
-                        "do": "set-panel",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "list"
-                    }
-                ]
-            },
-            "filter": {
-                "actions": [
-                    {
-                        "do": "update",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "load-page"
-                    }
-                ]
-            },
-            "new": {
-                "actions": [
-                    {
-                        "do": "set-panel",
-                        "to": "p2",
-                        "api": "form",
-                        "id": "google",
-                        "name": "google_form",
-                        "method": "new-record"
-                    }
-                ]
-            }
-        }        
-        
-        `
-    }
-
-
+    
 }
