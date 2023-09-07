@@ -18,13 +18,11 @@ export class Outer {
     public output: string;
     private data: Data[];
 
-    indexOf = 0;
-
     constructor() {
         this.resetData();
     }
 
-    public resetData(){
+    public resetData() {
         this.data = [];
     }
 
@@ -41,14 +39,24 @@ export class Outer {
         if (date instanceof Date) {
             return date;
         }
-
     }
 
     public evalMods(data: string | number | object | Date, mods: Modifier[]) {
+        if (data === null || data === undefined) {
+            const defMod = mods.find((m) => m.mod == "def");
+            if (defMod) {
+                if (defMod.value) {
+                    data = defMod.value;
+                } else {
+                    data = "";
+                }
+            } else {
+                return data;
+            }
+        }
 
         let aux = {};
-        mods.forEach(m => {
-
+        mods.forEach((m) => {
             switch (m.mod.toLowerCase()) {
                 case "trim":
                     data = data.toString();
@@ -77,11 +85,13 @@ export class Outer {
                 case "abs":
                     data = Math.abs(Number(data)).toString();
                     break;
-                case "digits": aux["format"] = true;
+                case "digits":
+                    aux["format"] = true;
                     aux["locales"] = aux["locales"];
                     aux["digits"] = m.value || 2;
                     break;
-                case "format": aux["format"] = true;
+                case "format":
+                    aux["format"] = true;
                     aux["locales"] = m.value;
                     if (aux["digits"] == undefined) {
                         aux["digits"] = 2;
@@ -107,7 +117,7 @@ export class Outer {
         if (aux["format"]) {
             return new Intl.NumberFormat(aux["locales"]?.replace("_", "-"), {
                 minimumFractionDigits: aux["digits"],
-                maximumFractionDigits: aux["digits"]
+                maximumFractionDigits: aux["digits"],
             }).format(Number(data));
         }
 
@@ -116,7 +126,7 @@ export class Outer {
         }
 
         if (typeof data == "object") {
-            return JSON.stringify(data)
+            return JSON.stringify(data);
         }
 
         return data;
@@ -126,59 +136,62 @@ export class Outer {
         let delta = 0;
         let offset;
         for (let e of expressions) {
-
             let value = null;
             if (e.type === ExpressionType.VAR) {
-                this.data.forEach(d => {
+                this.data.forEach((d) => {
                     if (e.token == d.token) {
+                        const path = [...e.path];
+                        const name = path.pop();
                         let data = d.data;
-                        for (let i = 0; i < e.path.length; i++) {
-                            if (data[e.path[i]] !== undefined) {
-                                value = data[e.path[i]];
-                                data = value;
+
+                        for (let i = 0; i < path.length; i++) {
+                            if (data[path[i]] !== undefined) {
+                                data = data[path[i]];
                             } else {
                                 return;
                             }
                         }
+
+                        value = data[name];
                     }
                 });
             } else if (e.type === ExpressionType.DATE) {
                 value = new Date();
             }
 
-            if (value === null) {
+            value = this.evalMods(value, e.mods);
+
+            if (value === null || value === undefined) {
                 continue;
             }
 
-            value = this.evalMods(value, e.mods);
-
             e.ready = true;
             e.pos += delta;
-            offset = (e.outside && e.pos > 0) ? 1 : 0;
-            this.output = this.output.substring(0, e.pos - offset) + value + this.output.substring(e.pos + e.length + offset);
+            offset = e.outside && e.pos > 0 ? 1 : 0;
+            this.output =
+                this.output.substring(0, e.pos - offset) + value + this.output.substring(e.pos + e.length + offset);
 
             delta = delta + (value.length - e.length) + 2 * offset;
-        };
+        }
 
         return this.output;
     }
 
     public execute(source) {
-
         this.output = source;
 
         const lexer = new Lexer(source, false);
 
-        const setions = lexer.getSections("{{","}}");
+        const setions = lexer.getSections("{{", "}}");
 
         const parser = new Parser();
-        
+
         const expressions = [];
 
-        for (let s of setions){
+        for (let s of setions) {
             let expr = parser.parse(s.tokens);
 
-            if(expr){
+            if (expr) {
                 expr.length = s.length;
                 expr.pos = s.pos;
                 expr.outside = s.outside && expr.outside;
@@ -187,7 +200,7 @@ export class Outer {
         }
 
         //console.log(expressions)
-        
+
         return this.eval(expressions);
     }
 }

@@ -19,7 +19,6 @@ export class Authorization {
     }
     verify(token) {
         const payload = this.jwt.verify(token);
-        console.log(payload);
         if (payload) {
             this.auth = true;
             this.user = payload.user;

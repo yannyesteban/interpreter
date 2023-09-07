@@ -14,9 +14,10 @@
         "pagination": true,
         "limit": "6",
         "page_": "{{@__page_}}",
-        "page1":"{{ PARAMS_.page}}",
-        "page2":"{{ PARAMS_.page}}",
-        "page":"1",
+        
+        "page":"{{ &PARAMS_.page}}",
+        
+        
         "test": "{{@params.f}} - {{ &API_ }}",
         "searchIn": ["lastName", "firstName"],
         "filter_": "{{@__filter_}}"
@@ -85,7 +86,7 @@
         ]
     },
     "layout": {
-        "caption": "Users Admin",
+        "caption": "Google Form",
         "elements": [
             {
                 "component": "field",

@@ -48,7 +48,26 @@
             }
         },
         {
-            "caption": "Load Form",
+            "caption": "New (+) Record",
+            "request": {
+                "_confirm": "sure?",
+                "actions": [
+                    {
+                        
+                        "id": "unit3",
+                        "do": "set-panel",
+                        "to": "p2",
+                        
+                        "api": "form",
+                        "name": "google_form",
+                        "method": "new-record",
+                        "params": {}
+                    }
+                ]
+            }
+        },
+        {
+            "caption": "Edit Record",
             "request": {
                 "_confirm": "sure?",
                 "actions": [

@@ -114,7 +114,6 @@ export class Store {
             return null;
         }
         let file = this.loadFile(name);
-        console.log(this.outer.execute(file))
         return JSON.parse(this.outer.execute(file));
     }
     eval(template) {

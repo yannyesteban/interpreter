@@ -593,6 +593,7 @@ class GTForm extends HTMLElement {
         for (const [key, value] of Object.entries(info.events || {})) {
             button.on(key, $.bind(value, this));
         }
+        button.attr("type", "button")
         button.attr(info.attr || {});
         button.html(info.label);
         return button.get();

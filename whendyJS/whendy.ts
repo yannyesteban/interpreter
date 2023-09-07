@@ -72,11 +72,11 @@ export class Whendy {
         }
 
         const id = info.id;
-        const panel = info.panel;
+        
         const api = info.api;
         const name = info.name;
         const method = info.method;
-        const params = info.params;
+        const params = info.params || {};
 
         this.store.setExp("ID_", id);
         this.store.setExp("API_", api);
@@ -119,7 +119,7 @@ export class Whendy {
                 }
 
                 this.addResponse([response]);
-           }
+            }
         }
 
         this.doUserAdmin(ele);

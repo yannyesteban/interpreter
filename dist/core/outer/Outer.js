@@ -9,7 +9,6 @@ class Data {
 }
 export class Outer {
     constructor() {
-        this.indexOf = 0;
         this.resetData();
     }
     resetData() {
@@ -29,8 +28,22 @@ export class Outer {
     }
     evalMods(data, mods) {
         var _a;
+        if (data === null || data === undefined) {
+            const defMod = mods.find((m) => m.mod == "def");
+            if (defMod) {
+                if (defMod.value) {
+                    data = defMod.value;
+                }
+                else {
+                    data = "";
+                }
+            }
+            else {
+                return data;
+            }
+        }
         let aux = {};
-        mods.forEach(m => {
+        mods.forEach((m) => {
             var _a;
             switch (m.mod.toLowerCase()) {
                 case "trim":
@@ -93,7 +106,7 @@ export class Outer {
         if (aux["format"]) {
             return new Intl.NumberFormat((_a = aux["locales"]) === null || _a === void 0 ? void 0 : _a.replace("_", "-"), {
                 minimumFractionDigits: aux["digits"],
-                maximumFractionDigits: aux["digits"]
+                maximumFractionDigits: aux["digits"],
             }).format(Number(data));
         }
         if (typeof data == "number") {
@@ -110,35 +123,37 @@ export class Outer {
         for (let e of expressions) {
             let value = null;
             if (e.type === ExpressionType.VAR) {
-                this.data.forEach(d => {
+                this.data.forEach((d) => {
                     if (e.token == d.token) {
+                        const path = [...e.path];
+                        const name = path.pop();
                         let data = d.data;
-                        for (let i = 0; i < e.path.length; i++) {
-                            if (data[e.path[i]] !== undefined) {
-                                value = data[e.path[i]];
-                                data = value;
+                        for (let i = 0; i < path.length; i++) {
+                            if (data[path[i]] !== undefined) {
+                                data = data[path[i]];
                             }
                             else {
                                 return;
                             }
                         }
+                        value = data[name];
                     }
                 });
             }
             else if (e.type === ExpressionType.DATE) {
                 value = new Date();
             }
-            if (value === null) {
+            value = this.evalMods(value, e.mods);
+            if (value === null || value === undefined) {
                 continue;
             }
-            value = this.evalMods(value, e.mods);
             e.ready = true;
             e.pos += delta;
-            offset = (e.outside && e.pos > 0) ? 1 : 0;
-            this.output = this.output.substring(0, e.pos - offset) + value + this.output.substring(e.pos + e.length + offset);
+            offset = e.outside && e.pos > 0 ? 1 : 0;
+            this.output =
+                this.output.substring(0, e.pos - offset) + value + this.output.substring(e.pos + e.length + offset);
             delta = delta + (value.length - e.length) + 2 * offset;
         }
-        ;
         return this.output;
     }
     execute(source) {

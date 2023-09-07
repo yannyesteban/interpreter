@@ -56,7 +56,7 @@ export class InfoElement {
     //source?: string;
     name?: string;
     method?: string;
-    params?: object[];
+    params?: any;
     doWhen?: any;
 
     constructor(info) {
