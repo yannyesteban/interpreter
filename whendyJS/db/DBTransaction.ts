@@ -50,7 +50,7 @@ export class DBTransaction {
     private schemes: { [name: string]: ISchemeInfo };
 
     
-    result: any = "esteban";
+    result: any;
 
     constructor(config: DBSaveInfo, dbAdmin: DBAdmin) {
         this.dbAdmin = dbAdmin;

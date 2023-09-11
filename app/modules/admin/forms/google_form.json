@@ -1,42 +1,88 @@
 {
-    "panelInfo": {
-        "panel": "p5",
-        "data": {
-            "a": 1
+    "label": "User 1.1",
+    "fields": [
+        {
+            "component": "field",
+            "label": "Employee ID",
+            "input": "input",
+            "name": "employeeNumber",
+            "cell": ""
+        },
+        {
+            "component": "field",
+            "label": "Apellido",
+            "input": "input",
+            "name": "lastName"
+        },
+        {
+            "component": "field",
+            "label": "Nombre",
+            "input": "input",
+            "name": "firstName"
+        },
+        {
+            "component": "field",
+            "label": "Extensión",
+            "input": "input",
+            "name": "extension"
+        },
+        {
+            "component": "field",
+            "label": "Correo",
+            "input": "input",
+            "name": "email"
+        },
+        {
+            "component": "field",
+            "label": "officeCode",
+            "input": "input",
+            "name": "officeCode"
+        },
+        {
+            "component": "field",
+            "label": "reportsTo",
+            "input": "input",
+            "name": "reportsTo"
+        },
+        {
+            "component": "field",
+            "label": "job",
+            "input": "input",
+            "name": "jobTitle"
+        },
+        {
+            "component": "field",
+            "label": "countryId",
+            "input": "select",
+            "name": "countryId"
+        },
+        {
+            "component": "field",
+            "label": "stateId",
+            "input": "select",
+            "name": "stateId"
+        },
+        {
+            "component": "field",
+            "label": "cityId",
+            "input": "select",
+            "name": "cityId"
         }
+    ],
+
+    "defaultData": {
+        "extension": "{{@_DATE_}}"
+    },
+    "fixedData": {
+        "jobTitle": "none"
     },
 
-    "eparamss": ["__page_", "__key_", "__mode_", "__search_", ""],
-    "db": "mysq",
-    "listData": {
-        "sql": "select * from classicmodels.em",
-        "params": ["2", "3"],
-        "pagination": true,
-        "limit": "6",
-        "page_": "{{@__page_}}",
-        
-        "page":"{{ &PARAMS_.page}}",
-        
-        
-        "test": "{{@params.f}} - {{ &API_ }}",
-        "searchIn": ["lastName", "firstName"],
-        "filter_": "{{@__filter_}}"
-    },
-    "recordKey": ["employeeNumber"],
-    "mode": 2,
-    "data": "SELECT * FROM classicmodels.em WHERE employeeNumber = 1370",
-    "recordData": {
+    "data": {
         "sql": "SELECT * FROM classicmodels.em",
-        "record": ["employeeNumber"],
-        "searchIn": ["lastName", "firstName"],
-        "orderBy": ["lastName"],
-        "pagination": true,
-        "limit": "10"
+        "params": ["1"],
+        "record": ["employeeNumber"]
     },
-    "dataRecord": {
-        "sql": "SELECT * FROM classicmodels.em WHERE employeeNumber = ?",
-        "params": ["{{@formId}}"]
-    },
+
     "dataLists": [
         {
             "name": "countryId",
@@ -76,14 +122,79 @@
         }
     ],
 
-    "fieldRequest": {
-        "countryId": [
-            {
-                "type": "element",
-                "name": "two",
-                "method": "data-field"
-            }
-        ]
+    "mongo": {
+        "select": ["collection.field1:a", "collection.field2:b"],
+        "from": "collection:t",
+        "innerJoin": "collect2:t2",
+        "where": { "a": 1 },
+        "orderBy": [1],
+        "limit": 20
+    },
+
+    "listData": {
+        "sql": "select * from classicmodels.em",
+        "params": [""],
+        "pagination": true,
+        "maxPage": 6,
+        "limit": 6,
+        "searchIn": ["lastName", "firstName"],
+        "orderBy": ["lastName"],
+        "footerText": "page 5 de 6",
+        "page": "{{ &PARAMS_.page}}"
+    },
+
+    
+    "schemes": [
+        {
+            "name": "em",
+            "table": "em",
+            "keys": ["employeeNumber"],
+            "fields": [
+                {
+                    "name": "employeeNumber",
+                    "type": "I",
+                    "key": true,
+                    "serial": true,
+                    "notNull": true,
+                    "default": ""
+                },
+                {
+                    "name": "lastName"
+                },
+                {
+                    "name": "firstName"
+                },
+                {
+                    "name": "extension"
+                },
+                {
+                    "name": "email"
+                },
+                {
+                    "name": "officeCode"
+                },
+                {
+                    "name": "reportsTo"
+                },
+                {
+                    "name": "jobTitle"
+                },
+                {
+                    "name": "countryId"
+                },
+                {
+                    "name": "stateId"
+                },
+                {
+                    "name": "cityId"
+                }
+            ]
+        }
+    ],
+
+    
+    "useRequest": {
+        "new-record": {}
     },
     "layout": {
         "caption": "Google Form",
@@ -186,9 +297,13 @@
                 "events": {
                     "click": "this.sendRequest('list')"
                 }
-            },
+            }
+        ]
+    },
 
-            {
+    "methods":{
+        "new-record":{
+            "nav":{
                 "component": "nav",
                 "elements": [
                     {
@@ -225,171 +340,52 @@
                     }
                 ]
             }
-        ]
-    },
-    "layout2": {
-        "caption": "Users Admin",
-        "elements": [
-            {
-                "component": "field",
-                "label": "country",
-                "input": "select",
-                "name": "countryId"
-            },
-            {
-                "component": "field",
-                "label": "State",
-                "input": "select",
-                "name": "state_id"
-            },
-            {
-                "component": "field",
-                "label": "City",
-                "input": "select",
-                "name": "city_id"
-            },
-            {
-                "component": "field",
-                "label": "Fisrt Name",
-                "name": "firstName",
-                "input": "input",
-                "type": "text",
-                "value": "5"
-            },
-            {
-                "component": "field",
-                "label": "Last Name",
-                "name": "lastName",
-                "input": "input",
-                "type": "text",
-                "value": "Yanny"
-            },
-            {
-                "component": "button",
-                "label": "OK",
-                "attr": {
-                    "class": "save",
-                    "type": "button"
-                },
-                "events": {
-                    "click": "this.sendRequest('save')"
-                }
+            
+        },
+        "list":{
+            "nav":{
+                "elements": [
+                    {
+                        "type": "button",
+                        "label": "+",
+                        "className": "",
+                        "action": "new",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "type": "button",
+                        "label": "save",
+                        "className": "",
+                        "action": "save",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "type": "button",
+                        "label": "Delete Record",
+                        "className": "",
+                        "action": "delete-record",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "type": "button",
+                        "label": "Edit",
+                        "className": "",
+                        "action": "edit-record",
+                        "request": {},
+                        "click": ""
+                    }
+                ]
             }
-        ]
-    },
-    "scheme": {
-        "name": "em",
-        "table": "em",
-        "keys": ["employeeNumber"],
-        "fields": [
-            {
-                "name": "employeeNumber",
-                "type": "I",
-                "key": true,
-                "serial": true,
-                "notNull": true,
-                "default": ""
-            },
-            {
-                "name": "lastName"
-            },
-            {
-                "name": "firstName"
-            },
-            {
-                "name": "extension"
-            },
-            {
-                "name": "email"
-            },
-            {
-                "name": "officeCode"
-            },
-            {
-                "name": "reportsTo"
-            },
-            {
-                "name": "jobTitle"
-            },
-            {
-                "name": "countryId"
-            },
-            {
-                "name": "stateId"
-            },
-            {
-                "name": "cityId"
-            }
-        ]
+        }
     },
 
-    "fields": [
-        {
-            "component": "field",
-            "label": "Employee ID",
-            "input": "input",
-            "name": "employeeNumber",
-            "cell": ""
-        },
-        {
-            "component": "field",
-            "label": "Apellido",
-            "input": "input",
-            "name": "lastName"
-        },
-        {
-            "component": "field",
-            "label": "Nombre",
-            "input": "input",
-            "name": "firstName"
-        },
-        {
-            "component": "field",
-            "label": "Extensión",
-            "input": "input",
-            "name": "extension"
-        },
-        {
-            "component": "field",
-            "label": "Correo",
-            "input": "input",
-            "name": "email"
-        },
-        {
-            "component": "field",
-            "label": "officeCode",
-            "input": "input",
-            "name": "officeCode"
-        },
-        {
-            "component": "field",
-            "label": "reportsTo",
-            "input": "input",
-            "name": "reportsTo"
-        },
-        {
-            "component": "field",
-            "label": "job",
-            "input": "input",
-            "name": "jobTitle"
-        },
-        {
-            "component": "field",
-            "label": "countryId",
-            "input": "select",
-            "name": "countryId"
-        },
-        {
-            "component": "field",
-            "label": "stateId",
-            "input": "select",
-            "name": "stateId"
-        },
-        {
-            "component": "field",
-            "label": "cityId",
-            "input": "select",
-            "name": "cityId"
+    "panelInfo": {
+        "panel": "p5",
+        "data": {
+            "a": 1
         }
-    ]
+    }
 }

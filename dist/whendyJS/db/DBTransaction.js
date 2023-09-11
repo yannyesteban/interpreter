@@ -10,7 +10,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 import { RecordMode } from "./db.js";
 export class DBTransaction {
     constructor(config, dbAdmin) {
-        this.result = "esteban";
         this.dbAdmin = dbAdmin;
         this.config = config;
         this.db = dbAdmin.get(config.db);

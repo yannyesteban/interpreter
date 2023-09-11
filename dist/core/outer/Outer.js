@@ -113,6 +113,9 @@ export class Outer {
             return data.toString();
         }
         if (typeof data == "object") {
+            if (data instanceof Date) {
+                return data.toISOString();
+            }
             return JSON.stringify(data);
         }
         return data;

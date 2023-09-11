@@ -100,6 +100,10 @@ export class Sevian extends HTMLElement {
         return __awaiter(this, void 0, void 0, function* () {
             return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
                 var _a, _b;
+                if (!name) {
+                    reject();
+                    return;
+                }
                 const element = ((_b = (_a = this.modules) === null || _a === void 0 ? void 0 : _a.find((e) => e.name.toUpperCase() === name.toUpperCase())) === null || _b === void 0 ? void 0 : _b.wc) || name;
                 console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
                 if (element.indexOf("-") < 0 || !element) {
@@ -147,6 +151,8 @@ export class Sevian extends HTMLElement {
                     panel.text("");
                 }
                 panel.append(e);
+            }).catch(error => {
+                console.log("element not found");
             });
         });
     }
@@ -159,6 +165,8 @@ export class Sevian extends HTMLElement {
                         e.prop(info.propertys);
                     }
                 }
+            }).catch(error => {
+                console.log("element not found");
             });
         });
     }

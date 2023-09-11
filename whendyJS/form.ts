@@ -3,7 +3,14 @@ import { DBSql } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
 import { JWT } from "./JWT.js";
-import { type } from "os";
+
+interface IRecordKey {
+    [key: string]: any;
+}
+
+interface IRecord {
+    [key: string]: any;
+}
 
 export class Model {
     name: string;
@@ -12,6 +19,7 @@ export class Model {
 }
 
 export class Form extends Element {
+    private method: string;
     public panel: string;
     public id: string;
     public name: string;
@@ -49,6 +57,8 @@ export class Form extends Element {
     dataRecord;
     recordKey;
     to;
+
+    keySecret = "Robin Williams";
     setStore(store: Store) {
         this.store = store;
     }
@@ -57,25 +67,30 @@ export class Form extends Element {
         this._info = info;
         //this._info = this.store.loadJsonFile(info.source) || {};
 
-        
-
         for (const [key, value] of Object.entries(info)) {
             this[key] = value;
         }
     }
 
     async evalMethod(method: string) {
-        
+        this.method = method;
+        if (this._info.methods && this._info.methods[method]) {
+            this._info = { ...this._info, ...this._info?.methods[method] };
+        }
 
         switch (method) {
+            case "list":
+                const page = this.store.getSes("__page_") || "1";
+                await this.doGrid(Number(page));
+                break;
             case "new-record":
-                await this.newRecord();
+                await this.doForm(1);
                 break;
             case "request":
-                await this.load();
+                await this.doForm(1);
                 break;
             case "load-record":
-                await this.loadRecord(2);
+                await this.doForm(2);
                 break;
             case "request2":
                 await this.evalFields();
@@ -87,18 +102,15 @@ export class Form extends Element {
                 await this.doDataFields(this.params?.parent);
                 break;
             case "save":
-                await this.transaction();
+                await this.saveRecord();
                 break;
-            case "list":
-                const page = this.store.getSes("__page_") || "1";
-                await this.list(Number(page));
-                break;
+
             case "load-page":
                 await this.loadPageInfo();
         }
     }
 
-    async list(page: number) {
+    private async doGrid(page: number) {
         const fields = this._info.fields.map((field) => ({
             name: field.name,
             label: field.label,
@@ -108,9 +120,7 @@ export class Form extends Element {
 
         const list = this._info.listData;
 
-        
         if (this.params.page === null) {
-            
             list.page = this.store.getReq("__page_") || this.store.getSes("__page_");
         }
 
@@ -121,7 +131,7 @@ export class Form extends Element {
             info = await this._pageData(list);
         }
 
-        const appRequests = this._appRequests("list");
+        const appRequests = this.appRequests();
 
         const dataSource = {
             caption: "hello Mundo",
@@ -132,7 +142,8 @@ export class Form extends Element {
             records: +info.totalRecords,
             maxPages: +list.maxPages || 6,
             filter: list.filter,
-            nav: {
+            nav: this._info.nav,
+            nav1: {
                 elements: [
                     {
                         type: "button",
@@ -182,7 +193,7 @@ export class Form extends Element {
         });
     }
 
-    async loadPageInfo() {
+    private async loadPageInfo() {
         const list = this._info.listData;
 
         if (this.params?.filter) {
@@ -191,7 +202,6 @@ export class Form extends Element {
 
         let pageData = await this._pageData(list);
 
-        
         this.doResponse({
             element: "grid",
             propertys: {
@@ -201,16 +211,15 @@ export class Form extends Element {
         });
     }
 
-    doKeyRecord(record1, data) {
+    private doKeyRecord(record1, data) {
         const record = ["employeeNumber"];
 
         const key = record.reduce((acc, e) => ((acc[e] = data[e]), acc), {});
-        
+
         return key;
     }
 
-    async _pageData(info) {
-        
+    private async _pageData(info) {
         let data: any[] = [];
         let totalRecords = 0;
         if (info.sql) {
@@ -250,8 +259,6 @@ export class Form extends Element {
                     __key_: this.genToken(this.doKeyRecord({}, row)),
                 }));
             }
-
-            
         }
 
         return {
@@ -263,36 +270,30 @@ export class Form extends Element {
         };
     }
 
-    async newRecord() {
-        const db = (this.db = this.store.db.get<DBSql>(this.connection));
+    private async doForm(mode) {
+        this.db = this.store.db.get<DBSql>(this.connection);
+        let data = this._info.defaultData || {};
 
-        this.layout.data = {
-            __mode_: 1,
-        };
-        this._data = this.layout.data;
-        if (this.datafields) {
-            //this.layout.dataLists = await this.evalDataFields(this.datafields);
-        }
-        const output = [];
-        if (this.dataLists) {
-            
+        const key = this.getRecordKey();
 
-            for (const d of this.dataLists) {
-                output.push({
-                    name: d.name,
-                    data: await this.evalData(d.data),
-                    childs: d.childs,
-                    parent: d.parent,
-                    mode: d.mode,
-                    //value: this.layout.data[d.name],
-                });
-            }
-            
-            this.layout.dataLists = output;
+        if (key) {
+            data = { ...data, ...(await this.getDBRecord(this._info.data, key)) };
         }
 
+        data = { ...data, __mode_: mode, ...(this._info.fixedData || {}) };
+
+        if (+mode != 1) {
+            data.__key_ = this.genToken(key);
+        }
+        this._data = data;
+
+        if (this._info.nav) {
+            this.layout.elements.push(this._info.nav);
+        }
+
+        this.layout.dataLists = await this.getDataList();
         this.layout.appRequests = this._appRequests("list");
-
+        this.layout.data = data;
         this.layout.elements.push(
             {
                 component: "field",
@@ -311,84 +312,11 @@ export class Form extends Element {
             element: "form",
             propertys: {
                 dataSource: this.layout,
-                //f: await this.evalDataFields(this.datafields),
-                output,
             },
         });
     }
 
-    async load() {
-        const db = (this.db = this.store.db.get<DBSql>(this.connection));
-
-        let result = await db.infoTable("cities");
-
-        let data = await db.query(this.data);
-        this._data = data.rows[0];
-        this._data["state_id"] = 2040;
-        this._data["city_id"] = 130165;
-        this._data["__mode_"] = this.mode;
-        this._data["__key_"] = JSON.stringify(this.record);
-        this.layout.data = data.rows[0];
-        if (this.datafields) {
-            //this.layout.dataLists = await this.evalDataFields(this.datafields);
-        }
-        const output = [];
-        if (this.dataLists) {
-            
-
-            for (const d of this.dataLists) {
-                output.push({
-                    name: d.name,
-                    data: await this.evalData(d.data),
-                    childs: d.childs,
-                    parent: d.parent,
-                    mode: d.mode,
-                    value: this._data[d.name],
-                });
-            }
-            
-            this.layout.dataLists = output;
-        }
-
-        this.layout.appRequests = this._appRequests("list");
-
-        this.layout.elements.push(
-            {
-                component: "field",
-                label: "__mode_",
-                input: "input",
-                name: "__mode_",
-            },
-            {
-                component: "field",
-                label: "__key_",
-                input: "input",
-                name: "__key_",
-            },
-        );
-        this.doResponse({
-            element: "form",
-            propertys: {
-                dataSource: this.layout,
-                //f: await this.evalDataFields(this.datafields),
-                output,
-            },
-        });
-        /*
-        const f:any = {};
-        f.setComponent("form", {datasource:{}})
-        f.addMessage({
-            "className":"yes",
-            "type":"error",
-            "title":"hello",
-            "message":"welcome",
-            "okButton":"Aceptar"
-
-        })
-        */
-    }
-
-    addRequest(type, info) {
+    private addRequest(type, info) {
         /*
         
 
@@ -404,86 +332,7 @@ export class Form extends Element {
         };
     }
 
-    async loadRecord(mode) {
-        let key: any;
-        const keyToken = this.params.__key_ || this.store.getReq("__key_") || this.store.getSes("__key_");
-
-        if (keyToken) {
-            key = this.decodeToken(keyToken);
-        } else {
-            key = this.params.__record_ || this.store.getReq("__record_") || this.store.getSes("__record_");
-        }
-
-        
-
-        let query = this._info.recordData.sql;
-
-        let conditions = [];
-        let values = [];
-        const record = this._info.recordData.record.forEach((field) => {
-            conditions.push(field + "= ?");
-            values.push(key[field]);
-        });
-
-        query += " WHERE " + conditions.join(" AND ");
-        const db = (this.db = this.store.db.get<DBSql>(this.connection));
-
-        
-
-        let data = await db.query(query, values);
-        this._data = data.rows[0];
-
-        this._data["__mode_"] = mode;
-        this._data["__key_"] = keyToken;
-        this.layout.data = data.rows[0];
-        if (this.datafields) {
-            //this.layout.dataLists = await this.evalDataFields(this.datafields);
-        }
-        const output = [];
-        if (this.dataLists) {
-            
-
-            for (const d of this.dataLists) {
-                output.push({
-                    name: d.name,
-                    data: await this.evalData(d.data),
-                    childs: d.childs,
-                    parent: d.parent,
-                    mode: d.mode,
-                    value: this._data[d.name],
-                });
-            }
-            
-            this.layout.dataLists = output;
-        }
-
-        this.layout.appRequests = this._appRequests("list");
-
-        this.layout.elements.push(
-            {
-                component: "field",
-                label: "__mode_",
-                input: "input",
-                name: "__mode_",
-            },
-            {
-                component: "field",
-                label: "__key_",
-                input: "input",
-                name: "__key_",
-            },
-        );
-        this.doResponse({
-            element: "form",
-            propertys: {
-                dataSource: this.layout,
-                //f: await this.evalDataFields(this.datafields),
-                output,
-            },
-        });
-    }
-
-    async getDataRecord(info) {
+    private async getDataRecord(info) {
         //info = JSON.parse(this.store.evalSubData(JSON.stringify(info), this._data));
 
         if (info.sql) {
@@ -496,7 +345,7 @@ export class Form extends Element {
         return {};
     }
 
-    async find() {
+    private async find() {
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
         let data = await this.getDataRecord(this.dataRecord);
         this._data = data;
@@ -513,9 +362,6 @@ export class Form extends Element {
 
         const jwt = new JWT({ key: "yanny" });
         const token = jwt.generate(key);
-        
-
-        
 
         data["__key_"] = token;
         data["__mode_"] = 2;
@@ -527,8 +373,6 @@ export class Form extends Element {
         }
         const output = [];
         if (this.dataLists) {
-            
-
             for (const d of this.dataLists) {
                 output.push({
                     name: d.name,
@@ -539,7 +383,7 @@ export class Form extends Element {
                     value: data[d.name],
                 });
             }
-            
+
             this.layout.dataLists = output;
         }
 
@@ -575,59 +419,59 @@ export class Form extends Element {
         });
     }
 
-    async transaction() {
-        const token = this.store.getReq("__key_");
-        const jwt = new JWT({ key: "yanny" });
-        const key = jwt.verify(token);
+    private async saveRecord() {
+        const key = this.getRecordKey();
+        const scheme = this._info.schemes[0];
+        const schemeName = "any";
 
-        
-
-        const json = {
+        const config = {
             db: "mysql",
             transaction: true,
-            schemes: [{ ...this.scheme, name: this.name }],
-            dataset: [
-                {
-                    scheme: this.name,
-                    mode: +this.store.getReq("__mode_"),
-                    record: key,
-                    data: this.store.getVReq(),
-                },
-            ],
-            masterData: {},
+            schemes: [{ ...scheme, name: schemeName }],
         };
 
-        const c = new DBTransaction(json, this.store.db);
+        const dataset = [
+            {
+                scheme: schemeName,
+                mode: +this.store.getReq("__mode_"),
+                record: key,
+                data: this.store.getVReq(),
+            },
+        ];
 
-        const r = await c.save(json.dataset, json.masterData);
-        
+        const transaction = new DBTransaction(config, this.store.db);
+
+        const result = await transaction.save(dataset, {});
 
         let message = "";
         let keyToken = "";
-        if (r.error) {
-            message = r.error;
+        if (result.error) {
+            message = result.error;
             this.store.setSes("__error_", true);
         } else {
             this.store.setSes("__error_", false);
             message = "record was saved correctly!";
-            if (r.recordId) {
-                keyToken = this.genToken(r.recordId);
+            if (result.recordId) {
+                keyToken = this.genToken(result.recordId);
             }
         }
 
         this.store.setSes("__key_", keyToken);
         this.doResponse({
+            /*
             element: "form",
             propertys: {
                 //f: await this.evalDataFields(this.datafields),
                 output: "SAVE FORM",
             },
-            log: { ...r },
+            */
+            log: { ...result },
 
             message,
         });
     }
-    async getDataFields(list) {
+
+    private async getDataFields(list) {
         const output = [];
         for (const info of list) {
             output.push(await this.getDataField(info));
@@ -635,7 +479,7 @@ export class Form extends Element {
         return output;
     }
 
-    async getDataField(info) {
+    private async getDataField(info) {
         return {
             name: info.name,
             data: await this.evalData(info.data),
@@ -645,7 +489,7 @@ export class Form extends Element {
         };
     }
 
-    async doDataFields(parent) {
+    private async doDataFields(parent) {
         this._data = this.store.getVReq();
 
         const db = (this.db = this.store.db.get<DBSql>(this.connection));
@@ -664,7 +508,7 @@ export class Form extends Element {
         });
     }
 
-    async evalDataFields(dataFields) {
+    private async evalDataFields(dataFields) {
         const result = {};
         for (const [field, dataField] of Object.entries(dataFields)) {
             result[field] = {
@@ -675,7 +519,7 @@ export class Form extends Element {
         return result;
     }
 
-    async evalData(dataField) {
+    private async evalData(dataField) {
         dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
 
         let info = [];
@@ -763,17 +607,210 @@ export class Form extends Element {
     }
 
     private genToken(payload) {
-        const jwt = new JWT({ key: "yanny" });
+        const jwt = new JWT({ key: this.keySecret });
         return jwt.generate(payload);
     }
 
     private decodeToken(token) {
-        const jwt = new JWT({ key: "yanny" });
+        const jwt = new JWT({ key: this.keySecret });
         return jwt.verify(token);
     }
 
+    private getRecordKey(): IRecordKey {
+        let key: IRecordKey;
+        const keyToken = this.params.__key_ || this.store.getReq("__key_") || this.store.getSes("__key_");
+
+        if (keyToken) {
+            key = this.decodeToken(keyToken);
+        } else {
+            key = this.params.__record_ || this.store.getReq("__record_") || this.store.getSes("__record_");
+        }
+
+        return key;
+    }
+
+    private async getDBRecord(info, key: IRecordKey): Promise<IRecord> {
+        let query = info.sql;
+
+        let conditions = [];
+        let values = [];
+        const record = this._info.data.record.forEach((field) => {
+            conditions.push(field + "= ?");
+            values.push(key[field]);
+        });
+
+        query += " WHERE " + conditions.join(" AND ");
+
+        const data = await this.db.query(query, values);
+
+        return data.rows[0] || {};
+    }
+
+    private async getDataList() {
+        const dataList = [];
+        if (this.dataLists) {
+            for (const d of this.dataLists) {
+                dataList.push({
+                    name: d.name,
+                    data: await this.evalData(d.data),
+                    childs: d.childs,
+                    parent: d.parent,
+                    mode: d.mode,
+                    value: this._data[d.name],
+                });
+            }
+        }
+
+        return dataList;
+    }
+
+    private appRequests(type?: string) {
+        const requests = {
+            dataField: {
+                actions: [
+                    {
+                        do: "update",
+                        to: "{{&TO_}}",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "data-fields",
+                    },
+                ],
+            },
+            save: {
+                confirm: "secure save?",
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "save",
+                    },
+                    {
+                        do: "set-panel",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        api: "form",
+                        method: "load-record",
+                        params: {
+                            page: 2,
+                        },
+                        doWhen: {
+                            __error_: false,
+                        },
+                    },
+                ],
+            },
+            delete: {
+                setFormValue: {
+                    __mode_: "3",
+                },
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: null,
+                        name: "{{&NAME_}}",
+                        method: "save",
+                    },
+                ],
+            },
+            list: {
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "list",
+                    },
+                ],
+            },
+            "load-page": {
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "load-page",
+                    },
+                ],
+            },
+            "edit-record": {
+                actions: [
+                    {
+                        do: "set-panel",
+                        api: "form",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "load-record",
+                    },
+                ],
+            },
+            "delete-record": {
+                confirm: "borrando!",
+                setFormValue: {
+                    __mode_: "3",
+                },
+                store: {
+                    __page_: "1",
+                },
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        to: null,
+                        id: null,
+                        name: "{{&NAME_}}",
+                        method: "save",
+                    },
+                    {
+                        do: "set-panel",
+                        api: "form",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "list",
+                        params: {
+                            page: null,
+                        },
+                    },
+                ],
+            },
+            filter: {
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "load-page",
+                    },
+                ],
+            },
+            new: {
+                actions: [
+                    {
+                        do: "set-panel",
+                        to: "{{&TO_}}",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "new-record",
+                    },
+                ],
+            },
+        };
+
+        return JSON.parse(this.store.eval(JSON.stringify(requests)));
+    }
+
     private _appRequests(type?: string) {
-        
         return {
             dataField: {
                 //form: this,
@@ -929,6 +966,4 @@ export class Form extends Element {
             },
         };
     }
-
-    
 }

@@ -61,7 +61,9 @@
                         "api": "form",
                         "name": "google_form",
                         "method": "new-record",
-                        "params": {}
+                        "params": {
+                            "__key_":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
+                        }
                     }
                 ]
             }

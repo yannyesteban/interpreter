@@ -20,6 +20,7 @@ export class Form extends Element {
         this.store = null;
         this.connection = "mysql";
         this.params = {};
+        this.keySecret = "Robin Williams";
     }
     setStore(store) {
         this.store = store;
@@ -32,17 +33,25 @@ export class Form extends Element {
         }
     }
     evalMethod(method) {
-        var _a;
+        var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
+            this.method = method;
+            if (this._info.methods && this._info.methods[method]) {
+                this._info = Object.assign(Object.assign({}, this._info), (_a = this._info) === null || _a === void 0 ? void 0 : _a.methods[method]);
+            }
             switch (method) {
+                case "list":
+                    const page = this.store.getSes("__page_") || "1";
+                    yield this.doGrid(Number(page));
+                    break;
                 case "new-record":
-                    yield this.newRecord();
+                    yield this.doForm(1);
                     break;
                 case "request":
-                    yield this.load();
+                    yield this.doForm(1);
                     break;
                 case "load-record":
-                    yield this.loadRecord(2);
+                    yield this.doForm(2);
                     break;
                 case "request2":
                     yield this.evalFields();
@@ -51,21 +60,17 @@ export class Form extends Element {
                     yield this.find();
                     break;
                 case "data-fields":
-                    yield this.doDataFields((_a = this.params) === null || _a === void 0 ? void 0 : _a.parent);
+                    yield this.doDataFields((_b = this.params) === null || _b === void 0 ? void 0 : _b.parent);
                     break;
                 case "save":
-                    yield this.transaction();
-                    break;
-                case "list":
-                    const page = this.store.getSes("__page_") || "1";
-                    yield this.list(Number(page));
+                    yield this.saveRecord();
                     break;
                 case "load-page":
                     yield this.loadPageInfo();
             }
         });
     }
-    list(page) {
+    doGrid(page) {
         return __awaiter(this, void 0, void 0, function* () {
             const fields = this._info.fields.map((field) => ({
                 name: field.name,
@@ -82,7 +87,7 @@ export class Form extends Element {
             if (list) {
                 info = yield this._pageData(list);
             }
-            const appRequests = this._appRequests("list");
+            const appRequests = this.appRequests();
             const dataSource = {
                 caption: "hello Mundo",
                 data: info.data,
@@ -92,7 +97,8 @@ export class Form extends Element {
                 records: +info.totalRecords,
                 maxPages: +list.maxPages || 6,
                 filter: list.filter,
-                nav: {
+                nav: this._info.nav,
+                nav1: {
                     elements: [
                         {
                             type: "button",
@@ -204,31 +210,25 @@ export class Form extends Element {
             };
         });
     }
-    newRecord() {
+    doForm(mode) {
         return __awaiter(this, void 0, void 0, function* () {
-            const db = (this.db = this.store.db.get(this.connection));
-            this.layout.data = {
-                __mode_: 1,
-            };
-            this._data = this.layout.data;
-            if (this.datafields) {
-                //this.layout.dataLists = await this.evalDataFields(this.datafields);
+            this.db = this.store.db.get(this.connection);
+            let data = this._info.defaultData || {};
+            const key = this.getRecordKey();
+            if (key) {
+                data = Object.assign(Object.assign({}, data), (yield this.getDBRecord(this._info.data, key)));
             }
-            const output = [];
-            if (this.dataLists) {
-                for (const d of this.dataLists) {
-                    output.push({
-                        name: d.name,
-                        data: yield this.evalData(d.data),
-                        childs: d.childs,
-                        parent: d.parent,
-                        mode: d.mode,
-                        //value: this.layout.data[d.name],
-                    });
-                }
-                this.layout.dataLists = output;
+            data = Object.assign(Object.assign(Object.assign({}, data), { __mode_: mode }), (this._info.fixedData || {}));
+            if (+mode != 1) {
+                data.__key_ = this.genToken(key);
             }
+            this._data = data;
+            if (this._info.nav) {
+                this.layout.elements.push(this._info.nav);
+            }
+            this.layout.dataLists = yield this.getDataList();
             this.layout.appRequests = this._appRequests("list");
+            this.layout.data = data;
             this.layout.elements.push({
                 component: "field",
                 label: "__mode_",
@@ -244,72 +244,8 @@ export class Form extends Element {
                 element: "form",
                 propertys: {
                     dataSource: this.layout,
-                    //f: await this.evalDataFields(this.datafields),
-                    output,
                 },
             });
-        });
-    }
-    load() {
-        return __awaiter(this, void 0, void 0, function* () {
-            const db = (this.db = this.store.db.get(this.connection));
-            let result = yield db.infoTable("cities");
-            let data = yield db.query(this.data);
-            this._data = data.rows[0];
-            this._data["state_id"] = 2040;
-            this._data["city_id"] = 130165;
-            this._data["__mode_"] = this.mode;
-            this._data["__key_"] = JSON.stringify(this.record);
-            this.layout.data = data.rows[0];
-            if (this.datafields) {
-                //this.layout.dataLists = await this.evalDataFields(this.datafields);
-            }
-            const output = [];
-            if (this.dataLists) {
-                for (const d of this.dataLists) {
-                    output.push({
-                        name: d.name,
-                        data: yield this.evalData(d.data),
-                        childs: d.childs,
-                        parent: d.parent,
-                        mode: d.mode,
-                        value: this._data[d.name],
-                    });
-                }
-                this.layout.dataLists = output;
-            }
-            this.layout.appRequests = this._appRequests("list");
-            this.layout.elements.push({
-                component: "field",
-                label: "__mode_",
-                input: "input",
-                name: "__mode_",
-            }, {
-                component: "field",
-                label: "__key_",
-                input: "input",
-                name: "__key_",
-            });
-            this.doResponse({
-                element: "form",
-                propertys: {
-                    dataSource: this.layout,
-                    //f: await this.evalDataFields(this.datafields),
-                    output,
-                },
-            });
-            /*
-            const f:any = {};
-            f.setComponent("form", {datasource:{}})
-            f.addMessage({
-                "className":"yes",
-                "type":"error",
-                "title":"hello",
-                "message":"welcome",
-                "okButton":"Aceptar"
-    
-            })
-            */
         });
     }
     addRequest(type, info) {
@@ -325,69 +261,6 @@ export class Form extends Element {
             element: "form",
             id: this.id,
         };
-    }
-    loadRecord(mode) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let key;
-            const keyToken = this.params.__key_ || this.store.getReq("__key_") || this.store.getSes("__key_");
-            if (keyToken) {
-                key = this.decodeToken(keyToken);
-            }
-            else {
-                key = this.params.__record_ || this.store.getReq("__record_") || this.store.getSes("__record_");
-            }
-            let query = this._info.recordData.sql;
-            let conditions = [];
-            let values = [];
-            const record = this._info.recordData.record.forEach((field) => {
-                conditions.push(field + "= ?");
-                values.push(key[field]);
-            });
-            query += " WHERE " + conditions.join(" AND ");
-            const db = (this.db = this.store.db.get(this.connection));
-            let data = yield db.query(query, values);
-            this._data = data.rows[0];
-            this._data["__mode_"] = mode;
-            this._data["__key_"] = keyToken;
-            this.layout.data = data.rows[0];
-            if (this.datafields) {
-                //this.layout.dataLists = await this.evalDataFields(this.datafields);
-            }
-            const output = [];
-            if (this.dataLists) {
-                for (const d of this.dataLists) {
-                    output.push({
-                        name: d.name,
-                        data: yield this.evalData(d.data),
-                        childs: d.childs,
-                        parent: d.parent,
-                        mode: d.mode,
-                        value: this._data[d.name],
-                    });
-                }
-                this.layout.dataLists = output;
-            }
-            this.layout.appRequests = this._appRequests("list");
-            this.layout.elements.push({
-                component: "field",
-                label: "__mode_",
-                input: "input",
-                name: "__mode_",
-            }, {
-                component: "field",
-                label: "__key_",
-                input: "input",
-                name: "__key_",
-            });
-            this.doResponse({
-                element: "form",
-                propertys: {
-                    dataSource: this.layout,
-                    //f: await this.evalDataFields(this.datafields),
-                    output,
-                },
-            });
-        });
     }
     getDataRecord(info) {
         var _a;
@@ -463,48 +336,49 @@ export class Form extends Element {
             });
         });
     }
-    transaction() {
+    saveRecord() {
         return __awaiter(this, void 0, void 0, function* () {
-            const token = this.store.getReq("__key_");
-            const jwt = new JWT({ key: "yanny" });
-            const key = jwt.verify(token);
-            const json = {
+            const key = this.getRecordKey();
+            const scheme = this._info.schemes[0];
+            const schemeName = "any";
+            const config = {
                 db: "mysql",
                 transaction: true,
-                schemes: [Object.assign(Object.assign({}, this.scheme), { name: this.name })],
-                dataset: [
-                    {
-                        scheme: this.name,
-                        mode: +this.store.getReq("__mode_"),
-                        record: key,
-                        data: this.store.getVReq(),
-                    },
-                ],
-                masterData: {},
+                schemes: [Object.assign(Object.assign({}, scheme), { name: schemeName })],
             };
-            const c = new DBTransaction(json, this.store.db);
-            const r = yield c.save(json.dataset, json.masterData);
+            const dataset = [
+                {
+                    scheme: schemeName,
+                    mode: +this.store.getReq("__mode_"),
+                    record: key,
+                    data: this.store.getVReq(),
+                },
+            ];
+            const transaction = new DBTransaction(config, this.store.db);
+            const result = yield transaction.save(dataset, {});
             let message = "";
             let keyToken = "";
-            if (r.error) {
-                message = r.error;
+            if (result.error) {
+                message = result.error;
                 this.store.setSes("__error_", true);
             }
             else {
                 this.store.setSes("__error_", false);
                 message = "record was saved correctly!";
-                if (r.recordId) {
-                    keyToken = this.genToken(r.recordId);
+                if (result.recordId) {
+                    keyToken = this.genToken(result.recordId);
                 }
             }
             this.store.setSes("__key_", keyToken);
             this.doResponse({
+                /*
                 element: "form",
                 propertys: {
                     //f: await this.evalDataFields(this.datafields),
                     output: "SAVE FORM",
                 },
-                log: Object.assign({}, r),
+                */
+                log: Object.assign({}, result),
                 message,
             });
         });
@@ -640,12 +514,199 @@ export class Form extends Element {
         });
     }
     genToken(payload) {
-        const jwt = new JWT({ key: "yanny" });
+        const jwt = new JWT({ key: this.keySecret });
         return jwt.generate(payload);
     }
     decodeToken(token) {
-        const jwt = new JWT({ key: "yanny" });
+        const jwt = new JWT({ key: this.keySecret });
         return jwt.verify(token);
+    }
+    getRecordKey() {
+        let key;
+        const keyToken = this.params.__key_ || this.store.getReq("__key_") || this.store.getSes("__key_");
+        if (keyToken) {
+            key = this.decodeToken(keyToken);
+        }
+        else {
+            key = this.params.__record_ || this.store.getReq("__record_") || this.store.getSes("__record_");
+        }
+        return key;
+    }
+    getDBRecord(info, key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let query = info.sql;
+            let conditions = [];
+            let values = [];
+            const record = this._info.data.record.forEach((field) => {
+                conditions.push(field + "= ?");
+                values.push(key[field]);
+            });
+            query += " WHERE " + conditions.join(" AND ");
+            const data = yield this.db.query(query, values);
+            return data.rows[0] || {};
+        });
+    }
+    getDataList() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const dataList = [];
+            if (this.dataLists) {
+                for (const d of this.dataLists) {
+                    dataList.push({
+                        name: d.name,
+                        data: yield this.evalData(d.data),
+                        childs: d.childs,
+                        parent: d.parent,
+                        mode: d.mode,
+                        value: this._data[d.name],
+                    });
+                }
+            }
+            return dataList;
+        });
+    }
+    appRequests(type) {
+        const requests = {
+            dataField: {
+                actions: [
+                    {
+                        do: "update",
+                        to: "{{&TO_}}",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "data-fields",
+                    },
+                ],
+            },
+            save: {
+                confirm: "secure save?",
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "save",
+                    },
+                    {
+                        do: "set-panel",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        api: "form",
+                        method: "load-record",
+                        params: {
+                            page: 2,
+                        },
+                        doWhen: {
+                            __error_: false,
+                        },
+                    },
+                ],
+            },
+            delete: {
+                setFormValue: {
+                    __mode_: "3",
+                },
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: null,
+                        name: "{{&NAME_}}",
+                        method: "save",
+                    },
+                ],
+            },
+            list: {
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "list",
+                    },
+                ],
+            },
+            "load-page": {
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "load-page",
+                    },
+                ],
+            },
+            "edit-record": {
+                actions: [
+                    {
+                        do: "set-panel",
+                        api: "form",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "load-record",
+                    },
+                ],
+            },
+            "delete-record": {
+                confirm: "borrando!",
+                setFormValue: {
+                    __mode_: "3",
+                },
+                store: {
+                    __page_: "1",
+                },
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        to: null,
+                        id: null,
+                        name: "{{&NAME_}}",
+                        method: "save",
+                    },
+                    {
+                        do: "set-panel",
+                        api: "form",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "list",
+                        params: {
+                            page: null,
+                        },
+                    },
+                ],
+            },
+            filter: {
+                actions: [
+                    {
+                        do: "update",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "load-page",
+                    },
+                ],
+            },
+            new: {
+                actions: [
+                    {
+                        do: "set-panel",
+                        to: "{{&TO_}}",
+                        api: "form",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        method: "new-record",
+                    },
+                ],
+            },
+        };
+        return JSON.parse(this.store.eval(JSON.stringify(requests)));
     }
     _appRequests(type) {
         return {

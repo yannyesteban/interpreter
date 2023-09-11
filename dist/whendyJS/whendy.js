@@ -63,7 +63,11 @@ export class Whendy {
             const method = info.method;
             const params = info.params || {};
             this.store.setExp("ID_", id);
+            this.store.setExp("DO_", info.do);
+            this.store.setExp("TO_", info.to);
             this.store.setExp("API_", api);
+            this.store.setExp("NAME_", name);
+            this.store.setExp("METHOD_", method);
             this.store.setExp("PARAMS_", params);
             //this.store.LoadExp(info.params)
             const cls = yield this.classes.getClass(api);

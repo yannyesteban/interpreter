@@ -107,6 +107,11 @@ export class Sevian extends HTMLElement {
 
     private async whenValid(name: string) {
         return new Promise(async (resolve, reject) => {
+            if(!name){
+
+                reject()
+                return;
+            }
             const element = this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase())?.wc || name;
 
             console.log(`%c Element: %c${element}, %s`, "color:yellow", "color:aqua", name);
@@ -159,6 +164,8 @@ export class Sevian extends HTMLElement {
                 panel.text("");
             }
             panel.append(e);
+        }).catch(error=>{
+            console.log("element not found");
         });
     }
 
@@ -171,6 +178,8 @@ export class Sevian extends HTMLElement {
                     e.prop(info.propertys);
                 }
             }
+        }).catch(error=>{
+            console.log("element not found");
         });
     }
 

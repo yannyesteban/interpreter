@@ -3,9 +3,10 @@
         "actions": [
             {
                 "do": "update",
+                "to": "{{&TO_}}",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "method": "data-fields"
             }
         ]
@@ -16,19 +17,22 @@
             {
                 "do": "update",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "method": "save"
             },
             {
                 "do": "set-panel",
-                "to": "p2",
-                "id": "google",
-                "name": "google_form",
+                "to": "{{&TO_}}",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "api": "form",
                 "method": "load-record",
                 "params": {
                     "page": 2
+                },
+                "doWhen": {
+                    "__error_": false
                 }
             }
         ]
@@ -41,8 +45,8 @@
             {
                 "do": "update",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "id": null,
+                "name": "{{&NAME_}}",
                 "method": "save"
             }
         ]
@@ -52,8 +56,8 @@
             {
                 "do": "update",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "method": "list"
             }
         ]
@@ -63,8 +67,8 @@
             {
                 "do": "update",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "method": "load-page"
             }
         ]
@@ -74,8 +78,9 @@
             {
                 "do": "set-panel",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "to": "{{&TO_}}",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "method": "load-record"
             }
         ]
@@ -92,16 +97,21 @@
             {
                 "do": "update",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "to": null,
+                "id": null,
+                "name": "{{&NAME_}}",
                 "method": "save"
             },
             {
                 "do": "set-panel",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
-                "method": "list"
+                "to": "{{&TO_}}",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
+                "method": "list",
+                "params": {
+                    "page": null
+                }
             }
         ]
     },
@@ -110,8 +120,8 @@
             {
                 "do": "update",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "method": "load-page"
             }
         ]
@@ -120,10 +130,10 @@
         "actions": [
             {
                 "do": "set-panel",
-                "to": "p2",
+                "to": "{{&TO_}}",
                 "api": "form",
-                "id": "google",
-                "name": "google_form",
+                "id": "{{&ID_}}",
+                "name": "{{&NAME_}}",
                 "method": "new-record"
             }
         ]
