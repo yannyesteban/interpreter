@@ -1,5 +1,48 @@
 import { Q as $, QElement } from "../Q.js";
 
+class NavButton extends HTMLElement {
+    static get observedAttributes() {
+        return ["type"];
+    }
+    constructor() {
+        super();
+    }
+
+    public connectedCallback() {}
+
+    public disconnectedCallback() {}
+
+    public attributeChangedCallback(name, oldVal, newVal) {}
+
+    set type(value) {
+        if (Boolean(value)) {
+            this.setAttribute("type", value);
+        } else {
+            this.removeAttribute("type");
+        }
+    }
+
+    get type() {
+        return this.getAttribute("type");
+    }
+
+    set request(value) {
+        if (Boolean(value)) {
+            this.setAttribute("request", value);
+        } else {
+            this.removeAttribute("request");
+        }
+    }
+
+    get request() {
+        return this.getAttribute("request");
+    }
+
+    set dataSource(source) {}
+}
+
+customElements.define("ss-nav-button", NavButton);
+
 class Nav extends HTMLElement {
     static get observedAttributes() {
         return ["type"];
@@ -9,12 +52,21 @@ class Nav extends HTMLElement {
 
         const template = document.createElement("template");
 
-        template.innerHTML = `
+        template.innerHTML = /*html*/`
 			<style>
 			:host {
-				display:inline-block;
+				display:flex;
 
 			}
+            ::slotted(ss-nav-button){
+                padding:2px;
+                border:1px solid gray;
+                font-size:1em;
+                line-height:1em;
+                vertical-align:middle;
+               
+                
+            }
 			</style><slot></slot>`;
 
         this.attachShadow({ mode: "open" });
@@ -28,10 +80,12 @@ class Nav extends HTMLElement {
         });
     }
 
-    public connectedCallback() {
-        $(this).on("click", (event) => {
-            const target: HTMLElement = event.target;
-            if (target.dataset.action) {
+    handleEvent(event) {
+        if (event.type == "click") {
+            const target: HTMLElement = event.target.closest("button[data-nav-button]");
+
+
+            if (target?.dataset.action) {
                 const customEvent = new CustomEvent("do-action", {
                     detail: {
                         action: target.dataset.action,
@@ -41,10 +95,25 @@ class Nav extends HTMLElement {
                 });
                 this.dispatchEvent(customEvent);
             }
-        });
+            if (target?.dataset.request) {
+                const customEvent = new CustomEvent("do-request", {
+                    detail: {
+                        request: target.dataset.request,
+                    },
+                    cancelable: true,
+                    bubbles: true,
+                });
+                this.dispatchEvent(customEvent);
+            }
+        }
+    }
+    public connectedCallback() {
+        $(this).on("click", this);
     }
 
-    public disconnectedCallback() {}
+    public disconnectedCallback() {
+        $(this).off("click", this);
+    }
 
     public attributeChangedCallback(name, oldVal, newVal) {}
 
@@ -69,14 +138,20 @@ class Nav extends HTMLElement {
     }
 
     createElement(info) {
-        switch (info.type) {
-            case "button":
-                $(this)
-                    .create("button")
-                    .attr("type", "button")
-                    .addClass(info.className)
-                    .ds("action", info.action)
-                    .html(info.label);
+        const button = $(this)
+            .create("button")
+            .attr("type", "button")
+            .addClass(info.className)
+            .ds("navButton", "")
+            .ds("action", info.action || "")
+            .html(info.label);
+        if (info.events) {
+            for (const [event, fn] of Object.entries(info.events)) {
+                button.on(event, $.bind(fn, this.parentElement));
+            }
+        }
+        if (info.request) {
+            button.ds("request", JSON.stringify(info.request));
         }
     }
 }

@@ -364,6 +364,9 @@ class Grid extends HTMLElement {
             console.log(request);
             this.send(request);
         });
+        this.addEventListener("do-request", (event) => {
+            this.send(JSON.parse(event.detail.request));
+        });
     }
     disconnectedCallback() { }
     attributeChangedCallback(name, oldVal, newVal) { }
@@ -700,6 +703,9 @@ class Grid extends HTMLElement {
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__mode_").value(mode);
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__key_").value(key);
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__page_").value(this._page);
+    }
+    about() {
+        alert("grid");
     }
 }
 //customElements.define("ss-win-header", WHWinHeader);

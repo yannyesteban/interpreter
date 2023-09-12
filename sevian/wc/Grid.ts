@@ -472,6 +472,11 @@ class Grid extends HTMLElement {
 
             this.send(request);
         });
+
+        this.addEventListener("do-request", (event: CustomEvent) => {
+            this.send(JSON.parse(event.detail.request));
+            
+        });
     }
 
     public disconnectedCallback() {}
@@ -861,6 +866,10 @@ class Grid extends HTMLElement {
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__mode_").value(mode);
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__key_").value(key);
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__page_").value(this._page);
+    }
+
+    about(){
+        alert("grid")
     }
 }
 

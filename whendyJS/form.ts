@@ -28,9 +28,9 @@ export class Form extends Element {
     public setPanel: string;
     public appendTo: string;
 
-    templateFile: string;
+    private templateFile: string;
 
-    response: object = {};
+    private response: object = {};
 
     store: Store = null;
 
@@ -42,21 +42,21 @@ export class Form extends Element {
     private fields;
     private layout: any;
 
-    data;
-    datafields;
-    dataFetch;
-    dataLists;
+    private data;
+    private datafields;
+    private dataFetch;
+    private dataLists;
 
-    _data;
-    params: any = {};
+    private _data;
+    private params: any = {};
 
-    record;
-    mode;
-    scheme;
+    private record;
+    private mode;
+    private scheme;
     private keyToken;
-    dataRecord;
-    recordKey;
-    to;
+    private dataRecord;
+    private recordKey;
+    private to;
 
     keySecret = "Robin Williams";
     setStore(store: Store) {
@@ -125,7 +125,7 @@ export class Form extends Element {
         }
 
         let info;
-        let totalRecords = null;
+       
 
         if (list) {
             info = await this._pageData(list);
@@ -134,7 +134,7 @@ export class Form extends Element {
         const appRequests = this.appRequests();
 
         const dataSource = {
-            caption: "hello Mundo",
+            caption: this._info.label ,
             data: info.data,
             fields,
             limit: +list.limit,
@@ -143,42 +143,6 @@ export class Form extends Element {
             maxPages: +list.maxPages || 6,
             filter: list.filter,
             nav: this._info.nav,
-            nav1: {
-                elements: [
-                    {
-                        type: "button",
-                        label: "+",
-                        className: "",
-                        action: "new",
-                        request: {},
-                        click: "",
-                    },
-                    {
-                        type: "button",
-                        label: "save",
-                        className: "",
-                        action: "save",
-                        request: {},
-                        click: "",
-                    },
-                    {
-                        type: "button",
-                        label: "Delete Record",
-                        className: "",
-                        action: "delete-record",
-                        request: {},
-                        click: "",
-                    },
-                    {
-                        type: "button",
-                        label: "Edit",
-                        className: "",
-                        action: "edit-record",
-                        request: {},
-                        click: "",
-                    },
-                ],
-            },
             appRequests,
         };
 
@@ -271,8 +235,14 @@ export class Form extends Element {
     }
 
     private async doForm(mode) {
+        const page = this.params["page"] || this.store.getReq("__page_") || 1;
+        const filter = this.params["filter"] || this.store.getReq("__filter_");
+
         this.db = this.store.db.get<DBSql>(this.connection);
         let data = this._info.defaultData || {};
+
+        data.__page_ = page;
+        data.__filter_ = filter;
 
         const key = this.getRecordKey();
 
@@ -292,22 +262,10 @@ export class Form extends Element {
         }
 
         this.layout.dataLists = await this.getDataList();
-        this.layout.appRequests = this._appRequests("list");
+        this.layout.appRequests = this.appRequests("list");
         this.layout.data = data;
-        this.layout.elements.push(
-            {
-                component: "field",
-                label: "__mode_",
-                input: "input",
-                name: "__mode_",
-            },
-            {
-                component: "field",
-                label: "__key_",
-                input: "input",
-                name: "__key_",
-            },
-        );
+        this.configInputs().forEach((item) => this.layout.elements.push(item));
+
         this.doResponse({
             element: "form",
             propertys: {
@@ -316,21 +274,7 @@ export class Form extends Element {
         });
     }
 
-    private addRequest(type, info) {
-        /*
-        
-
-        this.addRequest("message",{caption:"hello", text:"error"})
-        this.addRequest(request.do,{caption:"hello", text:"error"})
-
-        */
-
-        return {
-            type: "set-panel",
-            element: "form",
-            id: this.id,
-        };
-    }
+    addRequest(type, info) {}
 
     private async getDataRecord(info) {
         //info = JSON.parse(this.store.evalSubData(JSON.stringify(info), this._data));
@@ -387,7 +331,7 @@ export class Form extends Element {
             this.layout.dataLists = output;
         }
 
-        this.layout.appRequests = this._appRequests("list");
+        this.layout.appRequests = this.appRequests("list");
 
         this.layout.elements.push(
             {
@@ -810,160 +754,32 @@ export class Form extends Element {
         return JSON.parse(this.store.eval(JSON.stringify(requests)));
     }
 
-    private _appRequests(type?: string) {
-        return {
-            dataField: {
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        to: this.to,
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "data-fields",
-                    },
-                ],
+    private configInputs() {
+        return [
+            {
+                component: "field",
+                label: "__mode_",
+                input: "input",
+                name: "__mode_",
             },
-            save: {
-                confirm: "secure save?",
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                    {
-                        do: "set-panel",
-                        to: this.to,
-                        id: this.id,
-                        name: this.name,
-                        api: "form",
-                        method: "load-record",
-                        params: {
-                            page: 2,
-                        },
-                        doWhen: {
-                            __error_: false,
-                        },
-                    },
-                ],
+            {
+                component: "field",
+                label: "__key_",
+                input: "input",
+                name: "__key_",
             },
-            delete: {
-                //form: this,
-                setFormValue: {
-                    __mode_: "3",
-                },
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: null,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
+            {
+                component: "field",
+                label: "__filter_",
+                input: "input",
+                name: "__filter_",
             },
-            list: {
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                    },
-                ],
+            {
+                component: "field",
+                label: "__page_",
+                input: "input",
+                name: "__page_",
             },
-
-            "load-page": {
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "load-page",
-                    },
-                ],
-            },
-            "edit-record": {
-                //form: this,
-                actions: [
-                    {
-                        do: "set-panel",
-                        api: "form",
-                        to: this.to,
-                        id: this.id,
-                        name: this.name,
-                        method: "load-record",
-                    },
-                ],
-            },
-            "delete-record": {
-                //form: this,
-                confirm: "borrando!",
-                setFormValue: {
-                    __mode_: "3",
-                },
-                store: {
-                    __page_: "1",
-                },
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        to: null,
-                        id: null, //this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                    {
-                        do: "set-panel",
-                        api: "form",
-
-                        to: this.to,
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                        params: {
-                            page: null,
-                        },
-                    },
-                ],
-            },
-            filter: {
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        panel: this.panel,
-                        id: this.id,
-                        name: this.name,
-                        method: "load-page",
-                    },
-                ],
-            },
-            new: {
-                //form: this,
-                //confirm:"x?"+this.to,
-                actions: [
-                    {
-                        do: "set-panel",
-                        to: this.to,
-                        api: "form",
-
-                        id: this.id,
-                        name: this.name,
-                        method: "new-record",
-                    },
-                ],
-            },
-        };
+        ];
     }
 }

@@ -307,10 +307,18 @@
                 "component": "nav",
                 "elements": [
                     {
+                        "type": "button",
+                        "label": "<span class='material-symbols-outlined'>add</span><span>New</span>",
+                        "className": "",
+                        "action": "new",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
                         "component": "button",
                         "label": "Save Record",
                         "className": "",
-                        "action": "new",
+                        "action": "save",
                         "request": {},
                         "click": ""
                     },
@@ -347,7 +355,7 @@
                 "elements": [
                     {
                         "type": "button",
-                        "label": "+",
+                        "label": "<span class='material-symbols-outlined'>add</span><span>New</span>",
                         "className": "",
                         "action": "new",
                         "request": {},
@@ -355,16 +363,18 @@
                     },
                     {
                         "type": "button",
-                        "label": "save",
-                        "className": "",
-                        "action": "save",
-                        "request": {},
+                        "label": "captive_portal",
+                        "className": "material-symbols-outlined",
+                        "actionn": "request",
+                        "request": {
+                           "confirm":"hello"
+                        },
                         "click": ""
                     },
                     {
                         "type": "button",
-                        "label": "Delete Record",
-                        "className": "",
+                        "label": "Delete",
+                        "className": "material-symbols-outlined",
                         "action": "delete-record",
                         "request": {},
                         "click": ""
@@ -372,7 +382,7 @@
                     {
                         "type": "button",
                         "label": "Edit",
-                        "className": "",
+                        "className": "material-symbols-outlined",
                         "action": "edit-record",
                         "request": {},
                         "click": ""

@@ -83,13 +83,12 @@ export class Form extends Element {
                 list.page = this.store.getReq("__page_") || this.store.getSes("__page_");
             }
             let info;
-            let totalRecords = null;
             if (list) {
                 info = yield this._pageData(list);
             }
             const appRequests = this.appRequests();
             const dataSource = {
-                caption: "hello Mundo",
+                caption: this._info.label,
                 data: info.data,
                 fields,
                 limit: +list.limit,
@@ -98,42 +97,6 @@ export class Form extends Element {
                 maxPages: +list.maxPages || 6,
                 filter: list.filter,
                 nav: this._info.nav,
-                nav1: {
-                    elements: [
-                        {
-                            type: "button",
-                            label: "+",
-                            className: "",
-                            action: "new",
-                            request: {},
-                            click: "",
-                        },
-                        {
-                            type: "button",
-                            label: "save",
-                            className: "",
-                            action: "save",
-                            request: {},
-                            click: "",
-                        },
-                        {
-                            type: "button",
-                            label: "Delete Record",
-                            className: "",
-                            action: "delete-record",
-                            request: {},
-                            click: "",
-                        },
-                        {
-                            type: "button",
-                            label: "Edit",
-                            className: "",
-                            action: "edit-record",
-                            request: {},
-                            click: "",
-                        },
-                    ],
-                },
                 appRequests,
             };
             this.doResponse({
@@ -212,8 +175,12 @@ export class Form extends Element {
     }
     doForm(mode) {
         return __awaiter(this, void 0, void 0, function* () {
+            const page = this.params["page"] || this.store.getReq("__page_") || 1;
+            const filter = this.params["filter"] || this.store.getReq("__filter_");
             this.db = this.store.db.get(this.connection);
             let data = this._info.defaultData || {};
+            data.__page_ = page;
+            data.__filter_ = filter;
             const key = this.getRecordKey();
             if (key) {
                 data = Object.assign(Object.assign({}, data), (yield this.getDBRecord(this._info.data, key)));
@@ -227,19 +194,9 @@ export class Form extends Element {
                 this.layout.elements.push(this._info.nav);
             }
             this.layout.dataLists = yield this.getDataList();
-            this.layout.appRequests = this._appRequests("list");
+            this.layout.appRequests = this.appRequests("list");
             this.layout.data = data;
-            this.layout.elements.push({
-                component: "field",
-                label: "__mode_",
-                input: "input",
-                name: "__mode_",
-            }, {
-                component: "field",
-                label: "__key_",
-                input: "input",
-                name: "__key_",
-            });
+            this.configInputs().forEach((item) => this.layout.elements.push(item));
             this.doResponse({
                 element: "form",
                 propertys: {
@@ -248,20 +205,7 @@ export class Form extends Element {
             });
         });
     }
-    addRequest(type, info) {
-        /*
-        
-
-        this.addRequest("message",{caption:"hello", text:"error"})
-        this.addRequest(request.do,{caption:"hello", text:"error"})
-
-        */
-        return {
-            type: "set-panel",
-            element: "form",
-            id: this.id,
-        };
-    }
+    addRequest(type, info) { }
     getDataRecord(info) {
         var _a;
         return __awaiter(this, void 0, void 0, function* () {
@@ -309,7 +253,7 @@ export class Form extends Element {
                 }
                 this.layout.dataLists = output;
             }
-            this.layout.appRequests = this._appRequests("list");
+            this.layout.appRequests = this.appRequests("list");
             this.layout.elements.push({
                 component: "field",
                 label: "__mode_",
@@ -708,158 +652,33 @@ export class Form extends Element {
         };
         return JSON.parse(this.store.eval(JSON.stringify(requests)));
     }
-    _appRequests(type) {
-        return {
-            dataField: {
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        to: this.to,
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "data-fields",
-                    },
-                ],
+    configInputs() {
+        return [
+            {
+                component: "field",
+                label: "__mode_",
+                input: "input",
+                name: "__mode_",
             },
-            save: {
-                confirm: "secure save?",
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "save",
-                    },
-                    {
-                        do: "set-panel",
-                        to: this.to,
-                        id: this.id,
-                        name: this.name,
-                        api: "form",
-                        method: "load-record",
-                        params: {
-                            page: 2,
-                        },
-                        doWhen: {
-                            __error_: false,
-                        },
-                    },
-                ],
+            {
+                component: "field",
+                label: "__key_",
+                input: "input",
+                name: "__key_",
             },
-            delete: {
-                //form: this,
-                setFormValue: {
-                    __mode_: "3",
-                },
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: null,
-                        name: this.name,
-                        method: "save",
-                    },
-                ],
+            {
+                component: "field",
+                label: "__filter_",
+                input: "input",
+                name: "__filter_",
             },
-            list: {
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                    },
-                ],
+            {
+                component: "field",
+                label: "__page_",
+                input: "input",
+                name: "__page_",
             },
-            "load-page": {
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "load-page",
-                    },
-                ],
-            },
-            "edit-record": {
-                //form: this,
-                actions: [
-                    {
-                        do: "set-panel",
-                        api: "form",
-                        to: this.to,
-                        id: this.id,
-                        name: this.name,
-                        method: "load-record",
-                    },
-                ],
-            },
-            "delete-record": {
-                //form: this,
-                confirm: "borrando!",
-                setFormValue: {
-                    __mode_: "3",
-                },
-                store: {
-                    __page_: "1",
-                },
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        to: null,
-                        id: null,
-                        name: this.name,
-                        method: "save",
-                    },
-                    {
-                        do: "set-panel",
-                        api: "form",
-                        to: this.to,
-                        id: this.id,
-                        name: this.name,
-                        method: "list",
-                        params: {
-                            page: null,
-                        },
-                    },
-                ],
-            },
-            filter: {
-                //form: this,
-                actions: [
-                    {
-                        do: "update",
-                        api: "form",
-                        panel: this.panel,
-                        id: this.id,
-                        name: this.name,
-                        method: "load-page",
-                    },
-                ],
-            },
-            new: {
-                //form: this,
-                //confirm:"x?"+this.to,
-                actions: [
-                    {
-                        do: "set-panel",
-                        to: this.to,
-                        api: "form",
-                        id: this.id,
-                        name: this.name,
-                        method: "new-record",
-                    },
-                ],
-            },
-        };
+        ];
     }
 }
 //# sourceMappingURL=form.js.map
