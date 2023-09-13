@@ -1,3 +1,4 @@
+import * as Eval from "./../Eval.js";
 import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 
@@ -16,6 +17,8 @@ export class Sevian extends HTMLElement {
     constructor() {
         super();
 
+       
+        
         const template = document.createElement("template");
 
         template.innerHTML = `
@@ -313,7 +316,27 @@ export class Sevian extends HTMLElement {
         popup.dataSource = message
         popup.mode = "open"
     }
-    send(request: AppRequest) {
+
+    evalExp(obj, data){
+
+        const str = Eval.evalAll(JSON.stringify(obj), {...this.getStore(), ...data });
+
+        if(str){
+            return JSON.parse(str);
+        }
+
+        return obj;
+        
+
+
+    }
+
+    send(request: AppRequest, masterData?: any) {
+
+        if(masterData){
+            request = this.evalExp(request, masterData);
+        }
+
         if (request.validate && typeof request.validate === "function" && !request.validate()) {
             return;
         } else if (request.validate && typeof request.validate === "string") {

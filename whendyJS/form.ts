@@ -665,11 +665,15 @@ export class Form extends Element {
             list: {
                 actions: [
                     {
-                        do: "update",
+                        do: "set-panel",
                         api: "form",
+                        to: "{{&TO_}}",
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "list",
+                        params:{
+                            page:1
+                        }
                     },
                 ],
             },

@@ -62,7 +62,7 @@
                         "name": "google_form",
                         "method": "new-record",
                         "params": {
-                            "__key_":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
+                            "__key__":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
                         }
                     }
                 ]
@@ -74,13 +74,17 @@
                 "_confirm": "sure?",
                 "actions": [
                     {
+                        
                         "id": "unit3",
-                        "to": "p2",
                         "do": "set-panel",
+                        "to": "p2",
+                        
                         "api": "form",
-                        "name": "two",
-                        "method": "request",
-                        "params": {}
+                        "name": "google_form",
+                        "method": "new-record",
+                        "params": {
+                            "__key_":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
+                        }
                     }
                 ]
             }

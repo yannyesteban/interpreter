@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Document</title>
+    </head>
+    <body>
+        <script>
+
+            function EvalExp(regex, string, data){
+                return string.replace(regex, (str, index, p2, offset, s) => {
+                    let levels = index.split(".");
+                    let tempData = data;
+                    let valid = true;
+
+                    levels.forEach((key) => {
+                        if (valid && tempData[key] !== undefined && tempData[key] === null) {
+                            tempData = "";
+                            valid = false;
+                        } else if (valid && tempData[key] !== undefined) {
+                            tempData = tempData[key];
+                            valid = true;
+                        } else {
+                            valid = false;
+                        }
+                    });
+
+                    if (valid) {
+                        if (Number.isNaN(+tempData)) {
+                            return `"${tempData}"`;
+                        }
+
+                        return tempData;
+                    }
+                    return str;
+                });
+
+                return string;
+            }
+
+
+            function evaluate(string, data) {
+               
+
+                const regex = /\{=([a-z0-9-_\.]+)\}/gi;
+
+                return EvalExp(regex, string, data); 
+                
+            }
+
+            function evalJson(string, data) {
+                
+
+                const regex = /"\{#([a-z0-9-_\.\s]+)\}"/gi;
+
+                
+                return EvalExp(regex, string, data);
+            }
+
+            const data = {
+                "a b": "yanny",
+                b: "esteban",
+                c: {
+                    s: "45",
+                },
+            };
+
+            let str = "";
+
+            str = '"{#c.s}" d:"{#b}"';
+
+            console.log(evalExp(str, data));
+        </script>
+    </body>
+</html>

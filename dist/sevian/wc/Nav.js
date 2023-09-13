@@ -1,4 +1,41 @@
 import { Q as $ } from "../Q.js";
+class FButton extends HTMLButtonElement {
+    static get observedAttributes() {
+        return ["type"];
+    }
+    constructor() {
+        super();
+    }
+    connectedCallback() {
+        this.innerHTML = "Esteban";
+    }
+    disconnectedCallback() { }
+    attributeChangedCallback(name, oldVal, newVal) { }
+    set type1(value) {
+        if (Boolean(value)) {
+            this.setAttribute("type", value);
+        }
+        else {
+            this.removeAttribute("type");
+        }
+    }
+    get type1() {
+        return this.getAttribute("type");
+    }
+    set request(value) {
+        if (Boolean(value)) {
+            this.setAttribute("request", value);
+        }
+        else {
+            this.removeAttribute("request");
+        }
+    }
+    get request() {
+        return this.getAttribute("request");
+    }
+    set dataSource(source) { }
+}
+customElements.define("f-button", FButton, { extends: "button" });
 class NavButton extends HTMLElement {
     static get observedAttributes() {
         return ["type"];
@@ -36,10 +73,11 @@ class NavButton extends HTMLElement {
 customElements.define("ss-nav-button", NavButton);
 class Nav extends HTMLElement {
     static get observedAttributes() {
-        return ["type"];
+        return ["context"];
     }
     constructor() {
         super();
+        this._internals = this.attachInternals();
         const template = document.createElement("template");
         template.innerHTML = /*html*/ `
 			<style>
@@ -65,9 +103,14 @@ class Nav extends HTMLElement {
         });
     }
     handleEvent(event) {
+        var _a;
         if (event.type == "click") {
             const target = event.target.closest("button[data-nav-button]");
             if (target === null || target === void 0 ? void 0 : target.dataset.action) {
+                if ((_a = this.context) === null || _a === void 0 ? void 0 : _a.sendRequest) {
+                    this._context.sendRequest(target.dataset.action);
+                    return;
+                }
                 const customEvent = new CustomEvent("do-action", {
                     detail: {
                         action: target.dataset.action,
@@ -95,7 +138,18 @@ class Nav extends HTMLElement {
     disconnectedCallback() {
         $(this).off("click", this);
     }
-    attributeChangedCallback(name, oldVal, newVal) { }
+    attributeChangedCallback(name, oldValue, newValue) {
+        switch (name) {
+            case "context":
+                if (newValue) {
+                    this._context = this.closest(newValue);
+                }
+                break;
+        }
+    }
+    get form() {
+        return this._internals.form;
+    }
     set type(value) {
         if (Boolean(value)) {
             this.setAttribute("type", value);
@@ -107,7 +161,22 @@ class Nav extends HTMLElement {
     get type() {
         return this.getAttribute("type");
     }
+    set context(value) {
+        if (typeof value === "string") {
+            this.setAttribute("context", value);
+        }
+        else if (value instanceof HTMLElement) {
+            this._context = value;
+            this.setAttribute("context", "");
+        }
+    }
+    get context() {
+        return this._context || this;
+    }
     set dataSource(source) {
+        if (source.context) {
+            this.context = source.context;
+        }
         if (source.elements) {
             for (const item of source.elements) {
                 this.createElement(item);
@@ -124,7 +193,7 @@ class Nav extends HTMLElement {
             .html(info.label);
         if (info.events) {
             for (const [event, fn] of Object.entries(info.events)) {
-                button.on(event, $.bind(fn, this.parentElement));
+                button.on(event, $.bind(fn, this.context));
             }
         }
         if (info.request) {
@@ -132,5 +201,6 @@ class Nav extends HTMLElement {
         }
     }
 }
+Nav.formAssociated = true;
 customElements.define("ss-nav", Nav);
 //# sourceMappingURL=Nav.js.map

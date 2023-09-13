@@ -462,6 +462,7 @@ class GTForm extends HTMLElement {
         return button.get();
     }
     _createNav(info) {
+        info.context = this;
         const nav = $.create("ss-nav").prop("dataSource", info);
         /*
         console.log(info)

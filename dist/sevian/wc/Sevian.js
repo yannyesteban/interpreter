@@ -7,6 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
+import * as Eval from "./../Eval.js";
 import { loadScript } from "./../LoadScript.js";
 import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
@@ -279,8 +280,18 @@ export class Sevian extends HTMLElement {
         popup.dataSource = message;
         popup.mode = "open";
     }
-    send(request) {
+    evalExp(obj, data) {
+        const str = Eval.evalAll(JSON.stringify(obj), Object.assign(Object.assign({}, this.getStore()), data));
+        if (str) {
+            return JSON.parse(str);
+        }
+        return obj;
+    }
+    send(request, masterData) {
         var _a;
+        if (masterData) {
+            request = this.evalExp(request, masterData);
+        }
         if (request.validate && typeof request.validate === "function" && !request.validate()) {
             return;
         }

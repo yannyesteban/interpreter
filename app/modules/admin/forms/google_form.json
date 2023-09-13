@@ -1,5 +1,5 @@
 {
-    "label": "User 1.1",
+    "label": "Administrador de Usuarios",
     "fields": [
         {
             "component": "field",
@@ -389,6 +389,54 @@
                     }
                 ]
             }
+        },
+        "load-record":{
+            "nav":{
+                "component": "nav",
+                "elements": [
+                    {
+                        "type": "button",
+                        "label": "<span class='material-symbols-outlined'>add</span><span>New</span>",
+                        "className": "",
+                        "action": "new",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "component": "button",
+                        "label": "Save Record",
+                        "className": "",
+                        "action": "save",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "component": "button",
+                        "label": "save",
+                        "className": "",
+                        "action": "save",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "component": "button",
+                        "label": "Delete",
+                        "className": "",
+                        "action": "delete",
+                        "request": {},
+                        "click": ""
+                    },
+                    {
+                        "component": "button",
+                        "label": "Todos",
+                        "className": "",
+                        "action": "list",
+                        "request": {},
+                        "click": ""
+                    }
+                ]
+            }
+            
         }
     },
 

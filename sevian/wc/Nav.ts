@@ -1,5 +1,50 @@
 import { Q as $, QElement } from "../Q.js";
 
+class FButton extends HTMLButtonElement {
+    static get observedAttributes() {
+        return ["type"];
+    }
+    constructor() {
+        super();
+    }
+
+    public connectedCallback() {
+        this.innerHTML = "Esteban";
+    }
+
+    public disconnectedCallback() {}
+
+    public attributeChangedCallback(name, oldVal, newVal) {}
+
+    set type1(value) {
+        if (Boolean(value)) {
+            this.setAttribute("type", value);
+        } else {
+            this.removeAttribute("type");
+        }
+    }
+
+    get type1() {
+        return this.getAttribute("type");
+    }
+
+    set request(value) {
+        if (Boolean(value)) {
+            this.setAttribute("request", value);
+        } else {
+            this.removeAttribute("request");
+        }
+    }
+
+    get request() {
+        return this.getAttribute("request");
+    }
+
+    set dataSource(source) {}
+}
+
+customElements.define("f-button", FButton, { extends: "button" });
+
 class NavButton extends HTMLElement {
     static get observedAttributes() {
         return ["type"];
@@ -44,15 +89,18 @@ class NavButton extends HTMLElement {
 customElements.define("ss-nav-button", NavButton);
 
 class Nav extends HTMLElement {
+    static formAssociated = true;
+    private _internals: ElementInternals;
+    private _context: any;
     static get observedAttributes() {
-        return ["type"];
+        return ["context"];
     }
     constructor() {
         super();
-
+        this._internals = this.attachInternals();
         const template = document.createElement("template");
 
-        template.innerHTML = /*html*/`
+        template.innerHTML = /*html*/ `
 			<style>
 			:host {
 				display:flex;
@@ -84,8 +132,12 @@ class Nav extends HTMLElement {
         if (event.type == "click") {
             const target: HTMLElement = event.target.closest("button[data-nav-button]");
 
-
             if (target?.dataset.action) {
+                if (this.context?.sendRequest) {
+                    this._context.sendRequest(target.dataset.action);
+                    return;
+                }
+
                 const customEvent = new CustomEvent("do-action", {
                     detail: {
                         action: target.dataset.action,
@@ -107,6 +159,7 @@ class Nav extends HTMLElement {
             }
         }
     }
+
     public connectedCallback() {
         $(this).on("click", this);
     }
@@ -115,7 +168,20 @@ class Nav extends HTMLElement {
         $(this).off("click", this);
     }
 
-    public attributeChangedCallback(name, oldVal, newVal) {}
+    public attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        switch (name) {
+            case "context":
+                if (newValue) {
+                    this._context = this.closest(newValue);
+                }
+
+                break;
+        }
+    }
+
+    get form() {
+        return this._internals.form;
+    }
 
     set type(value) {
         if (Boolean(value)) {
@@ -129,7 +195,23 @@ class Nav extends HTMLElement {
         return this.getAttribute("type");
     }
 
+    set context(value: any) {
+        if (typeof value === "string") {
+            this.setAttribute("context", value);
+        } else if (value instanceof HTMLElement) {
+            this._context = value;
+            this.setAttribute("context", "");
+        }
+    }
+
+    get context() {
+        return this._context || this;
+    }
+
     set dataSource(source) {
+        if (source.context) {
+            this.context = source.context;
+        }
         if (source.elements) {
             for (const item of source.elements) {
                 this.createElement(item);
@@ -147,7 +229,7 @@ class Nav extends HTMLElement {
             .html(info.label);
         if (info.events) {
             for (const [event, fn] of Object.entries(info.events)) {
-                button.on(event, $.bind(fn, this.parentElement));
+                button.on(event, $.bind(fn, this.context));
             }
         }
         if (info.request) {
