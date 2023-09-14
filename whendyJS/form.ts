@@ -125,7 +125,6 @@ export class Form extends Element {
         }
 
         let info;
-       
 
         if (list) {
             info = await this._pageData(list);
@@ -134,7 +133,7 @@ export class Form extends Element {
         const appRequests = this.appRequests();
 
         const dataSource = {
-            caption: this._info.label ,
+            caption: this._info.label,
             data: info.data,
             fields,
             limit: +list.limit,
@@ -660,6 +659,20 @@ export class Form extends Element {
                         name: "{{&NAME_}}",
                         method: "save",
                     },
+                    {
+                        do: "set-panel",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        api: "form",
+                        method: "load-record",
+                        params: {
+                            page: 2,
+                        },
+                        doWhen: {
+                            __error_: false,
+                        },
+                    },
                 ],
             },
             list: {
@@ -671,9 +684,9 @@ export class Form extends Element {
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "list",
-                        params:{
-                            page:1
-                        }
+                        params: {
+                            page: 1,
+                        },
                     },
                 ],
             },
@@ -685,6 +698,10 @@ export class Form extends Element {
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "load-page",
+                        params: {
+                            page: "{=page}",
+                            filter: "{=filter}",
+                        },
                     },
                 ],
             },
@@ -738,6 +755,10 @@ export class Form extends Element {
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "load-page",
+                        params: {
+                            page: 1,
+                            filter: "{=filter}",
+                        },
                     },
                 ],
             },

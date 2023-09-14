@@ -264,39 +264,6 @@
                 "label": "cityId",
                 "input": "select",
                 "name": "cityId"
-            },
-            {
-                "component": "button",
-                "label": "OK",
-                "attr": {
-                    "class": "save",
-                    "type": "button"
-                },
-                "events": {
-                    "click": "this.sendRequest('save')"
-                }
-            },
-            {
-                "component": "button",
-                "label": "Delete",
-                "attr": {
-                    "class": "delete",
-                    "type": "button"
-                },
-                "events": {
-                    "click": "this.sendRequest('delete')"
-                }
-            },
-            {
-                "component": "button",
-                "label": "Show All",
-                "attr": {
-                    "class": "delete",
-                    "type": "button"
-                },
-                "events": {
-                    "click": "this.sendRequest('list')"
-                }
             }
         ]
     },

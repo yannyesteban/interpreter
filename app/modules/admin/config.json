@@ -23,9 +23,11 @@
                 "to":"p2",
                 "id":"two",
                 "api": "form",
-                "name": "two",
-                "method": "request",
-                "params": {}
+                "name": "google_form",
+                "method": "list",
+                "params": {
+                    "page":1
+                }
             },
             {
                 "do":"set-panel",

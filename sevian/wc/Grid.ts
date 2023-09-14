@@ -328,6 +328,7 @@ class Grid extends HTMLElement {
     _page;
 
     private appRequests;
+    private _filter: any;
     static get observedAttributes() {
         return ["type"];
     }
@@ -370,24 +371,40 @@ class Grid extends HTMLElement {
         });
     }
 
+    handleEvent(event){
+        if(event.type=="page-select"){
+           
+           
+            event.target.page = event.detail.page;
+
+            this._page = event.detail.page
+            this.sendRequest("load-page");
+        }
+       
+    }
     public connectedCallback() {
+
+        $(this).on("page-select", this);
+
         this.style.setProperty("--grid-columns", "");
 
         console.log("connectedCallback");
         this.addEventListener("search", (event: CustomEvent) => {
             //this.dispatchEvent(event)
 
-            const request = this.getAppRequest("filter");
-
+            this._filter = event.detail.text;
+            const request = this.sendRequest("filter");
+            /*
             request.store = {
                 __page_: 1,
                 __filter_: event.detail.text,
             };
 
             this.filter = event.detail.text;
-            request.actions[0].params = { ...(request.actions[0].params || {}), filter: event.detail.text, page:1 };
+            request.actions[0].params = { ...(request.actions[0].params || {}), filter: event.detail.text, page: 1 };
             console.log(request);
             this.send(request);
+            */
         });
 
         this.addEventListener("click", (event) => {
@@ -442,7 +459,7 @@ class Grid extends HTMLElement {
                     return;
                 }
 
-                const request = this.getAppRequest("edit-record");
+                const request:any = this.getAppRequest("edit-record");
 
                 request.store = {
                     __key_: row.dataset.key,
@@ -465,9 +482,9 @@ class Grid extends HTMLElement {
         this.addEventListener("do-action", (event: CustomEvent) => {
             const action = event.detail.action;
 
-            const request = this.getAppRequest(action);
+            const request:any = this.getAppRequest(action);
 
-            request.form = this.closest("form")
+            request.form = this.closest("form");
             console.log(request);
 
             this.send(request);
@@ -475,7 +492,6 @@ class Grid extends HTMLElement {
 
         this.addEventListener("do-request", (event: CustomEvent) => {
             this.send(JSON.parse(event.detail.request));
-            
         });
     }
 
@@ -546,43 +562,19 @@ class Grid extends HTMLElement {
         this._pages = pages;
         this._page = source.page;
 
-        this.appRequests = source.appRequests;
-
-        this.task = {
-            new: {
-                actions: [
-                    {
-                        window: "name",
-                        id: "this",
-                        element: "form",
-                        name: "two",
-                        method: "request",
-                    },
-                ],
-            },
-            load: {
-                body: "this.getRecordKey()",
-                actions: [
-                    {
-                        id: "this",
-                        element: "form",
-                        name: "two",
-                        method: "load",
-                    },
-                ],
-            },
-            delete: {
-                body: "this.selected()",
-                actions: [
-                    {
-                        id: "this",
-                        element: "form",
-                        name: "two",
-                        method: "delete",
-                    },
-                ],
-            },
-        };
+        //this.appRequests = source.appRequests;
+        if (source.appRequests) {
+            customElements.whenDefined("app-request").then((x) => {
+                for (const [name, info] of Object.entries(source.appRequests)) {
+                    const r = $(this).create("app-request").get<HTMLElement>();
+                    r.setAttribute("name", name);
+                    r.setAttribute("type", "json");
+                    r["data"] = info;
+                    console.log(info);
+                }
+            });
+        }
+        
         console.log("dataSource");
         /*
         Promise.all([
@@ -636,27 +628,14 @@ class Grid extends HTMLElement {
             .create("ss-paginator")
             .attr("page", source.page)
             .attr("pages", pages)
-            .attr("max-pages", maxPages)
-            .on("page-select", (event) => {
-                console.log(event.detail);
-                event.target.page = event.detail.page;
-
-                const request = this.getAppRequest("load-page");
-
-                request.store = {
-                    __page_: event.detail.page,
-                };
-
-                request.actions[0].params = { ...(request.actions[0].params || {}), filter: this.filter, page: event.detail.page };
-                console.log(request);
-                this.send(request);
-            });
+            .attr("max-pages", maxPages);
 
         this._createBarInfo();
         (<GridSearcher>this.querySelector("ss-grid-searcher")).text = source.filter || "";
 
         if (source.nav) {
             let nav: any = $(this).create("ss-nav").get();
+            //source.nav.context = this;
             nav.dataSource = source.nav;
         }
     }
@@ -803,11 +782,16 @@ class Grid extends HTMLElement {
     */
     sendRequest(name) {
         const info = this.getAppRequest(name)?.data;
+        console.log("INFO: ", info);
         if (info) {
             info.form = this;
             const app: any = document.querySelector("._main_app_");
 
-            app.send(info);
+
+            app.send(info, {
+                page:this._page || 1,
+                filter:this._filter || ""
+            });
         } else {
             console.log("request don't exists!");
         }
@@ -820,16 +804,17 @@ class Grid extends HTMLElement {
     send(request) {
         const app = this.getApp();
         if (app) {
-            request.form = this.closest("form")
+            request.form = this.closest("form");
             app.send(request);
         } else {
             console.log("app don't found!");
         }
     }
 
-    getAppRequest(name) {
-        return this.appRequests[name];
+    getAppRequest(name: string): AppRequest {
+        return this.querySelector(`app-request[name="${name}"]`);
     }
+
 
     evalTemplate(str, data) {
         str = str.replace(/{(\w+)}/g, (matched, index, original) => {
@@ -865,11 +850,16 @@ class Grid extends HTMLElement {
 
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__mode_").value(mode);
         $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__key_").value(key);
-        $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", "__page_").value(this._page);
+        $(this)
+            .create("input")
+            .ds("inputType", "record")
+            .prop("type", "text")
+            .prop("name", "__page_")
+            .value(this._page);
     }
 
-    about(){
-        alert("grid")
+    about() {
+        alert("grid");
     }
 }
 

@@ -560,6 +560,20 @@ export class Form extends Element {
                         name: "{{&NAME_}}",
                         method: "save",
                     },
+                    {
+                        do: "set-panel",
+                        to: "{{&TO_}}",
+                        id: "{{&ID_}}",
+                        name: "{{&NAME_}}",
+                        api: "form",
+                        method: "load-record",
+                        params: {
+                            page: 2,
+                        },
+                        doWhen: {
+                            __error_: false,
+                        },
+                    },
                 ],
             },
             list: {
@@ -572,8 +586,8 @@ export class Form extends Element {
                         name: "{{&NAME_}}",
                         method: "list",
                         params: {
-                            page: 1
-                        }
+                            page: 1,
+                        },
                     },
                 ],
             },
@@ -585,6 +599,10 @@ export class Form extends Element {
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "load-page",
+                        params: {
+                            page: "{=page}",
+                            filter: "{=filter}",
+                        },
                     },
                 ],
             },
@@ -638,6 +656,10 @@ export class Form extends Element {
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "load-page",
+                        params: {
+                            page: 1,
+                            filter: "{=filter}",
+                        },
                     },
                 ],
             },

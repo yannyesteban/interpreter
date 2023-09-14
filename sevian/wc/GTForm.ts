@@ -206,7 +206,7 @@ class GTForm extends HTMLElement {
 
             for (const input of elems) {
                 const list = this.querySelector(`datalist[data-name="${input.name}"]`);
-                
+
                 if (list) {
                     //input.classList.add("__ready__");
                     //console.log(list, input);
@@ -343,7 +343,6 @@ class GTForm extends HTMLElement {
     }
 
     set dataSource(source) {
-        
         /*
         const appRequest = {
             dataField: {
@@ -362,20 +361,15 @@ class GTForm extends HTMLElement {
         */
 
         customElements.whenDefined("app-request").then((x) => {
-
-            if(source.appRequests){
-                for(const [name, info] of Object.entries(source.appRequests)){
+            if (source.appRequests) {
+                for (const [name, info] of Object.entries(source.appRequests)) {
                     const r = $(this).create("app-request").get<HTMLElement>();
                     r.setAttribute("name", name);
                     r.setAttribute("type", "json");
                     r["data"] = info;
                     console.log(info);
                 }
-
             }
-
-
-            
         });
 
         this.modeInit = true;
@@ -497,7 +491,7 @@ class GTForm extends HTMLElement {
             if (component) {
                 parent.appendChild(component);
             } else {
-                console.log(element)
+                console.log(element);
                 throw new Error("component not found!");
             }
         });
@@ -588,12 +582,11 @@ class GTForm extends HTMLElement {
     }
 
     _createButton(info): HTMLElement {
-        
         const button = $.create("button");
         for (const [key, value] of Object.entries(info.events || {})) {
             button.on(key, $.bind(value, this));
         }
-        button.attr("type", "button")
+        button.attr("type", "button");
         button.attr(info.attr || {});
         button.html(info.label);
         return button.get();
@@ -649,7 +642,7 @@ class GTForm extends HTMLElement {
             const app: any = document.querySelector("._main_app_");
 
             app.send(info);
-        }else{
+        } else {
             console.log("request don't exists!");
         }
     }
