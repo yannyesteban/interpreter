@@ -289,8 +289,8 @@ export class Sevian extends HTMLElement {
     }
     send(request, masterData) {
         var _a;
-        if (masterData) {
-            request = this.evalExp(request, masterData);
+        if (masterData && request.actions) {
+            request.actions = this.evalExp(request.actions, masterData);
         }
         if (request.validate && typeof request.validate === "function" && !request.validate()) {
             return;
@@ -308,6 +308,7 @@ export class Sevian extends HTMLElement {
             return;
         }
         let form = null;
+        console.log(request.form);
         if (typeof request.form === "string") {
             form = $(request.form).get();
         }

@@ -131,10 +131,9 @@ class Nav extends HTMLElement {
     handleEvent(event) {
         if (event.type == "click") {
             const target: HTMLElement = event.target.closest("button[data-nav-button]");
-            
+
             if (target?.dataset.action) {
                 if (this.context?.sendRequest) {
-            
                     console.log("action is", target.dataset.action);
                     this._context.sendRequest(target.dataset.action);
                     return;

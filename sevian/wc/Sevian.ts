@@ -333,8 +333,8 @@ export class Sevian extends HTMLElement {
 
     send(request: AppRequest, masterData?: any) {
 
-        if(masterData){
-            request = this.evalExp(request, masterData);
+        if(masterData && request.actions){
+            request.actions = this.evalExp(request.actions, masterData);
         }
 
         if (request.validate && typeof request.validate === "function" && !request.validate()) {
@@ -353,7 +353,7 @@ export class Sevian extends HTMLElement {
         }
 
         let form: HTMLFormElement = null;
-
+        console.log(request.form)
         if (typeof request.form === "string") {
             form = $(request.form).get();
         } else if (request.form instanceof HTMLFormElement) {

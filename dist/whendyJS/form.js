@@ -458,6 +458,9 @@ export class Form extends Element {
         });
     }
     genToken(payload) {
+        if (!payload) {
+            return "";
+        }
         const jwt = new JWT({ key: this.keySecret });
         return jwt.generate(payload);
     }
