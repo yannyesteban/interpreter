@@ -248,8 +248,9 @@ class GridCell extends HTMLElement {
 customElements.define("ss-grid-cell", GridCell);
 
 class GridRow extends HTMLElement {
+    private _selected: boolean = false;
     static get observedAttributes() {
-        return ["type"];
+        return ["type", "selected"];
     }
     constructor() {
         super();
@@ -272,19 +273,36 @@ class GridRow extends HTMLElement {
 
         const slot = this.shadowRoot.querySelector("slot:not([name])");
 
-        
-
         slot.addEventListener("slotchange", (e) => {
-            console.log("slotchange")
+            console.log("slotchange");
             //this._createHolder();
             //const nodes = slot.assignedNodes();
         });
     }
 
-    handleEvent(event:Event) {
+    handleEvent(event: Event) {
         if (event.type == "click") {
-            const target:any = event.currentTarget
-            if(target.tagName =  "")
+            const target = event.target;
+
+            if (target instanceof HTMLInputElement && target.classList.contains("input-cell")) {
+                const value = target.checked;
+
+                if (target.type == "checkbox") {
+                    if (this.getAttribute("type") == "field-header") {
+                        $(this).fire("grid-check-all", { row: this, selected: value });
+                        return;
+                    }
+
+                    this.selected = value;
+                    target.checked = value;
+                    $(this).fire("grid-row-check", { row: this, selected: value });
+                }
+                if (target.type == "radio") {
+                    this.selected = value;
+                }
+
+                //this._selected = target.checked;
+            }
 
             $(this).fire("grid-row-click", { row: this, selected: this.selected });
         }
@@ -299,7 +317,17 @@ class GridRow extends HTMLElement {
         $(this).off("click", this);
     }
 
-    public attributeChangedCallback(name, oldVal, newVal) {}
+    public attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        switch (name) {
+            case "selected":
+                this._setChecked();
+                if (this.holder == "radio") {
+                    $(this).fire("grid-row-select", { row: this, selected: this.selected });
+                }
+
+                break;
+        }
+    }
 
     set type(value) {
         if (Boolean(value)) {
@@ -339,10 +367,9 @@ class GridRow extends HTMLElement {
 
     _createHolder() {
         console.log("error");
-        
-        this.holder = "checkbox";
+
+        this.holder = "radio";
         if (this.holder) {
-            
             let holder = $(this).query("ss-grid-cell.holder");
             if (holder) {
                 holder.remove();
@@ -350,11 +377,29 @@ class GridRow extends HTMLElement {
 
             holder = $(this).create("ss-grid-cell").addClass("holder").attr("slot", "holder");
             if (this.holder == "checkbox") {
-        
                 holder
                     .create("input")
-                    .attr("type", "checkbox").addClass("input-cell")
+                    .attr("type", "checkbox")
+                    .addClass("input-cell")
                     .doIf(this.selected, (e) => e.prop("checked", true));
+            }
+            if (this.holder == "radio") {
+                holder
+                    .create("input")
+                    .attr("type", "radio")
+                    .addClass("input-cell")
+                    .doIf(this.selected, (e) => e.prop("checked", true));
+            }
+        }
+    }
+
+    _setChecked() {
+        const input = $(this).query("input.input-cell");
+        if (input) {
+            const value = this.selected;
+
+            if (input.prop("checked") != value) {
+                input.prop("checked", value);
             }
         }
     }
@@ -470,56 +515,35 @@ class Grid extends HTMLElement {
             return;
         }
 
-        if (event.type == "click") {
-            const target: any = event.target;
+        
 
-            if (target.tagName === "INPUT" && target.type == "radio") {
-                if (this._lastChecked) {
-                    if (this._lastChecked == target) {
-                        return;
-                    }
-
-                    this._lastChecked.checked = false;
-
-                    this._lastChecked.closest("ss-grid-row").removeAttribute("selected");
+        if (event.type == "grid-check-all") {
+            this.checkAll(event.detail.selected);
+        }
+        if (event.type == "grid-row-select") {
+            if (this._lastChecked) {
+                if (this._lastChecked == event.target) {
+                    return;
                 }
-                this._lastChecked = target;
-                this._lastChecked.closest("ss-grid-row").setAttribute("selected", "");
 
-                this.setRecord(this.getDataRow(this._lastChecked.closest("ss-grid-row")));
+                this._lastChecked.checked = false;
+
+                this._lastChecked.closest("ss-grid-row").removeAttribute("selected");
             }
+            this._lastChecked = event.target;
+            this._lastChecked.closest("ss-grid-row").setAttribute("selected", "");
 
-            if (target.tagName === "INPUT" && target.type == "checkbox") {
-                if (target.classList.contains("cell-header")) {
-                    const rows = Array.from(this.querySelectorAll("ss-grid-row:not(.header-row)"));
-                    const checkboxes: HTMLInputElement[] = Array.from(
-                        this.querySelectorAll("ss-grid-row:not(.header-row) .cell-select input"),
-                    );
-                    if (target.checked) {
-                        rows.forEach((row) => row.setAttribute("selected", ""));
-                        checkboxes.forEach((check) => (check.checked = true));
-                    } else {
-                        rows.forEach((row) => row.removeAttribute("selected"));
-                        checkboxes.forEach((check) => (check.checked = false));
-                    }
-                } else {
-                    if (target.checked) {
-                        target.closest("ss-grid-row").setAttribute("selected", "");
-                    } else {
-                        target.closest("ss-grid-row").removeAttribute("selected");
-                    }
-                }
-                const selected = Array.from(this.querySelectorAll("ss-grid-row[selected]"));
+            this.setRecord(this.getDataRow(this._lastChecked.closest("ss-grid-row")));
+        }
+        if (event.type == "grid-row-check") {
+            const rows = Array.from(this.querySelectorAll("ss-grid-row:not(.header-row)"));
+            const selectedRows = Array.from(this.querySelectorAll("ss-grid-row[selected]:not(.header-row)"));
 
-                if (selected.length == 1) {
-                    this.setAttribute("selected", "one");
-                } else if (selected.length > 1) {
-                    this.setAttribute("selected", "multiple");
-                } else {
-                    this.removeAttribute("selected");
-                }
+            if (selectedRows.length != rows.length) {
+                this.querySelector("ss-grid-row.header-row").removeAttribute("selected");
+            } else if (selectedRows.length == rows.length) {
+                this.querySelector("ss-grid-row.header-row").setAttribute("selected", "");
             }
-            return;
         }
     }
     public connectedCallback() {
@@ -529,14 +553,21 @@ class Grid extends HTMLElement {
         $(this).on("page-select", this);
         $(this).on("grid-row-click", this);
         $(this).on("search", this);
-        $(this).on("click", this);
+        
+        $(this).on("grid-check-all", this);
+        $(this).on("grid-row-check", this);
+        $(this).on("grid-row-select", this);
     }
 
     public disconnectedCallback() {
         $(this).off("page-select", this);
         $(this).off("grid-row-click", this);
         $(this).off("search", this);
-        $(this).off("click", this);
+
+        $(this).off("grid-check-all", this);
+        $(this).off("grid-row-check", this);
+        $(this).off("grid-row-select", this);
+        
     }
 
     public attributeChangedCallback(name, oldVal, newVal) {}
@@ -704,6 +735,13 @@ class Grid extends HTMLElement {
         this._createBarInfo();
         //(<GridSearcher>this.querySelector("ss-grid-searcher")).text =info.filter || ""
     }
+
+    checkAll(value) {
+        if (this.modeSelect == "checkbox") {
+            console.log("vañlue", value);
+            Array.from($(this).queryAll("ss-grid-row")).forEach((row) => row.prop("selected", value));
+        }
+    }
     _setCaption(value) {
         let caption = $(this).query("ss-grid-caption");
         if (!caption) {
@@ -723,7 +761,7 @@ class Grid extends HTMLElement {
 
     _createHeaderRow(body, fields) {
         const row = body.create("ss-grid-row");
-        row.addClass("header-row").attr("type","field-header");
+        row.addClass("header-row").attr("type", "field-header");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
             /*const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "cell-header", "first-cell"]);
@@ -735,7 +773,6 @@ class Grid extends HTMLElement {
         }
 
         for (const field of fields) {
-            console.log(field);
             const cell = row.create("ss-grid-cell").ds("field", field.name || "");
             cell.addClass("cell-header");
             cell.text(field.label);
@@ -758,7 +795,7 @@ class Grid extends HTMLElement {
         }
     }
     _createRow(body, fields, data, index) {
-        const row = body.create("ss-grid-row").attr("type","field-body");;
+        const row = body.create("ss-grid-row").attr("type", "field-body");
         row.addClass("row")
             .ds("key", data.__key_ || "")
             .ds("mode", data.__mode_ || "0");
