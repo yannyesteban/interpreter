@@ -219,7 +219,9 @@ class GridRow extends HTMLElement {
     }
     handleEvent(event) {
         if (event.type == "click") {
-            $(this).fire("grid-row-click", { row: this, selected: this.selected });
+            const target = event.currentTarget;
+            if (target.tagName = "")
+                $(this).fire("grid-row-click", { row: this, selected: this.selected });
         }
     }
     connectedCallback() {
@@ -275,7 +277,7 @@ class GridRow extends HTMLElement {
             if (this.holder == "checkbox") {
                 holder
                     .create("input")
-                    .attr("type", "checkbox")
+                    .attr("type", "checkbox").addClass("input-cell")
                     .doIf(this.selected, (e) => e.prop("checked", true));
             }
         }
