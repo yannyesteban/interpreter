@@ -150,6 +150,12 @@ export class QElement {
         setProp(this.e.dataset, attrs, value);
         return this;
     }
+    doIf(cond, callback) {
+        if (cond) {
+            callback(this);
+        }
+        return this;
+    }
     addClass(classes) {
         if (Array.isArray(classes)) {
             classes.forEach((item) => this.e.classList.add(item));

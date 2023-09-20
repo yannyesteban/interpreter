@@ -75,13 +75,13 @@ export class QElement {
         return element;
     }
 
-    findOrCreate(selector: string, tagName:string) {
+    findOrCreate(selector: string, tagName: string) {
         const ele = this.e.querySelector(selector);
 
         if (ele) {
             return Q(ele);
         }
-        
+
         const element = Q.create(tagName);
         this.append(element);
         return element;
@@ -177,6 +177,13 @@ export class QElement {
         }
 
         setProp(this.e.dataset, attrs, value);
+        return this;
+    }
+
+    doIf(cond:boolean, callback:Function) {
+        if (cond) {
+            callback(this);
+        }
         return this;
     }
 

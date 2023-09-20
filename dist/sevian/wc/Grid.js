@@ -206,12 +206,14 @@ class GridRow extends HTMLElement {
 
 			}
 			</style>
-            
+            <slot name="holder"></slot>
             <slot></slot>`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
-        const slot = this.shadowRoot.querySelector("slot");
+        const slot = this.shadowRoot.querySelector("slot:not([name])");
         slot.addEventListener("slotchange", (e) => {
+            console.log("slotchange");
+            //this._createHolder();
             //const nodes = slot.assignedNodes();
         });
     }
@@ -222,6 +224,7 @@ class GridRow extends HTMLElement {
     }
     connectedCallback() {
         $(this).on("click", this);
+        this._createHolder();
     }
     disconnectedCallback() {
         $(this).off("click", this);
@@ -249,6 +252,34 @@ class GridRow extends HTMLElement {
     get selected() {
         return this.hasAttribute("selected");
     }
+    set holder(value) {
+        if (Boolean(value)) {
+            this.setAttribute("holder", value);
+        }
+        else {
+            this.removeAttribute("holder");
+        }
+    }
+    get holder() {
+        return this.getAttribute("holder");
+    }
+    _createHolder() {
+        console.log("error");
+        this.holder = "checkbox";
+        if (this.holder) {
+            let holder = $(this).query("ss-grid-cell.holder");
+            if (holder) {
+                holder.remove();
+            }
+            holder = $(this).create("ss-grid-cell").addClass("holder").attr("slot", "holder");
+            if (this.holder == "checkbox") {
+                holder
+                    .create("input")
+                    .attr("type", "checkbox")
+                    .doIf(this.selected, (e) => e.prop("checked", true));
+            }
+        }
+    }
 }
 customElements.define("ss-grid-row", GridRow);
 class Grid extends HTMLElement {
@@ -271,14 +302,14 @@ class Grid extends HTMLElement {
             ::slotted(ss-grid-searcher){
                 
             }
-			</style><slot></slot>`;
+			</style><slot></slot><div id="div1">div1</div>`;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         const slot = this.shadowRoot.querySelector("slot");
         slot.addEventListener("slotchange", (e) => {
             let c = 0;
             let str = `[p${++c}]`;
-            const rows = Array.from(this.querySelectorAll("ss-grid-cell.cell-header:not([hidden])"));
+            const rows = Array.from(this.querySelectorAll(".header-row ss-grid-cell:not([hidden])"));
             rows.forEach((row, index) => {
                 const width = row.dataset.width || "auto";
                 str += ` ${width} [p${++c}]`;
@@ -537,14 +568,15 @@ class Grid extends HTMLElement {
     }
     _createHeaderRow(body, fields) {
         const row = body.create("ss-grid-row");
-        row.addClass("header-row");
+        row.addClass("header-row").attr("type", "field-header");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
-            const cell = row.create("ss-grid-cell");
+            /*const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "cell-header", "first-cell"]);
             cell.ds("width", "min-content");
             const check = cell.create("input");
             check.attr("type", this.modeSelect);
             check.addClass("cell-header");
+            */
         }
         for (const field of fields) {
             console.log(field);
@@ -569,16 +601,20 @@ class Grid extends HTMLElement {
         }
     }
     _createRow(body, fields, data, index) {
-        const row = body.create("ss-grid-row");
+        const row = body.create("ss-grid-row").attr("type", "field-body");
+        ;
         row.addClass("row")
             .ds("key", data.__key_ || "")
             .ds("mode", data.__mode_ || "0");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
+            /*
             const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "first-cell"]);
+
             const check = cell.create("input");
             check.attr("type", this.modeSelect);
             check.attr("nid", index);
+            */
         }
         for (const field of fields) {
             const cell = row

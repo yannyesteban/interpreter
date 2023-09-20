@@ -263,28 +263,36 @@ class GridRow extends HTMLElement {
 
 			}
 			</style>
-            
+            <slot name="holder"></slot>
             <slot></slot>`;
 
         this.attachShadow({ mode: "open" });
 
         this.shadowRoot.appendChild(template.content.cloneNode(true));
 
-        const slot = this.shadowRoot.querySelector("slot");
+        const slot = this.shadowRoot.querySelector("slot:not([name])");
+
+        
 
         slot.addEventListener("slotchange", (e) => {
+            console.log("slotchange")
+            //this._createHolder();
             //const nodes = slot.assignedNodes();
         });
     }
 
-    handleEvent(event) {
+    handleEvent(event:Event) {
         if (event.type == "click") {
+            const target:any = event.currentTarget
+            if(target.tagName =  "")
+
             $(this).fire("grid-row-click", { row: this, selected: this.selected });
         }
     }
 
     public connectedCallback() {
         $(this).on("click", this);
+        this._createHolder();
     }
 
     public disconnectedCallback() {
@@ -315,6 +323,40 @@ class GridRow extends HTMLElement {
 
     get selected() {
         return this.hasAttribute("selected");
+    }
+
+    set holder(value) {
+        if (Boolean(value)) {
+            this.setAttribute("holder", value);
+        } else {
+            this.removeAttribute("holder");
+        }
+    }
+
+    get holder() {
+        return this.getAttribute("holder");
+    }
+
+    _createHolder() {
+        console.log("error");
+        
+        this.holder = "checkbox";
+        if (this.holder) {
+            
+            let holder = $(this).query("ss-grid-cell.holder");
+            if (holder) {
+                holder.remove();
+            }
+
+            holder = $(this).create("ss-grid-cell").addClass("holder").attr("slot", "holder");
+            if (this.holder == "checkbox") {
+        
+                holder
+                    .create("input")
+                    .attr("type", "checkbox").addClass("input-cell")
+                    .doIf(this.selected, (e) => e.prop("checked", true));
+            }
+        }
     }
 }
 
@@ -366,7 +408,7 @@ class Grid extends HTMLElement {
             ::slotted(ss-grid-searcher){
                 
             }
-			</style><slot></slot>`;
+			</style><slot></slot><div id="div1">div1</div>`;
 
         this.attachShadow({ mode: "open" });
 
@@ -378,7 +420,7 @@ class Grid extends HTMLElement {
             let c = 0;
             let str = `[p${++c}]`;
 
-            const rows: HTMLElement[] = Array.from(this.querySelectorAll("ss-grid-cell.cell-header:not([hidden])"));
+            const rows: HTMLElement[] = Array.from(this.querySelectorAll(".header-row ss-grid-cell:not([hidden])"));
 
             rows.forEach((row, index) => {
                 const width = row.dataset.width || "auto";
@@ -476,8 +518,6 @@ class Grid extends HTMLElement {
                 } else {
                     this.removeAttribute("selected");
                 }
-
-                
             }
             return;
         }
@@ -683,14 +723,15 @@ class Grid extends HTMLElement {
 
     _createHeaderRow(body, fields) {
         const row = body.create("ss-grid-row");
-        row.addClass("header-row");
+        row.addClass("header-row").attr("type","field-header");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
-            const cell = row.create("ss-grid-cell");
+            /*const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "cell-header", "first-cell"]);
             cell.ds("width", "min-content");
             const check = cell.create("input");
             check.attr("type", this.modeSelect);
             check.addClass("cell-header");
+            */
         }
 
         for (const field of fields) {
@@ -717,17 +758,19 @@ class Grid extends HTMLElement {
         }
     }
     _createRow(body, fields, data, index) {
-        const row = body.create("ss-grid-row");
+        const row = body.create("ss-grid-row").attr("type","field-body");;
         row.addClass("row")
             .ds("key", data.__key_ || "")
             .ds("mode", data.__mode_ || "0");
         if (this.modeSelect == "checkbox" || this.modeSelect == "radio") {
+            /*
             const cell = row.create("ss-grid-cell");
             cell.addClass(["cell-select", "first-cell"]);
 
             const check = cell.create("input");
             check.attr("type", this.modeSelect);
             check.attr("nid", index);
+            */
         }
         for (const field of fields) {
             const cell = row
@@ -795,8 +838,7 @@ class Grid extends HTMLElement {
     }
     */
     sendRequest(name) {
-
-        if(this.modeSelect == "checkbox"){
+        if (this.modeSelect == "checkbox") {
             this.setRecords();
         }
 
