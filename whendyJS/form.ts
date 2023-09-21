@@ -710,6 +710,7 @@ export class Form extends Element {
                 ],
             },
             "edit-record": {
+                validate:"#{{&ID_}}",
                 actions: [
                     {
                         do: "set-panel",

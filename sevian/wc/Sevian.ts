@@ -337,14 +337,14 @@ export class Sevian extends HTMLElement {
             request.actions = this.evalExp(request.actions, masterData);
         }
 
-        if (request.validate && typeof request.validate === "function" && !request.validate()) {
+        if (request.validate && typeof request.validate === "function" && !request.validate(request.validOption)) {
             return;
         } else if (request.validate && typeof request.validate === "string") {
             const element: any = $(request.validate).get();
-            if (typeof element.valid === "function" && !element.valid()) {
+            if (typeof element.valid === "function" && !element.valid(request.validOption)) {
                 return;
             }
-        } else if (typeof request.validate === "object" && "valid" in request.validate && !request.validate?.valid()) {
+        } else if (typeof request.validate === "object" && "valid" in request.validate && !request.validate?.valid(request.validOption)) {
             return;
         }
 

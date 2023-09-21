@@ -140,7 +140,12 @@
         "searchIn": ["lastName", "firstName"],
         "orderBy": ["lastName"],
         "footerText": "page 5 de 6",
-        "page": "{{ &PARAMS_.page}}"
+        "page": "{{ &PARAMS_.page}}",
+        "valid":{
+            "__key_":{
+                "required":{"msg":"select a record!"}
+            }
+        }
     },
 
     

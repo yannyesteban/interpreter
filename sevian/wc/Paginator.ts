@@ -81,6 +81,7 @@ class Paginator extends HTMLElement {
     }
 
     public connectedCallback() {
+        this.slot = "paginator";
         this.setAttribute("tabindex", "-1");
         $(this).on("click", this);
         $(this).on("change", this);
@@ -108,7 +109,6 @@ class Paginator extends HTMLElement {
         const maxPages = +this.maxPages || 6;
         const pages = +this.pages || 99;
         const page = +this.page || 44;
-
 
         const zone = Math.floor((page - 1) / maxPages);
 
@@ -138,7 +138,6 @@ class Paginator extends HTMLElement {
         $(this).create("span").addClass(["ss-symbols", "page", "next-page"]).ds("page", nextPage).text("navigate_next");
         $(this).create("span").addClass(["ss-symbols", "page", "last-page"]).ds("page", pages).text("last_page");
 
-        
         if (pages / maxPages > 1) {
             const select = $.create("select");
 

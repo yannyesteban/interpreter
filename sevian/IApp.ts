@@ -1,7 +1,7 @@
 export type selector = string;
 
 export interface AppComponent {
-    valid?: () => boolean;
+    valid?: (option?:any) => boolean;
 }
 
 export interface PanelInfo {
@@ -30,7 +30,8 @@ export interface AppRequest {
     type?: string;
     panel?: selector;
     confirm?: string;
-    validate?: AppComponent | selector | HTMLElement | (() => boolean);
+    validate?: AppComponent | selector | HTMLElement | ((option?:any) => boolean)  | {validd:(option?:any)=> boolean, option:any};
+    validOption?: any;
     form?: selector | HTMLElement | HTMLFormElement;
     body?: object;
     headers?: { [key: string]: string };

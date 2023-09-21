@@ -3,6 +3,7 @@ import "./Field.js";
 import { Sevian } from "./Sevian.js";
 
 import { AppRequest } from "./AppRequest.js";
+import { error } from "console";
 
 interface RequestAction {
     id: string;
@@ -650,6 +651,8 @@ class GTForm extends HTMLElement {
     test(h, i) {
         console.log(h, i);
     }
+
+    
 }
 
 customElements.define("gt-form", GTForm);

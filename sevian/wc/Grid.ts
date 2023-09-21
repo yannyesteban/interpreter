@@ -4,9 +4,9 @@ import { Q as $, QElement } from "../Q.js";
 import "./Paginator.js";
 import "./Win.js";
 import "./Menu.js";
-import { WHWin, WHWinBody, WHWinHeader } from "./Win.js";
+
 import { Sevian } from "./Sevian.js";
-import { Obj } from "../../core/Expressions.js";
+
 
 class GridBar extends HTMLElement {
     static get observedAttributes() {
@@ -85,7 +85,9 @@ class GridCaption extends HTMLElement {
         });
     }
 
-    public connectedCallback() {}
+    public connectedCallback() {
+        this.slot="caption";
+    }
 
     public disconnectedCallback() {}
 
@@ -160,6 +162,7 @@ class GridSearcher extends HTMLElement {
     }
 
     public connectedCallback() {
+        this.slot = "searcher";
         this.shadowRoot.querySelector("button").addEventListener("click", () => {
             const event = new CustomEvent("search", {
                 detail: {
@@ -453,7 +456,15 @@ class Grid extends HTMLElement {
             ::slotted(ss-grid-searcher){
                 
             }
-			</style><slot></slot><div id="div1">div1</div>`;
+			</style>
+            <slot name="caption"></slot>
+            <slot name="searcher"></slot>
+            <slot name="body"></slot>
+            <slot name="info"></slot>
+            <slot name="paginator"></slot>
+            <slot name="nav"></slot>
+            
+            `;
 
         this.attachShadow({ mode: "open" });
 
@@ -702,7 +713,7 @@ class Grid extends HTMLElement {
 
         $(this).create("ss-grid-searcher");
 
-        const body = $(this).create("section");
+        const body = $(this).create("section").prop("slot", "body");
         this._createHeaderRow(body, source.fields);
 
         let i = 0;
@@ -716,7 +727,8 @@ class Grid extends HTMLElement {
         (<GridSearcher>this.querySelector("ss-grid-searcher")).text = source.filter || "";
 
         if (source.nav) {
-            let nav: any = $(this).create("ss-nav").get();
+            let nav: any = $(this).create("ss-nav").prop("slot", "nav").get();
+            
             source.nav.context = this;
             nav.dataSource = source.nav;
         }
@@ -837,7 +849,8 @@ class Grid extends HTMLElement {
         } else {
             body = $(this).create("section");
         }
-
+        body.prop("slot", "body")
+        console.log(body.get())
         this._createHeaderRow(body, fields);
 
         let i = 0;
@@ -851,6 +864,7 @@ class Grid extends HTMLElement {
         if (!bar) {
             bar = $(this).create("div").addClass("bar-info");
         }
+        bar.prop("slot", "info")
         //barInfo = " página {page} de {pages}, {records} registros";
         bar.html(
             this.evalTemplate(this.barInfo, {
@@ -951,6 +965,17 @@ class Grid extends HTMLElement {
         for (const [name, value] of Object.entries(data)) {
             $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", name).value(value);
         }
+    }
+
+    valid(option?:string){
+        if(option == "record"){
+            const input =  $(this).query("input[name=__key_]");
+            if(input && !input.value()){
+                alert("error")
+            }
+            
+        }
+        alert("ok")
     }
 
     about() {
