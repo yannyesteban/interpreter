@@ -7,7 +7,6 @@ import "./Menu.js";
 
 import { Sevian } from "./Sevian.js";
 
-
 class GridBar extends HTMLElement {
     static get observedAttributes() {
         return ["type"];
@@ -86,7 +85,7 @@ class GridCaption extends HTMLElement {
     }
 
     public connectedCallback() {
-        this.slot="caption";
+        this.slot = "caption";
     }
 
     public disconnectedCallback() {}
@@ -526,8 +525,6 @@ class Grid extends HTMLElement {
             return;
         }
 
-        
-
         if (event.type == "grid-check-all") {
             this.checkAll(event.detail.selected);
         }
@@ -564,7 +561,7 @@ class Grid extends HTMLElement {
         $(this).on("page-select", this);
         $(this).on("grid-row-click", this);
         $(this).on("search", this);
-        
+
         $(this).on("grid-check-all", this);
         $(this).on("grid-row-check", this);
         $(this).on("grid-row-select", this);
@@ -578,7 +575,6 @@ class Grid extends HTMLElement {
         $(this).off("grid-check-all", this);
         $(this).off("grid-row-check", this);
         $(this).off("grid-row-select", this);
-        
     }
 
     public attributeChangedCallback(name, oldVal, newVal) {}
@@ -646,8 +642,21 @@ class Grid extends HTMLElement {
         return this.getAttribute("mode-select");
     }
 
+    set errorMessages(value) {
+        if (typeof value === "object") {
+            this.setAttribute("error-messages", JSON.stringify(value));
+        } else if (typeof value === "string") {
+            this.setAttribute("error-messages", value);
+        }
+    }
+
+    get errorMessages() {
+        return JSON.parse(this.getAttribute("error-messages") || "") || {};
+    }
+
     set dataSource(source) {
         this.modeSelect = "checkbox";
+        this.errorMessages = source.errorMessages;
         const maxPages = source.maxPages;
         const records = source.records;
         const limit = source.limit;
@@ -728,7 +737,7 @@ class Grid extends HTMLElement {
 
         if (source.nav) {
             let nav: any = $(this).create("ss-nav").prop("slot", "nav").get();
-            
+
             source.nav.context = this;
             nav.dataSource = source.nav;
         }
@@ -849,8 +858,8 @@ class Grid extends HTMLElement {
         } else {
             body = $(this).create("section");
         }
-        body.prop("slot", "body")
-        console.log(body.get())
+        body.prop("slot", "body");
+        console.log(body.get());
         this._createHeaderRow(body, fields);
 
         let i = 0;
@@ -864,7 +873,7 @@ class Grid extends HTMLElement {
         if (!bar) {
             bar = $(this).create("div").addClass("bar-info");
         }
-        bar.prop("slot", "info")
+        bar.prop("slot", "info");
         //barInfo = " página {page} de {pages}, {records} registros";
         bar.html(
             this.evalTemplate(this.barInfo, {
@@ -967,15 +976,18 @@ class Grid extends HTMLElement {
         }
     }
 
-    valid(option?:string){
-        if(option == "record"){
-            const input =  $(this).query("input[name=__key_]");
-            if(input && !input.value()){
-                alert("error")
-            }
+    valid(option?: string):string {
+        
+        
+        if (option == "select") {
+            const input = $(this).query("input[name=__key_]");
             
+            if (!input || input && !input.value()) {
+                return this.errorMessages?.selectRecord || "error";
+            }
         }
-        alert("ok")
+
+        return null;
     }
 
     about() {

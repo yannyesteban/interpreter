@@ -72,6 +72,7 @@ class Paginator extends HTMLElement {
         }
     }
     connectedCallback() {
+        this.slot = "paginator";
         this.setAttribute("tabindex", "-1");
         $(this).on("click", this);
         $(this).on("change", this);

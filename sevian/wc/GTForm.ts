@@ -541,6 +541,8 @@ class GTForm extends HTMLElement {
         }
 
         if (info.required) {
+            input.get<any>().setCustomValidity("You gotta fill this out, yo!");
+            input.attr("required", "");
             field.create("required-ind").text("*");
         }
         return field.get();

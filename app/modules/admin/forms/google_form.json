@@ -10,9 +10,12 @@
         },
         {
             "component": "field",
-            "label": "Apellido",
+            "label": "Last Name",
             "input": "input",
-            "name": "lastName"
+            "name": "lastName",
+            "required":{
+                "message":"yes"
+            }
         },
         {
             "component": "field",
@@ -212,9 +215,12 @@
             },
             {
                 "component": "field",
-                "label": "Apellido",
+                "label": "Apellidos",
                 "input": "input",
-                "name": "lastName"
+                "name": "lastName",
+                "required":{
+                    "message":"yes"
+                }
             },
             {
                 "component": "field",
@@ -417,5 +423,8 @@
         "data": {
             "a": 1
         }
+    },
+    "errorMessages":{
+        "selectRecord" : "seleccione un registro, por favor!"
     }
 }

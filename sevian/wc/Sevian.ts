@@ -17,8 +17,6 @@ export class Sevian extends HTMLElement {
     constructor() {
         super();
 
-       
-        
         const template = document.createElement("template");
 
         template.innerHTML = `
@@ -110,9 +108,8 @@ export class Sevian extends HTMLElement {
 
     private async whenValid(name: string) {
         return new Promise(async (resolve, reject) => {
-            if(!name){
-
-                reject()
+            if (!name) {
+                reject();
                 return;
             }
             const element = this.modules?.find((e) => e.name.toUpperCase() === name.toUpperCase())?.wc || name;
@@ -136,54 +133,58 @@ export class Sevian extends HTMLElement {
     }
 
     async setElement(info: IElement) {
-        await this.whenValid(info.element).then((element) => {
-            let e = $.id(info.id);
-            if (e) {
-                e.remove();
-            }
+        await this.whenValid(info.element)
+            .then((element) => {
+                let e = $.id(info.id);
+                if (e) {
+                    e.remove();
+                }
 
-            e = $.create(element);
-            e.id(info.id);
-            e.prop(info.propertys);
+                e = $.create(element);
+                e.id(info.id);
+                e.prop(info.propertys);
 
-            let panel;
-            //set-panel, set-element, update, append-to, before-to, request, request-to, DATA?
-            if (info.do == "set-panel") {
-                console.log(info);
-                panel = $(`#${info.to}`);
-                panel.text("");
-            } else if (info.do == "set-element") {
-                panel = $(info.to);
-                panel.text("");
-            }
+                let panel;
+                //set-panel, set-element, update, append-to, before-to, request, request-to, DATA?
+                if (info.do == "set-panel") {
+                    console.log(info);
+                    panel = $(`#${info.to}`);
+                    panel.text("");
+                } else if (info.do == "set-element") {
+                    panel = $(info.to);
+                    panel.text("");
+                }
 
-            //const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
+                //const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
 
-            if (!panel) {
-                return;
-            }
+                if (!panel) {
+                    return;
+                }
 
-            if (info.panel || info.setTo) {
-                panel.text("");
-            }
-            panel.append(e);
-        }).catch(error=>{
-            console.log("element not found");
-        });
+                if (info.panel || info.setTo) {
+                    panel.text("");
+                }
+                panel.append(e);
+            })
+            .catch((error) => {
+                console.log("element not found");
+            });
     }
 
     async updateElement(info) {
-        await this.whenValid(info.element).then(() => {
-            const e = $.id(info.id);
+        await this.whenValid(info.element)
+            .then(() => {
+                const e = $.id(info.id);
 
-            if (e) {
-                if (info.propertys) {
-                    e.prop(info.propertys);
+                if (e) {
+                    if (info.propertys) {
+                        e.prop(info.propertys);
+                    }
                 }
-            }
-        }).catch(error=>{
-            console.log("element not found");
-        });
+            })
+            .catch((error) => {
+                console.log("element not found");
+            });
     }
 
     async evalResponse(response: IElement[]) {
@@ -203,17 +204,15 @@ export class Sevian extends HTMLElement {
             }
 
             if (r.message) {
-                
-
                 this.showMessage({
                     type: "alert",
                     caption: "Sevian 1.0",
                     delay: 2000,
                     text: r.message,
                     className: "x",
-                    left:"center",
-                    top:"20px",
-                    
+                    left: "center",
+                    top: "20px",
+
                     autoClose: "true",
                 });
             }
@@ -223,12 +222,9 @@ export class Sevian extends HTMLElement {
             }
         }
 
-        
-
         return true;
     }
 
-    
     initApp() {
         /*
         const btn = $("#x");
@@ -311,41 +307,56 @@ export class Sevian extends HTMLElement {
         this.send(request);
     }
 
-    showMessage(message){
+    showMessage(message) {
         const popup = $(this).findOrCreate("ss-popup", "ss-popup").get<any>();
-        popup.dataSource = message
-        popup.mode = "open"
+        popup.dataSource = message;
+        popup.mode = "open";
     }
 
-    evalExp(obj, data){
+    evalExp(obj, data) {
+        const str = Eval.evalAll(JSON.stringify(obj), { ...this.getStore(), ...data });
 
-        const str = Eval.evalAll(JSON.stringify(obj), {...this.getStore(), ...data });
-
-        if(str){
+        if (str) {
             return JSON.parse(str);
         }
 
         return obj;
-        
-
-
     }
 
     send(request: AppRequest, masterData?: any) {
-
-        if(masterData && request.actions){
+        if (masterData && request.actions) {
             request.actions = this.evalExp(request.actions, masterData);
         }
 
-        if (request.validate && typeof request.validate === "function" && !request.validate(request.validOption)) {
-            return;
-        } else if (request.validate && typeof request.validate === "string") {
+        let validate;
+
+        if (typeof request.validate === "function") {
+            validate = request.validate;
+        } else if (typeof request.validate === "string") {
             const element: any = $(request.validate).get();
-            if (typeof element.valid === "function" && !element.valid(request.validOption)) {
+            if (element && typeof element.valid === "function") {
+                validate = $.bind(element.valid, element);
+            }
+        } else if (typeof request.validate === "object" && "valid" in request.validate) {
+            validate = request.validate.valid;
+        }
+
+        if (validate) {
+            const error = validate(request.validateOption);
+            if (error) {
+                this.showMessage({
+                    type: "alert",
+                    caption: "Error!",
+                    delay: 5000,
+                    text: error,
+                    className: "x",
+                    left: "center",
+                    top: "20px",
+
+                    autoClose: "true",
+                });
                 return;
             }
-        } else if (typeof request.validate === "object" && "valid" in request.validate && !request.validate?.valid(request.validOption)) {
-            return;
         }
 
         if (request.confirm && !window.confirm(request.confirm)) {
@@ -353,7 +364,7 @@ export class Sevian extends HTMLElement {
         }
 
         let form: HTMLFormElement = null;
-        console.log(request.form)
+        console.log(request.form);
         if (typeof request.form === "string") {
             form = $(request.form).get();
         } else if (request.form instanceof HTMLFormElement) {

@@ -142,6 +142,7 @@ export class Form extends Element {
             maxPages: +list.maxPages || 6,
             filter: list.filter,
             nav: this._info.nav,
+            errorMessages: this._info.errorMessages,
             appRequests,
         };
 
@@ -550,7 +551,7 @@ export class Form extends Element {
     }
 
     private genToken(payload) {
-        if(!payload){
+        if (!payload) {
             return "";
         }
 
@@ -627,6 +628,7 @@ export class Form extends Element {
             },
             save: {
                 confirm: "secure save?",
+                reportValidity: true,
                 actions: [
                     {
                         do: "update",
@@ -710,7 +712,8 @@ export class Form extends Element {
                 ],
             },
             "edit-record": {
-                validate:"#{{&ID_}}",
+                validate: "#{{&ID_}}",
+                validateOption: "select",
                 actions: [
                     {
                         do: "set-panel",
@@ -724,6 +727,8 @@ export class Form extends Element {
             },
             "delete-record": {
                 confirm: "borrando!",
+                validate: "#{{&ID_}}",
+                validateOption: "select",
                 setFormValue: {
                     __mode_: "3",
                 },

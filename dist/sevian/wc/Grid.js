@@ -60,7 +60,9 @@ class GridCaption extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
     }
-    connectedCallback() { }
+    connectedCallback() {
+        this.slot = "caption";
+    }
     disconnectedCallback() { }
     attributeChangedCallback(name, oldVal, newVal) { }
     set type(value) {
@@ -123,6 +125,7 @@ class GridSearcher extends HTMLElement {
         });
     }
     connectedCallback() {
+        this.slot = "searcher";
         this.shadowRoot.querySelector("button").addEventListener("click", () => {
             const event = new CustomEvent("search", {
                 detail: {
@@ -346,7 +349,15 @@ class Grid extends HTMLElement {
             ::slotted(ss-grid-searcher){
                 
             }
-			</style><slot></slot><div id="div1">div1</div>`;
+			</style>
+            <slot name="caption"></slot>
+            <slot name="searcher"></slot>
+            <slot name="body"></slot>
+            <slot name="info"></slot>
+            <slot name="paginator"></slot>
+            <slot name="nav"></slot>
+            
+            `;
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
         const slot = this.shadowRoot.querySelector("slot");
@@ -494,8 +505,20 @@ class Grid extends HTMLElement {
     get modeSelect() {
         return this.getAttribute("mode-select");
     }
+    set errorMessages(value) {
+        if (typeof value === "object") {
+            this.setAttribute("error-messages", JSON.stringify(value));
+        }
+        else if (typeof value === "string") {
+            this.setAttribute("error-messages", value);
+        }
+    }
+    get errorMessages() {
+        return JSON.parse(this.getAttribute("error-messages") || "") || {};
+    }
     set dataSource(source) {
         this.modeSelect = "checkbox";
+        this.errorMessages = source.errorMessages;
         const maxPages = source.maxPages;
         const records = source.records;
         const limit = source.limit;
@@ -552,7 +575,7 @@ class Grid extends HTMLElement {
         this._actions = source.actions;
         const data = source.data;
         $(this).create("ss-grid-searcher");
-        const body = $(this).create("section");
+        const body = $(this).create("section").prop("slot", "body");
         this._createHeaderRow(body, source.fields);
         let i = 0;
         for (const line of data) {
@@ -562,7 +585,7 @@ class Grid extends HTMLElement {
         this._createBarInfo();
         this.querySelector("ss-grid-searcher").text = source.filter || "";
         if (source.nav) {
-            let nav = $(this).create("ss-nav").get();
+            let nav = $(this).create("ss-nav").prop("slot", "nav").get();
             source.nav.context = this;
             nav.dataSource = source.nav;
         }
@@ -672,6 +695,8 @@ class Grid extends HTMLElement {
         else {
             body = $(this).create("section");
         }
+        body.prop("slot", "body");
+        console.log(body.get());
         this._createHeaderRow(body, fields);
         let i = 0;
         for (const line of data) {
@@ -683,6 +708,7 @@ class Grid extends HTMLElement {
         if (!bar) {
             bar = $(this).create("div").addClass("bar-info");
         }
+        bar.prop("slot", "info");
         //barInfo = " página {page} de {pages}, {records} registros";
         bar.html(this.evalTemplate(this.barInfo, {
             page: this._page,
@@ -769,6 +795,16 @@ class Grid extends HTMLElement {
         for (const [name, value] of Object.entries(data)) {
             $(this).create("input").ds("inputType", "record").prop("type", "text").prop("name", name).value(value);
         }
+    }
+    valid(option) {
+        var _a;
+        if (option == "select") {
+            const input = $(this).query("input[name=__key_]");
+            if (!input || input && !input.value()) {
+                return ((_a = this.errorMessages) === null || _a === void 0 ? void 0 : _a.selectRecord) || "error";
+            }
+        }
+        return null;
     }
     about() {
         alert("grid");

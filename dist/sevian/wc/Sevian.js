@@ -125,7 +125,8 @@ export class Sevian extends HTMLElement {
     }
     setElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.whenValid(info.element).then((element) => {
+            yield this.whenValid(info.element)
+                .then((element) => {
                 let e = $.id(info.id);
                 if (e) {
                     e.remove();
@@ -152,21 +153,24 @@ export class Sevian extends HTMLElement {
                     panel.text("");
                 }
                 panel.append(e);
-            }).catch(error => {
+            })
+                .catch((error) => {
                 console.log("element not found");
             });
         });
     }
     updateElement(info) {
         return __awaiter(this, void 0, void 0, function* () {
-            yield this.whenValid(info.element).then(() => {
+            yield this.whenValid(info.element)
+                .then(() => {
                 const e = $.id(info.id);
                 if (e) {
                     if (info.propertys) {
                         e.prop(info.propertys);
                     }
                 }
-            }).catch(error => {
+            })
+                .catch((error) => {
                 console.log("element not found");
             });
         });
@@ -288,21 +292,37 @@ export class Sevian extends HTMLElement {
         return obj;
     }
     send(request, masterData) {
-        var _a;
         if (masterData && request.actions) {
             request.actions = this.evalExp(request.actions, masterData);
         }
-        if (request.validate && typeof request.validate === "function" && !request.validate()) {
-            return;
+        let validate;
+        if (typeof request.validate === "function") {
+            validate = request.validate;
         }
-        else if (request.validate && typeof request.validate === "string") {
+        else if (typeof request.validate === "string") {
             const element = $(request.validate).get();
-            if (typeof element.valid === "function" && !element.valid()) {
-                return;
+            if (element && typeof element.valid === "function") {
+                validate = $.bind(element.valid, element);
             }
         }
-        else if (typeof request.validate === "object" && "valid" in request.validate && !((_a = request.validate) === null || _a === void 0 ? void 0 : _a.valid())) {
-            return;
+        else if (typeof request.validate === "object" && "valid" in request.validate) {
+            validate = request.validate.valid;
+        }
+        if (validate) {
+            const error = validate(request.validateOption);
+            if (error) {
+                this.showMessage({
+                    type: "alert",
+                    caption: "Error!",
+                    delay: 5000,
+                    text: error,
+                    className: "x",
+                    left: "center",
+                    top: "20px",
+                    autoClose: "true",
+                });
+                return;
+            }
         }
         if (request.confirm && !window.confirm(request.confirm)) {
             return;

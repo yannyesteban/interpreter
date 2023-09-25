@@ -31,7 +31,7 @@ export interface AppRequest {
     panel?: selector;
     confirm?: string;
     validate?: AppComponent | selector | HTMLElement | ((option?:any) => boolean)  | {validd:(option?:any)=> boolean, option:any};
-    validOption?: any;
+    validateOption?: any;
     form?: selector | HTMLElement | HTMLFormElement;
     body?: object;
     headers?: { [key: string]: string };
