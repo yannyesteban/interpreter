@@ -107,6 +107,11 @@ class Nav extends HTMLElement {
         if (event.type == "click") {
             const target = event.target.closest("button[data-nav-button]");
             if (target === null || target === void 0 ? void 0 : target.dataset.action) {
+                $(this).fire("app-action", { action: target === null || target === void 0 ? void 0 : target.dataset.action });
+                return;
+            }
+            return;
+            if (target === null || target === void 0 ? void 0 : target.dataset.action) {
                 if ((_a = this.context) === null || _a === void 0 ? void 0 : _a.sendRequest) {
                     console.log("action is", target.dataset.action);
                     this._context.sendRequest(target.dataset.action);
@@ -172,6 +177,9 @@ class Nav extends HTMLElement {
         }
     }
     get context() {
+        if (this.getAttribute("context")) {
+            return this.getAttribute("context");
+        }
         return this._context || this;
     }
     set dataSource(source) {
@@ -187,6 +195,8 @@ class Nav extends HTMLElement {
     createElement(info) {
         const button = $(this)
             .create("button")
+            .attr("ss-action", info.action || "")
+            .attr("ss-trigger", info.trigger || "click")
             .attr("type", "button")
             .addClass(info.className)
             .ds("navButton", "")

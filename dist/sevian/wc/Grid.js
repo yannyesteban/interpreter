@@ -375,9 +375,14 @@ class Grid extends HTMLElement {
         });
     }
     handleEvent(event) {
+        if (event.type == "app-action") {
+            this.sendRequest(event.detail.action);
+            return;
+        }
         if (event.type == "search" && event instanceof CustomEvent) {
             this._filter = event.detail.text;
             const request = this.sendRequest("filter");
+            return;
         }
         if (event.type == "page-select" && event instanceof CustomEvent) {
             const target = event.target;
@@ -434,6 +439,7 @@ class Grid extends HTMLElement {
     connectedCallback() {
         console.log("connectedCallback");
         this.style.setProperty("--grid-columns", "");
+        $(this).on("app-action", this);
         $(this).on("page-select", this);
         $(this).on("grid-row-click", this);
         $(this).on("search", this);
@@ -442,6 +448,7 @@ class Grid extends HTMLElement {
         $(this).on("grid-row-select", this);
     }
     disconnectedCallback() {
+        $(this).off("app-action", this);
         $(this).off("page-select", this);
         $(this).off("grid-row-click", this);
         $(this).off("search", this);
@@ -735,6 +742,12 @@ class Grid extends HTMLElement {
         const info = (_a = this.getAppRequest(name)) === null || _a === void 0 ? void 0 : _a.data;
         if (info) {
             info.form = this;
+            info.masterData = {
+                page: this._page || 1,
+                filter: this._filter || "",
+            };
+            $(this).fire("app-request", info);
+            return;
             const app = document.querySelector("._main_app_");
             app.send(info, {
                 page: this._page || 1,
@@ -800,7 +813,7 @@ class Grid extends HTMLElement {
         var _a;
         if (option == "select") {
             const input = $(this).query("input[name=__key_]");
-            if (!input || input && !input.value()) {
+            if (!input || (input && !input.value())) {
                 return ((_a = this.errorMessages) === null || _a === void 0 ? void 0 : _a.selectRecord) || "error";
             }
         }

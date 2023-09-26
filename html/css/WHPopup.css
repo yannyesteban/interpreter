@@ -46,6 +46,7 @@ dd {
   transition-duration: 0.2s;
   transition-property: all;
   transition-timing-function: ease-in;
+  z-index: -1 !important;
 }
 
 :host([mode=open]) {

@@ -286,7 +286,7 @@
                 "elements": [
                     {
                         "type": "button",
-                        "label": "<span class='material-symbols-outlined'>add</span><span>New</span>",
+                        "label": "<span class='material-symbols-outlined'>add</span><span>New ++</span>",
                         "className": "",
                         "action": "new",
                         "request": {},
@@ -333,7 +333,7 @@
                 "elements": [
                     {
                         "type": "button",
-                        "label": "<span class='material-symbols-outlined'>add</span><span>New</span>",
+                        "label": "<span class='material-symbols-outlined'>add</span><span>New ..</span>",
                         "className": "",
                         "action": "new",
                         "request": {},

@@ -488,9 +488,15 @@ class Grid extends HTMLElement {
     }
 
     handleEvent(event: CustomEvent) {
+        if (event.type == "app-action") {
+            this.sendRequest(event.detail.action);
+            return;
+        }
+
         if (event.type == "search" && event instanceof CustomEvent) {
             this._filter = event.detail.text;
             const request = this.sendRequest("filter");
+            return;
         }
 
         if (event.type == "page-select" && event instanceof CustomEvent) {
@@ -558,6 +564,7 @@ class Grid extends HTMLElement {
         console.log("connectedCallback");
         this.style.setProperty("--grid-columns", "");
 
+        $(this).on("app-action", this);
         $(this).on("page-select", this);
         $(this).on("grid-row-click", this);
         $(this).on("search", this);
@@ -568,6 +575,7 @@ class Grid extends HTMLElement {
     }
 
     public disconnectedCallback() {
+        $(this).off("app-action", this);
         $(this).off("page-select", this);
         $(this).off("grid-row-click", this);
         $(this).off("search", this);
@@ -906,7 +914,13 @@ class Grid extends HTMLElement {
 
         if (info) {
             info.form = this;
+            info.masterData = {
+                page: this._page || 1,
+                filter: this._filter || "",
+            };
+            $(this).fire("app-request", info);
 
+            return;
             const app: any = document.querySelector("._main_app_");
 
             app.send(info, {
@@ -976,13 +990,11 @@ class Grid extends HTMLElement {
         }
     }
 
-    valid(option?: string):string {
-        
-        
+    valid(option?: string): string {
         if (option == "select") {
             const input = $(this).query("input[name=__key_]");
-            
-            if (!input || input && !input.value()) {
+
+            if (!input || (input && !input.value())) {
                 return this.errorMessages?.selectRecord || "error";
             }
         }

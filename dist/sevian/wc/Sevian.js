@@ -21,6 +21,7 @@ export class Sevian extends HTMLElement {
         super();
         this.panels = {};
         this._modules = [];
+        this.triggers = {};
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
@@ -41,8 +42,62 @@ export class Sevian extends HTMLElement {
             //const nodes = slot.assignedNodes();
         });
     }
+    handleEvent(event) {
+        if (event.type == "click") {
+            const target = event.target.closest("ss-action");
+            console.log("Woooao", event.target);
+        }
+        else if (event.type == "app-request") {
+            console.log("*********", event.detail);
+            this.send(event.detail);
+        }
+    }
     connectedCallback() {
+        this.addEventListener("app-request", this);
+        // Select the node that will be observed for mutations
+        const targetNode = this;
+        // Options for the observer (which mutations to observe)
+        const config = { attributes: true, /*attributeFilter: ['error-messages'],*/ childList: true, subtree: true };
+        // Callback function to execute when mutations are observed
+        const callback = (mutationList, observer) => {
+            for (const mutation of mutationList) {
+                if (mutation.type === "childList") {
+                    const ss = Array.from(mutation.target.querySelectorAll("[ss-trigger]"));
+                    if (ss) {
+                        console.log(ss);
+                        ss.forEach((s) => {
+                            const trigger = s.getAttribute("ss-trigger");
+                            if (!this.triggers[trigger]) {
+                                this.addEventListener(trigger, this);
+                                this.triggers[trigger] = true;
+                            }
+                        });
+                    }
+                }
+                else if (mutation.type === "attributes") {
+                    console.log(`The ${mutation.attributeName} attribute was modified. `);
+                }
+            }
+        };
+        // Create an observer instance linked to the callback function
+        const observer = new MutationObserver(callback);
+        // Start observing the target node for configured mutations
+        observer.observe(targetNode, config);
+        // Later, you can stop observing
+        //observer.disconnect();
         this.classList.add("_main_app_");
+        return;
+        const ss = Array.from(this.querySelectorAll("[ss-trigger]"));
+        if (ss) {
+            console.log(ss);
+            ss.forEach((s) => {
+                const trigger = s.getAttribute("ss-trigger");
+                if (!this.triggers[trigger]) {
+                    this.addEventListener(trigger, this);
+                    this.triggers[trigger] = true;
+                }
+            });
+        }
     }
     disconnectedCallback() { }
     attributeChangedCallback(name, old, value) {
@@ -292,6 +347,7 @@ export class Sevian extends HTMLElement {
         return obj;
     }
     send(request, masterData) {
+        masterData = request.masterData || masterData;
         if (masterData && request.actions) {
             request.actions = this.evalExp(request.actions, masterData);
         }

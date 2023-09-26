@@ -40,6 +40,7 @@ export interface AppRequest {
     reportValidity?: boolean;
     blockLayers?: selector[];
     blockForm?:boolean;
+    masterData?:any;
 }
 
 export interface HtmlFragment {}

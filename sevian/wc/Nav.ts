@@ -133,6 +133,11 @@ class Nav extends HTMLElement {
             const target: HTMLElement = event.target.closest("button[data-nav-button]");
 
             if (target?.dataset.action) {
+                $(this).fire("app-action", { action: target?.dataset.action });
+                return;
+            }
+            return ;
+            if (target?.dataset.action) {
                 if (this.context?.sendRequest) {
                     console.log("action is", target.dataset.action);
                     this._context.sendRequest(target.dataset.action);
@@ -206,6 +211,9 @@ class Nav extends HTMLElement {
     }
 
     get context() {
+        if (this.getAttribute("context")) {
+            return this.getAttribute("context");
+        }
         return this._context || this;
     }
 
@@ -223,6 +231,8 @@ class Nav extends HTMLElement {
     createElement(info) {
         const button = $(this)
             .create("button")
+            .attr("ss-action", info.action || "")
+            .attr("ss-trigger", info.trigger || "click")
             .attr("type", "button")
             .addClass(info.className)
             .ds("navButton", "")
