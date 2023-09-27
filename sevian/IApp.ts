@@ -1,7 +1,31 @@
+export type DataJson = { [key: string]: any };
+
+export interface LRequest {
+
+    headers?: DataJson;
+    mode?: string;
+    method?:"post" | "get";
+    contentType?: string;
+
+    confirm?:string;
+    sendTo: selector | HTMLElement;
+    sendForm?: true;
+    body?: DataJson;
+    valid?: boolean;
+    validForm?: boolean;
+    validOption?: any;
+    globalStore?: true | string[];
+    sendStore?: boolean | object;
+    blockTo?: boolean | "*" | selector | selector[] | HTMLElement[];
+    
+    actions?: any[];
+    masterData?: DataJson;
+}
+
 export type selector = string;
 
 export interface AppComponent {
-    valid?: (option?:any) => boolean;
+    valid?: (option?: any) => boolean;
 }
 
 export interface PanelInfo {
@@ -30,7 +54,12 @@ export interface AppRequest {
     type?: string;
     panel?: selector;
     confirm?: string;
-    validate?: AppComponent | selector | HTMLElement | ((option?:any) => boolean)  | {validd:(option?:any)=> boolean, option:any};
+    validate?:
+        | AppComponent
+        | selector
+        | HTMLElement
+        | ((option?: any) => boolean)
+        | { validd: (option?: any) => boolean; option: any };
     validateOption?: any;
     form?: selector | HTMLElement | HTMLFormElement;
     body?: object;
@@ -39,8 +68,8 @@ export interface AppRequest {
     store?: true | { [key: string]: any };
     reportValidity?: boolean;
     blockLayers?: selector[];
-    blockForm?:boolean;
-    masterData?:any;
+    blockForm?: boolean;
+    masterData?: any;
 }
 
 export interface HtmlFragment {}
@@ -98,8 +127,8 @@ export interface IResponse {
 }
 
 export interface IElement {
-    do?:string;
-    to?:string;
+    do?: string;
+    to?: string;
     id: string;
     element: string;
     iClass: string;
@@ -116,6 +145,6 @@ export interface IElement {
     panel?: string;
     setTo?: selector;
     appendTo?: string;
-    message?:string;
-    log?:string;
+    message?: string;
+    log?: string;
 }

@@ -356,6 +356,7 @@ class Grid extends HTMLElement {
             <slot name="info"></slot>
             <slot name="paginator"></slot>
             <slot name="nav"></slot>
+            <slot></slot>
             
             `;
         this.attachShadow({ mode: "open" });
@@ -741,7 +742,7 @@ class Grid extends HTMLElement {
         }
         const info = (_a = this.getAppRequest(name)) === null || _a === void 0 ? void 0 : _a.data;
         if (info) {
-            info.form = this;
+            info.sendTo = this;
             info.masterData = {
                 page: this._page || 1,
                 filter: this._filter || "",

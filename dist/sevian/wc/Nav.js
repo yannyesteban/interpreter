@@ -103,31 +103,14 @@ class Nav extends HTMLElement {
         });
     }
     handleEvent(event) {
-        var _a;
         if (event.type == "click") {
-            const target = event.target.closest("button[data-nav-button]");
+            const target = event.target.closest("button[data-nav-type='button']");
             if (target === null || target === void 0 ? void 0 : target.dataset.action) {
                 $(this).fire("app-action", { action: target === null || target === void 0 ? void 0 : target.dataset.action });
                 return;
             }
-            return;
-            if (target === null || target === void 0 ? void 0 : target.dataset.action) {
-                if ((_a = this.context) === null || _a === void 0 ? void 0 : _a.sendRequest) {
-                    console.log("action is", target.dataset.action);
-                    this._context.sendRequest(target.dataset.action);
-                    return;
-                }
-                const customEvent = new CustomEvent("do-action", {
-                    detail: {
-                        action: target.dataset.action,
-                    },
-                    cancelable: true,
-                    bubbles: true,
-                });
-                this.dispatchEvent(customEvent);
-            }
             if (target === null || target === void 0 ? void 0 : target.dataset.request) {
-                const customEvent = new CustomEvent("do-request", {
+                const customEvent = new CustomEvent("app-request", {
                     detail: {
                         request: target.dataset.request,
                     },
@@ -195,11 +178,12 @@ class Nav extends HTMLElement {
     createElement(info) {
         const button = $(this)
             .create("button")
+            .id(info.id || null)
             .attr("ss-action", info.action || "")
             .attr("ss-trigger", info.trigger || "click")
             .attr("type", "button")
             .addClass(info.className)
-            .ds("navButton", "")
+            .ds("navType", "button")
             .ds("action", info.action || "")
             .html(info.label);
         if (info.events) {

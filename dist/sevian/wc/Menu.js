@@ -209,8 +209,22 @@ class WHMenuItem extends HTMLElement {
             });
         });
     }
+    handleEvent(event) {
+        if (event.type == "click") {
+            if (this.request) {
+                const customEvent = new CustomEvent("app-request", {
+                    detail: this.request,
+                    cancelable: true,
+                    bubbles: true,
+                });
+                this.dispatchEvent(customEvent);
+            }
+        }
+    }
     connectedCallback() {
         this.slot = "item";
+        $(this).on("click", this);
+        return;
         $(this).on("click", event => {
             console.log(event);
             if (this.request) {
@@ -218,9 +232,12 @@ class WHMenuItem extends HTMLElement {
             }
         });
     }
+    disconnectedCallback() {
+        $(this).off("click", this);
+    }
     attributeChangedCallback(name, oldValue, newValue) {
         switch (name) {
-            case 'value':
+            case "value":
                 break;
             case 'checked':
                 this._updateCheckbox(newValue);
@@ -247,7 +264,18 @@ class WHMenuItem extends HTMLElement {
         this.setAttribute("value", value);
     }
     get value() {
-        return this.getAttribute('value');
+        return this.getAttribute("value");
+    }
+    set request(value) {
+        if (typeof value === "object") {
+            this.setAttribute("request", JSON.stringify(value));
+        }
+        else {
+            this.setAttribute("request", value);
+        }
+    }
+    get request() {
+        return JSON.parse(this.getAttribute("request"));
     }
     set useIcon(value) {
         if (Boolean(value)) {
@@ -385,12 +413,6 @@ class WHMenuItem extends HTMLElement {
     }
     set removeClass(className) {
         $(this).removeClass(className);
-    }
-    set request(value) {
-        this._request = value;
-    }
-    get request() {
-        return this._request;
     }
     _getCheckbox() {
         return this.querySelector(`:scope > wh-menu-link > wh-menu-check input`);

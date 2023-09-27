@@ -4,8 +4,10 @@
     "className": "main",
     "items": [
         {
-            "caption": "Google Form",
+            "caption": "Google Form.",
             "request": {
+                "sendTo":"#p2",
+                "blockTo": true,
                 "form_":"#p2",
                 "store":{
                   
@@ -13,7 +15,7 @@
                 "_confirm": "sure?",
                 "actions": [
                     {
-                        "id": "google",
+                        "id": "two",
                         "to": "p2",
                         "do": "set-panel",
                         "api": "form",
@@ -29,6 +31,8 @@
         {
             "caption": "Load Form",
             "request": {
+                "sendTo":"#p2",
+                "blockTo": true,
                 "form":"#p1",
                 "_confirm": "sure?",
                 "store":{
@@ -50,6 +54,8 @@
         {
             "caption": "New (+) Record",
             "request": {
+                "sendTo":"#p2",
+                "blockTo": true,
                 "_confirm": "sure?",
                 "actions": [
                     {
@@ -71,6 +77,8 @@
         {
             "caption": "Edit Record",
             "request": {
+                "sendTo":"#p2",
+                "blockTo": true,
                 "_confirm": "sure?",
                 "actions": [
                     {

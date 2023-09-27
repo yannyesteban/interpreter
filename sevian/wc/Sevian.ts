@@ -4,7 +4,7 @@ import { loadCss } from "./../LoadCss.js";
 
 import { Q as $ } from "./../Q.js";
 import * as wc from "./../WC.js";
-import { AppRequest, ElementResponse, FetchInfo, IElement, IResponse } from "../IApp.js";
+import { AppRequest, ElementResponse, FetchInfo, IElement, IResponse, LRequest } from "../IApp.js";
 import "./AppRequest.js";
 
 export class Sevian extends HTMLElement {
@@ -41,25 +41,26 @@ export class Sevian extends HTMLElement {
         const slot = this.shadowRoot.querySelector("slot");
 
         slot.addEventListener("slotchange", (e) => {
-            
             //const nodes = slot.assignedNodes();
         });
     }
 
-    handleEvent(event:any) {
+    handleEvent(event: any) {
         if (event.type == "click") {
             const target = event.target.closest("ss-action");
-            
+
             console.log("Woooao", event.target);
-        }else if(event.type == "app-request"){
-            console.log("*********", event.detail)
-            this.send(event.detail)
+        } else if (event.type == "app-request") {
+            
+            console.log("*********", event.detail);
+            this.fetch(event.detail);
         }
     }
 
     public connectedCallback() {
-
+        this.classList.add("_main_app_");
         this.addEventListener("app-request", this);
+        return;
         // Select the node that will be observed for mutations
         const targetNode = this;
 
@@ -97,7 +98,7 @@ export class Sevian extends HTMLElement {
         // Later, you can stop observing
         //observer.disconnect();
 
-        this.classList.add("_main_app_");
+        
 
         return;
         const ss = Array.from(this.querySelectorAll("[ss-trigger]"));
@@ -111,7 +112,6 @@ export class Sevian extends HTMLElement {
                 }
             });
         }
-        
     }
 
     public disconnectedCallback() {}
@@ -390,8 +390,135 @@ export class Sevian extends HTMLElement {
         return obj;
     }
 
-    send(request: AppRequest, masterData?: any) {
+    fetch(request: LRequest) {
+       
+        let element = null;
 
+        if (request.sendTo && request.sendTo instanceof HTMLElement) {
+            element = request.sendTo;
+        } else if (request.sendTo && typeof request.sendTo === "string") {
+            element = this.querySelector(request.sendTo);
+        }
+
+        if (request.valid && typeof element?.valid === "function") {
+            const error = element.valid(request.validOption || undefined);
+            if (error) {
+               this._showError(error);
+                return;
+            }
+        }
+
+        if (request.confirm && !window.confirm(request.confirm)) {
+            return;
+        }
+        let actions = request.actions;
+        const masterData = request.masterData;
+
+        if (masterData && actions) {
+            actions = this.evalExp(actions, masterData);
+        }
+
+        let form: HTMLFormElement = null;
+        let data = new FormData();
+        if (element) {
+            form = element.closest("form");
+        }
+
+        if (form && request.validForm) {
+            if (!form.reportValidity()) {
+                return;
+            }
+
+            data = new FormData(form);
+        }
+
+        let store: any = {};
+
+        if (request?.globalStore === true) {
+            store = this.getStore();
+        } else if (Array.isArray(request?.globalStore)) {
+            store = request.globalStore.reduce((s: any, e: string) => ((s[e] = store[e]), s), {});
+        }
+
+        if (request?.sendStore === true && typeof element.getStore === "function") {
+            const _store = element.getStore();
+            store = { ...store, ..._store };
+        } else if (typeof request?.sendStore === "object") {
+            store = { ...store, ...request.sendStore };
+        }
+
+        if (request.body) {
+            for (const [key, value] of Object.entries(request.body)) {
+                data.append(key, value);
+            }
+        }
+
+        let contentType = request.contentType === undefined ? "application/json" : request.contentType;
+
+        let body: FormData | any = {};
+        if (contentType === "application/json") {
+            body = JSON.stringify({
+                ...Object.fromEntries(data.entries()),
+                __app_request: actions,
+                __app_store: store,
+            });
+        } else {
+            body.append("__app_request", JSON.stringify(actions));
+            if (store) {
+                body.append("__app_store", JSON.stringify(store));
+            }
+
+            if (contentType === "application/x-www-form-urlencoded") {
+                body = new URLSearchParams(body);
+            } else {
+                contentType = null;
+            }
+        }
+
+        const layers = [];
+
+        if (request.blockTo === true && element) {
+            layers.push(this._createBlockLayer(element));
+        } else if (request.blockTo === true && form) {
+            layers.push(this._createBlockLayer(form));
+        } else if (Array.isArray(request.blockTo)) {
+            request.blockTo.forEach((e) => layers.push(this._createBlockLayer(e)));
+        }
+
+        const headers = {
+            Authorization: `Bearer ${this.token}`,
+            "Application-Id": this.id,
+            "Application-Mode": request.mode,
+            ...request.headers,
+        };
+
+        if (contentType) {
+            headers["Content-Type"] = contentType;
+        }
+
+        fetch(this.server /*"http://localhost/phpserver/"*/, {
+            method: request.method || "post",
+            headers,
+            body,
+        })
+            .then((response) => {
+                return response.json();
+            })
+            .catch((error) => {
+                console.log(error);
+            })
+            .then((json) => {
+                this.evalResponse(json);
+            })
+            .finally(() => {
+                layers.forEach((layer) => {
+                    layer.remove();
+                });
+            });
+    }
+
+    send(request: AppRequest, masterData?: any) {
+        
         masterData = request.masterData || masterData;
 
         if (masterData && request.actions) {
@@ -540,6 +667,36 @@ export class Sevian extends HTMLElement {
                     layer.remove();
                 });
             });
+    }
+
+    _createBlockLayer(source: HTMLElement | string): HTMLElement {
+        let element: HTMLElement;
+        if (typeof source === "string") {
+            element = this.querySelector(source);
+        }else {
+            element = source;
+        }
+
+        const layer = $.create("wait-layer");
+
+        element.appendChild(layer.get<HTMLElement>());
+
+        console.log(element, layer)
+        return layer.get();
+    }
+
+    _showError(error){
+        this.showMessage({
+            type: "alert",
+            caption: "Error!",
+            delay: 5000,
+            text: error,
+            className: "x",
+            left: "center",
+            top: "20px",
+
+            autoClose: "true",
+        });
     }
 }
 

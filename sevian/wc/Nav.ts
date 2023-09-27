@@ -130,31 +130,15 @@ class Nav extends HTMLElement {
 
     handleEvent(event) {
         if (event.type == "click") {
-            const target: HTMLElement = event.target.closest("button[data-nav-button]");
+            const target: HTMLElement = event.target.closest("button[data-nav-type='button']");
 
             if (target?.dataset.action) {
                 $(this).fire("app-action", { action: target?.dataset.action });
                 return;
             }
-            return ;
-            if (target?.dataset.action) {
-                if (this.context?.sendRequest) {
-                    console.log("action is", target.dataset.action);
-                    this._context.sendRequest(target.dataset.action);
-                    return;
-                }
 
-                const customEvent = new CustomEvent("do-action", {
-                    detail: {
-                        action: target.dataset.action,
-                    },
-                    cancelable: true,
-                    bubbles: true,
-                });
-                this.dispatchEvent(customEvent);
-            }
             if (target?.dataset.request) {
-                const customEvent = new CustomEvent("do-request", {
+                const customEvent = new CustomEvent("app-request", {
                     detail: {
                         request: target.dataset.request,
                     },
@@ -163,6 +147,7 @@ class Nav extends HTMLElement {
                 });
                 this.dispatchEvent(customEvent);
             }
+           
         }
     }
 
@@ -231,11 +216,12 @@ class Nav extends HTMLElement {
     createElement(info) {
         const button = $(this)
             .create("button")
+            .id(info.id || null)
             .attr("ss-action", info.action || "")
             .attr("ss-trigger", info.trigger || "click")
             .attr("type", "button")
             .addClass(info.className)
-            .ds("navButton", "")
+            .ds("navType", "button")
             .ds("action", info.action || "")
             .html(info.label);
         if (info.events) {

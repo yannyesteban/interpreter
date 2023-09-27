@@ -30,8 +30,9 @@ export class QElement {
         this.e.removeEventListener(event, fn, true);
         return this;
     }
-
-    id(id?) {
+    id(): string;
+    id(id: string): QElement;
+    id(id?: string): unknown {
         if (id === undefined) {
             return this.e.id;
         }
@@ -180,7 +181,7 @@ export class QElement {
         return this;
     }
 
-    doIf(cond:boolean, callback:Function) {
+    doIf(cond: boolean, callback: Function) {
         if (cond) {
             callback(this);
         }

@@ -515,6 +515,7 @@ export class Form extends Element {
     appRequests(type) {
         const requests = {
             dataField: {
+                blockTo: true,
                 actions: [
                     {
                         do: "update",
@@ -527,6 +528,7 @@ export class Form extends Element {
                 ],
             },
             save: {
+                blockTo: true,
                 confirm: "secure save?",
                 reportValidity: true,
                 actions: [
@@ -554,6 +556,7 @@ export class Form extends Element {
                 ],
             },
             delete: {
+                blockTo: true,
                 setFormValue: {
                     __mode_: "3",
                 },
@@ -582,6 +585,7 @@ export class Form extends Element {
                 ],
             },
             list: {
+                blockTo: true,
                 actions: [
                     {
                         do: "set-panel",
@@ -597,6 +601,7 @@ export class Form extends Element {
                 ],
             },
             "load-page": {
+                blockTo: true,
                 actions: [
                     {
                         do: "update",
@@ -614,6 +619,7 @@ export class Form extends Element {
             "edit-record": {
                 validate: "#{{&ID_}}",
                 validateOption: "select",
+                blockTo: true,
                 actions: [
                     {
                         do: "set-panel",
@@ -626,6 +632,7 @@ export class Form extends Element {
                 ],
             },
             "delete-record": {
+                blockTo: true,
                 confirm: "borrando!",
                 validate: "#{{&ID_}}",
                 validateOption: "select",
@@ -658,6 +665,7 @@ export class Form extends Element {
                 ],
             },
             filter: {
+                blockTo: true,
                 actions: [
                     {
                         do: "update",
@@ -673,6 +681,7 @@ export class Form extends Element {
                 ],
             },
             new: {
+                blockTo: true,
                 actions: [
                     {
                         do: "set-panel",

@@ -462,6 +462,7 @@ class Grid extends HTMLElement {
             <slot name="info"></slot>
             <slot name="paginator"></slot>
             <slot name="nav"></slot>
+            <slot></slot>
             
             `;
 
@@ -913,7 +914,7 @@ class Grid extends HTMLElement {
         const info = this.getAppRequest(name)?.data;
 
         if (info) {
-            info.form = this;
+            info.sendTo = this;
             info.masterData = {
                 page: this._page || 1,
                 filter: this._filter || "",

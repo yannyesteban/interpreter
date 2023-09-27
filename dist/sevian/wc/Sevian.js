@@ -49,11 +49,13 @@ export class Sevian extends HTMLElement {
         }
         else if (event.type == "app-request") {
             console.log("*********", event.detail);
-            this.send(event.detail);
+            this.fetch(event.detail);
         }
     }
     connectedCallback() {
+        this.classList.add("_main_app_");
         this.addEventListener("app-request", this);
+        return;
         // Select the node that will be observed for mutations
         const targetNode = this;
         // Options for the observer (which mutations to observe)
@@ -85,7 +87,6 @@ export class Sevian extends HTMLElement {
         observer.observe(targetNode, config);
         // Later, you can stop observing
         //observer.disconnect();
-        this.classList.add("_main_app_");
         return;
         const ss = Array.from(this.querySelectorAll("[ss-trigger]"));
         if (ss) {
@@ -346,6 +347,110 @@ export class Sevian extends HTMLElement {
         }
         return obj;
     }
+    fetch(request) {
+        let element = null;
+        if (request.sendTo && request.sendTo instanceof HTMLElement) {
+            element = request.sendTo;
+        }
+        else if (request.sendTo && typeof request.sendTo === "string") {
+            element = this.querySelector(request.sendTo);
+        }
+        if (request.valid && typeof (element === null || element === void 0 ? void 0 : element.valid) === "function") {
+            const error = element.valid(request.validOption || undefined);
+            if (error) {
+                this._showError(error);
+                return;
+            }
+        }
+        if (request.confirm && !window.confirm(request.confirm)) {
+            return;
+        }
+        let actions = request.actions;
+        const masterData = request.masterData;
+        if (masterData && actions) {
+            actions = this.evalExp(actions, masterData);
+        }
+        let form = null;
+        let data = new FormData();
+        if (element) {
+            form = element.closest("form");
+        }
+        if (form && request.validForm) {
+            if (!form.reportValidity()) {
+                return;
+            }
+            data = new FormData(form);
+        }
+        let store = {};
+        if ((request === null || request === void 0 ? void 0 : request.globalStore) === true) {
+            store = this.getStore();
+        }
+        else if (Array.isArray(request === null || request === void 0 ? void 0 : request.globalStore)) {
+            store = request.globalStore.reduce((s, e) => ((s[e] = store[e]), s), {});
+        }
+        if ((request === null || request === void 0 ? void 0 : request.sendStore) === true && typeof element.getStore === "function") {
+            const _store = element.getStore();
+            store = Object.assign(Object.assign({}, store), _store);
+        }
+        else if (typeof (request === null || request === void 0 ? void 0 : request.sendStore) === "object") {
+            store = Object.assign(Object.assign({}, store), request.sendStore);
+        }
+        if (request.body) {
+            for (const [key, value] of Object.entries(request.body)) {
+                data.append(key, value);
+            }
+        }
+        let contentType = request.contentType === undefined ? "application/json" : request.contentType;
+        let body = {};
+        if (contentType === "application/json") {
+            body = JSON.stringify(Object.assign(Object.assign({}, Object.fromEntries(data.entries())), { __app_request: actions, __app_store: store }));
+        }
+        else {
+            body.append("__app_request", JSON.stringify(actions));
+            if (store) {
+                body.append("__app_store", JSON.stringify(store));
+            }
+            if (contentType === "application/x-www-form-urlencoded") {
+                body = new URLSearchParams(body);
+            }
+            else {
+                contentType = null;
+            }
+        }
+        const layers = [];
+        if (request.blockTo === true && element) {
+            layers.push(this._createBlockLayer(element));
+        }
+        else if (request.blockTo === true && form) {
+            layers.push(this._createBlockLayer(form));
+        }
+        else if (Array.isArray(request.blockTo)) {
+            request.blockTo.forEach((e) => layers.push(this._createBlockLayer(e)));
+        }
+        const headers = Object.assign({ Authorization: `Bearer ${this.token}`, "Application-Id": this.id, "Application-Mode": request.mode }, request.headers);
+        if (contentType) {
+            headers["Content-Type"] = contentType;
+        }
+        fetch(this.server /*"http://localhost/phpserver/"*/, {
+            method: request.method || "post",
+            headers,
+            body,
+        })
+            .then((response) => {
+            return response.json();
+        })
+            .catch((error) => {
+            console.log(error);
+        })
+            .then((json) => {
+            this.evalResponse(json);
+        })
+            .finally(() => {
+            layers.forEach((layer) => {
+                layer.remove();
+            });
+        });
+    }
     send(request, masterData) {
         masterData = request.masterData || masterData;
         if (masterData && request.actions) {
@@ -472,6 +577,31 @@ export class Sevian extends HTMLElement {
             layers.forEach((layer) => {
                 layer.remove();
             });
+        });
+    }
+    _createBlockLayer(source) {
+        let element;
+        if (typeof source === "string") {
+            element = this.querySelector(source);
+        }
+        else {
+            element = source;
+        }
+        const layer = $.create("wait-layer");
+        element.appendChild(layer.get());
+        console.log(element, layer);
+        return layer.get();
+    }
+    _showError(error) {
+        this.showMessage({
+            type: "alert",
+            caption: "Error!",
+            delay: 5000,
+            text: error,
+            className: "x",
+            left: "center",
+            top: "20px",
+            autoClose: "true",
         });
     }
 }

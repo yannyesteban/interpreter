@@ -332,6 +332,7 @@
             "nav":{
                 "elements": [
                     {
+                        "id":"elButton1",
                         "type": "button",
                         "label": "<span class='material-symbols-outlined'>add</span><span>New ..</span>",
                         "className": "",
