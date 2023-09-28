@@ -1,0 +1,42 @@
+{
+    "id": "google-menu",
+    "caption": "Test",
+    "className": "main",
+    "appRequests":{
+        "load1":{
+            "sendTo":"#p2",
+            "blockTo": true,
+            "_confirm": "sure?",
+            "actions": [
+                {
+                    
+                    "id": "unit3",
+                    "do": "set-panel",
+                    "to": "p2",
+                    
+                    "api": "form",
+                    "name": "google_form",
+                    "method": "new-record",
+                    "params": {
+                        "__key__":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
+                    }
+                }
+            ]
+        }
+    },
+    "items": [
+        {
+            "caption": "LOAD ONE",
+            "action":"load1"
+        }
+        
+    ],
+    "element": {
+        "addClass": ["exit-menu", "unit"],
+        "hideCheck": true,
+        "hideIcon": false,
+        "events": {
+            "link-action": "console.log('hola')"
+        }
+    }
+}

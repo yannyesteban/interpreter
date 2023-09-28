@@ -37,6 +37,15 @@
                 "name": "main-menu",
                 "method": "load",
                 "params": {}
+            },
+            {
+                "do":"append-to",
+                "to":"#m2",
+                "id":"google-menu",
+                "api": "menu",
+                "name": "google-menu",
+                "method": "load",
+                "params": {}
             }
         ]
     },

@@ -8,7 +8,7 @@ export interface LRequest {
     contentType?: string;
 
     confirm?:string;
-    sendTo: selector | HTMLElement;
+    sendTo?: selector | HTMLElement;
     sendForm?: true;
     body?: DataJson;
     valid?: boolean;

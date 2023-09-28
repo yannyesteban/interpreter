@@ -142,31 +142,12 @@ class GTForm extends HTMLElement {
                     if (mode) {
                         const request = this.getAppRequest("dataField");
                         if (request) {
-                            let info = request.data;
-                            info.form = this;
-                            info.actions[0].params = {
+                            request.sendTo = request.sendTo || this;
+                            request.masterData = {
                                 parent: event.target.name,
                             };
-                            const app = document.querySelector("._main_app_");
-                            app.send(info);
+                            $(this).fire("app-request", request);
                         }
-                        /*
-                        const app: Sevian = this.closest("sevian-app");
-                        app.send({
-                            form: this,
-                            actions: [
-                                {
-                                    type: "element",
-                                    element: "form",
-                                    id: this.id,
-                                    name: "two",
-                                    method: "data-fields",
-                                    params: {
-                                        parent: event.target.name,
-                                    },
-                                },
-                            ],
-                        });*/
                     }
                     else {
                         const element = $(`[name="${name}"]`);
@@ -465,6 +446,7 @@ class GTForm extends HTMLElement {
     }
     _createNav(info) {
         info.context = this;
+        info.actionContext = this.tagName.toLowerCase();
         const nav = $.create("ss-nav").prop("dataSource", info);
         /*
         console.log(info)
@@ -494,19 +476,8 @@ class GTForm extends HTMLElement {
         return separator.get();
     }
     getAppRequest(name) {
-        return this.querySelector(`app-request[name="${name}"]`);
-    }
-    sendRequest(name) {
         var _a;
-        const info = (_a = this.getAppRequest(name)) === null || _a === void 0 ? void 0 : _a.data;
-        if (info) {
-            info.form = this;
-            const app = document.querySelector("._main_app_");
-            app.send(info);
-        }
-        else {
-            console.log("request don't exists!");
-        }
+        return (_a = this.querySelector(`app-request[name="${name}"]`)) === null || _a === void 0 ? void 0 : _a.data;
     }
     test(h, i) {
         console.log(h, i);

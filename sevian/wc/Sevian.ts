@@ -51,15 +51,49 @@ export class Sevian extends HTMLElement {
 
             console.log("Woooao", event.target);
         } else if (event.type == "app-request") {
-            
             console.log("*********", event.detail);
             this.fetch(event.detail);
+        } else if (event.type == "app-action") {
+            const action = event.detail;
+            let request: LRequest = {};
+            let context = null;
+            const target = event.target;
+            console.log(target, action, event.target.actionContext)
+            if (event.target.actionContext) {
+                context = target.closest(event.target.actionContext);
+            } else if (event.target.useContext) {
+                context = this.querySelector(event.target.actionContext);
+            } else {
+                context = this;
+            }
+
+            if (typeof context.getAppRequest === "function") {
+                request = context.getAppRequest(action);
+                console.log(action, context, request);
+            } else {
+                const elem: any = this.querySelector(`app-request[name="${action}"]`);
+                if (elem) {
+                    request = elem.data;
+                }
+            }
+
+            if (!request.sendTo) {
+                request.sendTo = context;
+
+                console.log(request.sendTo);
+            }
+
+            console.log(request);
+
+            this.fetch(request);
+            //return this.querySelector(`app-request[name="${name}"]`);
         }
     }
 
     public connectedCallback() {
         this.classList.add("_main_app_");
         this.addEventListener("app-request", this);
+        this.addEventListener("app-action", this);
         return;
         // Select the node that will be observed for mutations
         const targetNode = this;
@@ -97,8 +131,6 @@ export class Sevian extends HTMLElement {
 
         // Later, you can stop observing
         //observer.disconnect();
-
-        
 
         return;
         const ss = Array.from(this.querySelectorAll("[ss-trigger]"));
@@ -220,6 +252,12 @@ export class Sevian extends HTMLElement {
                 } else if (info.do == "set-element") {
                     panel = $(info.to);
                     panel.text("");
+                }else if (info.do == "append-to") {
+                    
+                    panel = $(info.to);
+                    
+                    
+               
                 }
 
                 //const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
@@ -231,6 +269,7 @@ export class Sevian extends HTMLElement {
                 if (info.panel || info.setTo) {
                     panel.text("");
                 }
+                
                 panel.append(e);
             })
             .catch((error) => {
@@ -265,6 +304,9 @@ export class Sevian extends HTMLElement {
                         this.panels[r.panel] = r;
                     }
                     break;
+                case "append-to":
+                    await this.setElement(r);
+                    break;                    
                 case "update":
                     await this.updateElement(r);
                     break;
@@ -380,6 +422,16 @@ export class Sevian extends HTMLElement {
         popup.mode = "open";
     }
 
+    evalDataElement(obj, data) {
+        const str = Eval.evalAll(JSON.stringify(obj), data);
+
+        if (str) {
+            return JSON.parse(str);
+        }
+
+        return obj;
+    }
+
     evalExp(obj, data) {
         const str = Eval.evalAll(JSON.stringify(obj), { ...this.getStore(), ...data });
 
@@ -391,7 +443,6 @@ export class Sevian extends HTMLElement {
     }
 
     fetch(request: LRequest) {
-       
         let element = null;
 
         if (request.sendTo && request.sendTo instanceof HTMLElement) {
@@ -403,7 +454,7 @@ export class Sevian extends HTMLElement {
         if (request.valid && typeof element?.valid === "function") {
             const error = element.valid(request.validOption || undefined);
             if (error) {
-               this._showError(error);
+                this._showError(error);
                 return;
             }
         }
@@ -411,7 +462,14 @@ export class Sevian extends HTMLElement {
         if (request.confirm && !window.confirm(request.confirm)) {
             return;
         }
-        let actions = request.actions;
+        let actions = request.actions || [];
+
+        if (element && actions) {
+            
+            actions = this.evalDataElement(actions, element);
+            console.log("actions", actions,element);
+        }
+
         const masterData = request.masterData;
 
         if (masterData && actions) {
@@ -424,8 +482,8 @@ export class Sevian extends HTMLElement {
             form = element.closest("form");
         }
 
-        if (form && request.validForm) {
-            if (!form.reportValidity()) {
+        if (form) {
+            if (request.validForm && !form.reportValidity()) {
                 return;
             }
 
@@ -518,7 +576,6 @@ export class Sevian extends HTMLElement {
     }
 
     send(request: AppRequest, masterData?: any) {
-        
         masterData = request.masterData || masterData;
 
         if (masterData && request.actions) {
@@ -673,7 +730,7 @@ export class Sevian extends HTMLElement {
         let element: HTMLElement;
         if (typeof source === "string") {
             element = this.querySelector(source);
-        }else {
+        } else {
             element = source;
         }
 
@@ -681,11 +738,11 @@ export class Sevian extends HTMLElement {
 
         element.appendChild(layer.get<HTMLElement>());
 
-        console.log(element, layer)
+        console.log(element, layer);
         return layer.get();
     }
 
-    _showError(error){
+    _showError(error) {
         this.showMessage({
             type: "alert",
             caption: "Error!",

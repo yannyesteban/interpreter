@@ -233,33 +233,12 @@ class GTForm extends HTMLElement {
                     if (mode) {
                         const request = this.getAppRequest("dataField");
                         if (request) {
-                            let info = request.data;
-                            info.form = this;
-                            info.actions[0].params = {
+                            request.sendTo = request.sendTo || this;
+                            request.masterData = {
                                 parent: event.target.name,
                             };
-
-                            const app: any = document.querySelector("._main_app_");
-
-                            app.send(info);
+                            $(this).fire("app-request", request);
                         }
-                        /* 
-                        const app: Sevian = this.closest("sevian-app");
-                        app.send({
-                            form: this,
-                            actions: [
-                                {
-                                    type: "element",
-                                    element: "form",
-                                    id: this.id,
-                                    name: "two",
-                                    method: "data-fields",
-                                    params: {
-                                        parent: event.target.name,
-                                    },
-                                },
-                            ],
-                        });*/
                     } else {
                         const element = $(`[name="${name}"]`);
                         if (element) {
@@ -597,6 +576,7 @@ class GTForm extends HTMLElement {
 
     _createNav(info): HTMLElement {
         info.context = this;
+        info.actionContext = this.tagName.toLowerCase();
         const nav = $.create("ss-nav").prop("dataSource", info);
 
         /*
@@ -634,27 +614,15 @@ class GTForm extends HTMLElement {
         return separator.get();
     }
 
-    getAppRequest(name: string): AppRequest {
-        return this.querySelector(`app-request[name="${name}"]`);
+    getAppRequest(name: string): any {
+        return this.querySelector<AppRequest>(`app-request[name="${name}"]`)?.data;
     }
 
-    sendRequest(name) {
-        const info = this.getAppRequest(name)?.data;
-        if (info) {
-            info.form = this;
-            const app: any = document.querySelector("._main_app_");
-
-            app.send(info);
-        } else {
-            console.log("request don't exists!");
-        }
-    }
+    
 
     test(h, i) {
         console.log(h, i);
     }
-
-    
 }
 
 customElements.define("gt-form", GTForm);

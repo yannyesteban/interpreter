@@ -524,6 +524,9 @@ export class Form extends Element {
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "data-fields",
+                        params: {
+                            parent: "{=parent}"
+                        }
                     },
                 ],
             },

@@ -4,7 +4,7 @@ function dispatchEvent(element, eventName, detail) {
     const event = new CustomEvent(eventName, {
         detail,
         cancelable: true,
-        bubbles: true
+        bubbles: true,
     });
     element.dispatchEvent(event);
 }
@@ -171,7 +171,7 @@ class WHMenuItem extends HTMLElement {
                 if ($(this).hasClass("sub-menu")) {
                     if (!this.opened) {
                         const items = Array.from(this.parentElement.querySelectorAll(`:scope > wh-menu-item`));
-                        items.forEach(item => {
+                        items.forEach((item) => {
                             item["opened"] = false;
                         });
                     }
@@ -186,7 +186,7 @@ class WHMenuItem extends HTMLElement {
                         if (!this.opened) {
                             const parent = this.parentElement;
                             const items = Array.from(this.parentElement.querySelectorAll(`:scope > wh-menu-item`));
-                            items.forEach(item => {
+                            items.forEach((item) => {
                                 item["opened"] = false;
                             });
                         }
@@ -200,7 +200,7 @@ class WHMenuItem extends HTMLElement {
         slot.addEventListener("slotchange", (event) => {
             console.log("group");
             $(this).removeClass("sub-menu");
-            [...slot.assignedElements()].forEach(e => {
+            [...slot.assignedElements()].forEach((e) => {
                 $(this).addClass("sub-menu");
                 const link = $(this).query(`wh-menu-link`);
                 link.prop("subMenu", true);
@@ -225,7 +225,7 @@ class WHMenuItem extends HTMLElement {
         this.slot = "item";
         $(this).on("click", this);
         return;
-        $(this).on("click", event => {
+        $(this).on("click", (event) => {
             console.log(event);
             if (this.request) {
                 this.send();
@@ -239,23 +239,23 @@ class WHMenuItem extends HTMLElement {
         switch (name) {
             case "value":
                 break;
-            case 'checked':
+            case "checked":
                 this._updateCheckbox(newValue);
                 break;
-            case 'disabled':
+            case "disabled":
                 break;
-            case 'visible':
+            case "visible":
                 break;
-            case 'use-check':
+            case "use-check":
                 break;
-            case 'use-icon':
+            case "use-icon":
                 break;
-            case 'appRequest':
+            case "appRequest":
                 break;
-            case 'onaction':
+            case "onaction":
                 $(this).on("link-action", $.bind(newValue, this, "event"));
                 break;
-            case 'oncheck':
+            case "oncheck":
                 $(this).on("link-check", $.bind(newValue, this, "event"));
                 break;
         }
@@ -277,6 +277,17 @@ class WHMenuItem extends HTMLElement {
     get request() {
         return JSON.parse(this.getAttribute("request"));
     }
+    set action(value) {
+        if (Boolean(value)) {
+            this.setAttribute("action", value);
+        }
+        else {
+            this.removeAttribute("action");
+        }
+    }
+    get action() {
+        return this.getAttribute("action");
+    }
     set useIcon(value) {
         if (Boolean(value)) {
             this.setAttribute("use-icon", "");
@@ -286,7 +297,7 @@ class WHMenuItem extends HTMLElement {
         }
     }
     get useIcon() {
-        return this.hasAttribute('use-icon');
+        return this.hasAttribute("use-icon");
     }
     set useCheck(value) {
         if (Boolean(value)) {
@@ -297,7 +308,7 @@ class WHMenuItem extends HTMLElement {
         }
     }
     get useCheck() {
-        return this.hasAttribute('use-check');
+        return this.hasAttribute("use-check");
     }
     set checked(value) {
         if (Boolean(value)) {
@@ -323,7 +334,7 @@ class WHMenuItem extends HTMLElement {
         }
     }
     get disabled() {
-        return this.hasAttribute('disabled');
+        return this.hasAttribute("disabled");
     }
     set hidden(value) {
         if (Boolean(value)) {
@@ -334,7 +345,7 @@ class WHMenuItem extends HTMLElement {
         }
     }
     get hidden() {
-        return this.hasAttribute('hidden');
+        return this.hasAttribute("hidden");
     }
     set opened(value) {
         if (Boolean(value)) {
@@ -345,7 +356,7 @@ class WHMenuItem extends HTMLElement {
         }
     }
     get opened() {
-        return this.hasAttribute('opened');
+        return this.hasAttribute("opened");
     }
     set hideIcon(value) {
         if (Boolean(value)) {
@@ -356,7 +367,7 @@ class WHMenuItem extends HTMLElement {
         }
     }
     get hideIcon() {
-        return this.hasAttribute('hide-icon');
+        return this.hasAttribute("hide-icon");
     }
     set hideCheck(value) {
         if (Boolean(value)) {
@@ -367,7 +378,7 @@ class WHMenuItem extends HTMLElement {
         }
     }
     get hideCheck() {
-        return this.hasAttribute('hide-check');
+        return this.hasAttribute("hide-check");
     }
     set dataSource(source) {
         this.innerHTML = "";
@@ -426,8 +437,7 @@ class WHMenuItem extends HTMLElement {
     getApp1() {
         return getParentElement(this, "wh-app");
     }
-    whenApp() {
-    }
+    whenApp() { }
     getApp() {
         return this.closest("._main_app_");
     }
@@ -473,7 +483,17 @@ class WHMenu extends HTMLElement {
             }
         });
     }
+    handleEvent(event) {
+        if (event.type == "click") {
+            const target = event.target.closest("wh-menu-item[action]");
+            if (target === null || target === void 0 ? void 0 : target.action) {
+                $(this).fire("app-action", target === null || target === void 0 ? void 0 : target.action);
+                return;
+            }
+        }
+    }
     connectedCallback() {
+        $(this).on("click", this);
     }
     disconnectedCallback() {
         console.log("disconnectedCallback");
@@ -481,7 +501,7 @@ class WHMenu extends HTMLElement {
     attributeChangedCallback(name, oldVal, newVal) {
         console.log("attributeChangedCallback");
         switch (name) {
-            case 'hide-icon':
+            case "hide-icon":
                 if (this.hasAttribute("hide-icon")) {
                     this.setAttributeItems("hide-icon", this.hasAttribute("hide-icon"));
                 }
@@ -490,7 +510,7 @@ class WHMenu extends HTMLElement {
                 }
                 this.setAttributeItems("hide-icon", this.getAttribute("hide-icon"));
                 break;
-            case 'hide-check':
+            case "hide-check":
                 if (this.hasAttribute("hide-check")) {
                     this.setAttributeItems("hide-check", "");
                 }
@@ -506,6 +526,9 @@ class WHMenu extends HTMLElement {
         this.hideCheck = dataSource.hideCheck || false;
         this.hideIcon = dataSource.hideIcon || false;
         this.checkbox = dataSource.checkbox || false;
+        if (dataSource.appRequests) {
+            this.appRequests = dataSource.appRequests;
+        }
         if (dataSource.addClass) {
             this.addClass = dataSource.addClass;
         }
@@ -531,6 +554,7 @@ class WHMenu extends HTMLElement {
                 info.useCheck = this.checkbox;
             }
             item = $(menu).create("wh-menu-item");
+            item.actionContext = this;
             item.get().dataSource = info;
             /*item.addClass(info.addClass || null);
             item.prop("action", info.action || null);
@@ -560,7 +584,7 @@ class WHMenu extends HTMLElement {
         }
     }
     get checkbox() {
-        return this.hasAttribute('checkbox');
+        return this.hasAttribute("checkbox");
     }
     set hideIcon(value) {
         if (Boolean(value)) {
@@ -571,7 +595,7 @@ class WHMenu extends HTMLElement {
         }
     }
     get hideIcon() {
-        return this.hasAttribute('hide-icon');
+        return this.hasAttribute("hide-icon");
     }
     set hideCheck(value) {
         if (Boolean(value)) {
@@ -582,32 +606,35 @@ class WHMenu extends HTMLElement {
         }
     }
     get hideCheck() {
-        return this.hasAttribute('hide-check');
+        return this.hasAttribute("hide-check");
+    }
+    get actionContext() {
+        return this.tagName.toLowerCase();
     }
     _allItems() {
-        return Array.from(this.querySelectorAll('wh-menu-item'));
+        return Array.from(this.querySelectorAll("wh-menu-item"));
     }
     setAttributeItems(attr, value) {
         const items = this._allItems();
-        items.forEach(item => {
+        items.forEach((item) => {
             item.setAttribute(attr, value);
         });
     }
     removeAttributeItems(attr) {
         const items = this._allItems();
-        items.forEach(item => {
+        items.forEach((item) => {
             item.removeAttribute(attr);
         });
     }
     classItems(className) {
         const items = this._allItems();
-        items.forEach(item => {
+        items.forEach((item) => {
             $(item).addClass(className);
         });
     }
     removeClassItems(className) {
         const items = this._allItems();
-        items.forEach(item => {
+        items.forEach((item) => {
             $(item).removeClass(className);
         });
     }
@@ -616,6 +643,23 @@ class WHMenu extends HTMLElement {
     }
     set removeClass(className) {
         $(this).removeClass(className);
+    }
+    /*
+    public getApp() {
+        return getParentElement(this, "wh-app");
+    }
+
+    */
+    set appRequests(requests) {
+        customElements.whenDefined("app-request").then((x) => {
+            for (const [name, info] of Object.entries(requests)) {
+                const r = $(this).create("app-request").get();
+                r.setAttribute("name", name);
+                r.setAttribute("type", "json");
+                r["data"] = info;
+                console.log(info);
+            }
+        });
     }
 }
 customElements.define("wh-menu", WHMenu);

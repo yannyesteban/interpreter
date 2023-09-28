@@ -106,7 +106,7 @@ class Nav extends HTMLElement {
         if (event.type == "click") {
             const target = event.target.closest("button[data-nav-type='button']");
             if (target === null || target === void 0 ? void 0 : target.dataset.action) {
-                $(this).fire("app-action", { action: target === null || target === void 0 ? void 0 : target.dataset.action });
+                $(this).fire("app-action", target === null || target === void 0 ? void 0 : target.dataset.action);
                 return;
             }
             if (target === null || target === void 0 ? void 0 : target.dataset.request) {
@@ -150,13 +150,25 @@ class Nav extends HTMLElement {
     get type() {
         return this.getAttribute("type");
     }
+    set actionContext(value) {
+        this.setAttribute("action-context", value);
+    }
+    get actionContext() {
+        return this.getAttribute("action-context");
+    }
+    set useContext(value) {
+        this.setAttribute("use-context", value);
+    }
+    get useContext() {
+        return this.getAttribute("use-context");
+    }
     set context(value) {
         if (typeof value === "string") {
             this.setAttribute("context", value);
         }
         else if (value instanceof HTMLElement) {
             this._context = value;
-            this.setAttribute("context", "");
+            this.removeAttribute("context");
         }
     }
     get context() {
@@ -165,14 +177,20 @@ class Nav extends HTMLElement {
         }
         return this._context || this;
     }
-    set dataSource(source) {
-        if (source.context) {
-            this.context = source.context;
+    set elements(items) {
+        for (const item of items) {
+            this.createElement(item);
         }
-        if (source.elements) {
-            for (const item of source.elements) {
-                this.createElement(item);
-            }
+    }
+    get elements() {
+        return [];
+    }
+    set dataSource(source) {
+        if (typeof source !== "object") {
+            return;
+        }
+        for (const [key, value] of Object.entries(source)) {
+            this[key] = value;
         }
     }
     createElement(info) {

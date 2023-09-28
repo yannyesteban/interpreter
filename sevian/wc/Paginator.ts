@@ -53,8 +53,11 @@ class Paginator extends HTMLElement {
     }
 
     fireEvent(detail) {
-        const customEvent = new CustomEvent("page-select", {
-            detail,
+
+        const customEvent = new CustomEvent("paginator-event", {
+            detail:{...detail,
+                type:"change"
+            },
             cancelable: true,
             bubbles: true,
         });

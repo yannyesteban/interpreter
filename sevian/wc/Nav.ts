@@ -97,6 +97,7 @@ class Nav extends HTMLElement {
     }
     constructor() {
         super();
+        
         this._internals = this.attachInternals();
         const template = document.createElement("template");
 
@@ -133,7 +134,7 @@ class Nav extends HTMLElement {
             const target: HTMLElement = event.target.closest("button[data-nav-type='button']");
 
             if (target?.dataset.action) {
-                $(this).fire("app-action", { action: target?.dataset.action });
+                $(this).fire("app-action", target?.dataset.action );
                 return;
             }
 
@@ -147,7 +148,6 @@ class Nav extends HTMLElement {
                 });
                 this.dispatchEvent(customEvent);
             }
-           
         }
     }
 
@@ -160,6 +160,7 @@ class Nav extends HTMLElement {
     }
 
     public attributeChangedCallback(name: string, oldValue: string, newValue: string) {
+        
         switch (name) {
             case "context":
                 if (newValue) {
@@ -186,12 +187,29 @@ class Nav extends HTMLElement {
         return this.getAttribute("type");
     }
 
+    set actionContext(value) {
+        this.setAttribute("action-context", value);
+    }
+
+    get actionContext() {
+        return this.getAttribute("action-context");
+    }
+
+    set useContext(value) {
+        this.setAttribute("use-context", value);
+    }
+
+    get useContext() {
+        return this.getAttribute("use-context");
+    }
+
     set context(value: any) {
+        
         if (typeof value === "string") {
             this.setAttribute("context", value);
         } else if (value instanceof HTMLElement) {
             this._context = value;
-            this.setAttribute("context", "");
+            this.removeAttribute("context");
         }
     }
 
@@ -202,15 +220,25 @@ class Nav extends HTMLElement {
         return this._context || this;
     }
 
+    set elements(items){
+        for (const item of items) {
+            this.createElement(item);
+        }
+    }
+
+    get elements(){
+        return [];
+    }
     set dataSource(source) {
-        if (source.context) {
-            this.context = source.context;
+
+        if(typeof source !== "object"){
+            return;
         }
-        if (source.elements) {
-            for (const item of source.elements) {
-                this.createElement(item);
-            }
+
+        for(const [key, value] of Object.entries(source)){
+            this[key] = value
         }
+        
     }
 
     createElement(info) {
