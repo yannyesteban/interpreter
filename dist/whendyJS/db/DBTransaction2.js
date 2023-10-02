@@ -27,6 +27,7 @@ export class DBTransaction {
             let recordId;
             const subRecords = [];
             for (const data of dataset) {
+                console.log(data);
                 const mode = +data.__mode_;
                 const key = data.__key_;
                 let result;
@@ -52,8 +53,9 @@ export class DBTransaction {
                     let value = data[name];
                     if (field.type == "detail") {
                         subRecords.push({
+                            name: name,
                             scheme: field.scheme,
-                            data: value,
+                            data: value
                         });
                         return;
                     }
@@ -143,4 +145,4 @@ export class DBTransaction {
         });
     }
 }
-//# sourceMappingURL=DBTransaction.js.map
+//# sourceMappingURL=DBTransaction2.js.map

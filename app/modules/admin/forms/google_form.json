@@ -151,6 +151,49 @@
         }
     },
 
+    "scheme":{
+        "table":"em",
+        "fields": [
+            {
+                "name": "employeeNumber",
+                "type": "I",
+                "key": true,
+                "serial": true,
+                "notNull": true,
+                "default": ""
+            },
+            {
+                "name": "lastName"
+            },
+            {
+                "name": "firstName"
+            },
+            {
+                "name": "extension"
+            },
+            {
+                "name": "email"
+            },
+            {
+                "name": "officeCode"
+            },
+            {
+                "name": "reportsTo"
+            },
+            {
+                "name": "jobTitle"
+            },
+            {
+                "name": "countryId"
+            },
+            {
+                "name": "stateId"
+            },
+            {
+                "name": "cityId"
+            }
+        ]
+    },
     
     "schemes": [
         {

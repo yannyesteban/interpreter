@@ -15,7 +15,6 @@ export interface IFieldInfo {
     masterValue?: string;
     inputValue?: string;
     noUpdate?: boolean;
-    scheme?: ISchemeInfo;
 }
 
 export interface ISchemeInfo {
@@ -23,7 +22,6 @@ export interface ISchemeInfo {
     table?: string;
     keys?: string[];
     fields?: IFieldInfo[];
-    subrecord: ISchemeInfo;
 }
 
 export interface IDataInfo {
@@ -38,7 +36,6 @@ export interface DBSaveInfo {
     db?: string;
     transaction?: boolean;
     schemes?: ISchemeInfo[];
-    scheme?: ISchemeInfo;
     dataset?: IDataInfo[];
     masterData?: {};
 }
@@ -52,50 +49,53 @@ export class DBTransaction {
     private config;
     private schemes: { [name: string]: ISchemeInfo };
 
-    private scheme: ISchemeInfo;
-
+    
     result: any;
 
-    constructor(config: DBSaveInfo, db: DBSql) {
-        this.db = db;
-        this.transaction = config.transaction || false;
-        this.scheme = config.scheme;
+    constructor(config: DBSaveInfo, dbAdmin: DBAdmin) {
+        this.dbAdmin = dbAdmin;
+
+        this.config = config;
+
+        this.db = dbAdmin.get<DBSql>(config.db);
+
+        this.schemes = config.schemes.reduce((a: any, b) => {
+            a[b.name] = b;
+            return a;
+        }, {});
 
         //this.save(config.dataset, config?.masterData || {});
     }
 
-    async save(dataset: any[], master?: {}) {
+    async save(dataset: IDataInfo[], master?: {}) {
         const db = this.db;
-        const scheme = this.scheme;
-        const table = scheme.table;
 
         let error: string = "";
         let errno: number = 0;
         let lastId: number = null;
         let record: { [key: string]: any } = {};
 
-        let recordId: any;
+        let recordId :any;
 
-        const subRecords = [];
-
-        for (const data of dataset) {
-            const mode = +data.__mode_;
-            const key = data.__key_;
+        for (const info of dataset) {
+            const scheme = this.schemes[info.scheme];
+            const mode = info.mode;
             let result: STMTResult;
 
             if (mode === RecordMode.DELETE) {
                 result = await db.deleteRecord({
-                    table: table,
-                    record: key,
+                    table: scheme.table,
+                    record: info.record,
                 });
 
                 error = result.error;
                 errno = result.errno;
-                //record = info.record;
+                record = info.record;
 
                 continue;
             }
 
+            const data = info.data;
             //const find = scheme.fields.find(e => e.serial);
             const keys = scheme.fields.filter((e) => e.key);
             recordId = keys.reduce((acc, value) => {
@@ -107,15 +107,6 @@ export class DBTransaction {
             for (const field of scheme.fields) {
                 const name = field.name;
                 let value = data[name];
-
-                if (field.type == "detail") {
-                    subRecords.push({
-                        scheme: field.scheme,
-                        data: value,
-                    });
-                    return;
-                }
-
                 if (field.serial) {
                     serialField = name;
                 }
@@ -169,7 +160,7 @@ export class DBTransaction {
                     table: scheme.table,
                     serial: serialField,
                     data: newData,
-                    record: key,
+                    record: info.record,
                 });
             } else if (mode === RecordMode.UPSERT) {
                 result = await db.upsertRecord({
@@ -194,23 +185,11 @@ export class DBTransaction {
             error = result.error;
             errno = result.errno;
             record = result.row;
-
-            if (scheme.subrecord) {
-                const sub = new DBTransaction({ scheme: scheme.subrecord }, this.db);
-
-                const result = await sub.save([data], {});
-                this.save(data, { ...master, ...data });
-            }
-
-            if (subRecords.length > 0) {
-                for (const subInfo of subRecords) {
-                    const sub = new DBTransaction({ scheme: subInfo.scheme }, this.db);
-
-                    const result = await sub.save(subInfo.data, { ...master, ...data });
-                }
+            if (info.detail) {
+                this.save(info.detail, { ...master, ...data });
             }
         }
 
-        return { error, errno, lastId, record, recordId };
+        return { error, errno, lastId, record, recordId};
     }
 }

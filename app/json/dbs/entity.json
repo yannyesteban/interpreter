@@ -4,6 +4,13 @@
     "keys": ["employeeNumber"],
     "fields": [
         {
+            "name":"hijos",
+            "type":"detail",
+            "scheme":{
+
+            }
+        },
+        {
             "name": "employeeNumber",
             "type": "I",
             "key": true,
@@ -12,7 +19,13 @@
             "default": ""
         },
         {
-            "name": "lastName"
+            "name": "lastName",
+            "scheme":{
+                "table":"x",
+                "fields":[
+
+                ]
+            }
         },
         {
             "name": "firstName"
@@ -51,5 +64,9 @@
                 }
             ]
         }
-    ]
+    ],
+    "subrecord":{
+        "table":"x",
+        "fields":[]
+    }
 }

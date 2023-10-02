@@ -9,37 +9,39 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
 };
 import { RecordMode } from "./db.js";
 export class DBTransaction {
-    constructor(config, db) {
-        this.db = db;
-        this.transaction = config.transaction || false;
-        this.scheme = config.scheme;
+    constructor(config, dbAdmin) {
+        this.dbAdmin = dbAdmin;
+        this.config = config;
+        this.db = dbAdmin.get(config.db);
+        this.schemes = config.schemes.reduce((a, b) => {
+            a[b.name] = b;
+            return a;
+        }, {});
         //this.save(config.dataset, config?.masterData || {});
     }
     save(dataset, master) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = this.db;
-            const scheme = this.scheme;
-            const table = scheme.table;
             let error = "";
             let errno = 0;
             let lastId = null;
             let record = {};
             let recordId;
-            const subRecords = [];
-            for (const data of dataset) {
-                const mode = +data.__mode_;
-                const key = data.__key_;
+            for (const info of dataset) {
+                const scheme = this.schemes[info.scheme];
+                const mode = info.mode;
                 let result;
                 if (mode === RecordMode.DELETE) {
                     result = yield db.deleteRecord({
-                        table: table,
-                        record: key,
+                        table: scheme.table,
+                        record: info.record,
                     });
                     error = result.error;
                     errno = result.errno;
-                    //record = info.record;
+                    record = info.record;
                     continue;
                 }
+                const data = info.data;
                 //const find = scheme.fields.find(e => e.serial);
                 const keys = scheme.fields.filter((e) => e.key);
                 recordId = keys.reduce((acc, value) => {
@@ -50,13 +52,6 @@ export class DBTransaction {
                 for (const field of scheme.fields) {
                     const name = field.name;
                     let value = data[name];
-                    if (field.type == "detail") {
-                        subRecords.push({
-                            scheme: field.scheme,
-                            data: value,
-                        });
-                        return;
-                    }
                     if (field.serial) {
                         serialField = name;
                     }
@@ -106,7 +101,7 @@ export class DBTransaction {
                         table: scheme.table,
                         serial: serialField,
                         data: newData,
-                        record: key,
+                        record: info.record,
                     });
                 }
                 else if (mode === RecordMode.UPSERT) {
@@ -127,20 +122,12 @@ export class DBTransaction {
                 error = result.error;
                 errno = result.errno;
                 record = result.row;
-                if (scheme.subrecord) {
-                    const sub = new DBTransaction({ scheme: scheme.subrecord }, this.db);
-                    const result = yield sub.save([data], {});
-                    this.save(data, Object.assign(Object.assign({}, master), data));
-                }
-                if (subRecords.length > 0) {
-                    for (const subInfo of subRecords) {
-                        const sub = new DBTransaction({ scheme: subInfo.scheme }, this.db);
-                        const result = yield sub.save(subInfo.data, Object.assign(Object.assign({}, master), data));
-                    }
+                if (info.detail) {
+                    this.save(info.detail, Object.assign(Object.assign({}, master), data));
                 }
             }
             return { error, errno, lastId, record, recordId };
         });
     }
 }
-//# sourceMappingURL=DBTransaction.js.map
+//# sourceMappingURL=DBTransactionOLD.js.map

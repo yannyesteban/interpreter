@@ -7,7 +7,8 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { DBTransaction } from "./db/DBTransaction.js";
+import { DBTransaction } from "./db/DBTransactionOLD.js";
+import { DBTransaction as Transaction } from "./db/DBTransaction.js";
 import { Element } from "./element.js";
 import { JWT } from "./JWT.js";
 export class Model {
@@ -282,6 +283,46 @@ export class Form extends Element {
         });
     }
     saveRecord() {
+        return __awaiter(this, void 0, void 0, function* () {
+            const db = this.store.db.get(this.connection);
+            const key = this.getRecordKey();
+            //const mode = +this.store.getReq("__mode_");
+            const data = Object.assign(Object.assign({}, this.store.getVReq()), { __key_: key });
+            const scheme = this._info.scheme;
+            const config = {
+                transaction: true,
+                scheme,
+            };
+            const transaction = new Transaction(config, db);
+            const result = yield transaction.save([data], {});
+            let message = "";
+            let keyToken = "";
+            if (result.error) {
+                message = result.error;
+                this.store.setSes("__error_", true);
+            }
+            else {
+                this.store.setSes("__error_", false);
+                message = "record was saved correctly!";
+                if (result.recordId) {
+                    keyToken = this.genToken(result.recordId);
+                }
+            }
+            this.store.setSes("__key_", keyToken);
+            this.doResponse({
+                /*
+                element: "form",
+                propertys: {
+                    //f: await this.evalDataFields(this.datafields),
+                    output: "SAVE FORM",
+                },
+                */
+                log: Object.assign({}, result),
+                message,
+            });
+        });
+    }
+    saveRecord2() {
         return __awaiter(this, void 0, void 0, function* () {
             const key = this.getRecordKey();
             const scheme = this._info.schemes[0];

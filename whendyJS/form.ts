@@ -1,4 +1,5 @@
-import { DBTransaction } from "./db/DBTransaction.js";
+import { DBTransaction } from "./db/DBTransactionOLD.js";
+import { DBTransaction as Transaction } from "./db/DBTransaction.js";
 import { DBSql } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
@@ -362,8 +363,50 @@ export class Form extends Element {
             },
         });
     }
-
     private async saveRecord() {
+        const db = this.store.db.get<DBSql>(this.connection);
+        
+        const key = this.getRecordKey();
+        //const mode = +this.store.getReq("__mode_");
+        const data = {...this.store.getVReq(), __key_ : key};
+        const scheme = this._info.scheme;
+
+        const config = {
+            transaction: true,
+            scheme,
+        };
+
+        const transaction = new Transaction(config, db);
+        const result = await transaction.save([data], {});
+
+        let message = "";
+        let keyToken = "";
+        if (result.error) {
+            message = result.error;
+            this.store.setSes("__error_", true);
+        } else {
+            this.store.setSes("__error_", false);
+            message = "record was saved correctly!";
+            if (result.recordId) {
+                keyToken = this.genToken(result.recordId);
+            }
+        }
+
+        this.store.setSes("__key_", keyToken);
+        this.doResponse({
+            /*
+            element: "form",
+            propertys: {
+                //f: await this.evalDataFields(this.datafields),
+                output: "SAVE FORM",
+            },
+            */
+            log: { ...result },
+
+            message,
+        });
+    }
+    private async saveRecord2() {
         const key = this.getRecordKey();
         const scheme = this._info.schemes[0];
         const schemeName = "any";
