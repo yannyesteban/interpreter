@@ -59,14 +59,11 @@ export class DBTransaction {
     constructor(config: DBSaveInfo, db: DBSql) {
         this.db = db;
         this.transaction = config.transaction || false;
-        this.scheme = config.scheme;
-
-        //this.save(config.dataset, config?.masterData || {});
     }
 
-    async save(dataset: any[], master?: {}) {
+    async save(scheme: ISchemeInfo, dataset: any[], master?: {}) {
         const db = this.db;
-        const scheme = this.scheme;
+        
         const table = scheme.table;
 
         let error: string = "";
@@ -198,7 +195,7 @@ export class DBTransaction {
             if (scheme.subrecord) {
                 const sub = new DBTransaction({ scheme: scheme.subrecord }, this.db);
 
-                const result = await sub.save([data], {});
+                const result = await sub.save(scheme.subrecord, [data], {});
                 this.save(data, { ...master, ...data });
             }
 

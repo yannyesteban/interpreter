@@ -290,11 +290,10 @@ export class Form extends Element {
             const data = Object.assign(Object.assign({}, this.store.getVReq()), { __key_: key });
             const scheme = this._info.scheme;
             const config = {
-                transaction: true,
-                scheme,
+                transaction: true
             };
             const transaction = new Transaction(config, db);
-            const result = yield transaction.save([data], {});
+            const result = yield transaction.save(scheme, [data], {});
             let message = "";
             let keyToken = "";
             if (result.error) {

@@ -372,12 +372,11 @@ export class Form extends Element {
         const scheme = this._info.scheme;
 
         const config = {
-            transaction: true,
-            scheme,
+            transaction: true
         };
 
         const transaction = new Transaction(config, db);
-        const result = await transaction.save([data], {});
+        const result = await transaction.save(scheme, [data], {});
 
         let message = "";
         let keyToken = "";

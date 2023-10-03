@@ -12,13 +12,10 @@ export class DBTransaction {
     constructor(config, db) {
         this.db = db;
         this.transaction = config.transaction || false;
-        this.scheme = config.scheme;
-        //this.save(config.dataset, config?.masterData || {});
     }
-    save(dataset, master) {
+    save(scheme, dataset, master) {
         return __awaiter(this, void 0, void 0, function* () {
             const db = this.db;
-            const scheme = this.scheme;
             const table = scheme.table;
             let error = "";
             let errno = 0;
@@ -129,7 +126,7 @@ export class DBTransaction {
                 record = result.row;
                 if (scheme.subrecord) {
                     const sub = new DBTransaction({ scheme: scheme.subrecord }, this.db);
-                    const result = yield sub.save([data], {});
+                    const result = yield sub.save(scheme.subrecord, [data], {});
                     this.save(data, Object.assign(Object.assign({}, master), data));
                 }
                 if (subRecords.length > 0) {
