@@ -1,0 +1,23 @@
+{
+    "union": [
+        {
+            "select": 1
+        }
+    ],
+
+    "select": ["table:*", "a.id", "b.name", "b.state"],
+    "from": "table:a",
+    "join": {
+        "inner": "table:b",
+        "on": {
+            "a.id": "b.id"
+        }
+    },
+    "where": {
+        "a.x:>=": "3"
+    },
+    "orderBy": ["a.id"],
+    "limit": 10,
+    "offset": 10,
+    "groupBy": ["a:id"]
+}
