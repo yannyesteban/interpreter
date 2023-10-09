@@ -82,7 +82,7 @@
     "formData": {
         "query": {
             "sql": "select * from ...",
-            "select": ["a", "b"],
+            "select": ["a", "b", ["tabla.field1", "cos"], ["tabla.field1","tabla.field2", "+"]],
             "from": "user"
         },
 
