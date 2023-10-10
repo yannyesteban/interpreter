@@ -7,9 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { DBSql } from "./db.js";
+import { DBEngine } from "./db.js";
 import sqlite3 from "sqlite3";
-export class SQLiteDB extends DBSql {
+export class SQLiteDB extends DBEngine {
     query(sql, param) {
         sql = sql.replace(/`/gim, '"');
         return new Promise((resolve, reject) => {
@@ -31,6 +31,20 @@ export class SQLiteDB extends DBSql {
                     }
                 }));
             });
+        });
+    }
+    getRecord(info, key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let query = info.sql;
+            let conditions = [];
+            let values = [];
+            const record = info.record.forEach((field) => {
+                conditions.push(field + "= ?");
+                values.push(key[field]);
+            });
+            query += " WHERE " + conditions.join(" AND ");
+            const data = yield this.query(query, values);
+            return data.rows[0] || {};
         });
     }
     infoQuery(q) {

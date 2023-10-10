@@ -1,4 +1,4 @@
-import { DBSql } from "./db/db.js";
+import { DBEngine } from "./db/db.js";
 import { InfoElement, Element, IUserAdmin, UserInfo } from "./element.js";
 import { Store } from "./store.js";
 import { createHash } from "node:crypto";
@@ -20,7 +20,7 @@ export class User extends Element implements IUserAdmin {
     store: Store = null;
     
 
-    db: DBSql;
+    db: DBEngine;
 
     private connection: string = "_defaul";
     private security: string = null;
@@ -61,7 +61,7 @@ export class User extends Element implements IUserAdmin {
 
         this.user = user;
 
-        this.db = this.store.db.get<DBSql>(this.connection);
+        this.db = this.store.db.get<DBEngine>(this.connection);
 
         const result = await this.db.query(this.sqlUser, [user]);
         

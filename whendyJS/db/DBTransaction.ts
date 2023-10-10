@@ -1,4 +1,4 @@
-import { DBSql, IRecordAdmin, IRecordInfo, RecordMode, STMTResult } from "./db.js";
+import { DBEngine, IRecordAdmin, IRecordInfo, RecordMode, STMTResult } from "./db.js";
 import { DBAdmin } from "./dbAdmin.js";
 
 export interface IFieldInfo {
@@ -48,7 +48,7 @@ export class DBTransaction {
     transaction;
 
     private dbAdmin: DBAdmin;
-    private db: DBSql;
+    private db: DBEngine;
     private config;
     private schemes: { [name: string]: ISchemeInfo };
 
@@ -56,7 +56,7 @@ export class DBTransaction {
 
     result: any;
 
-    constructor(config: DBSaveInfo, db: DBSql) {
+    constructor(config: DBSaveInfo, db: DBEngine) {
         this.db = db;
         this.transaction = config.transaction || false;
     }

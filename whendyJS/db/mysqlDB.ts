@@ -1,5 +1,5 @@
 import { IConnectInfo } from "../dataModel.js";
-import { DB, DBSql, IFieldInfo, IRecordAdmin, IRecordInfo, QueryResult, STMT, STMTResult } from "./db.js";
+import { BDRequest, DB, DBEngine, IFieldInfo, IRecordAdmin, IRecordInfo, QueryResult, STMT, STMTResult } from "./db.js";
 import * as mysql from "mysql";
 
 enum FLAGS {
@@ -14,19 +14,47 @@ enum FLAGS {
     UNIQUE_FLAG = 65536,
 }
 
-export class MysqlDB extends DBSql {
+export class MysqlDB extends DBEngine {
     client;
     dbase: string;
-    query(value: string | object, param?: any[]): Promise<QueryResult> {
+    query(info: string | BDRequest, params?: any[]): Promise<QueryResult> {
+
+        
         let sql: string;
-        if (typeof value === "object") {
-            sql = this.doQuery(value);
+        if (typeof info === "object") {
+
+            if(info.params){
+                params = info.params;
+            }
+
+            if (info.sql) {
+                sql = this.doSql(info);
+            } else {
+                sql = this.doQuery(info);
+            }
         } else {
-            sql = value;
+            sql = info;
         }
 
-        return new Promise((resolve, reject) => {
-            this.client.query(sql, param, (error, results, fields) => {
+        return new Promise(async (resolve, reject) => {
+            let totalRecords = undefined;
+            let page = undefined;
+            let totalPages = undefined;
+
+            if (typeof info === "object" && info.page !== undefined) {
+                page = info.page;
+                let result = await this.query(this.doQueryAll(sql), params);
+                if (result.rows.length > 0) {
+                    totalRecords = result.rows[0].total;
+                    totalPages = Math.ceil(totalRecords / info.limit);
+
+                    if (info.page > totalPages) {
+                        page = totalPages;
+                    }
+                }
+            }
+
+            this.client.query(sql, params, (error, results, fields) => {
                 if (error) {
                     resolve({
                         errno: 0,
@@ -59,10 +87,30 @@ export class MysqlDB extends DBSql {
                         error: null,
                         rows: results,
                         fields,
+                        totalRecords,
+                        page,
+                        totalPages,
                     });
                 }
             });
         });
+    }
+
+    async getRecord(info:BDRequest, key:any): Promise<any>{
+        let query = info.sql;
+
+        let conditions = [];
+        let values = [];
+        const record = info.record.forEach((field) => {
+            conditions.push(field + "= ?");
+            values.push(key[field]);
+        });
+
+        query += " WHERE " + conditions.join(" AND ");
+
+        const data = await this.query(query, values);
+
+        return data.rows[0] || {};
     }
     async infoQuery(q: string): Promise<IFieldInfo[]> {
         throw new Error("Method not implemented.");
@@ -236,11 +284,9 @@ export class MysqlDB extends DBSql {
                     });
                 }
 
-                
-                if(rows?.insertId){
+                if (rows?.insertId) {
                     data[info.serial] = rows?.insertId;
                 }
-                
 
                 resolve({
                     row: data,
@@ -362,7 +408,41 @@ export class MysqlDB extends DBSql {
         });
     }
 
-    doQuery(value):string {
+    doSql(info: BDRequest) {
+
+        let query = info.sql;
+        let filters = [];
+
+        if (info.filterBy && info.filter) {
+            info.filterBy.forEach((e) => {
+                filters.push(`${e} like concat('%',${this.client.escape(info.filter)},'%')`);
+            });
+
+            query += " WHERE " + filters.join(" OR ");
+        }
+
+        if (info.orderBy) {
+            if (Array.isArray(info.orderBy)) {
+                info.orderBy.forEach((item) => {
+                    const values = item.split(":");
+                    query += " ORDER BY " + values[0] + (values[1] ? " " + values[1] : "");
+                });
+            }
+        }
+
+        if (info.limit) {
+            const limit = " LIMIT " + info.limit;
+            if (info.page) {
+                query += limit + " OFFSET " + (info.page - 1) * info.limit;
+            } else if (info.offset) {
+                query += limit + " OFFSET " + info.offset;
+            }
+        }
+        console.log(query);
+        return query;
+    }
+
+    doQuery(value): string {
         let query = value.sql;
 
         if (value.limit) {
@@ -376,7 +456,7 @@ export class MysqlDB extends DBSql {
         return query;
     }
 
-    doQueryAll(query:string):string {
+    doQueryAll(query: string): string {
         return query.replace(/(select\s)(.+) FROM\s/i, "$1count(*) as total FROM ");
     }
 }

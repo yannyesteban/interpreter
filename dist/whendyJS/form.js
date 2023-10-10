@@ -79,33 +79,28 @@ export class Form extends Element {
                 type: field.cellType,
                 cellWidth: field.cellWidth,
             }));
-            const list = this._info.listData;
+            const { label, gridData, gridOptions, errorMessages, nav } = this._info;
             if (this.params.page === null) {
-                list.page = this.store.getReq("__page_") || this.store.getSes("__page_");
+                gridData.page = this.store.getReq("__page_") || this.store.getSes("__page_");
             }
-            let info;
-            if (list) {
-                info = yield this._pageData(list);
-            }
+            const info = yield this._pageData(gridData);
             const appRequests = this.appRequests();
-            const dataSource = {
-                caption: this._info.label,
-                data: info.data,
-                fields,
-                limit: +list.limit,
-                page: +list.page,
-                records: +info.totalRecords,
-                maxPages: +list.maxPages || 6,
-                filter: list.filter,
-                nav: this._info.nav,
-                errorMessages: this._info.errorMessages,
-                appRequests,
-            };
             this.doResponse({
                 element: "grid",
                 propertys: {
-                    dataSource,
-                    //f: await this.evalDataFields(this.datafields),
+                    dataSource: {
+                        caption: label,
+                        fields,
+                        data: info.data,
+                        limit: +gridData.limit,
+                        page: +info.page,
+                        records: +info.totalRecords,
+                        maxPages: +(info.totalPages || gridOptions.maxPages || 6),
+                        filter: gridData.filter,
+                        nav,
+                        errorMessages,
+                        appRequests,
+                    },
                     output: info.data,
                 },
                 log: "yanny esteban",
@@ -113,18 +108,17 @@ export class Form extends Element {
         });
     }
     loadPageInfo() {
-        var _a, _b;
+        var _a;
         return __awaiter(this, void 0, void 0, function* () {
-            const list = this._info.listData;
+            const { gridData, fields } = this._info;
             if ((_a = this.params) === null || _a === void 0 ? void 0 : _a.filter) {
-                list.filter = (_b = this.params) === null || _b === void 0 ? void 0 : _b.filter;
+                gridData.filter = this.params.filter;
             }
-            let pageData = yield this._pageData(list);
+            const pageData = yield this._pageData(gridData);
             this.doResponse({
                 element: "grid",
                 propertys: {
-                    pageData: Object.assign(Object.assign({}, pageData), { fields: this._info.fields }),
-                    //f: await this.evalDataFields(this.datafields),
+                    pageData: Object.assign(Object.assign({}, pageData), { fields }),
                 },
             });
         });
@@ -135,41 +129,18 @@ export class Form extends Element {
         return key;
     }
     _pageData(info) {
-        var _a;
         return __awaiter(this, void 0, void 0, function* () {
             let data = [];
-            let totalRecords = 0;
-            if (info.sql) {
-                const db = (this.db = this.store.db.get(this.connection));
-                let filters = [];
-                let values = [];
-                if ((_a = this.params) === null || _a === void 0 ? void 0 : _a.filter) {
-                    if (info.searchIn) {
-                        info.searchIn.forEach((e) => {
-                            filters.push(`${e} like concat('%',?,'%')`);
-                            values.push(info.filter);
-                        });
-                        info.sql += " WHERE " + filters.join(" OR ");
-                    }
-                }
-                let result = yield db.query(db.doQueryAll(info.sql), values);
-                if (result.rows.length > 0) {
-                    totalRecords = result.rows[0].total;
-                    const totalPages = Math.ceil(totalRecords / info.limit);
-                    if (info.page > totalPages) {
-                        info.page = totalPages;
-                    }
-                }
-                result = yield db.query(info, values);
-                const record = ["id"];
-                if (result.rows) {
-                    data = result.rows.map((row, index) => (Object.assign(Object.assign({}, row), { __mode_: 2, __key_: this.genToken(this.doKeyRecord({}, row)) })));
-                }
+            const db = this.store.db.get(this.connection);
+            let result = yield db.query(info);
+            if (result.rows) {
+                data = result.rows.map((row, index) => (Object.assign(Object.assign({}, row), { __mode_: 2, __key_: this.genToken(this.doKeyRecord({}, row)) })));
             }
             return {
                 data,
-                totalRecords,
-                page: info.page,
+                totalRecords: result.totalRecords || 0,
+                totalPages: result.totalPages || 0,
+                page: result.page || 1,
                 limit: info.limit,
                 filter: info.filter,
             };
@@ -179,13 +150,13 @@ export class Form extends Element {
         return __awaiter(this, void 0, void 0, function* () {
             const page = this.params["page"] || this.store.getReq("__page_") || 1;
             const filter = this.params["filter"] || this.store.getReq("__filter_");
-            this.db = this.store.db.get(this.connection);
             let data = this._info.defaultData || {};
             data.__page_ = page;
             data.__filter_ = filter;
             const key = this.getRecordKey();
             if (key) {
-                data = Object.assign(Object.assign({}, data), (yield this.getDBRecord(this._info.data, key)));
+                const db = this.store.db.get(this.connection);
+                data = Object.assign(Object.assign({}, data), (yield db.getRecord(this._info.data, key)));
             }
             data = Object.assign(Object.assign(Object.assign({}, data), { __mode_: mode }), (this._info.fixedData || {}));
             if (+mode != 1) {
@@ -290,7 +261,7 @@ export class Form extends Element {
             const data = Object.assign(Object.assign({}, this.store.getVReq()), { __key_: key });
             const scheme = this._info.scheme;
             const config = {
-                transaction: true
+                transaction: true,
             };
             const transaction = new Transaction(config, db);
             const result = yield transaction.save(scheme, [data], {});
@@ -420,13 +391,14 @@ export class Form extends Element {
         return __awaiter(this, void 0, void 0, function* () {
             dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
             let info = [];
+            const db = this.store.db.get(this.connection);
             for (const data of dataField) {
                 if (Array.isArray(data)) {
                     info.push({ value: data[0], text: data[1], level: (_a = data[2]) !== null && _a !== void 0 ? _a : undefined });
                 }
                 else if (typeof data === "object") {
                     if (data.sql) {
-                        let result = (yield this.db.query(data.sql, (_b = data.params) !== null && _b !== void 0 ? _b : undefined)).rows;
+                        const result = (yield db.query(data.sql, (_b = data.params) !== null && _b !== void 0 ? _b : undefined)).rows;
                         info = [...info, ...result];
                     }
                     else if (data.value && data.text) {
@@ -565,8 +537,8 @@ export class Form extends Element {
                         name: "{{&NAME_}}",
                         method: "data-fields",
                         params: {
-                            parent: "{=parent}"
-                        }
+                            parent: "{=parent}",
+                        },
                     },
                 ],
             },
@@ -766,6 +738,20 @@ export class Form extends Element {
                 name: "__page_",
             },
         ];
+    }
+    test() {
+        const DBRequest = {
+            sql: "select",
+            filter: [],
+            params: [],
+            select: [["add", "field1", ["mult", 3, 4]]],
+            from: "t:t1",
+            join: ["inner", "t2:t2", { "t1.a": "t2.a" }],
+            where: { "a:>": 2 },
+            orderBY: ["desc", "field1"],
+            limit: 4,
+            offset: 10,
+        };
     }
 }
 //# sourceMappingURL=form.js.map

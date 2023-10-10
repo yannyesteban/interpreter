@@ -1,8 +1,8 @@
-import { DBSql, IFieldInfo, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
+import { BDRequest, DBEngine, IFieldInfo, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
 import { IConnectInfo } from "../dataModel.js";
 import pg from "pg";
 
-export class PostgreDB extends DBSql {
+export class PostgreDB extends DBEngine {
     client;
 
     async query(value: string, param?: any[]) {
@@ -38,7 +38,22 @@ export class PostgreDB extends DBSql {
                 };
             });
     }
+    async getRecord(info:BDRequest, key:any): Promise<any>{
+        let query = info.sql;
 
+        let conditions = [];
+        let values = [];
+        const record = info.record.forEach((field) => {
+            conditions.push(field + "= ?");
+            values.push(key[field]);
+        });
+
+        query += " WHERE " + conditions.join(" AND ");
+
+        const data = await this.query(query, values);
+
+        return data.rows[0] || {};
+    }
     infoQuery(q: string): Promise<IFieldInfo[]> {
         throw new Error("Method not implemented.");
     }

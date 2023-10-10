@@ -56,16 +56,16 @@ export class Lexer {
         return tokenDefault;
     }
     skipWhitespace() {
-        while (this.ch == ' ' || this.ch == '\t' || this.ch == '\n' && !this.markEOL || this.ch == '\r') {
+        while (this.ch == " " || this.ch == "\t" || (this.ch == "\n" && !this.markEOL) || this.ch == "\r") {
             this.next();
         }
     }
     digitVal(ch) {
         if ("0" <= ch && ch <= "9") {
-            return (ch.charCodeAt(0) - "0".charCodeAt(0));
+            return ch.charCodeAt(0) - "0".charCodeAt(0);
         }
         if ("a" <= ch.toLowerCase() && ch.toLowerCase() <= "f") {
-            return (ch.charCodeAt(0) - "a".charCodeAt(0) + 10);
+            return ch.charCodeAt(0) - "a".charCodeAt(0) + 10;
         }
         return 16;
     }
@@ -95,15 +95,15 @@ export class Lexer {
             case "7":
                 [n, base, max] = [3, 8, 255];
                 break;
-            case 'x':
+            case "x":
                 this.next();
                 [n, base, max] = [2, 16, 255];
                 break;
-            case 'u':
+            case "u":
                 this.next();
                 [n, base, max] = [4, 16, unicode.MaxRune];
                 break;
-            case 'U':
+            case "U":
                 this.next();
                 [n, base, max] = [8, 16, unicode.MaxRune];
                 break;
@@ -130,7 +130,7 @@ export class Lexer {
             this.next();
             n--;
         }
-        if (x > max || 0xD800 <= x && x < 0xE000) {
+        if (x > max || (0xd800 <= x && x < 0xe000)) {
             this.error(offs, "escape sequence is invalid Unicode code point");
             return false;
         }
@@ -149,7 +149,7 @@ export class Lexer {
             if (ch == quote) {
                 break;
             }
-            if (ch == '\\') {
+            if (ch == "\\") {
                 this.scanEscape(quote);
             }
         }
@@ -181,35 +181,35 @@ export class Lexer {
         //invalid = -1     // index of invalid digit in literal, or < 0
         let lit = "c";
         // integer part
-        if (this.ch != '.') {
+        if (this.ch != ".") {
             tok = Token.INT;
-            if (this.ch == '0') {
+            if (this.ch == "0") {
                 this.next();
                 switch (this.ch.toLowerCase()) {
-                    case 'x':
+                    case "x":
                         this.next();
-                        [base, prefix] = [16, 'x'];
+                        [base, prefix] = [16, "x"];
                         break;
-                    case 'o':
+                    case "o":
                         this.next();
-                        ([base, prefix] = [8, 'o']);
+                        [base, prefix] = [8, "o"];
                         break;
-                    case 'b':
+                    case "b":
                         this.next();
-                        [base, prefix] = [2, 'b'];
+                        [base, prefix] = [2, "b"];
                         break;
                     default:
-                        [base, prefix] = [8, '0'];
+                        [base, prefix] = [8, "0"];
                     //digsep = 1 // leading 0
                 }
             }
-            //digsep |= 
+            //digsep |=
             this.digits(base);
         }
         // fractional part
-        if (this.ch == '.') {
+        if (this.ch == ".") {
             tok = Token.FLOAT;
-            if (prefix == 'o' || prefix == 'b') {
+            if (prefix == "o" || prefix == "b") {
                 //s.error(s.offset, "invalid radix point in "+litname(prefix))
             }
             this.next();
@@ -222,7 +222,7 @@ export class Lexer {
         */
         // exponent
         const e = this.ch.toLowerCase();
-        if (e == 'e' || e == 'p') {
+        if (e == "e" || e == "p") {
             /*
             switch {
             case e == 'e' && prefix != 0 && prefix != '0':
@@ -233,7 +233,7 @@ export class Lexer {
             */
             this.next();
             tok = Token.FLOAT;
-            if (this.ch == '+' || this.ch == '-') {
+            if (this.ch == "+" || this.ch == "-") {
                 this.next();
             }
             let ds = this.digits(10);
@@ -314,7 +314,7 @@ export class Lexer {
                 }
                 break;
             }
-            else if (isDecimal(ch) || ch == '.' && isDecimal(this.peek())) {
+            else if (isDecimal(ch) || (ch == "." && isDecimal(this.peek()))) {
                 markEOL = true;
                 ({ lit, tok } = this.scanNumber());
                 //console.log("this.scanNumber()", this.scanNumber())
@@ -340,7 +340,7 @@ export class Lexer {
                         tok = Token.SEMICOLON;
                         lit = "\n";
                         break;
-                    case "\"":
+                    case '"':
                     case "'":
                         /*if(this.useString){
                             tok = Token.STRING;
@@ -483,7 +483,7 @@ export class Lexer {
             pos: this.pos,
             value: lit,
             priority: keyword.precedence(tok),
-            tok
+            tok,
         };
     }
     next() {
@@ -525,7 +525,7 @@ export class Lexer {
             pos: null,
             value: "EOF",
             priority: null,
-            tok: Token.EOF
+            tok: Token.EOF,
         });
         return tokens;
     }
@@ -555,7 +555,7 @@ export class Lexer {
                     pos: null,
                     value: "EOF",
                     priority: null,
-                    tok: Token.EOF
+                    tok: Token.EOF,
                 });
                 sections.push(new Section(tokens, pos, endPos - pos, this.input[pos - 1] === '"' && this.input[endPos] === '"'));
             }

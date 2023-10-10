@@ -1,4 +1,4 @@
-import { DBSql, IRecordAdmin, IRecordInfo, RecordMode, STMTResult } from "./db.js";
+import { DBEngine, IRecordAdmin, IRecordInfo, RecordMode, STMTResult } from "./db.js";
 import { DBAdmin } from "./dbAdmin.js";
 
 export interface IFieldInfo {
@@ -44,7 +44,7 @@ export class DBUpdate {
     connection;
     transaction;
 
-    private db: DBSql;
+    private db: DBEngine;
     private config;
     private schemes: { [name: string]: ISchemeInfo };
 
@@ -78,9 +78,9 @@ export class DBUpdate {
         ]);
 
         this.config = config;
-        let db: DBSql;
+        let db: DBEngine;
         let driver = "postgres";
-        db = dbAdmin.get<DBSql>(driver);
+        db = dbAdmin.get<DBEngine>(driver);
 
         this.db = db;
 

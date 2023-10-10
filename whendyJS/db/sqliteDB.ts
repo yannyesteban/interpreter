@@ -1,9 +1,9 @@
 import { IConnectInfo } from "../dataModel.js";
-import { DBSql, IFieldInfo, IRecordAdmin, IRecordInfo, STMT, STMTResult } from "./db.js";
+import { BDRequest, DBEngine, IFieldInfo, IRecordAdmin, IRecordInfo, QueryResult, STMT, STMTResult } from "./db.js";
 import * as mysql from "mysql";
 import sqlite3 from "sqlite3";
-export class SQLiteDB extends DBSql {
-    query(sql: string, param?: any[]) {
+export class SQLiteDB extends DBEngine {
+    query(sql: string, param?: any[]): Promise<QueryResult> {
         sql = sql.replace(/`/gim, '"');
 
         return new Promise((resolve, reject) => {
@@ -25,6 +25,22 @@ export class SQLiteDB extends DBSql {
                 });
             });
         });
+    }
+    async getRecord(info:BDRequest, key:any): Promise<any>{
+        let query = info.sql;
+
+        let conditions = [];
+        let values = [];
+        const record = info.record.forEach((field) => {
+            conditions.push(field + "= ?");
+            values.push(key[field]);
+        });
+
+        query += " WHERE " + conditions.join(" AND ");
+
+        const data = await this.query(query, values);
+
+        return data.rows[0] || {};
     }
     infoQuery(q: string): Promise<IFieldInfo[]> {
         throw new Error("Method not implemented.");

@@ -1,6 +1,6 @@
 import { DBTransaction } from "./db/DBTransactionOLD.js";
 import { DBTransaction as Transaction } from "./db/DBTransaction.js";
-import { DBSql } from "./db/db.js";
+import { DBEngine } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
 import { JWT } from "./JWT.js";
@@ -36,7 +36,7 @@ export class Form extends Element {
     store: Store = null;
 
     private query: string;
-    private db: DBSql;
+    private db: DBEngine;
 
     private connection: string = "mysql";
     private _info: any;
@@ -119,39 +119,31 @@ export class Form extends Element {
             cellWidth: field.cellWidth,
         }));
 
-        const list = this._info.listData;
+        const { label, gridData, gridOptions, errorMessages, nav } = this._info;
 
         if (this.params.page === null) {
-            list.page = this.store.getReq("__page_") || this.store.getSes("__page_");
+            gridData.page = this.store.getReq("__page_") || this.store.getSes("__page_");
         }
 
-        let info;
-
-        if (list) {
-            info = await this._pageData(list);
-        }
-
+        const info = await this._pageData(gridData);
         const appRequests = this.appRequests();
-
-        const dataSource = {
-            caption: this._info.label,
-            data: info.data,
-            fields,
-            limit: +list.limit,
-            page: +list.page,
-            records: +info.totalRecords,
-            maxPages: +list.maxPages || 6,
-            filter: list.filter,
-            nav: this._info.nav,
-            errorMessages: this._info.errorMessages,
-            appRequests,
-        };
 
         this.doResponse({
             element: "grid",
             propertys: {
-                dataSource,
-                //f: await this.evalDataFields(this.datafields),
+                dataSource: {
+                    caption: label,
+                    fields,
+                    data: info.data,
+                    limit: +gridData.limit,
+                    page: +info.page,
+                    records: +info.totalRecords,
+                    maxPages: +(info.totalPages || gridOptions.maxPages || 6),
+                    filter: gridData.filter,
+                    nav,
+                    errorMessages,
+                    appRequests,
+                },
                 output: info.data,
             },
             log: "yanny esteban",
@@ -159,19 +151,17 @@ export class Form extends Element {
     }
 
     private async loadPageInfo() {
-        const list = this._info.listData;
+        const { gridData, fields } = this._info;
 
         if (this.params?.filter) {
-            list.filter = this.params?.filter;
+            gridData.filter = this.params.filter;
         }
 
-        let pageData = await this._pageData(list);
-
+        const pageData = await this._pageData(gridData);
         this.doResponse({
             element: "grid",
             propertys: {
-                pageData: { ...pageData, fields: this._info.fields },
-                //f: await this.evalDataFields(this.datafields),
+                pageData: { ...pageData, fields },
             },
         });
     }
@@ -186,50 +176,23 @@ export class Form extends Element {
 
     private async _pageData(info) {
         let data: any[] = [];
-        let totalRecords = 0;
-        if (info.sql) {
-            const db = (this.db = this.store.db.get<DBSql>(this.connection));
-            let filters = [];
-            let values = [];
+        const db = this.store.db.get<DBEngine>(this.connection);
 
-            if (this.params?.filter) {
-                if (info.searchIn) {
-                    info.searchIn.forEach((e) => {
-                        filters.push(`${e} like concat('%',?,'%')`);
-                        values.push(info.filter);
-                    });
+        let result = await db.query(info);
 
-                    info.sql += " WHERE " + filters.join(" OR ");
-                }
-            }
-
-            let result = await db.query(db.doQueryAll(info.sql), values);
-            if (result.rows.length > 0) {
-                totalRecords = result.rows[0].total;
-                const totalPages = Math.ceil(totalRecords / info.limit);
-
-                if (info.page > totalPages) {
-                    info.page = totalPages;
-                }
-            }
-
-            result = await db.query(info, values);
-
-            const record = ["id"];
-
-            if (result.rows) {
-                data = result.rows.map((row, index) => ({
-                    ...row,
-                    __mode_: 2,
-                    __key_: this.genToken(this.doKeyRecord({}, row)),
-                }));
-            }
+        if (result.rows) {
+            data = result.rows.map((row, index) => ({
+                ...row,
+                __mode_: 2,
+                __key_: this.genToken(this.doKeyRecord({}, row)),
+            }));
         }
 
         return {
             data,
-            totalRecords,
-            page: info.page,
+            totalRecords: result.totalRecords || 0,
+            totalPages: result.totalPages || 0,
+            page: result.page || 1,
             limit: info.limit,
             filter: info.filter,
         };
@@ -239,7 +202,7 @@ export class Form extends Element {
         const page = this.params["page"] || this.store.getReq("__page_") || 1;
         const filter = this.params["filter"] || this.store.getReq("__filter_");
 
-        this.db = this.store.db.get<DBSql>(this.connection);
+        
         let data = this._info.defaultData || {};
 
         data.__page_ = page;
@@ -248,7 +211,8 @@ export class Form extends Element {
         const key = this.getRecordKey();
 
         if (key) {
-            data = { ...data, ...(await this.getDBRecord(this._info.data, key)) };
+            const db = this.store.db.get<DBEngine>(this.connection);
+            data = { ...data, ...(await db.getRecord(this._info.data, key)) };
         }
 
         data = { ...data, __mode_: mode, ...(this._info.fixedData || {}) };
@@ -261,8 +225,9 @@ export class Form extends Element {
         if (this._info.nav) {
             this.layout.elements.push(this._info.nav);
         }
-
+        
         this.layout.dataLists = await this.getDataList();
+        
         this.layout.appRequests = this.appRequests("list");
         this.layout.data = data;
         this.configInputs().forEach((item) => this.layout.elements.push(item));
@@ -291,7 +256,7 @@ export class Form extends Element {
     }
 
     private async find() {
-        const db = (this.db = this.store.db.get<DBSql>(this.connection));
+        const db = (this.db = this.store.db.get<DBEngine>(this.connection));
         let data = await this.getDataRecord(this.dataRecord);
         this._data = data;
         let key;
@@ -364,15 +329,15 @@ export class Form extends Element {
         });
     }
     private async saveRecord() {
-        const db = this.store.db.get<DBSql>(this.connection);
-        
+        const db = this.store.db.get<DBEngine>(this.connection);
+
         const key = this.getRecordKey();
         //const mode = +this.store.getReq("__mode_");
-        const data = {...this.store.getVReq(), __key_ : key};
+        const data = { ...this.store.getVReq(), __key_: key };
         const scheme = this._info.scheme;
 
         const config = {
-            transaction: true
+            transaction: true,
         };
 
         const transaction = new Transaction(config, db);
@@ -478,7 +443,7 @@ export class Form extends Element {
     private async doDataFields(parent) {
         this._data = this.store.getVReq();
 
-        const db = (this.db = this.store.db.get<DBSql>(this.connection));
+        const db = (this.db = this.store.db.get<DBEngine>(this.connection));
 
         const list = this.dataLists.filter((data) => data.parent == parent) || [];
 
@@ -509,12 +474,13 @@ export class Form extends Element {
         dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
 
         let info = [];
+        const db = this.store.db.get<DBEngine>(this.connection);
         for (const data of dataField) {
             if (Array.isArray(data)) {
                 info.push({ value: data[0], text: data[1], level: data[2] ?? undefined });
             } else if (typeof data === "object") {
                 if (data.sql) {
-                    let result = (await this.db.query(data.sql, data.params ?? undefined)).rows;
+                    const result = (await db.query(data.sql, data.params ?? undefined)).rows;
                     info = [...info, ...result];
                 } else if (data.value && data.text) {
                     info.push(data);
@@ -666,9 +632,9 @@ export class Form extends Element {
                         id: "{{&ID_}}",
                         name: "{{&NAME_}}",
                         method: "data-fields",
-                        params:{
-                            parent: "{=parent}"
-                        }
+                        params: {
+                            parent: "{=parent}",
+                        },
                     },
                 ],
             },
@@ -870,5 +836,21 @@ export class Form extends Element {
                 name: "__page_",
             },
         ];
+    }
+
+    test() {
+        const DBRequest = {
+            sql: "select",
+            filter: [],
+            params: [],
+
+            select: [["add", "field1", ["mult", 3, 4]]],
+            from: "t:t1",
+            join: ["inner", "t2:t2", { "t1.a": "t2.a" }],
+            where: { "a:>": 2 },
+            orderBY: ["desc", "field1"],
+            limit: 4,
+            offset: 10,
+        };
     }
 }

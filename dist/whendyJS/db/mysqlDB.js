@@ -7,7 +7,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { DBSql } from "./db.js";
+import { DBEngine } from "./db.js";
 import * as mysql from "mysql";
 var FLAGS;
 (function (FLAGS) {
@@ -21,17 +21,39 @@ var FLAGS;
     FLAGS[FLAGS["TIMESTAMP_FLAG"] = 1024] = "TIMESTAMP_FLAG";
     FLAGS[FLAGS["UNIQUE_FLAG"] = 65536] = "UNIQUE_FLAG";
 })(FLAGS || (FLAGS = {}));
-export class MysqlDB extends DBSql {
-    query(value, param) {
+export class MysqlDB extends DBEngine {
+    query(info, params) {
         let sql;
-        if (typeof value === "object") {
-            sql = this.doQuery(value);
+        if (typeof info === "object") {
+            if (info.params) {
+                params = info.params;
+            }
+            if (info.sql) {
+                sql = this.doSql(info);
+            }
+            else {
+                sql = this.doQuery(info);
+            }
         }
         else {
-            sql = value;
+            sql = info;
         }
-        return new Promise((resolve, reject) => {
-            this.client.query(sql, param, (error, results, fields) => {
+        return new Promise((resolve, reject) => __awaiter(this, void 0, void 0, function* () {
+            let totalRecords = undefined;
+            let page = undefined;
+            let totalPages = undefined;
+            if (typeof info === "object" && info.page !== undefined) {
+                page = info.page;
+                let result = yield this.query(this.doQueryAll(sql), params);
+                if (result.rows.length > 0) {
+                    totalRecords = result.rows[0].total;
+                    totalPages = Math.ceil(totalRecords / info.limit);
+                    if (info.page > totalPages) {
+                        page = totalPages;
+                    }
+                }
+            }
+            this.client.query(sql, params, (error, results, fields) => {
                 if (error) {
                     resolve({
                         errno: 0,
@@ -64,9 +86,26 @@ export class MysqlDB extends DBSql {
                         error: null,
                         rows: results,
                         fields,
+                        totalRecords,
+                        page,
+                        totalPages,
                     });
                 }
             });
+        }));
+    }
+    getRecord(info, key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let query = info.sql;
+            let conditions = [];
+            let values = [];
+            const record = info.record.forEach((field) => {
+                conditions.push(field + "= ?");
+                values.push(key[field]);
+            });
+            query += " WHERE " + conditions.join(" AND ");
+            const data = yield this.query(query, values);
+            return data.rows[0] || {};
         });
     }
     infoQuery(q) {
@@ -326,6 +365,35 @@ export class MysqlDB extends DBSql {
                 });
             });
         });
+    }
+    doSql(info) {
+        let query = info.sql;
+        let filters = [];
+        if (info.filterBy && info.filter) {
+            info.filterBy.forEach((e) => {
+                filters.push(`${e} like concat('%',${this.client.escape(info.filter)},'%')`);
+            });
+            query += " WHERE " + filters.join(" OR ");
+        }
+        if (info.orderBy) {
+            if (Array.isArray(info.orderBy)) {
+                info.orderBy.forEach((item) => {
+                    const values = item.split(":");
+                    query += " ORDER BY " + values[0] + (values[1] ? " " + values[1] : "");
+                });
+            }
+        }
+        if (info.limit) {
+            const limit = " LIMIT " + info.limit;
+            if (info.page) {
+                query += limit + " OFFSET " + (info.page - 1) * info.limit;
+            }
+            else if (info.offset) {
+                query += limit + " OFFSET " + info.offset;
+            }
+        }
+        console.log(query);
+        return query;
     }
     doQuery(value) {
         let query = value.sql;

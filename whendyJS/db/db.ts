@@ -41,12 +41,15 @@ export interface IRecordInfo {
 export interface QueryResult {
     type?: string;
     lastId?;
-    rows?:any[];
+    rows?: any[];
     info?;
     error?;
     errno?;
     table?: string;
     fields?: IFieldInfo[];
+    totalRecords?: number;
+    page?: number;
+    totalPages?: number;
 }
 
 export interface STMTResult {
@@ -71,22 +74,40 @@ export abstract class STMT {
     abstract execute(...args: any);
 }
 
-export abstract class DBSql implements IRecordAdmin {
-    abstract connect(info: IConnectInfo);
+export type BDRequest = {
+    sql?: string;
+    filterBy?: string[];
+    filter?: string;
+    params?: string[];
+    select?: any[];
+    from?: string;
+    join?: any[];
+    where?: any;
+    orderBy?: string[];
+    limit?: number;
+    page?: number;
+    offset?: number;
+    record?: any;
+};
+
+export abstract class DBEngine implements IRecordAdmin {
+    abstract connect(info: IConnectInfo): void;
     abstract query(sql: string | object, params?: any[]): Promise<QueryResult>;
     abstract infoQuery(q: string): Promise<IFieldInfo[]>;
     abstract infoTable(table: string): Promise<IFieldInfo[]>;
     abstract prepare(): Promise<STMT>;
-    abstract begin();
-    abstract commit();
-    abstract rollback();
-    abstract close();
+    abstract begin(): void;
+    abstract commit(): void;
+    abstract rollback(): void;
+    abstract close(): void;
     abstract insertRecord(info: IRecordInfo): Promise<STMTResult>;
     abstract updateRecord(info: IRecordInfo): Promise<STMTResult>;
     abstract upsertRecord(info: IRecordInfo): Promise<STMTResult>;
     abstract deleteRecord(info: IRecordInfo): Promise<STMTResult>;
 
-    abstract doQueryAll(query:string):string 
+    abstract doQueryAll(query: string): string;
+
+    abstract getRecord(info:BDRequest, key:any): Promise<any>
 }
 
 export abstract class DBSqll {

@@ -10,7 +10,7 @@ export var RecordMode;
 })(RecordMode || (RecordMode = {}));
 export class STMT {
 }
-export class DBSql {
+export class DBEngine {
 }
 export class DBSqll {
 }

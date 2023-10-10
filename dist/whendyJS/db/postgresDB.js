@@ -7,9 +7,9 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { DBSql } from "./db.js";
+import { DBEngine } from "./db.js";
 import pg from "pg";
-export class PostgreDB extends DBSql {
+export class PostgreDB extends DBEngine {
     query(value, param) {
         return __awaiter(this, void 0, void 0, function* () {
             let sql;
@@ -41,6 +41,20 @@ export class PostgreDB extends DBSql {
                     rows: [],
                 };
             });
+        });
+    }
+    getRecord(info, key) {
+        return __awaiter(this, void 0, void 0, function* () {
+            let query = info.sql;
+            let conditions = [];
+            let values = [];
+            const record = info.record.forEach((field) => {
+                conditions.push(field + "= ?");
+                values.push(key[field]);
+            });
+            query += " WHERE " + conditions.join(" AND ");
+            const data = yield this.query(query, values);
+            return data.rows[0] || {};
         });
     }
     infoQuery(q) {

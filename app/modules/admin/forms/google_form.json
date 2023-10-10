@@ -82,7 +82,7 @@
     "formData": {
         "query": {
             "sql": "select * from ...",
-            "select": ["a", "b", ["tabla.field1", "cos"], ["tabla.field1","tabla.field2", "+"]],
+            "select": ["a", "b", ["tabla.field1", "cos"], ["tabla.field1", "tabla.field2", "+"]],
             "from": "user"
         },
 
@@ -90,7 +90,7 @@
         "default": {},
         "fixed": {}
     },
-    
+
     "formLists": [
         {
             "name": "countryId",
@@ -153,7 +153,7 @@
 
     "data": {
         "sql": "SELECT * FROM classicmodels.em",
-        "params": ["1"],
+        "_params": ["1"],
         "record": ["employeeNumber"]
     },
 
@@ -205,16 +205,18 @@
         "limit": 20
     },
 
-    "listData": {
+    "gridData": {
         "sql": "select * from classicmodels.em",
-        "params": [""],
+        "filterBy": ["lastName", "firstName"],
+        "orderBy": ["lastName:desc"],
+        "limit": 6,
+        "page": "{{ &PARAMS_.page}}"
+    },
+
+    "gridOptions":{
         "pagination": true,
         "maxPage": 6,
-        "limit": 6,
-        "searchIn": ["lastName", "firstName"],
-        "orderBy": ["lastName"],
         "footerText": "page 5 de 6",
-        "page": "{{ &PARAMS_.page}}",
         "valid": {
             "__key_": {
                 "required": { "msg": "select a record!" }
