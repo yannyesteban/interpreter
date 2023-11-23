@@ -4,6 +4,11 @@ import { getParentElement, fire } from "../Tool.js";
 
 import { Float, Move, Drag, Resize } from "../Float.js";
 
+
+//const CSS = "./css/WHPopup.css";
+const CSS = "../html/css/WHPopup.css";
+
+
 const html = 0;
 
 class PopupCaption extends HTMLElement {
@@ -62,7 +67,7 @@ class Popup extends HTMLElement {
 			</style>
 			<!--<link rel="stylesheet" href="./css/WHPopup.css">-->
             <style>
-            @import "./css/WHPopup.css";
+            @import "${CSS}";
             </style>
 			<slot name="caption"></slot>
 			<slot name="body"></slot>

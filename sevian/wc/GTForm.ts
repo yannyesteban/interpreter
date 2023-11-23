@@ -6,6 +6,10 @@ import { Sevian } from "./Sevian.js";
 import { AppRequest } from "./AppRequest.js";
 import { error } from "console";
 
+
+//const CSS = "./css/WHForm.css";
+const CSS = "../html/css/WHForm.css";
+
 interface RequestAction {
     id: string;
     panelId: string;
@@ -59,7 +63,10 @@ class FormContainer extends HTMLElement {
 
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./css/WHForm.css">
+		
+        <style>
+            @import "${CSS}";
+        </style>
 		<slot></slot>	
 	
 		`;
@@ -518,21 +525,23 @@ class GTForm extends HTMLElement {
         if (this._data && name in this._data) {
             input.value(this._data[name]);
         }
-
+        const ind = field.create("required-ind");
         if (info.required) {
-            
             input.attr("required", "");
-            field.create("required-ind").text("*");
+            ind.text("*")
         }
 
         if (info.rules) {
-            //input.setCustomValidity("");
+            if(info.rules.required){
+                ind.text("*")
+            }
             input.ds("rules", JSON.stringify(info.rules));
         }
         return field.get();
     }
 
     _createTab(info): HTMLElement {
+        
         const tab = $.create("wh-tab");
         info.elements.forEach((child) => {
             tab.create("wh-tab-menu").html(child.label);

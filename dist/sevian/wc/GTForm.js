@@ -1,6 +1,8 @@
 import { Q as $ } from "../Q.js";
 import { valid } from "../Valid.js";
 import "./Field.js";
+//const CSS = "./css/WHForm.css";
+const CSS = "../html/css/WHForm.css";
 class FormContainer extends HTMLElement {
     constructor() {
         super();
@@ -8,7 +10,10 @@ class FormContainer extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./css/WHForm.css">
+		
+        <style>
+            @import "${CSS}";
+        </style>
 		<slot></slot>	
 	
 		`;
@@ -395,12 +400,15 @@ class GTForm extends HTMLElement {
         if (this._data && name in this._data) {
             input.value(this._data[name]);
         }
+        const ind = field.create("required-ind");
         if (info.required) {
             input.attr("required", "");
-            field.create("required-ind").text("*");
+            ind.text("*");
         }
         if (info.rules) {
-            //input.setCustomValidity("");
+            if (info.rules.required) {
+                ind.text("*");
+            }
             input.ds("rules", JSON.stringify(info.rules));
         }
         return field.get();

@@ -11,6 +11,8 @@ var __classPrivateFieldSet = (this && this.__classPrivateFieldSet) || function (
 };
 var _WHTab_lastIndex;
 import { Q as $ } from "./../Q.js";
+//const CSS = "./../css/WHTab.css";
+const CSS = "../html/css/WHTab.css";
 const KEYCODE = {
     DOWN: 40,
     LEFT: 37,
@@ -37,7 +39,7 @@ class WHTabMenu extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../css/WHTab.css">
+		<link rel="stylesheet" href="${CSS}">
 		<slot></slot>	
 	
 		`;
@@ -80,7 +82,7 @@ class WHTabPanel extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../css/WHTab.css">
+		<link rel="stylesheet" href="${CSS}">
 		<slot></slot>	
 	
 		`;
@@ -104,7 +106,7 @@ export class WHTab extends HTMLElement {
         _WHTab_lastIndex.set(this, -1);
         const template = document.createElement("template");
         template.innerHTML = `
-			<link rel="stylesheet" href="./../css/WHTab.css">
+			<link rel="stylesheet" href="${CSS}">
 			<slot name="menu"></slot>
 			<slot name="panel"></slot>
 

@@ -1,3 +1,5 @@
+//const CSS_PATH = "./css/WHForm.css";
+const CSS_PATH = "../html/css/WHForm.css";
 class SectionCaption extends HTMLElement {
     constructor() {
         super();
@@ -5,7 +7,9 @@ class SectionCaption extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../css/WHForm.css">
+		<style>
+			@import "${CSS_PATH}";
+		</style>
 		<slot></slot>	
 	
 		`;
@@ -24,7 +28,9 @@ class SectionBody extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../css/WHForm.css">
+		<style>
+		@import "${CSS_PATH}";
+	</style>
 		<slot></slot>	
 	
 		`;
@@ -43,7 +49,9 @@ class Section extends HTMLElement {
         const template = document.createElement("template");
         template.innerHTML = `
 			
-		<link rel="stylesheet" href="./../css/WHForm.css">
+		<style>
+		@import "${CSS_PATH}";
+	</style>
 		<slot name="caption"></slot>	
 		<slot name="body"></slot>
 	
@@ -51,8 +59,7 @@ class Section extends HTMLElement {
         this.attachShadow({ mode: "open" });
         this.shadowRoot.appendChild(template.content.cloneNode(true));
     }
-    connectedCallback() {
-    }
+    connectedCallback() { }
 }
 customElements.define("wh-section", Section);
 //# sourceMappingURL=Section.js.map

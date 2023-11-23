@@ -1,6 +1,8 @@
 import { Q as $ } from "../Q.js";
 import { fire } from "../Tool.js";
 import { Float } from "../Float.js";
+//const CSS = "./css/WHPopup.css";
+const CSS = "../html/css/WHPopup.css";
 const html = 0;
 class PopupCaption extends HTMLElement {
     constructor() {
@@ -48,7 +50,7 @@ class Popup extends HTMLElement {
 			</style>
 			<!--<link rel="stylesheet" href="./css/WHPopup.css">-->
             <style>
-            @import "./css/WHPopup.css";
+            @import "${CSS}";
             </style>
 			<slot name="caption"></slot>
 			<slot name="body"></slot>
