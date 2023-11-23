@@ -58,7 +58,7 @@ export class Sevian extends HTMLElement {
             let request: LRequest = {};
             let context = null;
             const target = event.target;
-            console.log(target, action, event.target.actionContext)
+            console.log(target, action, event.target.actionContext);
             if (event.target.actionContext) {
                 context = target.closest(event.target.actionContext);
             } else if (event.target.useContext) {
@@ -94,6 +94,7 @@ export class Sevian extends HTMLElement {
         this.classList.add("_main_app_");
         this.addEventListener("app-request", this);
         this.addEventListener("app-action", this);
+
         return;
         // Select the node that will be observed for mutations
         const targetNode = this;
@@ -166,6 +167,18 @@ export class Sevian extends HTMLElement {
 
     get server() {
         return this.getAttribute("server");
+    }
+
+    set module(value) {
+        if (Boolean(value)) {
+            this.setAttribute("module", value);
+        } else {
+            this.removeAttribute("module");
+        }
+    }
+
+    get module() {
+        return this.getAttribute("module");
     }
 
     set name(value) {
@@ -252,12 +265,8 @@ export class Sevian extends HTMLElement {
                 } else if (info.do == "set-element") {
                     panel = $(info.to);
                     panel.text("");
-                }else if (info.do == "append-to") {
-                    
+                } else if (info.do == "append-to") {
                     panel = $(info.to);
-                    
-                    
-               
                 }
 
                 //const panel = $(`#${info.panel}` || info.setTo || info.appendTo);
@@ -269,7 +278,7 @@ export class Sevian extends HTMLElement {
                 if (info.panel || info.setTo) {
                     panel.text("");
                 }
-                
+
                 panel.append(e);
             })
             .catch((error) => {
@@ -306,7 +315,7 @@ export class Sevian extends HTMLElement {
                     break;
                 case "append-to":
                     await this.setElement(r);
-                    break;                    
+                    break;
                 case "update":
                     await this.updateElement(r);
                     break;
@@ -335,6 +344,9 @@ export class Sevian extends HTMLElement {
     }
 
     initApp() {
+        if (!this.module) {
+            return;
+        }
         /*
         const btn = $("#x");
         btn.on("click", (e) => {
@@ -445,6 +457,10 @@ export class Sevian extends HTMLElement {
     fetch(request: LRequest) {
         let element = null;
 
+        if (request.confirm && !window.confirm(request.confirm)) {
+            return;
+        }
+
         if (request.sendTo && request.sendTo instanceof HTMLElement) {
             element = request.sendTo;
         } else if (request.sendTo && typeof request.sendTo === "string") {
@@ -452,22 +468,20 @@ export class Sevian extends HTMLElement {
         }
 
         if (request.valid && typeof element?.valid === "function") {
-            const error = element.valid(request.validOption || undefined);
-            if (error) {
-                this._showError(error);
+            const result = element.valid(request.validOption || undefined);
+            
+            if (result.error) {
+                
+                this._showError(result.message);
                 return;
             }
         }
 
-        if (request.confirm && !window.confirm(request.confirm)) {
-            return;
-        }
         let actions = request.actions || [];
 
         if (element && actions) {
-            
             actions = this.evalDataElement(actions, element);
-            console.log("actions", actions,element);
+            console.log("actions", actions, element);
         }
 
         const masterData = request.masterData;

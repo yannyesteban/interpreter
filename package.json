@@ -9,12 +9,12 @@
   "scripts": {
     "build": "tsc --build",
     "clean": "tsc --build --clean",
-    "start": "node dist/main.js",
+    "start": "nodemon dist/whendyJS/main.js",
     "main": "node dist/main.js",
     "ss": "node dist/server.js",
     "ws": "node dist/websocket.js",
     "test": "node dist/nodetest.js",
-    "w": "node dist/whendy/node/main.js"
+    "w": "nodemon dist/whendyJS/main.js"
   },
   "type": "module",
   "dependencies": {

@@ -229,7 +229,7 @@ export class Form extends Element {
         this.layout.dataLists = await this.getDataList();
         
         this.layout.appRequests = this.appRequests("list");
-        this.layout.data = data;
+        this.layout.values = data;
         this.configInputs().forEach((item) => this.layout.elements.push(item));
 
         this.doResponse({

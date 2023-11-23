@@ -1,9 +1,47 @@
 {
-    "label": "Administrador de Usuarios",
+    "label": "Administrador de Usuarios 2024",
+    "gridQuery":"select",
+    "formQuery":"select",
+    "form_":{
+        "label":"form One",
+        "className":["sevian", "sigefor"],
+        "layout":[],
+        "nav":"new-record",
+        "pages":["field1", "field4", {"label":"XXXX", "className":"sevian"}],
+        "tabs":[{"label":"personal Data"}]
+    },
+    "grid_":{
+        "label":"List of Ones",
+        "className":["sevian", "sigefor"],
+        "layout":[],
+        "nav":"list"
+    },
+    "responseApi":{
+        "name":"aqui",
+        "data":{
+            "sql":"select * from ..$1",
+            "params":["&a"]
+
+        },
+        "format":{
+
+        }
+    },
+    "nav":{
+        "default":{
+
+        },
+        "new-record":{
+
+        },
+        "list":{
+
+        }
+    },
     "fields": [
         {
             "component": "field",
-            "label": "Employee ID",
+            "label": "Employee ID--",
             "input": "input",
             "name": "employeeNumber",
             "cell": ""
@@ -330,7 +368,7 @@
             },
             {
                 "component": "field",
-                "label": "Apellidos",
+                "label": "Apellidos.-",
                 "input": "input",
                 "name": "lastName",
                 "required": {

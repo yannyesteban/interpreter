@@ -153,6 +153,17 @@ export class Sevian extends HTMLElement {
     get server() {
         return this.getAttribute("server");
     }
+    set module(value) {
+        if (Boolean(value)) {
+            this.setAttribute("module", value);
+        }
+        else {
+            this.removeAttribute("module");
+        }
+    }
+    get module() {
+        return this.getAttribute("module");
+    }
     set name(value) {
         if (Boolean(value)) {
             this.setAttribute("name", value);
@@ -306,6 +317,9 @@ export class Sevian extends HTMLElement {
         });
     }
     initApp() {
+        if (!this.module) {
+            return;
+        }
         /*
         const btn = $("#x");
         btn.on("click", (e) => {
@@ -396,6 +410,9 @@ export class Sevian extends HTMLElement {
     }
     fetch(request) {
         let element = null;
+        if (request.confirm && !window.confirm(request.confirm)) {
+            return;
+        }
         if (request.sendTo && request.sendTo instanceof HTMLElement) {
             element = request.sendTo;
         }
@@ -403,14 +420,11 @@ export class Sevian extends HTMLElement {
             element = this.querySelector(request.sendTo);
         }
         if (request.valid && typeof (element === null || element === void 0 ? void 0 : element.valid) === "function") {
-            const error = element.valid(request.validOption || undefined);
-            if (error) {
-                this._showError(error);
+            const result = element.valid(request.validOption || undefined);
+            if (result.error) {
+                this._showError(result.message);
                 return;
             }
-        }
-        if (request.confirm && !window.confirm(request.confirm)) {
-            return;
         }
         let actions = request.actions || [];
         if (element && actions) {

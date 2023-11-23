@@ -1,0 +1,701 @@
+<!DOCTYPE html>
+<html lang="en">
+    <head>
+        <meta charset="UTF-8" />
+        <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+        <title>Form Test</title>
+
+        <link rel="icon" type="image/x-icon" href="../html/images/favicon.ico" />
+
+        <link rel="stylesheet" href="../html/css/google.css" />
+        <link rel="stylesheet" href="../html/css/grid.css" />
+
+        <style>
+            body {
+                background-image: url("../html/images/wallpapers/003.jpg");
+                background-position: center center;
+                background-size: 100vw auto;
+            }
+
+            .pepo {
+                border: 1px solid blue;
+            }
+            input:invalid {
+                color: red;
+            }
+
+            /* Estilo para el mensaje de validación cuando se muestra */
+            input:invalid + span::before {
+                content: "⚠ "; /* Agrega un icono de advertencia */
+                color: red;
+            }
+            input:invalid::cue {
+                color: red;
+            }
+        </style>
+        <script defer type="module" src="../dist/sevian/wc/AppRequest.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/Popup.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/Nav.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/Grid.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/Sevian.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/WaitLayer.js"></script>
+        <script defer type="module" src="../dist/sevian/wc/GTForm.js"></script>
+    </head>
+    <body>
+        <sevian-app module="" id="gtcomm" name="home" server="http://127.0.0.1:8080/admin">
+            <form id="y" action="">
+                <gt-form id="x"></gt-form>
+            </form>
+        </sevian-app>
+
+        <script type="module">
+            import { Q as $ } from "../dist/sevian/Q.js";
+
+            const dataSource1 = {
+                caption: "Google Form",
+                className: "pepo",
+                elements: [
+                    { component: "field", label: "Employee ID", input: "input", name: "employeeNumber" },
+                    {
+                        component: "field",
+                        label: "Apellidos.-",
+                        input: "input",
+                        name: "lastName",
+                        required: { message: "yes" },
+                    },
+                    { component: "field", label: "Nombre", input: "input", name: "firstName" },
+                    { component: "field", label: "Extensión", input: "input", name: "extension" },
+                    { component: "field", label: "Correo", input: "input", name: "email" },
+                    { component: "field", label: "officeCode", input: "input", name: "officeCode" },
+                    { component: "field", label: "reportsTo", input: "input", name: "reportsTo" },
+                    { component: "field", label: "job", input: "input", name: "jobTitle" },
+                    { component: "field", label: "countryId", input: "select", name: "countryId" },
+                    { component: "field", label: "stateId", input: "select", name: "stateId" },
+                    { component: "field", label: "cityId", input: "select", name: "cityId" },
+                    {
+                        component: "nav",
+                        elements: [
+                            {
+                                type: "button",
+                                label: "<span class='material-symbols-outlined'>add</span><span>New</span>",
+                                className: "",
+                                action: "new",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "Save Record",
+                                className: "",
+                                action: "save",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "save",
+                                className: "",
+                                action: "save",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "Delete",
+                                className: "",
+                                action: "delete",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "Todos",
+                                className: "",
+                                action: "list",
+                                request: {},
+                                click: "",
+                            },
+                        ],
+                    },
+                    { component: "field", label: "__mode_", input: "input", name: "__mode_" },
+                    { component: "field", label: "__key_", input: "input", name: "__key_" },
+                    { component: "field", label: "__filter_", input: "input", name: "__filter_" },
+                    { component: "field", label: "__page_", input: "input", name: "__page_" },
+                ],
+                values: {
+                    extension: "1",
+                    __page_: "1",
+                    employeeNumber: 5,
+                    lastName: "Yanny",
+                    firstName: null,
+                    email: null,
+                    officeCode: null,
+                    reportsTo: null,
+                    jobTitle: "none",
+                    countryId: 11,
+                    stateId: 3638,
+                    cityId: 838,
+                    __mode_: 2,
+                    __key_: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NX0.oeRhCeScrX7A-z8F_gV5BtQ_uVaFWPm9i8I7z4FC6R4",
+                },
+                appRequests: {
+                    dataField: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "update",
+                                to: "p2",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "data-fields",
+                                params: { parent: "{=parent}" },
+                            },
+                        ],
+                    },
+                    save: {
+                        blockTo: true,
+                        confirm: "secure save?",
+                        reportValidity: true,
+                        actions: [
+                            { do: "update", api: "form", id: "two", name: "google_form", method: "save" },
+                            {
+                                do: "set-panel",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                api: "form",
+                                method: "load-record",
+                                params: { page: 2 },
+                                doWhen: { __error_: false },
+                            },
+                        ],
+                    },
+                    delete: {
+                        blockTo: true,
+                        setFormValue: { __mode_: "3" },
+                        actions: [
+                            { do: "update", api: "form", id: null, name: "google_form", method: "save" },
+                            {
+                                do: "set-panel",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                api: "form",
+                                method: "load-record",
+                                params: { page: 2 },
+                                doWhen: { __error_: false },
+                            },
+                        ],
+                    },
+                    list: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "set-panel",
+                                api: "form",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                method: "list",
+                                params: { page: 1 },
+                            },
+                        ],
+                    },
+                    "load-page": {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "update",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "load-page",
+                                params: { page: "{=page}", filter: "{=filter}" },
+                            },
+                        ],
+                    },
+                    "edit-record": {
+                        validate: "#two",
+                        validateOption: "select",
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "set-panel",
+                                api: "form",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                method: "load-record",
+                            },
+                        ],
+                    },
+                    "delete-record": {
+                        blockTo: true,
+                        confirm: "borrando!",
+                        validate: "#two",
+                        validateOption: "select",
+                        setFormValue: { __mode_: "3" },
+                        store: { __page_: "1" },
+                        actions: [
+                            {
+                                do: "update",
+                                api: "form",
+                                to: null,
+                                id: null,
+                                name: "google_form",
+                                method: "save",
+                            },
+                            {
+                                do: "set-panel",
+                                api: "form",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                method: "list",
+                                params: { page: null },
+                            },
+                        ],
+                    },
+                    filter: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "update",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "load-page",
+                                params: { page: 1, filter: "{=filter}" },
+                            },
+                        ],
+                    },
+                    new: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "set-panel",
+                                to: "p2",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "new-record",
+                            },
+                        ],
+                    },
+                },
+            };
+
+            const dataSource2 = {
+                caption: "Google Form 2",
+                className: "pepo",
+                elements: [
+                    {
+                        component: "field",
+                        label: "Employee ID",
+                        input: "input",
+                        name: "employeeNumber",
+                        required: { message: "yes" },
+                        rules: {
+                            required: { message: "field is bad" },
+                        },
+                    },
+                    {
+                        component: "field",
+                        label: "Apellidos.-",
+                        input: "input",
+                        name: "lastName",
+                        required: { message: "yes" },
+                        rules: {
+                            required: { message: "field is bad" },
+                        },
+                    },
+                    { component: "field", label: "Nombre", input: "input", name: "firstName" },
+                    { component: "field", label: "Extensión", input: "input", name: "extension" },
+                    { component: "field", label: "Correo", input: "input", name: "email" },
+                    { component: "field", label: "officeCode", input: "input", name: "officeCode" },
+                    { component: "field", label: "reportsTo", input: "input", name: "reportsTo" },
+                    { component: "field", label: "job", input: "input", name: "jobTitle" },
+                    {
+                        component: "field",
+                        label: "countryId",
+                        input: "select",
+                        name: "countryId",
+                        rules: {
+                            required: { message: "field is bad" },
+                        },
+                    },
+                    { component: "field", label: "stateId", input: "select", name: "stateId" },
+                    { component: "field", label: "cityId", input: "select", name: "cityId" },
+                    {
+                        component: "nav",
+                        elements: [
+                            {
+                                type: "button",
+                                label: "<span class='material-symbols-outlined'>add</span><span>New</span>",
+                                className: "",
+                                action: "new",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "Save Record",
+                                className: "",
+                                action: "save",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "save",
+                                className: "",
+                                action: "save",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "Delete",
+                                className: "",
+                                action: "delete",
+                                request: {},
+                                click: "",
+                            },
+                            {
+                                component: "button",
+                                label: "Todos",
+                                className: "",
+                                action: "list",
+                                request: {},
+                                click: "",
+                            },
+                        ],
+                    },
+                    { component: "field", label: "__mode_", input: "input", name: "__mode_" },
+                    { component: "field", label: "__key_", input: "input", name: "__key_" },
+                    { component: "field", label: "__filter_", input: "input", name: "__filter_" },
+                    { component: "field", label: "__page_", input: "input", name: "__page_" },
+                ],
+                values: {
+                    extension: "1",
+                    __page_: "1",
+                    employeeNumber: "",
+                    lastName: "Yanny",
+                    firstName: null,
+                    email: null,
+                    officeCode: null,
+                    reportsTo: null,
+                    jobTitle: "none",
+                    countryId: 11,
+                    stateId: 3638,
+                    cityId: 838,
+                    __mode_: 2,
+                    __key_: "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NX0.oeRhCeScrX7A-z8F_gV5BtQ_uVaFWPm9i8I7z4FC6R4",
+                },
+                appRequests: {
+                    dataField: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "update",
+                                to: "p2",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "data-fields",
+                                params: { parent: "{=parent}" },
+                            },
+                        ],
+                    },
+                    save: {
+                        blockTo: true,
+                        confirm: "secure save?",
+                        sendTo: "#x",
+                        valid: true,
+                        //validForm: true,
+                        //reportValidity: true,
+                        actions: [
+                            /*{ do: "update", api: "form", id: "two", name: "google_form", method: "save" },
+                            {
+                                do: "set-panel",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                api: "form",
+                                method: "load-record",
+                                params: { page: 2 },
+                                doWhen: { __error_: false },
+                            },*/
+                        ],
+                    },
+                    delete: {
+                        blockTo: true,
+                        setFormValue: { __mode_: "3" },
+                        actions: [
+                            { do: "update", api: "form", id: null, name: "google_form", method: "save" },
+                            {
+                                do: "set-panel",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                api: "form",
+                                method: "load-record",
+                                params: { page: 2 },
+                                doWhen: { __error_: false },
+                            },
+                        ],
+                    },
+                    list: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "set-panel",
+                                api: "form",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                method: "list",
+                                params: { page: 1 },
+                            },
+                        ],
+                    },
+                    "load-page": {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "update",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "load-page",
+                                params: { page: "{=page}", filter: "{=filter}" },
+                            },
+                        ],
+                    },
+                    "edit-record": {
+                        validate: "#two",
+                        validateOption: "select",
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "set-panel",
+                                api: "form",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                method: "load-record",
+                            },
+                        ],
+                    },
+                    "delete-record": {
+                        blockTo: true,
+                        confirm: "borrando!",
+                        validate: "#two",
+                        validateOption: "select",
+                        setFormValue: { __mode_: "3" },
+                        store: { __page_: "1" },
+                        actions: [
+                            {
+                                do: "update",
+                                api: "form",
+                                to: null,
+                                id: null,
+                                name: "google_form",
+                                method: "save",
+                            },
+                            {
+                                do: "set-panel",
+                                api: "form",
+                                to: "p2",
+                                id: "two",
+                                name: "google_form",
+                                method: "list",
+                                params: { page: null },
+                            },
+                        ],
+                    },
+                    filter: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "update",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "load-page",
+                                params: { page: 1, filter: "{=filter}" },
+                            },
+                        ],
+                    },
+                    new: {
+                        blockTo: true,
+                        actions: [
+                            {
+                                do: "set-panel",
+                                to: "p2",
+                                api: "form",
+                                id: "two",
+                                name: "google_form",
+                                method: "new-record",
+                            },
+                        ],
+                    },
+                },
+            };
+
+            const f = $("gt-form").get();
+
+            f.dataSource = dataSource2;
+            // f.values = {};
+
+            console.log(f.caption);
+
+            f["dataLists"] = [
+                {
+                    name: "countryId",
+                    data: [
+                        { value: "", text: "- select your Country" },
+                        { value: "1", text: "ALL" },
+                        { value: 11, text: "Argentina" },
+                        { value: 27, text: "Bolivia" },
+                        { value: 31, text: "Brazil" },
+                        { value: 44, text: "Chile" },
+                        { value: 48, text: "Colombia" },
+                        { value: 64, text: "Ecuador" },
+                        { value: 71, text: "Falkland Islands" },
+                        { value: 76, text: "French Guiana" },
+                        { value: 94, text: "Guyana" },
+                        { value: 172, text: "Paraguay" },
+                        { value: 173, text: "Peru" },
+                        { value: 205, text: "South Georgia" },
+                        { value: 210, text: "Suriname" },
+                        { value: 235, text: "Uruguay" },
+                        { value: 239, text: "Venezuela" },
+                    ],
+                    childs: true,
+                    value: 11,
+                },
+                {
+                    name: "stateId",
+                    data: [
+                        { value: "", text: "- select your State", level: "*" },
+                        { value: 3656, text: "Buenos Aires", level: 11 },
+                        { value: 3647, text: "Catamarca", level: 11 },
+                        { value: 3640, text: "Chaco", level: 11 },
+                        { value: 3651, text: "Chubut", level: 11 },
+                        { value: 4880, text: "Ciudad Autónoma de Buenos Aires", level: 11 },
+                        { value: 3642, text: "Córdoba", level: 11 },
+                        { value: 3638, text: "Corrientes", level: 11 },
+                        { value: 3654, text: "Entre Ríos", level: 11 },
+                        { value: 3652, text: "Formosa", level: 11 },
+                        { value: 3645, text: "Jujuy", level: 11 },
+                        { value: 3655, text: "La Pampa", level: 11 },
+                        { value: 3653, text: "La Rioja", level: 11 },
+                        { value: 3646, text: "Mendoza", level: 11 },
+                        { value: 3644, text: "Misiones", level: 11 },
+                        { value: 3648, text: "Neuquén", level: 11 },
+                        { value: 3639, text: "Río Negro", level: 11 },
+                        { value: 3643, text: "Salta", level: 11 },
+                        { value: 3634, text: "San Juan", level: 11 },
+                        { value: 3636, text: "San Luis", level: 11 },
+                        { value: 3649, text: "Santa Cruz", level: 11 },
+                        { value: 3641, text: "Santa Fe", level: 11 },
+                        { value: 3635, text: "Santiago del Estero", level: 11 },
+                        { value: 3650, text: "Tierra del Fuego", level: 11 },
+                        { value: 3637, text: "Tucumán", level: 11 },
+                    ],
+                    parent: "countryId",
+                    mode: "fetch",
+                    value: 3638,
+                },
+                {
+                    name: "cityId",
+                    data: [
+                        { value: "", text: "- select your City", level: "*" },
+                        { value: 658, text: "Alvear", level: 3638 },
+                        { value: 696, text: "Berón de Astrada", level: 3638 },
+                        { value: 698, text: "Bonpland", level: 3638 },
+                        { value: 756, text: "Chavarría", level: 3638 },
+                        { value: 789, text: "Concepción", level: 3638 },
+                        { value: 803, text: "Corrientes", level: 3638 },
+                        { value: 810, text: "Cruz de los Milagros", level: 3638 },
+                        { value: 813, text: "Curuzú Cuatiá", level: 3638 },
+                        { value: 836, text: "Departamento de Bella Vista", level: 3638 },
+                        { value: 838, text: "Departamento de Berón de Astrada", level: 3638 },
+                        { value: 847, text: "Departamento de Capital", level: 3638 },
+                        { value: 866, text: "Departamento de Concepción", level: 3638 },
+                        { value: 872, text: "Departamento de Curuzú Cuatiá", level: 3638 },
+                        { value: 879, text: "Departamento de Empedrado", level: 3638 },
+                        { value: 881, text: "Departamento de Esquina", level: 3638 },
+                        { value: 888, text: "Departamento de General Alvear", level: 3638 },
+                        { value: 895, text: "Departamento de General Paz", level: 3638 },
+                        { value: 899, text: "Departamento de Goya", level: 3638 },
+                        { value: 912, text: "Departamento de Itatí", level: 3638 },
+                        { value: 913, text: "Departamento de Ituzaingó", level: 3638 },
+                        { value: 925, text: "Departamento de Lavalle", level: 3638 },
+                        { value: 940, text: "Departamento de Mburucuyá", level: 3638 },
+                        { value: 941, text: "Departamento de Mercedes", level: 3638 },
+                        { value: 945, text: "Departamento de Monte Caseros", level: 3638 },
+                        { value: 957, text: "Departamento de Paso de los Libres", level: 3638 },
+                        { value: 980, text: "Departamento de Saladas", level: 3638 },
+                        { value: 984, text: "Departamento de San Cosme", level: 3638 },
+                        { value: 995, text: "Departamento de San Luis del Palmar", level: 3638 },
+                        { value: 996, text: "Departamento de San Martín", level: 3638 },
+                        { value: 1001, text: "Departamento de San Miguel", level: 3638 },
+                        { value: 1004, text: "Departamento de San Roque", level: 3638 },
+                        { value: 1009, text: "Departamento de Santo Tomé", level: 3638 },
+                        { value: 1014, text: "Departamento de Sauce", level: 3638 },
+                        { value: 1068, text: "Empedrado", level: 3638 },
+                        { value: 1071, text: "Esquina", level: 3638 },
+                        { value: 1077, text: "Felipe Yofré", level: 3638 },
+                        { value: 1089, text: "Garruchos", level: 3638 },
+                        { value: 1118, text: "Gobernador Juan E. Martínez", level: 3638 },
+                        { value: 1121, text: "Gobernador Virasora", level: 3638 },
+                        { value: 1123, text: "Goya", level: 3638 },
+                        { value: 1134, text: "Herlitzka", level: 3638 },
+                        { value: 1163, text: "Itá Ibaté", level: 3638 },
+                        { value: 1161, text: "Itatí", level: 3638 },
+                        { value: 1162, text: "Ituzaingó", level: 3638 },
+                        { value: 1171, text: "Juan Pujol", level: 3638 },
+                        { value: 1184, text: "La Cruz", level: 3638 },
+                        { value: 1235, text: "Libertad", level: 3638 },
+                        { value: 1237, text: "Lomas de Vallejos", level: 3638 },
+                        { value: 1242, text: "Loreto", level: 3638 },
+                        { value: 1271, text: "Mariano I. Loza", level: 3638 },
+                        { value: 1275, text: "Mburucuyá", level: 3638 },
+                        { value: 1279, text: "Mercedes", level: 3638 },
+                        { value: 1284, text: "Mocoretá", level: 3638 },
+                        { value: 1287, text: "Monte Caseros", level: 3638 },
+                        { value: 1301, text: "Nuestra Señora del Rosario de Caa Catí", level: 3638 },
+                        { value: 1303, text: "Nueve de Julio", level: 3638 },
+                        { value: 1311, text: "Palmar Grande", level: 3638 },
+                        { value: 1323, text: "Paso de la Patria", level: 3638 },
+                        { value: 1324, text: "Paso de los Libres", level: 3638 },
+                        { value: 1325, text: "Pedro R. Fernández", level: 3638 },
+                        { value: 1327, text: "Perugorría", level: 3638 },
+                        { value: 1349, text: "Pueblo Libertador", level: 3638 },
+                        { value: 1382, text: "Riachuelo", level: 3638 },
+                        { value: 1399, text: "Saladas", level: 3638 },
+                        { value: 1416, text: "San Carlos", level: 3638 },
+                        { value: 1419, text: "San Cosme", level: 3638 },
+                        { value: 1437, text: "San Lorenzo", level: 3638 },
+                        { value: 1439, text: "San Luis del Palmar", level: 3638 },
+                        { value: 1443, text: "San Miguel", level: 3638 },
+                        { value: 1461, text: "Santa Lucía", level: 3638 },
+                        { value: 1466, text: "Santa Rosa", level: 3638 },
+                        { value: 1476, text: "Santo Tomé", level: 3638 },
+                        { value: 1594, text: "Yapeyú", level: 3638 },
+                        { value: 1595, text: "Yataity Calle", level: 3638 },
+                    ],
+                    parent: "stateId",
+                    mode: "fetch",
+                    value: 838,
+                },
+            ];
+
+            //f.dataSource = { appRequests: dataSource2.appRequests };
+            //f.caption = "Yanny Esteban";
+        </script>
+    </body>
+</html>

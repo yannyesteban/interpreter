@@ -1,4 +1,5 @@
 import { Q as $ } from "../Q.js";
+import { valid } from "../Valid.js";
 import "./Field.js";
 import { Sevian } from "./Sevian.js";
 
@@ -172,7 +173,7 @@ class GTForm extends HTMLElement {
 			}
 			</style>
             <slot name="caption"></slot>
-           
+            <slot name="app-request"></slot>
             <slot></slot>
             
             `;
@@ -322,78 +323,77 @@ class GTForm extends HTMLElement {
         return this.getAttribute("type");
     }
 
-    set dataSource(source) {
-        /*
-        const appRequest = {
-            dataField: {
-                //form: this,
-                actions: [
-                    {
-                        type: "element",
-                        element: "form",
-                        id: this.id,
-                        name: "two",
-                        method: "data-fields",
-                    },
-                ],
-            },
-        };
-        */
+    set caption(value: string) {
+        const _caption = $(this).findOrCreate("gt-caption", "gt-caption");
+        _caption.html(value);
+    }
 
-        customElements.whenDefined("app-request").then((x) => {
-            if (source.appRequests) {
-                for (const [name, info] of Object.entries(source.appRequests)) {
-                    const r = $(this).create("app-request").get<HTMLElement>();
-                    r.setAttribute("name", name);
-                    r.setAttribute("type", "json");
-                    r["data"] = info;
-                    console.log(info);
-                }
-            }
-        });
-
-        this.modeInit = true;
-        this.innerHTML = "";
-        console.log(source);
-
-        if (source.caption) {
-            this._createCaption(source.caption);
+    get caption() {
+        const _caption = $(this).query("gt-caption");
+        if (_caption) {
+            return _caption.html();
         }
+        return;
+    }
 
-        if (source.className) {
-            $(this).addClass(source.className);
+    set elements(elems: any[]) {
+        this.setElements(this, elems);
+
+        if (this._data) {
+            this.values = this._data;
         }
+    }
 
-        //this._data = source.data || {};
-        //console.log(this._data);
+    get elements() {
+        return;
+    }
 
-        this.setElements(this, source.elements);
-
-        /*
-        const dataLists: HTMLElement[] = Array.from(this.querySelectorAll(`datalist[data-name]`));
-
-        for (const list of dataLists) {
-            const name = list.dataset.name;
-            const element = this.querySelector(`[data-form-element="field"][name="${name}"]`);
-            this._setDataOptions(list, element);
-        }
-        */
-        console.log("FINAL.....");
-        this.values = source.data || {};
-
-        if (source.dataLists) {
-            source.dataLists.forEach((info) => {
+    set dataLists(lists: any[]) {
+        if (lists) {
+            lists.forEach((info) => {
                 this._createDataList(info);
             });
         }
     }
 
-    set values(data) {
+    set appRequests(request: object) {
+        customElements.whenDefined("app-request").then((x) => {
+            Array.from($(this).queryAll("app-request")).forEach((e) => e.remove());
+
+            if (request) {
+                for (const [name, info] of Object.entries(request)) {
+                    const r = $(this).create("app-request").get<HTMLElement>();
+                    r.setAttribute("name", name);
+                    r.setAttribute("type", "json");
+                    r.setAttribute("slot", "app-request");
+                    r["data"] = info;
+                    console.log(info);
+                }
+            }
+        });
+    }
+
+    set dataSource(info: any) {
+        this.innerHTML = "";
+        this.modeInit = true;
+        this._data = null;
+
+        for (const [key, value] of Object.entries(info)) {
+            this[key] = value;
+        }
+    }
+
+    set values(data: any) {
+        if (typeof data !== "object") {
+            console.warn("data dont found!");
+        }
         this.getFields().forEach((field) => {
             if (data[field.name]) {
                 field.value = data[field.name];
             }
         });
+
+        this._data = data;
     }
 
     set dataFields(dataFields) {
@@ -515,14 +515,19 @@ class GTForm extends HTMLElement {
             input.attr("type", info.type);
         }
 
-        if (name in this._data) {
+        if (this._data && name in this._data) {
             input.value(this._data[name]);
         }
 
         if (info.required) {
-            input.get<any>().setCustomValidity("You gotta fill this out, yo!");
+            
             input.attr("required", "");
             field.create("required-ind").text("*");
+        }
+
+        if (info.rules) {
+            //input.setCustomValidity("");
+            input.ds("rules", JSON.stringify(info.rules));
         }
         return field.get();
     }
@@ -618,10 +623,26 @@ class GTForm extends HTMLElement {
         return this.querySelector<AppRequest>(`app-request[name="${name}"]`)?.data;
     }
 
-    
-
     test(h, i) {
         console.log(h, i);
+    }
+
+    valid() {
+        for (const f of Array.from($(this).queryAll(`[data-form-element="field"][data-rules]`))) {
+            const input = f.get<HTMLInputElement>();
+            const rules = JSON.parse(f.ds("rules") || "{}");
+            console.log(rules);
+            const result = valid(rules, f.value(), "title: string");
+            if (result.error) {
+                input.setCustomValidity(result.message);
+                input.reportValidity();
+
+                return result;
+            }
+            input.setCustomValidity("");
+        }
+
+        return {error: false};
     }
 }
 
