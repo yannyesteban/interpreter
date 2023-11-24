@@ -8,13 +8,35 @@
         "layout":[],
         "nav":"new-record",
         "pages":["field1", "field4", {"label":"XXXX", "className":"sevian"}],
-        "tabs":[{"label":"personal Data"}]
+        "tabs":[{"label":"personal Data"}],
+        "data": {
+            "sql": "SELECT * FROM classicmodels.em",
+            "_params": ["1"],
+            "record": ["employeeNumber"]
+        }
     },
     "grid_":{
         "label":"List of Ones",
-        "className":["sevian", "sigefor"],
-        "layout":[],
-        "nav":"list"
+        "addClasses":["sevian", "sigefor"],
+        "selectionType": "simple",
+        "pagination": true,
+        "nav":"list",
+        "data":{
+            "sql": "select * from classicmodels.em",
+            "filterBy": ["lastName", "firstName"],
+            "orderBy": ["lastName:desc"],
+            "limit": 6,
+            "page": "{{ &PARAMS_.page}}"
+        },
+
+        
+        "maxPage": 6,
+        "footerText": "page 5 de 6",
+        "valid": {
+            "__key_": {
+                "required": { "msg": "select a record!" }
+            }
+        }
     },
     "responseApi":{
         "name":"aqui",
