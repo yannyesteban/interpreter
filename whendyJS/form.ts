@@ -4,19 +4,57 @@ import { DBEngine } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
 import { Store } from "./store.js";
 import { JWT } from "./JWT.js";
+enum ModeForm {
+  INSERT = 1,
+  UPDATE,
+  DELETE,
+  AUTO,
+}
+
+type FormFieldInfo = {
+  id: string;
+  component: string;
+  label: string;
+  className: string;
+  input: string;
+  type: string;
+  name: string;
+  cell: string;
+  required: { message: string };
+  rules: any;
+
+  events: any;
+  propertys: any;
+  attributes: any;
+};
+
+type FieldComponent = {
+  component: "field";
+  id: string;
+  label: string;
+  className: string;
+  input: string;
+  type: string;
+  name: string;
+
+  required?: { message: string };
+  rules: any;
+  events: any;
+  propertys: any;
+  attributes: any;
+};
 
 type InfoDataList =
   | { sql: string; params?: (string | number)[] }
   | (string | number)[][];
 
-const k: InfoDataList[] = [
-  { sql: "select from ", params: ["vv", 5] },
-  [
-    ["1", "Venezuela", "1"],
-    ["2", "Estados Unidos", "0"],
-  ],
-];
-console.log(k);
+type ElementType = {
+  component: string;
+  label?: string;
+  className?: string;
+  elements: ElementType[];
+};
+
 interface IRecordKey {
   [key: string]: any;
 }
@@ -26,31 +64,29 @@ interface IRecord {
 }
 
 interface FormInfo {
+  connection: string;
   label: string;
+  className: string;
   form: {
     label: string;
     className: string;
     nav: string;
-    pages?: {
-      field: string;
+    sections?: {
+      name: string;
+      label?: string;
+      className?: string;
+      elements: ElementType[];
+    }[];
+    tabs?: {
+      name: string;
       label?: string;
       className?: string;
       elements: any[];
     }[];
-    tabs?: {
-      field: string;
-      label?: string;
-      className?: string;
-      elements: any[];
-    };
+    layout: any;
+    recordData: any;
   };
-  fields: {
-    component: string;
-    label: string;
-    input: string;
-    name: string;
-    cell: string;
-  }[];
+  fields: FormFieldInfo[];
   dataLists: {
     name: string;
     data: InfoDataList[];
@@ -59,9 +95,11 @@ interface FormInfo {
     mode: "fetch";
   }[];
 
-  "defaultData": {[key:string]:any};
-    
-    "fixedData":  {[key:string]:any};
+  defaultData: { [key: string]: any };
+
+  fixedData: { [key: string]: any };
+
+  nav: { [key: string]: any };
 }
 
 export class Model {
@@ -71,6 +109,8 @@ export class Model {
 }
 
 export class Form extends Element {
+  private _config: FormInfo;
+
   private method: string;
 
   public panel: string;
@@ -111,12 +151,21 @@ export class Form extends Element {
   private recordKey;
   private to;
 
+  private state: {
+    page?: number;
+    filter?: string;
+    key?: string;
+    record?: any;
+    mode?: number;
+  };
+
   keySecret = "Robin Williams";
   setStore(store: Store) {
     this.store = store;
   }
 
-  init(info: InfoElement) {
+  init(info: any /*: InfoElement*/) {
+    this._config = info;
     this._info = info;
     //this._info = this.store.loadJsonFile(info.source) || {};
 
@@ -131,19 +180,34 @@ export class Form extends Element {
       this._info = { ...this._info, ...this._info?.methods[method] };
     }
 
+    this.state = {
+      page: this.params["page"] || this.store.getSes("__page_") || "1",
+      filter: this.params["filter"] || this.store.getReq("__filter_"),
+      key: this.store.getReq("__key_") || this.store.getSes("__key_"),
+      record:
+        this.params.__record_ ||
+        this.store.getReq("__record_") ||
+        this.store.getSes("__record_"),
+    };
+
     switch (method) {
+      case "load-form":
+        this.state.key = null;
+        await this.loadForm(ModeForm.INSERT);
+        break;
       case "list":
         const page = this.store.getSes("__page_") || "1";
         await this.doGrid(Number(page));
         break;
       case "new-record":
-        await this.doForm(1);
+        this.state.key = null;
+        await this.loadForm(ModeForm.INSERT);
         break;
       case "request":
-        await this.doForm(1);
+        await this.loadForm(ModeForm.INSERT);
         break;
       case "load-record":
-        await this.doForm(2);
+        await this.loadForm(ModeForm.UPDATE);
         break;
       case "request2":
         await this.evalFields();
@@ -161,6 +225,144 @@ export class Form extends Element {
       case "load-page":
         await this.loadPageInfo();
     }
+  }
+
+  private doFormElements() {
+    const config = this._config;
+
+    if (config.form.layout) {
+      return config.form.layout;
+    }
+
+    let section = {};
+
+    if ("sections" in config.form) {
+      section = config.form.sections.reduce((a, s) => {
+        a[s.name] = {
+          component: "section",
+          label: s.label,
+          className: s.className,
+          elements: [],
+        };
+        return a;
+      }, {});
+    }
+
+    let pages: {
+      [key: string]: { page: ElementType; parent: any };
+    } = {};
+    let tabPages: any = {};
+
+    if ("tabs" in config.form) {
+      for (const tab of config.form.tabs) {
+        tabPages[tab.name] = {
+          component: "tab",
+          label: tab.label,
+          className: tab.className,
+          elements: tab.elements.map((e) => {
+            const _page = {
+              component: "tabPage",
+              label: e.label,
+              className: e.className,
+              elements: [],
+            };
+
+            pages[e.name] = {
+              page: _page,
+              parent: tabPages[tab.name],
+            };
+            return _page;
+          }),
+        };
+      }
+    }
+
+    let elements: any[] = [];
+    let page = elements;
+
+    for (const field of config.fields) {
+      const f: FieldComponent = {
+        id: field.id,
+        component: "field",
+        name: field.name,
+        label: field.name,
+        className: field.className,
+        input: field.input,
+        type: field.type,
+        required: field.required,
+        rules: field.rules,
+        events: field.events,
+        propertys: field.propertys,
+        attributes: field.attributes,
+      };
+
+      if (field.name in tabPages) {
+        elements.push(tabPages[field.name]);
+      }
+
+      if (field.name in pages) {
+        page = pages[field.name].page.elements;
+      }
+
+      if (field.name in section) {
+        page.push(section[field.name]);
+        page = section[field.name].elements;
+      }
+
+      page.push(f);
+    }
+
+    this.configInputs().forEach((item) => elements.push(item));
+    return elements;
+  }
+
+  private async getRecordData(mode: number) {
+    const config = this._config;
+    const connection = this._config.connection || this.connection;
+
+    let data = config.defaultData || {};
+
+    data.__page_ = this.state.page;
+    data.__filter_ = this.state.filter;
+
+    const key: IRecordKey = this.getRecordKey();
+
+    if (key) {
+      const db = this.store.db.get<DBEngine>(connection);
+      data = { ...data, ...(await db.getRecord(config.form.recordData, key)) };
+    }
+
+    data = { ...data, __mode_: mode, ...(this._info.fixedData || {}) };
+
+    if (+mode != ModeForm.INSERT) {
+      data.__key_ = this.genToken(key);
+    }
+    return data;
+  }
+
+  private async loadForm(mode: number) {
+    const config = this._config;
+    const form = this._config.form;
+
+    const values = await this.getRecordData(mode);
+
+    const dataSource = {
+      caption: form.label || config.label,
+      className: form.className || config.className,
+      elements: this.doFormElements(),
+      nav: config.nav[form.nav],
+      dataLists: await this.getDataList(config.dataLists, values),
+      values,
+      appRequests: await this.appRequests("list"),
+    };
+
+    this.doResponse({
+      element: "form",
+      propertys: {
+        dataSource,
+        log: {},
+      },
+    });
   }
 
   private async doGrid(page: number) {
@@ -251,48 +453,7 @@ export class Form extends Element {
     };
   }
 
-  private async doForm(mode) {
-    const page = this.params["page"] || this.store.getReq("__page_") || 1;
-    const filter = this.params["filter"] || this.store.getReq("__filter_");
-
-    let data = this._info.defaultData || {};
-
-    data.__page_ = page;
-    data.__filter_ = filter;
-
-    const key = this.getRecordKey();
-
-    if (key) {
-      const db = this.store.db.get<DBEngine>(this.connection);
-      data = { ...data, ...(await db.getRecord(this._info.data, key)) };
-    }
-
-    data = { ...data, __mode_: mode, ...(this._info.fixedData || {}) };
-
-    if (+mode != 1) {
-      data.__key_ = this.genToken(key);
-    }
-    this._data = data;
-
-    if (this._info.nav) {
-      this.layout.elements.push(this._info.nav);
-    }
-
-    this.layout.dataLists = await this.getDataList();
-
-    this.layout.appRequests = this.appRequests("list");
-    this.layout.values = data;
-    this.configInputs().forEach((item) => this.layout.elements.push(item));
-
-    this.doResponse({
-      element: "form",
-      propertys: {
-        dataSource: this.layout,
-      },
-    });
-  }
-
-  addRequest(type, info) {}
+   addRequest(type, info) {}
 
   private async getDataRecord(info) {
     //info = JSON.parse(this.store.evalSubData(JSON.stringify(info), this._data));
@@ -341,7 +502,7 @@ export class Form extends Element {
       for (const d of this.dataLists) {
         output.push({
           name: d.name,
-          data: await this.evalData(d.data),
+          data: await this.evalData(d.data, this._data),
           childs: d.childs,
           parent: d.parent,
           mode: d.mode,
@@ -488,7 +649,7 @@ export class Form extends Element {
   private async getDataField(info) {
     return {
       name: info.name,
-      data: await this.evalData(info.data),
+      data: await this.evalData(info.data, this._data),
       childs: info.childs,
       parent: info.parent,
       mode: info.mode,
@@ -518,16 +679,16 @@ export class Form extends Element {
     const result = {};
     for (const [field, dataField] of Object.entries(dataFields)) {
       result[field] = {
-        data: await this.evalData(dataField),
+        data: await this.evalData(dataField, this._data),
       };
     }
 
     return result;
   }
 
-  private async evalData(dataField) {
+  private async evalData(dataField, values) {
     dataField = JSON.parse(
-      this.store.evalSubData(JSON.stringify(dataField), this._data)
+      this.store.evalSubData(JSON.stringify(dataField), values)
     );
 
     let info = [];
@@ -635,22 +796,11 @@ export class Form extends Element {
   }
 
   private getRecordKey(): IRecordKey {
-    let key: IRecordKey;
-    const keyToken =
-      this.params.__key_ ||
-      this.store.getReq("__key_") ||
-      this.store.getSes("__key_");
-
-    if (keyToken) {
-      key = this.decodeToken(keyToken);
-    } else {
-      key =
-        this.params.__record_ ||
-        this.store.getReq("__record_") ||
-        this.store.getSes("__record_");
+    if (this.state.key) {
+      return this.decodeToken(this.state.key);
     }
 
-    return key;
+    return this.state.record;
   }
 
   private async getDBRecord(info, key: IRecordKey): Promise<IRecord> {
@@ -670,17 +820,17 @@ export class Form extends Element {
     return data.rows[0] || {};
   }
 
-  private async getDataList() {
+  private async getDataList(dataLists, values?) {
     const dataList = [];
-    if (this.dataLists) {
-      for (const d of this.dataLists) {
+    if (dataLists) {
+      for (const d of dataLists) {
         dataList.push({
           name: d.name,
-          data: await this.evalData(d.data),
+          data: await this.evalData(d.data, values),
           childs: d.childs,
           parent: d.parent,
           mode: d.mode,
-          value: this._data[d.name],
+          value: values[d.name],
         });
       }
     }

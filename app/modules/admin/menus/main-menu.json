@@ -4,6 +4,27 @@
     "className": "main",
     "items": [
         {
+            "caption": "New Form 2021",
+            "request":{
+                "sendTo":"#p2",
+                "blockTo": true,
+                "form_":"#p2",
+                "actions":[
+                    {
+                        "id": "two",
+                        "to": "p2",
+                        "do": "set-panel",
+                        "api": "form",
+                        "name": "google_form",
+                        "method": "load-form",
+                        "params": {
+                            "page":1
+                        }
+                    }
+                ]
+            } 
+        },
+        {
             "caption": "Google Form.",
             "request": {
                 "sendTo":"#p2",

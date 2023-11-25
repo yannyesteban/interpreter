@@ -11,6 +11,13 @@ import { DBTransaction } from "./db/DBTransactionOLD.js";
 import { DBTransaction as Transaction } from "./db/DBTransaction.js";
 import { Element } from "./element.js";
 import { JWT } from "./JWT.js";
+var ModeForm;
+(function (ModeForm) {
+    ModeForm[ModeForm["INSERT"] = 1] = "INSERT";
+    ModeForm[ModeForm["UPDATE"] = 2] = "UPDATE";
+    ModeForm[ModeForm["DELETE"] = 3] = "DELETE";
+    ModeForm[ModeForm["AUTO"] = 4] = "AUTO";
+})(ModeForm || (ModeForm = {}));
 export class Model {
 }
 export class Form extends Element {
@@ -26,7 +33,8 @@ export class Form extends Element {
     setStore(store) {
         this.store = store;
     }
-    init(info) {
+    init(info /*: InfoElement*/) {
+        this._config = info;
         this._info = info;
         //this._info = this.store.loadJsonFile(info.source) || {};
         for (const [key, value] of Object.entries(info)) {
@@ -40,19 +48,32 @@ export class Form extends Element {
             if (this._info.methods && this._info.methods[method]) {
                 this._info = Object.assign(Object.assign({}, this._info), (_a = this._info) === null || _a === void 0 ? void 0 : _a.methods[method]);
             }
+            this.state = {
+                page: this.params["page"] || this.store.getSes("__page_") || "1",
+                filter: this.params["filter"] || this.store.getReq("__filter_"),
+                key: this.store.getReq("__key_") || this.store.getSes("__key_"),
+                record: this.params.__record_ ||
+                    this.store.getReq("__record_") ||
+                    this.store.getSes("__record_"),
+            };
             switch (method) {
+                case "load-form":
+                    this.state.key = null;
+                    yield this.loadForm(ModeForm.INSERT);
+                    break;
                 case "list":
                     const page = this.store.getSes("__page_") || "1";
                     yield this.doGrid(Number(page));
                     break;
                 case "new-record":
-                    yield this.doForm(1);
+                    this.state.key = null;
+                    yield this.loadForm(ModeForm.INSERT);
                     break;
                 case "request":
-                    yield this.doForm(1);
+                    yield this.loadForm(ModeForm.INSERT);
                     break;
                 case "load-record":
-                    yield this.doForm(2);
+                    yield this.loadForm(ModeForm.UPDATE);
                     break;
                 case "request2":
                     yield this.evalFields();
@@ -71,6 +92,121 @@ export class Form extends Element {
             }
         });
     }
+    doFormElements() {
+        const config = this._config;
+        if (config.form.layout) {
+            return config.form.layout;
+        }
+        let section = {};
+        if ("sections" in config.form) {
+            section = config.form.sections.reduce((a, s) => {
+                a[s.name] = {
+                    component: "section",
+                    label: s.label,
+                    className: s.className,
+                    elements: [],
+                };
+                return a;
+            }, {});
+        }
+        let pages = {};
+        let tabPages = {};
+        if ("tabs" in config.form) {
+            for (const tab of config.form.tabs) {
+                tabPages[tab.name] = {
+                    component: "tab",
+                    label: tab.label,
+                    className: tab.className,
+                    elements: tab.elements.map((e) => {
+                        const _page = {
+                            component: "tabPage",
+                            label: e.label,
+                            className: e.className,
+                            elements: [],
+                        };
+                        pages[e.name] = {
+                            page: _page,
+                            parent: tabPages[tab.name],
+                        };
+                        return _page;
+                    }),
+                };
+            }
+        }
+        let elements = [];
+        let page = elements;
+        for (const field of config.fields) {
+            const f = {
+                id: field.id,
+                component: "field",
+                name: field.name,
+                label: field.name,
+                className: field.className,
+                input: field.input,
+                type: field.type,
+                required: field.required,
+                rules: field.rules,
+                events: field.events,
+                propertys: field.propertys,
+                attributes: field.attributes,
+            };
+            if (field.name in tabPages) {
+                elements.push(tabPages[field.name]);
+            }
+            if (field.name in pages) {
+                page = pages[field.name].page.elements;
+            }
+            if (field.name in section) {
+                page.push(section[field.name]);
+                page = section[field.name].elements;
+            }
+            page.push(f);
+        }
+        this.configInputs().forEach((item) => elements.push(item));
+        return elements;
+    }
+    getRecordData(mode) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const config = this._config;
+            const connection = this._config.connection || this.connection;
+            let data = config.defaultData || {};
+            data.__page_ = this.state.page;
+            data.__filter_ = this.state.filter;
+            const key = this.getRecordKey();
+            if (key) {
+                const db = this.store.db.get(connection);
+                data = Object.assign(Object.assign({}, data), (yield db.getRecord(config.form.recordData, key)));
+            }
+            data = Object.assign(Object.assign(Object.assign({}, data), { __mode_: mode }), (this._info.fixedData || {}));
+            if (+mode != ModeForm.INSERT) {
+                data.__key_ = this.genToken(key);
+            }
+            return data;
+        });
+    }
+    loadForm(mode) {
+        return __awaiter(this, void 0, void 0, function* () {
+            const config = this._config;
+            const form = this._config.form;
+            const values = yield this.getRecordData(mode);
+            const dataSource = {
+                caption: form.label || config.label,
+                className: form.className || config.className,
+                elements: this.doFormElements(),
+                nav: config.nav[form.nav],
+                dataLists: yield this.getDataList(config.dataLists, values),
+                values,
+                appRequests: yield this.appRequests("list"),
+            };
+            this.doResponse({
+                element: "form",
+                propertys: {
+                    dataSource,
+                    log: {},
+                },
+            });
+        });
+    }
     doGrid(page) {
         return __awaiter(this, void 0, void 0, function* () {
             const fields = this._info.fields.map((field) => ({
@@ -81,7 +217,8 @@ export class Form extends Element {
             }));
             const { label, gridData, gridOptions, errorMessages, nav } = this._info;
             if (this.params.page === null) {
-                gridData.page = this.store.getReq("__page_") || this.store.getSes("__page_");
+                gridData.page =
+                    this.store.getReq("__page_") || this.store.getSes("__page_");
             }
             const info = yield this._pageData(gridData);
             const appRequests = this.appRequests();
@@ -166,7 +303,7 @@ export class Form extends Element {
             if (this._info.nav) {
                 this.layout.elements.push(this._info.nav);
             }
-            this.layout.dataLists = yield this.getDataList();
+            this.layout.dataLists = yield this.getDataList(this.dataLists, data);
             this.layout.appRequests = this.appRequests("list");
             this.layout.values = data;
             this.configInputs().forEach((item) => this.layout.elements.push(item));
@@ -184,7 +321,8 @@ export class Form extends Element {
         return __awaiter(this, void 0, void 0, function* () {
             //info = JSON.parse(this.store.evalSubData(JSON.stringify(info), this._data));
             if (info.sql) {
-                const rows = (yield this.db.query(info.sql, (_a = info.params) !== null && _a !== void 0 ? _a : undefined)).rows;
+                const rows = (yield this.db.query(info.sql, (_a = info.params) !== null && _a !== void 0 ? _a : undefined))
+                    .rows;
                 if (rows.length > 0) {
                     return rows[0];
                 }
@@ -217,7 +355,7 @@ export class Form extends Element {
                 for (const d of this.dataLists) {
                     output.push({
                         name: d.name,
-                        data: yield this.evalData(d.data),
+                        data: yield this.evalData(d.data, this._data),
                         childs: d.childs,
                         parent: d.parent,
                         mode: d.mode,
@@ -281,12 +419,12 @@ export class Form extends Element {
             this.store.setSes("__key_", keyToken);
             this.doResponse({
                 /*
-                element: "form",
-                propertys: {
-                    //f: await this.evalDataFields(this.datafields),
-                    output: "SAVE FORM",
-                },
-                */
+                            element: "form",
+                            propertys: {
+                                //f: await this.evalDataFields(this.datafields),
+                                output: "SAVE FORM",
+                            },
+                            */
                 log: Object.assign({}, result),
                 message,
             });
@@ -328,12 +466,12 @@ export class Form extends Element {
             this.store.setSes("__key_", keyToken);
             this.doResponse({
                 /*
-                element: "form",
-                propertys: {
-                    //f: await this.evalDataFields(this.datafields),
-                    output: "SAVE FORM",
-                },
-                */
+                            element: "form",
+                            propertys: {
+                                //f: await this.evalDataFields(this.datafields),
+                                output: "SAVE FORM",
+                            },
+                            */
                 log: Object.assign({}, result),
                 message,
             });
@@ -352,7 +490,7 @@ export class Form extends Element {
         return __awaiter(this, void 0, void 0, function* () {
             return {
                 name: info.name,
-                data: yield this.evalData(info.data),
+                data: yield this.evalData(info.data, this._data),
                 childs: info.childs,
                 parent: info.parent,
                 mode: info.mode,
@@ -380,25 +518,30 @@ export class Form extends Element {
             const result = {};
             for (const [field, dataField] of Object.entries(dataFields)) {
                 result[field] = {
-                    data: yield this.evalData(dataField),
+                    data: yield this.evalData(dataField, this._data),
                 };
             }
             return result;
         });
     }
-    evalData(dataField) {
+    evalData(dataField, values) {
         var _a, _b;
         return __awaiter(this, void 0, void 0, function* () {
-            dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), this._data));
+            dataField = JSON.parse(this.store.evalSubData(JSON.stringify(dataField), values));
             let info = [];
             const db = this.store.db.get(this.connection);
             for (const data of dataField) {
                 if (Array.isArray(data)) {
-                    info.push({ value: data[0], text: data[1], level: (_a = data[2]) !== null && _a !== void 0 ? _a : undefined });
+                    info.push({
+                        value: data[0],
+                        text: data[1],
+                        level: (_a = data[2]) !== null && _a !== void 0 ? _a : undefined,
+                    });
                 }
                 else if (typeof data === "object") {
                     if (data.sql) {
-                        const result = (yield db.query(data.sql, (_b = data.params) !== null && _b !== void 0 ? _b : undefined)).rows;
+                        const result = (yield db.query(data.sql, (_b = data.params) !== null && _b !== void 0 ? _b : undefined))
+                            .rows;
                         info = [...info, ...result];
                     }
                     else if (data.value && data.text) {
@@ -482,15 +625,10 @@ export class Form extends Element {
         return jwt.verify(token);
     }
     getRecordKey() {
-        let key;
-        const keyToken = this.params.__key_ || this.store.getReq("__key_") || this.store.getSes("__key_");
-        if (keyToken) {
-            key = this.decodeToken(keyToken);
+        if (this.state.key) {
+            return this.decodeToken(this.state.key);
         }
-        else {
-            key = this.params.__record_ || this.store.getReq("__record_") || this.store.getSes("__record_");
-        }
-        return key;
+        return this.state.record;
     }
     getDBRecord(info, key) {
         return __awaiter(this, void 0, void 0, function* () {
@@ -506,18 +644,18 @@ export class Form extends Element {
             return data.rows[0] || {};
         });
     }
-    getDataList() {
+    getDataList(dataLists, values) {
         return __awaiter(this, void 0, void 0, function* () {
             const dataList = [];
-            if (this.dataLists) {
-                for (const d of this.dataLists) {
+            if (dataLists) {
+                for (const d of dataLists) {
                     dataList.push({
                         name: d.name,
-                        data: yield this.evalData(d.data),
+                        data: yield this.evalData(d.data, values),
                         childs: d.childs,
                         parent: d.parent,
                         mode: d.mode,
-                        value: this._data[d.name],
+                        value: values[d.name],
                     });
                 }
             }

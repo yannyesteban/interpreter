@@ -1,604 +1,658 @@
 {
-    "label": "Administrador de Usuarios 2024",
-    "gridQuery":"select",
-    "formQuery":"select",
-    "form_":{
-        "label":"form One",
-        "className":["sevian", "sigefor"],
-        "layout":[],
-        "nav":"new-record",
-        "pages":["field1", "field4", {"label":"XXXX", "className":"sevian"}],
-        "tabs":[{"label":"personal Data"}],
-        "data": {
-            "sql": "SELECT * FROM classicmodels.em",
-            "_params": ["1"],
-            "record": ["employeeNumber"]
-        }
+  "connection": "mysql",
+  "label": "Administrador de Usuarios 2024",
+  "defaultData": {
+    "extension": "{{@_DATE_}}"
+  },
+  "fixedData": {
+    "jobTitle": "none"
+  },
+  "errorMessages": {
+    "selectRecord": "seleccione un registro, por favor!"
+  },
+  "fields": [
+    {
+      "component": "field",
+      "label": "Employee ID--",
+      "input": "input",
+      "name": "employeeNumber",
+      "cell": "",
+      "table":"em",
+      "metaType": "I",
+      "key": true,
+      "serial": true,
+      "notNull": true,
+      "default": "",
+      "rules":{
+
+      }
     },
-    "grid_":{
-        "label":"List of Ones",
-        "addClasses":["sevian", "sigefor"],
-        "selectionType": "simple",
-        "pagination": true,
-        "nav":"list",
-        "data":{
-            "sql": "select * from classicmodels.em",
-            "filterBy": ["lastName", "firstName"],
-            "orderBy": ["lastName:desc"],
-            "limit": 6,
-            "page": "{{ &PARAMS_.page}}"
-        },
-
-        
-        "maxPage": 6,
-        "footerText": "page 5 de 6",
-        "valid": {
-            "__key_": {
-                "required": { "msg": "select a record!" }
-            }
-        }
+    {
+      "component": "field",
+      "label": "Last Name",
+      "input": "input",
+      "name": "lastName",
+      "required": {
+        "message": "yes"
+      }
     },
-    "responseApi":{
-        "name":"aqui",
-        "data":{
-            "sql":"select * from ..$1",
-            "params":["&a"]
-
-        },
-        "format":{
-
-        }
+    {
+      "component": "field",
+      "label": "Nombre",
+      "input": "input",
+      "name": "firstName"
     },
-    "nav":{
-        "default":{
-
-        },
-        "new-record":{
-
-        },
-        "list":{
-
-        }
+    {
+      "component": "field",
+      "label": "Extensión",
+      "input": "input",
+      "name": "extension"
     },
-    "fields": [
-        {
-            "component": "field",
-            "label": "Employee ID--",
-            "input": "input",
-            "name": "employeeNumber",
-            "cell": ""
-        },
-        {
-            "component": "field",
-            "label": "Last Name",
-            "input": "input",
-            "name": "lastName",
-            "required": {
-                "message": "yes"
-            }
-        },
-        {
-            "component": "field",
-            "label": "Nombre",
-            "input": "input",
-            "name": "firstName"
-        },
-        {
-            "component": "field",
-            "label": "Extensión",
-            "input": "input",
-            "name": "extension"
-        },
-        {
-            "component": "field",
-            "label": "Correo",
-            "input": "input",
-            "name": "email"
-        },
-        {
-            "component": "field",
-            "label": "officeCode",
-            "input": "input",
-            "name": "officeCode"
-        },
-        {
-            "component": "field",
-            "label": "reportsTo",
-            "input": "input",
-            "name": "reportsTo"
-        },
-        {
-            "component": "field",
-            "label": "job",
-            "input": "input",
-            "name": "jobTitle"
-        },
-        {
-            "component": "field",
-            "label": "countryId",
-            "input": "select",
-            "name": "countryId"
-        },
-        {
-            "component": "field",
-            "label": "stateId",
-            "input": "select",
-            "name": "stateId"
-        },
-        {
-            "component": "field",
-            "label": "cityId",
-            "input": "select",
-            "name": "cityId"
-        }
-    ],
-
-    "formTabs": [],
-
-    "formPages": [],
-
-    "formLayout": {},
-    "gridLayout": {},
-    "formData": {
-        "query": {
-            "sql": "select * from ...",
-            "select": ["a", "b", ["tabla.field1", "cos"], ["tabla.field1", "tabla.field2", "+"]],
-            "from": "user"
-        },
-
-        "record": ["employeeNumber"],
-        "default": {},
-        "fixed": {}
+    {
+      "component": "field",
+      "label": "Correo",
+      "input": "input",
+      "name": "email"
     },
-
-    "formLists": [
-        {
-            "name": "countryId",
-            "childs": true,
-            "query": {
-                "select": ["id:value", "name:text"],
-                "from": "countries",
-                "where": {
-                    "subregion": "?:subregion"
-                },
-                "params": {
-                    "subregion": "South America"
-                }
-            }
-        },
-        {
-            "name": "stateId",
-            "parent": "countryId",
-            "mode": "fetch",
-            "data": [
-                ["", "- select your State", "*"],
-                {
-                    "select": ["id:value", "name:text", "country_id:level"],
-                    "from": "classicmodels.states",
-                    "where": [{ "country_id?": "{{&countryId}}" }, { "country_id:in": [239, 233] }],
-                    "old": [
-                        ["", "- select your State", "*"],
-                        {
-                            "sql": "SELECT id as 'value', name as text, country_id as level FROM classicmodels.states WHERE country_id=?/* or country_id IN (239,233)*/ ORDER BY name",
-                            "params": ["{{&countryId}}"]
-                        }
-                    ]
-                }
-            ]
-        },
-        {
-            "name": "cityId",
-            "parent": "stateId",
-            "mode": "fetch",
-            "data": [
-                ["", "- select your City", "*"],
-                {
-                    "select": ["id:value", "name:text", "state_id:level"],
-                    "from": "classicmodels.states",
-                    "where": { "state_id?": "{{&stateId}}" },
-                    "old": {
-                        "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE state_id=? /*country_id IN (239)*/  ORDER BY name",
-                        "params": ["{{&stateId}}"]
-                    }
-                }
-            ]
-        }
-    ],
-    "defaultData": {
-        "extension": "{{@_DATE_}}"
+    {
+      "component": "field",
+      "label": "officeCode",
+      "input": "input",
+      "name": "officeCode"
     },
-    "fixedData": {
-        "jobTitle": "none"
+    {
+      "component": "field",
+      "label": "reportsTo",
+      "input": "input",
+      "name": "reportsTo"
     },
-
-    "data": {
-        "sql": "SELECT * FROM classicmodels.em",
-        "_params": ["1"],
-        "record": ["employeeNumber"]
+    {
+      "component": "field",
+      "label": "job",
+      "input": "input",
+      "name": "jobTitle"
     },
-
-    "dataLists": [
-        {
-            "name": "countryId",
-            "data": [
-                ["", "- select your Country"],
-                { "value": "1", "text": "ALL" },
-                {
-                    "sql": "select id as 'value', name as 'text' from countries WHERE subregion=? ORDER BY name",
-                    "params": ["South America"]
-                }
-            ],
-            "childs": true
-        },
-        {
-            "name": "stateId",
-            "parent": "countryId",
-            "mode": "fetch",
-            "data": [
-                ["", "- select your State", "*"],
-                {
-                    "sql": "SELECT id as 'value', name as text, country_id as level FROM classicmodels.states WHERE country_id=?/* or country_id IN (239,233)*/ ORDER BY name",
-                    "params": ["{{&countryId}}"]
-                }
-            ]
-        },
-        {
-            "name": "cityId",
-            "parent": "stateId",
-            "mode": "fetch",
-            "data": [
-                ["", "- select your City", "*"],
-                {
-                    "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE state_id=? /*country_id IN (239)*/  ORDER BY name",
-                    "params": ["{{&stateId}}"]
-                }
-            ]
-        }
-    ],
-
-    "mongo": {
-        "select": ["collection.field1:a", "collection.field2:b"],
-        "from": "collection:t",
-        "innerJoin": "collect2:t2",
-        "where": { "a": 1 },
-        "orderBy": [1],
-        "limit": 20
+    {
+      "component": "field",
+      "label": "countryId",
+      "input": "select",
+      "name": "countryId"
     },
-
-    "gridData": {
-        "sql": "select * from classicmodels.em",
-        "filterBy": ["lastName", "firstName"],
-        "orderBy": ["lastName:desc"],
-        "limit": 6,
-        "page": "{{ &PARAMS_.page}}"
+    {
+      "component": "field",
+      "label": "stateId",
+      "input": "select",
+      "name": "stateId"
     },
-
-    "gridOptions":{
-        "pagination": true,
-        "maxPage": 6,
-        "footerText": "page 5 de 6",
-        "valid": {
-            "__key_": {
-                "required": { "msg": "select a record!" }
-            }
-        }
-    },
-
-    "scheme": {
-        "table": "em",
-        "fields": [
-            {
-                "name": "employeeNumber",
-                "type": "I",
-                "key": true,
-                "serial": true,
-                "notNull": true,
-                "default": ""
-            },
-            {
-                "name": "lastName"
-            },
-            {
-                "name": "firstName"
-            },
-            {
-                "name": "extension"
-            },
-            {
-                "name": "email"
-            },
-            {
-                "name": "officeCode"
-            },
-            {
-                "name": "reportsTo"
-            },
-            {
-                "name": "jobTitle"
-            },
-            {
-                "name": "countryId"
-            },
-            {
-                "name": "stateId"
-            },
-            {
-                "name": "cityId"
-            }
-        ]
-    },
-
-    "schemes": [
-        {
-            "name": "em",
-            "table": "em",
-            "keys": ["employeeNumber"],
-            "fields": [
-                {
-                    "name": "employeeNumber",
-                    "type": "I",
-                    "key": true,
-                    "serial": true,
-                    "notNull": true,
-                    "default": ""
-                },
-                {
-                    "name": "lastName"
-                },
-                {
-                    "name": "firstName"
-                },
-                {
-                    "name": "extension"
-                },
-                {
-                    "name": "email"
-                },
-                {
-                    "name": "officeCode"
-                },
-                {
-                    "name": "reportsTo"
-                },
-                {
-                    "name": "jobTitle"
-                },
-                {
-                    "name": "countryId"
-                },
-                {
-                    "name": "stateId"
-                },
-                {
-                    "name": "cityId"
-                }
-            ]
-        }
-    ],
-
-    "useRequest": {
-        "new-record": {}
-    },
-    "layout": {
-        "caption": "Google Form",
-        "elements": [
-            {
-                "component": "field",
-                "label": "Employee ID",
-                "input": "input",
-                "name": "employeeNumber"
-            },
-            {
-                "component": "field",
-                "label": "Apellidos.-",
-                "input": "input",
-                "name": "lastName",
-                "required": {
-                    "message": "yes"
-                }
-            },
-            {
-                "component": "field",
-                "label": "Nombre",
-                "input": "input",
-                "name": "firstName"
-            },
-            {
-                "component": "field",
-                "label": "Extensión",
-                "input": "input",
-                "name": "extension"
-            },
-            {
-                "component": "field",
-                "label": "Correo",
-                "input": "input",
-                "name": "email"
-            },
-            {
-                "component": "field",
-                "label": "officeCode",
-                "input": "input",
-                "name": "officeCode"
-            },
-            {
-                "component": "field",
-                "label": "reportsTo",
-                "input": "input",
-                "name": "reportsTo"
-            },
-            {
-                "component": "field",
-                "label": "job",
-                "input": "input",
-                "name": "jobTitle"
-            },
-            {
-                "component": "field",
-                "label": "countryId",
-                "input": "select",
-                "name": "countryId"
-            },
-            {
-                "component": "field",
-                "label": "stateId",
-                "input": "select",
-                "name": "stateId"
-            },
-            {
-                "component": "field",
-                "label": "cityId",
-                "input": "select",
-                "name": "cityId"
-            }
-        ]
-    },
-
-    "methods": {
-        "new-record": {
-            "nav": {
-                "component": "nav",
-                "elements": [
-                    {
-                        "type": "button",
-                        "label": "<span class='material-symbols-outlined'>add</span><span>New ++</span>",
-                        "className": "",
-                        "action": "new",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "Save Record",
-                        "className": "",
-                        "action": "save",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "save",
-                        "className": "",
-                        "action": "save",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "Delete",
-                        "className": "",
-                        "action": "delete",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "Todos",
-                        "className": "",
-                        "action": "list",
-                        "request": {},
-                        "click": ""
-                    }
-                ]
-            }
-        },
-        "list": {
-            "nav": {
-                "elements": [
-                    {
-                        "id": "elButton1",
-                        "type": "button",
-                        "label": "<span class='material-symbols-outlined'>add</span><span>New ..</span>",
-                        "className": "",
-                        "action": "new",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "type": "button",
-                        "label": "captive_portal",
-                        "className": "material-symbols-outlined",
-                        "actionn": "request",
-                        "request": {
-                            "confirm": "hello"
-                        },
-                        "click": ""
-                    },
-                    {
-                        "type": "button",
-                        "label": "Delete",
-                        "className": "material-symbols-outlined",
-                        "action": "delete-record",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "type": "button",
-                        "label": "Edit",
-                        "className": "material-symbols-outlined",
-                        "action": "edit-record",
-                        "request": {},
-                        "click": ""
-                    }
-                ]
-            }
-        },
-        "load-record": {
-            "nav": {
-                "component": "nav",
-                "elements": [
-                    {
-                        "type": "button",
-                        "label": "<span class='material-symbols-outlined'>add</span><span>New</span>",
-                        "className": "",
-                        "action": "new",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "Save Record",
-                        "className": "",
-                        "action": "save",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "save",
-                        "className": "",
-                        "action": "save",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "Delete",
-                        "className": "",
-                        "action": "delete",
-                        "request": {},
-                        "click": ""
-                    },
-                    {
-                        "component": "button",
-                        "label": "Todos",
-                        "className": "",
-                        "action": "list",
-                        "request": {},
-                        "click": ""
-                    }
-                ]
-            }
-        }
-    },
-
-    "panelInfo": {
-        "panel": "p5",
-        "data": {
-            "a": 1
-        }
-    },
-    "errorMessages": {
-        "selectRecord": "seleccione un registro, por favor!"
+    {
+      "component": "field",
+      "label": "cityId",
+      "input": "select",
+      "name": "cityId"
     }
+  ],
+
+  "extraData" :{
+    "form1":{
+        "label":"opcion 2"
+    }
+  },
+
+  "form": {
+    "extends":["form1"],
+    "label": "form One",
+    "className": ["sevian", "sigefor"],
+    "layoutt": [],
+    "nav": "new-record",
+    "sections": [
+      {
+        "name":"stateId",
+        "label":"captive_portal",
+        "className":"sevian"
+      },
+      {
+        "name":"cityId",
+        "label":"Apellidos.-",
+
+        "className":"sigefor"
+      }
+      
+    ],
+    "tabss": [
+      {
+        "name":"lastName",
+        "className":"sigefor",
+        "elements":[
+          {
+            "name":"lastName",
+            "label":"Ultimo Apellido"
+          },
+          {
+            "name":"email",
+            "label":"un Correo"
+          },
+          {
+            "name":"countryId",
+            "label":"un pais"
+          }
+        ]
+      }
+    ],
+    "recordData": {
+      "sql": "SELECT * FROM classicmodels.em",
+
+      "_params": ["1"],
+      "record": ["employeeNumber"],
+      "filterBy": {
+        "db.table1": "#value1"
+      }
+    }
+  },
+  "grid_": {
+    "label": "List of Ones",
+    "addClasses": ["sevian", "sigefor"],
+    "selectionType": "simple",
+    "pagination": true,
+    "nav": "list",
+    "limit": 6,
+    "page": "{{ &PARAMS_.page}}",
+    "data": {
+      "sql": "select * from classicmodels.em",
+      "filterBy_OK": {
+        "lastName": "#value1"
+      },
+      "filterBy_OK2": [
+        {
+          "lastName": "#value1"
+        }
+      ],
+      "filterBy": ["lastName", "firstName"],
+      "searchIn": ["lastName", "firstName"],
+      "orderBy": ["lastName:desc"]
+    },
+    "maxPage": 6,
+    "footerText": "page 5 de 6",
+    "valid": {
+      "__key_": {
+        "required": {
+          "msg": "select a record!"
+        }
+      }
+    }
+  },
+
+  "nav": {
+    "default": {},
+    "new-record": {},
+    "list": {}
+  },
+  "addFields":[{
+    "field":"id",
+    "type":null
+  }],
+  
+
+  "formData": {
+    "query": {
+      "sql": "select * from ...",
+      "select": [
+        "a",
+        "b",
+        ["tabla.field1", "cos"],
+        ["tabla.field1", "tabla.field2", "+"]
+      ],
+      "from": "user"
+    },
+    "record": ["employeeNumber"],
+    "default": {},
+    "fixed": {}
+  },
+  "formLists": [
+    {
+      "name": "countryId",
+      "childs": true,
+      "query": {
+        "select": ["id:value", "name:text"],
+        "from": "countries",
+        "where": {
+          "subregion": "?:subregion"
+        },
+        "params": {
+          "subregion": "South America"
+        }
+      }
+    },
+    {
+      "name": "stateId",
+      "parent": "countryId",
+      "mode": "fetch",
+      "data": [
+        ["", "- select your State", "*"],
+        {
+          "select": ["id:value", "name:text", "country_id:level"],
+          "from": "classicmodels.states",
+          "where": [
+            {
+              "country_id?": "{{&countryId}}"
+            },
+            {
+              "country_id:in": [239, 233]
+            }
+          ],
+          "old": [
+            ["", "- select your State", "*"],
+            {
+              "sql": "SELECT id as 'value', name as text, country_id as level FROM classicmodels.states WHERE country_id=?/* or country_id IN (239,233)*/ ORDER BY name",
+              "params": ["{{&countryId}}"]
+            }
+          ]
+        }
+      ]
+    },
+    {
+      "name": "cityId",
+      "parent": "stateId",
+      "mode": "fetch",
+      "data": [
+        ["", "- select your City", "*"],
+        {
+          "select": ["id:value", "name:text", "state_id:level"],
+          "from": "classicmodels.states",
+          "where": {
+            "state_id?": "{{&stateId}}"
+          },
+          "old": {
+            "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE state_id=? /*country_id IN (239)*/  ORDER BY name",
+            "params": ["{{&stateId}}"]
+          }
+        }
+      ]
+    }
+  ],
+
+  "data": {
+    "sql": "SELECT * FROM classicmodels.em",
+    "_params": ["1"],
+    "record": ["employeeNumber"]
+  },
+  "dataLists": [
+    {
+      "name": "countryId",
+      "data": [
+        ["", "- select your Country"],
+        {
+          "value": "1",
+          "text": "ALL"
+        },
+        {
+          "sql": "select id as 'value', name as 'text' from countries WHERE subregion=? ORDER BY name",
+          "params": ["South America"]
+        }
+      ],
+      "childs": true
+    },
+    {
+      "name": "stateId",
+      "parent": "countryId",
+      "mode": "fetch",
+      "data": [
+        ["", "- select your State", "*"],
+        {
+          "sql": "SELECT id as 'value', name as text, country_id as level FROM classicmodels.states WHERE country_id=?/* or country_id IN (239,233)*/ ORDER BY name",
+          "params": ["{{&countryId}}"]
+        }
+      ]
+    },
+    {
+      "name": "cityId",
+      "parent": "stateId",
+      "mode": "fetch",
+      "data": [
+        ["", "- select your City", "*"],
+        {
+          "sql": "SELECT id as 'value', name as text, state_id as level FROM classicmodels.cities WHERE state_id=? /*country_id IN (239)*/  ORDER BY name",
+          "params": ["{{&stateId}}"]
+        }
+      ]
+    }
+  ],
+  "mongo": {
+    "select": ["collection.field1:a", "collection.field2:b"],
+    "from": "collection:t",
+    "innerJoin": "collect2:t2",
+    "where": {
+      "a": 1
+    },
+    "orderBy": [1],
+    "limit": 20
+  },
+  "gridData": {
+    "sql": "select * from classicmodels.em",
+    "filterBy": ["lastName", "firstName"],
+    "orderBy": ["lastName:desc"],
+    "limit": 6,
+    "page": "{{ &PARAMS_.page}}"
+  },
+  "gridOptions": {
+    "pagination": true,
+    "maxPage": 6,
+    "footerText": "page 5 de 6",
+    "valid": {
+      "__key_": {
+        "required": {
+          "msg": "select a record!"
+        }
+      }
+    }
+  },
+  "scheme": {
+    "table": "em",
+    "fields": [
+      {
+        "name": "employeeNumber",
+        "type": "I",
+        "key": true,
+        "serial": true,
+        "notNull": true,
+        "default": ""
+      },
+      {
+        "name": "lastName"
+      },
+      {
+        "name": "firstName"
+      },
+      {
+        "name": "extension"
+      },
+      {
+        "name": "email"
+      },
+      {
+        "name": "officeCode"
+      },
+      {
+        "name": "reportsTo"
+      },
+      {
+        "name": "jobTitle"
+      },
+      {
+        "name": "countryId"
+      },
+      {
+        "name": "stateId"
+      },
+      {
+        "name": "cityId"
+      }
+    ]
+  },
+  "schemes": [
+    {
+      "name": "em",
+      "table": "em",
+      "keys": ["employeeNumber"],
+      "fields": [
+        {
+          "name": "employeeNumber",
+          "type": "I",
+          "key": true,
+          "serial": true,
+          "notNull": true,
+          "default": ""
+        },
+        {
+          "name": "lastName"
+        },
+        {
+          "name": "firstName"
+        },
+        {
+          "name": "extension"
+        },
+        {
+          "name": "email"
+        },
+        {
+          "name": "officeCode"
+        },
+        {
+          "name": "reportsTo"
+        },
+        {
+          "name": "jobTitle"
+        },
+        {
+          "name": "countryId"
+        },
+        {
+          "name": "stateId"
+        },
+        {
+          "name": "cityId"
+        }
+      ]
+    }
+  ],
+  "useRequest": {
+    "new-record": {}
+  },
+  "layout": {
+    "caption": "Google Form",
+    "elements": [
+      {
+        "component": "field",
+        "label": "Employee ID",
+        "input": "input",
+        "name": "employeeNumber"
+      },
+      {
+        "component": "field",
+        "label": "Apellidos.-",
+        "input": "input",
+        "name": "lastName",
+        "required": {
+          "message": "yes"
+        }
+      },
+      {
+        "component": "field",
+        "label": "Nombre",
+        "input": "input",
+        "name": "firstName"
+      },
+      {
+        "component": "field",
+        "label": "Extensión",
+        "input": "input",
+        "name": "extension"
+      },
+      {
+        "component": "field",
+        "label": "Correo",
+        "input": "input",
+        "name": "email"
+      },
+      {
+        "component": "field",
+        "label": "officeCode",
+        "input": "input",
+        "name": "officeCode"
+      },
+      {
+        "component": "field",
+        "label": "reportsTo",
+        "input": "input",
+        "name": "reportsTo"
+      },
+      {
+        "component": "field",
+        "label": "job",
+        "input": "input",
+        "name": "jobTitle"
+      },
+      {
+        "component": "field",
+        "label": "countryId",
+        "input": "select",
+        "name": "countryId"
+      },
+      {
+        "component": "field",
+        "label": "stateId",
+        "input": "select",
+        "name": "stateId"
+      },
+      {
+        "component": "field",
+        "label": "cityId",
+        "input": "select",
+        "name": "cityId"
+      }
+    ]
+  },
+  "methods": {
+    "new-record": {
+      "nav": {
+        "component": "nav",
+        "elements": [
+          {
+            "type": "button",
+            "label": "<span class='material-symbols-outlined'>add</span><span>New ++</span>",
+            "className": "",
+            "action": "new",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "Save Record",
+            "className": "",
+            "action": "save",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "save",
+            "className": "",
+            "action": "save",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "Delete",
+            "className": "",
+            "action": "delete",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "Todos",
+            "className": "",
+            "action": "list",
+            "request": {},
+            "click": ""
+          }
+        ]
+      }
+    },
+    "list": {
+      "nav": {
+        "elements": [
+          {
+            "id": "elButton1",
+            "type": "button",
+            "label": "<span class='material-symbols-outlined'>add</span><span>New ..</span>",
+            "className": "",
+            "action": "new",
+            "request": {},
+            "click": ""
+          },
+          {
+            "type": "button",
+            "label": "captive_portal",
+            "className": "material-symbols-outlined",
+            "actionn": "request",
+            "request": {
+              "confirm": "hello"
+            },
+            "click": ""
+          },
+          {
+            "type": "button",
+            "label": "Delete",
+            "className": "material-symbols-outlined",
+            "action": "delete-record",
+            "request": {},
+            "click": ""
+          },
+          {
+            "type": "button",
+            "label": "Edit",
+            "className": "material-symbols-outlined",
+            "action": "edit-record",
+            "request": {},
+            "click": ""
+          }
+        ]
+      }
+    },
+    "load-record": {
+      "nav": {
+        "component": "nav",
+        "elements": [
+          {
+            "type": "button",
+            "label": "<span class='material-symbols-outlined'>add</span><span>New</span>",
+            "className": "",
+            "action": "new",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "Save Record",
+            "className": "",
+            "action": "save",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "save",
+            "className": "",
+            "action": "save",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "Delete",
+            "className": "",
+            "action": "delete",
+            "request": {},
+            "click": ""
+          },
+          {
+            "component": "button",
+            "label": "Todos",
+            "className": "",
+            "action": "list",
+            "request": {},
+            "click": ""
+          }
+        ]
+      }
+    }
+  },
+  "panelInfo": {
+    "panel": "p5",
+    "data": {
+      "a": 1
+    }
+  }
 }

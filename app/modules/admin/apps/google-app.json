@@ -18,6 +18,7 @@
     ],
     "jsModuless": [
         "{{ @WC_PATH }}Select.js",
+        "{{ @WC_PATH }}Tab.js",
         "{{ @WC_PATH }}GTForm.js",
         "{{ @WC_PATH }}Field.js"
     ],
