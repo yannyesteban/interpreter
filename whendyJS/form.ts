@@ -586,58 +586,8 @@ export class Form extends Element {
       message,
     });
   }
-  private async saveRecord2() {
-    const key = this.getRecordKey();
-    const scheme = this._info.schemes[0];
-    const schemeName = "any";
-
-    const config = {
-      db: "mysql",
-      transaction: true,
-      schemes: [{ ...scheme, name: schemeName }],
-    };
-
-    const dataset = [
-      {
-        scheme: schemeName,
-        mode: +this.store.getReq("__mode_"),
-        record: key,
-        data: this.store.getVReq(),
-      },
-    ];
-
-    const transaction = new DBTransaction(config, this.store.db);
-
-    const result = await transaction.save(dataset, {});
-
-    let message = "";
-    let keyToken = "";
-    if (result.error) {
-      message = result.error;
-      this.store.setSes("__error_", true);
-    } else {
-      this.store.setSes("__error_", false);
-      message = "record was saved correctly!";
-      if (result.recordId) {
-        keyToken = this.genToken(result.recordId);
-      }
-    }
-
-    this.store.setSes("__key_", keyToken);
-    this.doResponse({
-      /*
-                  element: "form",
-                  propertys: {
-                      //f: await this.evalDataFields(this.datafields),
-                      output: "SAVE FORM",
-                  },
-                  */
-      log: { ...result },
-
-      message,
-    });
-  }
-
+  
+/*
   private async getDataFields(list) {
     const output = [];
     for (const info of list) {
@@ -655,36 +605,43 @@ export class Form extends Element {
       mode: info.mode,
     };
   }
-
+*/
+  private async getDataList(dataLists, values?) {
+    const dataList = [];
+    if (dataLists) {
+      for (const list of dataLists) {
+        dataList.push({
+          name: list.name,
+          data: await this.evalData(list.data, values),
+          childs: list.childs,
+          parent: list.parent,
+          mode: list.mode,
+          value: values[list.name],
+        });
+      }
+    }
+    return dataList;
+  }
   private async doDataFields(parent) {
-    this._data = this.store.getVReq();
 
-    const db = (this.db = this.store.db.get<DBEngine>(this.connection));
 
-    const list = this.dataLists.filter((data) => data.parent == parent) || [];
 
-    const output = await this.getDataFields(list);
+
+    const values = this.store.getVReq();
+
+    //const db = (this.db = this.store.db.get<DBEngine>(connection));
+
+    const list = this.dataLists.filter((data) => data.parent == parent);
 
     this.doResponse({
       element: "form",
       propertys: {
-        dataFields: output,
-        //f: await this.evalDataFields(this.datafields),
-        output,
+        dataFields: await this.getDataList(list, values)
       },
     });
   }
 
-  private async evalDataFields(dataFields) {
-    const result = {};
-    for (const [field, dataField] of Object.entries(dataFields)) {
-      result[field] = {
-        data: await this.evalData(dataField, this._data),
-      };
-    }
-
-    return result;
-  }
+ 
 
   private async evalData(dataField, values) {
     dataField = JSON.parse(
@@ -803,40 +760,11 @@ export class Form extends Element {
     return this.state.record;
   }
 
-  private async getDBRecord(info, key: IRecordKey): Promise<IRecord> {
-    let query = info.sql;
+  
 
-    let conditions = [];
-    let values = [];
-    const record = this._info.data.record.forEach((field) => {
-      conditions.push(field + "= ?");
-      values.push(key[field]);
-    });
+  
 
-    query += " WHERE " + conditions.join(" AND ");
-
-    const data = await this.db.query(query, values);
-
-    return data.rows[0] || {};
-  }
-
-  private async getDataList(dataLists, values?) {
-    const dataList = [];
-    if (dataLists) {
-      for (const d of dataLists) {
-        dataList.push({
-          name: d.name,
-          data: await this.evalData(d.data, values),
-          childs: d.childs,
-          parent: d.parent,
-          mode: d.mode,
-          value: values[d.name],
-        });
-      }
-    }
-
-    return dataList;
-  }
+    
 
   private appRequests(type?: string) {
     const requests = {

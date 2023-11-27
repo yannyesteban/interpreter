@@ -7,7 +7,6 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
         step((generator = generator.apply(thisArg, _arguments || [])).next());
     });
 };
-import { DBTransaction } from "./db/DBTransactionOLD.js";
 import { DBTransaction as Transaction } from "./db/DBTransaction.js";
 import { Element } from "./element.js";
 import { JWT } from "./JWT.js";
@@ -283,38 +282,6 @@ export class Form extends Element {
             };
         });
     }
-    doForm(mode) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const page = this.params["page"] || this.store.getReq("__page_") || 1;
-            const filter = this.params["filter"] || this.store.getReq("__filter_");
-            let data = this._info.defaultData || {};
-            data.__page_ = page;
-            data.__filter_ = filter;
-            const key = this.getRecordKey();
-            if (key) {
-                const db = this.store.db.get(this.connection);
-                data = Object.assign(Object.assign({}, data), (yield db.getRecord(this._info.data, key)));
-            }
-            data = Object.assign(Object.assign(Object.assign({}, data), { __mode_: mode }), (this._info.fixedData || {}));
-            if (+mode != 1) {
-                data.__key_ = this.genToken(key);
-            }
-            this._data = data;
-            if (this._info.nav) {
-                this.layout.elements.push(this._info.nav);
-            }
-            this.layout.dataLists = yield this.getDataList(this.dataLists, data);
-            this.layout.appRequests = this.appRequests("list");
-            this.layout.values = data;
-            this.configInputs().forEach((item) => this.layout.elements.push(item));
-            this.doResponse({
-                element: "form",
-                propertys: {
-                    dataSource: this.layout,
-                },
-            });
-        });
-    }
     addRequest(type, info) { }
     getDataRecord(info) {
         var _a;
@@ -430,98 +397,54 @@ export class Form extends Element {
             });
         });
     }
-    saveRecord2() {
+    /*
+      private async getDataFields(list) {
+        const output = [];
+        for (const info of list) {
+          output.push(await this.getDataField(info));
+        }
+        return output;
+      }
+    
+      private async getDataField(info) {
+        return {
+          name: info.name,
+          data: await this.evalData(info.data, this._data),
+          childs: info.childs,
+          parent: info.parent,
+          mode: info.mode,
+        };
+      }
+    */
+    getDataList(dataLists, values) {
         return __awaiter(this, void 0, void 0, function* () {
-            const key = this.getRecordKey();
-            const scheme = this._info.schemes[0];
-            const schemeName = "any";
-            const config = {
-                db: "mysql",
-                transaction: true,
-                schemes: [Object.assign(Object.assign({}, scheme), { name: schemeName })],
-            };
-            const dataset = [
-                {
-                    scheme: schemeName,
-                    mode: +this.store.getReq("__mode_"),
-                    record: key,
-                    data: this.store.getVReq(),
-                },
-            ];
-            const transaction = new DBTransaction(config, this.store.db);
-            const result = yield transaction.save(dataset, {});
-            let message = "";
-            let keyToken = "";
-            if (result.error) {
-                message = result.error;
-                this.store.setSes("__error_", true);
-            }
-            else {
-                this.store.setSes("__error_", false);
-                message = "record was saved correctly!";
-                if (result.recordId) {
-                    keyToken = this.genToken(result.recordId);
+            const dataList = [];
+            if (dataLists) {
+                for (const list of dataLists) {
+                    dataList.push({
+                        name: list.name,
+                        data: yield this.evalData(list.data, values),
+                        childs: list.childs,
+                        parent: list.parent,
+                        mode: list.mode,
+                        value: values[list.name],
+                    });
                 }
             }
-            this.store.setSes("__key_", keyToken);
-            this.doResponse({
-                /*
-                            element: "form",
-                            propertys: {
-                                //f: await this.evalDataFields(this.datafields),
-                                output: "SAVE FORM",
-                            },
-                            */
-                log: Object.assign({}, result),
-                message,
-            });
-        });
-    }
-    getDataFields(list) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const output = [];
-            for (const info of list) {
-                output.push(yield this.getDataField(info));
-            }
-            return output;
-        });
-    }
-    getDataField(info) {
-        return __awaiter(this, void 0, void 0, function* () {
-            return {
-                name: info.name,
-                data: yield this.evalData(info.data, this._data),
-                childs: info.childs,
-                parent: info.parent,
-                mode: info.mode,
-            };
+            return dataList;
         });
     }
     doDataFields(parent) {
         return __awaiter(this, void 0, void 0, function* () {
-            this._data = this.store.getVReq();
-            const db = (this.db = this.store.db.get(this.connection));
-            const list = this.dataLists.filter((data) => data.parent == parent) || [];
-            const output = yield this.getDataFields(list);
+            const values = this.store.getVReq();
+            //const db = (this.db = this.store.db.get<DBEngine>(connection));
+            const list = this.dataLists.filter((data) => data.parent == parent);
             this.doResponse({
                 element: "form",
                 propertys: {
-                    dataFields: output,
-                    //f: await this.evalDataFields(this.datafields),
-                    output,
+                    dataFields: yield this.getDataList(list, values)
                 },
             });
-        });
-    }
-    evalDataFields(dataFields) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const result = {};
-            for (const [field, dataField] of Object.entries(dataFields)) {
-                result[field] = {
-                    data: yield this.evalData(dataField, this._data),
-                };
-            }
-            return result;
         });
     }
     evalData(dataField, values) {
@@ -629,38 +552,6 @@ export class Form extends Element {
             return this.decodeToken(this.state.key);
         }
         return this.state.record;
-    }
-    getDBRecord(info, key) {
-        return __awaiter(this, void 0, void 0, function* () {
-            let query = info.sql;
-            let conditions = [];
-            let values = [];
-            const record = this._info.data.record.forEach((field) => {
-                conditions.push(field + "= ?");
-                values.push(key[field]);
-            });
-            query += " WHERE " + conditions.join(" AND ");
-            const data = yield this.db.query(query, values);
-            return data.rows[0] || {};
-        });
-    }
-    getDataList(dataLists, values) {
-        return __awaiter(this, void 0, void 0, function* () {
-            const dataList = [];
-            if (dataLists) {
-                for (const d of dataLists) {
-                    dataList.push({
-                        name: d.name,
-                        data: yield this.evalData(d.data, values),
-                        childs: d.childs,
-                        parent: d.parent,
-                        mode: d.mode,
-                        value: values[d.name],
-                    });
-                }
-            }
-            return dataList;
-        });
     }
     appRequests(type) {
         const requests = {
