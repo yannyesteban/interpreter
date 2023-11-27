@@ -1,4 +1,4 @@
-import { DBTransaction } from "./db/DBTransactionOLD.js";
+
 import { DBTransaction as Transaction } from "./db/DBTransaction.js";
 import { DBEngine } from "./db/db.js";
 import { InfoElement, Element } from "./element.js";
@@ -7,7 +7,7 @@ import { JWT } from "./JWT.js";
 enum ModeForm {
   INSERT = 1,
   UPDATE,
-  DELETE,
+  DELETE, 
   AUTO,
 }
 
@@ -305,7 +305,7 @@ export class Form extends Element {
       }
 
       if (field.name in section) {
-        page.push(section[field.name]);
+        elements.push(section[field.name]);
         page = section[field.name].elements;
       }
 
@@ -313,6 +313,10 @@ export class Form extends Element {
     }
 
     this.configInputs().forEach((item) => elements.push(item));
+
+    if(config.nav[config.form.nav]){
+      elements.push(config.nav[config.form.nav]);
+    }
     return elements;
   }
 
@@ -788,6 +792,7 @@ export class Form extends Element {
         blockTo: true,
         confirm: "secure save?",
         reportValidity: true,
+        valid: true,
         actions: [
           {
             do: "update",

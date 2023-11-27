@@ -156,12 +156,15 @@ export class Form extends Element {
                 page = pages[field.name].page.elements;
             }
             if (field.name in section) {
-                page.push(section[field.name]);
+                elements.push(section[field.name]);
                 page = section[field.name].elements;
             }
             page.push(f);
         }
         this.configInputs().forEach((item) => elements.push(item));
+        if (config.nav[config.form.nav]) {
+            elements.push(config.nav[config.form.nav]);
+        }
         return elements;
     }
     getRecordData(mode) {
@@ -575,6 +578,7 @@ export class Form extends Element {
                 blockTo: true,
                 confirm: "secure save?",
                 reportValidity: true,
+                valid: true,
                 actions: [
                     {
                         do: "update",

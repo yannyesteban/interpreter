@@ -32,9 +32,12 @@
       "label": "Last Name",
       "input": "input",
       "name": "lastName",
-      "required": {
-        "message": "yes"
+      "rules":{
+        "required": {
+          "message": "yes"
+        }
       }
+      
     },
     {
       "component": "field",
@@ -50,9 +53,14 @@
     },
     {
       "component": "field",
-      "label": "Correo",
+      "label": "Correo Electrónico",
       "input": "input",
-      "name": "email"
+      "name": "email",
+      "rules":{
+        "email":{
+          "message":"correo no valido"
+        }
+      }
     },
     {
       "component": "field",
@@ -183,8 +191,91 @@
 
   "nav": {
     "default": {},
-    "new-record": {},
-    "list": {}
+    "new-record": {
+      "component": "nav",
+      "elements": [
+        {
+          "type": "button",
+          "label": "<span class='material-symbols-outlined'>add</span><span>New ++</span>",
+          "className": "",
+          "action": "new",
+          "request": {},
+          "click": ""
+        },
+        {
+          "component": "button",
+          "label": "Save Record",
+          "className": "",
+          "action": "save",
+          "request": {},
+          "click": ""
+        },
+        {
+          "component": "button",
+          "label": "save",
+          "className": "",
+          "action": "save",
+          "request": {},
+          "click": ""
+        },
+        {
+          "component": "button",
+          "label": "Delete",
+          "className": "",
+          "action": "delete",
+          "request": {},
+          "click": ""
+        },
+        {
+          "component": "button",
+          "label": "Todos",
+          "className": "",
+          "action": "list",
+          "request": {},
+          "click": ""
+        }
+      ]
+    },
+    "list": {
+      "component": "nav",
+      "elements": [
+        {
+          "id": "elButton1",
+          "type": "button",
+          "label": "<span class='material-symbols-outlined'>add</span><span>New ..</span>",
+          "className": "",
+          "action": "new",
+          "request": {},
+          "click": ""
+        },
+        {
+          "type": "button",
+          "label": "captive_portal",
+          "className": "material-symbols-outlined",
+          "actionn": "request",
+          "request": {
+            "confirm": "hello"
+          },
+          "click": ""
+        },
+        {
+          "type": "button",
+          "label": "Delete",
+          "className": "material-symbols-outlined",
+          "action": "delete-record",
+          "request": {},
+          "click": ""
+        },
+        {
+          "type": "button",
+          "label": "Edit",
+          "className": "material-symbols-outlined",
+          "action": "edit-record",
+          "request": {},
+          "click": ""
+        }
+      ]
+    }
   },
   "addFields":[{
     "field":"id",
