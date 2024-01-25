@@ -7,9 +7,39 @@ import * as wc from "./../WC.js";
 import { AppRequest, ElementResponse, FetchInfo, IElement, IResponse, LRequest } from "../IApp.js";
 import "./AppRequest.js";
 
+class LocalData {
+
+    private user: string = ""
+    private auth: boolean = false;
+    private data: Object = {};
+
+    constructor() {
+
+        this.load();
+    }
+
+    load() {
+        this.data = JSON.parse(localStorage.getItem("DATA")) || {};
+    }
+
+    save(){
+        localStorage.setItem("DATA", JSON.stringify(this.data))
+    }
+
+    clear() { }
+
+    setData(key: string, value: any){
+        this.data[key] = value;
+        this.save();
+    }
+
+}
+
+
 export class Sevian extends HTMLElement {
     private panels: any = {};
     private _modules: wc.WCModule[] = [];
+    private localData:LocalData = null;
 
     private triggers = {};
 
@@ -18,6 +48,11 @@ export class Sevian extends HTMLElement {
     }
     constructor() {
         super();
+
+
+        this.localData = new LocalData();
+
+        console.log("Welcome to Sevian 1.0!")
 
         const template = document.createElement("template");
 
@@ -147,7 +182,7 @@ export class Sevian extends HTMLElement {
         }
     }
 
-    public disconnectedCallback() {}
+    public disconnectedCallback() { }
 
     public attributeChangedCallback(name, old, value) {
         switch (name) {
@@ -309,11 +344,17 @@ export class Sevian extends HTMLElement {
                 case "set-panel":
                     await this.setElement(r);
 
+                    if(r.id){
+                        this.localData.setData(r.id, r)
+                    }
+
                     if (r.panel) {
                         this.panels[r.panel] = r;
+                        
                     }
                     break;
                 case "append-to":
+                    
                     await this.setElement(r);
                     break;
                 case "update":
@@ -469,9 +510,9 @@ export class Sevian extends HTMLElement {
 
         if (request.valid && typeof element?.valid === "function") {
             const result = element.valid(request.validOption || undefined);
-            
+
             if (result.error) {
-                
+
                 this._showError(result.message);
                 return;
             }

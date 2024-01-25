@@ -13,6 +13,25 @@ import { loadCss } from "./../LoadCss.js";
 import { Q as $ } from "./../Q.js";
 import * as wc from "./../WC.js";
 import "./AppRequest.js";
+class LocalData {
+    constructor() {
+        this.user = "";
+        this.auth = false;
+        this.data = {};
+        this.load();
+    }
+    load() {
+        this.data = JSON.parse(localStorage.getItem("DATA")) || {};
+    }
+    save() {
+        localStorage.setItem("DATA", JSON.stringify(this.data));
+    }
+    clear() { }
+    setData(key, value) {
+        this.data[key] = value;
+        this.save();
+    }
+}
 export class Sevian extends HTMLElement {
     static get observedAttributes() {
         return ["server"];
@@ -21,7 +40,10 @@ export class Sevian extends HTMLElement {
         super();
         this.panels = {};
         this._modules = [];
+        this.localData = null;
         this.triggers = {};
+        this.localData = new LocalData();
+        console.log("Welcome to Sevian 1.0!");
         const template = document.createElement("template");
         template.innerHTML = `
 			<style>
@@ -286,6 +308,9 @@ export class Sevian extends HTMLElement {
                 switch (r.do) {
                     case "set-panel":
                         yield this.setElement(r);
+                        if (r.id) {
+                            this.localData.setData(r.id, r);
+                        }
                         if (r.panel) {
                             this.panels[r.panel] = r;
                         }
