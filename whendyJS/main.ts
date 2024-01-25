@@ -2,7 +2,7 @@ import { Tool } from "./tool.js";
 import { /*Socket as*/ Server } from "./server.js";
 
 
-console.log("Welcome to Whendy V1.0!");
+console.log("Welcome to Whendy V1.0");
 
 const config = Tool.loadJsonFile("./app/configuration/server.json");
 const constants = Tool.loadJsonFile("./app/configuration/constants.json");
