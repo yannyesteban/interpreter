@@ -1,6 +1,6 @@
 {
   "connection": "mysql",
-  "label": "Administrador de Usuarios 2024",
+  "label": "Administrador de Usuarios Mayo 2024",
   "defaultData": {
     "extension": "{{@_DATE_}}"
   },
