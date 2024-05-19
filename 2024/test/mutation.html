@@ -1,0 +1,45 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MutationObserver Example</title>
+    <link rel="icon" href="icons8-favicon-50.png" type="image/x-icon">
+
+</head>
+
+<body>
+    <div id="app">
+        <input type="text" id="input" placeholder="Type something...">
+        <p id="output">yanny</p>
+        
+    </div>
+
+    <script>
+        document.addEventListener('DOMContentLoaded', () => {
+            const input = document.getElementById('input');
+            const output = document.getElementById('output');
+
+            input.addEventListener('input', () => {
+                output.textContent = input.value;
+            });
+            console.log("hello 1.1")
+            const observer = new MutationObserver((mutationsList, observer) => {
+                console.log("hello")
+                for (const mutation of mutationsList) {
+                    console.log(mutation.type)
+                    if (mutation.type === 'characterData') {
+                        console.log('Output text changed:', mutation.target.data);
+                    }
+                }
+            });
+            
+            observer.observe(input, { attributes: true, attributeFilter: ['value'], characterData: true, subtree: true, childList: false, });
+        });
+
+
+    </script>
+</body>
+
+</html>

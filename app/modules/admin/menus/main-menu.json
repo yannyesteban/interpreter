@@ -4,12 +4,12 @@
     "className": "main",
     "items": [
         {
-            "caption": "New Form 2021",
-            "request":{
-                "sendTo":"#p2",
+            "caption": "New Form 2024",
+            "request": {
+                "sendTo": "#p2",
                 "blockTo": true,
-                "form_":"#p2",
-                "actions":[
+                "form_": "#p2",
+                "actions": [
                     {
                         "id": "two",
                         "to": "p2",
@@ -18,21 +18,19 @@
                         "name": "google_form",
                         "method": "load-form",
                         "params": {
-                            "page":1
+                            "page": 1
                         }
                     }
                 ]
-            } 
+            }
         },
         {
             "caption": "Google Form.",
             "request": {
-                "sendTo":"#p2",
+                "sendTo": "#p2",
                 "blockTo": true,
-                "form_":"#p2",
-                "store":{
-                  
-                },
+                "form_": "#p2",
+                "store": {},
                 "_confirm": "sure?",
                 "actions": [
                     {
@@ -43,7 +41,7 @@
                         "name": "google_form",
                         "method": "list",
                         "params": {
-                            "page":1
+                            "page": 1
                         }
                     }
                 ]
@@ -52,12 +50,12 @@
         {
             "caption": "Load Form",
             "request": {
-                "sendTo":"#p2",
+                "sendTo": "#p2",
                 "blockTo": true,
-                "form":"#p1",
+                "form": "#p1",
                 "_confirm": "sure?",
-                "store":{
-                    "__page_":"1"
+                "store": {
+                    "__page_": "1"
                 },
                 "actions": [
                     {
@@ -75,21 +73,19 @@
         {
             "caption": "New (+) Record",
             "request": {
-                "sendTo":"#p2",
+                "sendTo": "#p2",
                 "blockTo": true,
                 "_confirm": "sure?",
                 "actions": [
                     {
-                        
                         "id": "unit3",
                         "do": "set-panel",
                         "to": "p2",
-                        
                         "api": "form",
                         "name": "google_form",
                         "method": "new-record",
                         "params": {
-                            "__key__":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
+                            "__key__": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
                         }
                     }
                 ]
@@ -98,21 +94,19 @@
         {
             "caption": "Edit Record",
             "request": {
-                "sendTo":"#p2",
+                "sendTo": "#p2",
                 "blockTo": true,
                 "_confirm": "sure?",
                 "actions": [
                     {
-                        
                         "id": "unit3",
                         "do": "set-panel",
                         "to": "p2",
-                        
                         "api": "form",
                         "name": "google_form",
                         "method": "new-record",
                         "params": {
-                            "__key_":"eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
+                            "__key_": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJlbXBsb3llZU51bWJlciI6NH0.oX0KPrvUdwA_dneXpZWGjITUy7jdRHGh5b7oMf0gQwc"
                         }
                     }
                 ]
@@ -196,7 +190,10 @@
         }
     ],
     "element": {
-        "addClass": ["exit-menu", "unit"],
+        "addClass": [
+            "exit-menu",
+            "unit"
+        ],
         "hideCheck": true,
         "hideIcon": false,
         "events": {

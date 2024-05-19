@@ -1,0 +1,50 @@
+{
+    "scheme": {
+        "name" : "users",
+        "table": "user",
+        "fields": [
+            {
+                "name": "id",
+                "type": "I",
+                "key": true,
+                "serial": true,
+                "notNull": true,
+                "default": ""
+            },
+            {
+                "name": "lastName",
+                "type": "C",
+                "rules": {
+                    "required": true
+                }
+            },
+            {
+                "name": "firstName",
+                "type": "C",
+                "rules": {
+                    "required": true
+                }
+            },
+            {
+                "name": "email",
+                "type": "C",
+                "rules": {
+                    "required": true,
+                    "email": true
+                }
+            },
+            {
+                "name": "countryId",
+                "type": "I"
+            },
+            {
+                "name": "stateId",
+                "type": "I"
+            },
+            {
+                "name": "cityId",
+                "type": "I"
+            }
+        ]
+    }
+}
