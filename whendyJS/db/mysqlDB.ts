@@ -1,6 +1,6 @@
 import { IConnectInfo } from "../dataModel.js";
 import { BDRequest, DB, DBEngine, IFieldInfo, IRecordAdmin, IRecordInfo, QueryResult, STMT, STMTResult } from "./db.js";
-import * as mysql from "mysql";
+import * as mysql from "mysql2";
 
 enum FLAGS {
     NOT_NULL_FLAG = 1,

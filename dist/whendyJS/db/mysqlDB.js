@@ -8,7 +8,7 @@ var __awaiter = (this && this.__awaiter) || function (thisArg, _arguments, P, ge
     });
 };
 import { DBEngine } from "./db.js";
-import * as mysql from "mysql";
+import * as mysql from "mysql2";
 var FLAGS;
 (function (FLAGS) {
     FLAGS[FLAGS["NOT_NULL_FLAG"] = 1] = "NOT_NULL_FLAG";
