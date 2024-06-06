@@ -1,0 +1,28 @@
+{
+    "route": "/user/list",
+    "jwt": true,
+    "fromJson": true,
+    "params": [
+        {
+            "name": "page",
+            "type": "integer"
+        },
+        {
+            "name": "limit",
+            "type": "integer",
+            "default" : 10
+        }
+    ],
+    "method": "get",
+    "actions": [
+        {
+            "element": "form",
+            "name": "user",
+            "method": "load",
+            "params": {
+                "page": "#page",
+                "limit" : "#limit"
+            }
+        }
+    ]
+}
